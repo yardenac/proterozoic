@@ -9,6 +9,6 @@ makedepends=(findutils)
 depends=(emacs-nox bash-completion)
 
 package() {
-	 cp -a ${startdir}/etc ${pkgdir}/etc
+	 cp -a ${startdir}/{etc,lib,usr} ${pkgdir}/
 #	 install -t ${pkgdir} ${startdir}/tree/*
 }
