@@ -1,7 +1,7 @@
 pkgname=hades
 pkgver=00001
 pkgrel=1
-pkgdesc="Ingeniusly super collection of settings"
+pkgdesc="Configs and scripts overlaying Arch Linux"
 arch=(any)
 license=('GPL')
 makedepends=(findutils)
