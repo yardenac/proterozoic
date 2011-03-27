@@ -1,5 +1,6 @@
-pkgname=hades
-pkgver=00001
+pkgname=proterozoic
+#todo - write small hashing program
+pkgver=0.$(date +%s)
 pkgrel=1
 pkgdesc="Configs and scripts overlaying Arch Linux"
 arch=(any)
