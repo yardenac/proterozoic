@@ -1,0 +1,256 @@
+#echo starting functions
+full_path() {
+   echo -n "$( readlink -f "$( dirname "$1" )" )/$( basename "$1" )"
+}
+full_path_lax() {
+   echo -n "$( readlink -m "$( dirname "$1" )" )/$( basename "$1" )"
+}
+full_path_strict() {
+   echo -n "$( readlink -e "$( dirname "$1" )" )/$( basename "$1" )"
+}
+uniq_token() {
+	echo $(  date +%s ).$( printf "%05d" $RANDOM )
+}
+do_unto_others() {
+	ionice -c 3 -p $$ > /dev/null
+	renice -n 19 $$ > /dev/null
+}
+alias unto=do_unto_others
+ll() {
+	if [ $# -gt 1 ]; then
+		ls --color=auto -FlAthrd "$@"
+	else
+		ls --color=auto -FlAthr  "$@"
+	fi
+}
+lls() {
+	ll | head -n 10
+}
+__expand_tilde_by_ref() {
+	sleep 0
+}
+_expand() {
+	sleep 0
+}
+repermit() {
+	for TARGET; do
+		[ -e "$TARGET" ] || continue
+		find "$TARGET" -type d -exec chmod 750 {} \;
+		find "$TARGET" -type f -exec chmod 640 {} \;
+	done
+}
+ppid_from_pid() {
+	[ -z "$1" ] && return
+	[ -z "$2" ] || GREPTEXT=' | grep -i'"$2 "
+	ps -p "$1" -o ppid= $GREPTEXT | awk '{ print $1 }' # | tail -n -1
+}
+pid_exists() {
+	[ -z "$1" ] && return
+	VAL=$( ps -p "$1" -o pid= )
+	[ -z "$VAL" ] && return 1
+	return 0
+}
+run_in_temp_memdir() {
+	[ "$UID" -eq 0 ] && return
+	INMEM=/media/inmem
+	FOLFSEEY342534="$INMEM"/$( uniq_token )
+	mkdir "$FOLFSEEY342534"
+	cd "$FOLFSEEY342534"
+	do_in_temp_memdir "$@"
+	cd
+	rm -rf "$FOLFSEEY342534"
+}
+ups() {
+	apcaccess status | grep -Ei '^(status|linev|loadpct|bcharge|timeleft)'
+}
+make_bash_script() {
+	[ -f "$1" ] && return 1
+	echo	'#!/bin/bash' > "$1"
+	chmod +x "$1"
+	emacs "$1"
+}
+cursor_position() { # http://invisible-island.net/xterm/xterm.faq.html
+	 exec < /dev/tty
+	 oldstty=$(stty -g)
+	 stty raw -echo min 0
+	 echo -en "\033[6n" > /dev/tty
+	 IFS=';' read -r -d R -a pos
+	 stty $oldstty
+	 col=$((${pos[1]} - 1))
+	 echo $col
+}
+at_line_start() {
+	 CP=$(cursor_position)
+	 return $CP
+}
+clear_line() {
+	 echo -ne "\r"
+	 let NUMCHARS=$( tput cols )
+	 while let NUMCHARS--; do
+		  echo -n ' '
+	 done
+	 echo -ne "\r"
+}
+clear_echo() {
+	 at_line_start || echo
+	 echo "$@"
+}
+active_win_hash() {
+    #print 0x###### hash for the currently active window. bit of a hack... 
+    wmctrl -vR :ACTIVE: 2>&1 | grep -i using\ window | awk '{ print $3 }'
+}
+title_of_active_win() {
+    wmctrl -l | grep -Ri '^'$(active_win_hash) | colrm 1 22
+}
+process_exists() {
+	return $( ps --pid $1 -o pid= 1>/dev/null 2>&1 )
+}
+hatch() {
+	hatch_do() {
+		[ "$1" ] || return
+		"$@" >/dev/null 2>&1 &
+	}
+	hatch_do "$@" >/dev/null 2>&1  &
+	PROC=$!
+	while process_exists $PROC; do
+		sleep 0.1
+	done
+	sleep 0.3
+}
+woman() {
+	local IFS='
+';	[ "$1" ] && COMMAND="$@" || {
+		echo -n "Enter command to look up: "
+		read COMMAND
+		echo
+	}
+	help "$COMMAND" && read || emacs\
+		--eval '(fset '"'"'manpage "man '$COMMAND' | cat && exit\C-m")'\
+		--eval '(shell)'\
+		--eval '(execute-kbd-macro (symbol-function '"'"'manpage))'\
+		--eval '(beginning-of-buffer)'\
+		--eval '(beginning-of-buffer)'\
+		--eval '(beginning-of-buffer)'\
+		--eval '(beginning-of-buffer)'\
+		--eval '(beginning-of-buffer)'\
+		--eval '(beginning-of-buffer)'
+}
+wf() {
+#	cd /tmp
+#	[ -z "$1" ] && return 1
+	[ "$1" ] || return
+	PWD_B=$(pwd)
+	cd ~
+	local IFS=:
+	for P in $PATH; do
+		[ -a "$P" ] || continue
+		find "$P" | grep -i "$1"
+	done
+	cd "$PWD_B"
+}
+niceify_tree() {
+	local INDENT=$INDENT"   "
+	echo "${INDENT:3}"$( ps --pid $1 -o comm= )" "$(
+		renice -n $RENICE $1
+		ionice -c 3 -p $1
+		ionice -p $1 #just to display what it accomplished...                                                                                 
+	)
+	for CHILD in $( ps --ppid $1 -o pid= ); do
+		niceify_tree $CHILD
+	done
+}
+family_therapy() {
+	INDENT=""
+	RENICE=19
+	[ "$1" == "mean" ] && {
+		shift
+		RENICE='-5'
+	}
+	ps --pid $1 -o pid= 1>/dev/null 2>&1 && niceify_tree $1 || echo no such process
+}
+e() {
+   TERM=xterm emacs "$@"
+}
+bootable() {
+	DATA=$( od -A x -j 510 -N 2 -w16 -t x2 "$1" | colrm 1 7 )
+	[ "$DATA" == "aa55" ] && echo "$1 is bootable" >&2 || {
+		echo "$1 is not bootable" >&2
+		return 1
+	}
+}
+countdown() {
+   COUNT=$1
+	NUMCHARS=${#COUNT}
+   while let COUNT--; do
+      echo -ne "  $COUNT  "
+      sleep 1
+      echo -ne "\b\b\b\b"
+		I=$NUMCHARS
+		while let --I; do
+			 echo -ne "\b"
+		done
+   done
+}
+clear_input_buffer() {
+    #example: clear_input_buffer "clearing input buffer..." "ok\n"
+
+    while true; do
+        read -p "$1" -t 0.0001 -n 32767 ENTERED
+        [ $? -gt 128 ] && break
+    done
+    echo -ne "$2"
+}
+askyn() {
+	 QUESTION="$@"
+	 echo
+	 clear_input_buffer
+	 read -N 1 -p "$QUESTION [*/n]): " USERINPUT
+	 case $USERINPUT in
+		  n) return 1;;
+		  *) return 0
+	 esac
+}
+drome() {
+#	 create a new window in screen, open screen & switch to it
+#	 USAGE: drome [title [command [args]]]
+	 TOKEN=${1:-$(uniq_token)}
+	 shift
+	 screen -p - -X screen -t $TOKEN "$@"
+	 screen -x -R -p $TOKEN
+}
+weekletter() {
+	 NUM=$(date +%u)
+	 case "$NUM" in
+		  1) echo m;;
+		  2) echo t;;
+		  3) echo w;;
+		  4) echo T;;
+		  5) echo f;;
+		  6) echo s;;
+		  7) echo S;;
+	 esac
+}
+plyst() {
+    pacman -r /aufs-ro \
+	--dbpath /aufs-ro/var/lib/pacman \
+	--config /etc/pacman.conf \
+	--logfile /var/log/pacman.log\
+	--cachedir /root/snowball/pkgcache -Ss "$1" | tr '\n' '#' | sed 's%#    % %ig' | tr '#' '\n' | sed 's%^[a-z]*/%%i' | sort | awk '{
+	twotxt = ""
+	spaces = length($1)
+	maxl = 20
+	for ( i = maxl ; i > spaces ; i-- ) twotxt = twotxt " "
+	$2 = twotxt
+	print $0	
+}'
+}
+#echo finishing functions
+#holdss() {
+#	unto
+#	while true; do
+#		xscreensaver-command -deactivate >/dev/null 2>&1
+#		sleep 55
+#		pid_exists $PPID && [ "$PPID" -ne "1" ] && continue
+#		break
+#	done
+#}
