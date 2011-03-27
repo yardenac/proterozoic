@@ -1,0 +1,54 @@
+# vim: set ft=sh:
+
+uniq_token () {
+	 echo $(date +%s).$(printf "%05d" $RANDOM)
+}
+
+scaly_mount_handler() {
+
+	 XINO_FILE=/tmp/.aufs.xino #/.aufs.xino
+
+	 mkdir -p /aufs-ro /aufs-rw /tmp
+
+	 /sbin/fsck.jfs /dev/disk/by-uuid/45d0d831-d045-410c-b2ec-d525ef69e36c
+	 /sbin/fsck.jfs /dev/disk/by-uuid/ac7d44cc-9edf-4dda-bd13-6731d1fb596f
+
+	 mount -t jfs -o rw,noatime,nodiratime /dev/disk/by-uuid/45d0d831-d045-410c-b2ec-d525ef69e36c /aufs-rw
+	 mount -t jfs -o ro,noatime,nodiratime /dev/disk/by-uuid/ac7d44cc-9edf-4dda-bd13-6731d1fb596f /aufs-ro
+	 echo DOING TMPFS
+	 mount -t tmpfs -o defaults,nodev,nosuid,noexec,mode=1777,size=25%,uid=0,gid=0,noauto,noatime,nodiratime shm /tmp
+	 echo DID TMPFS
+	 mount -t aufs -o br:/aufs-rw=rw:/aufs-ro=ro,xino=$XINO_FILE,noauto,noatime,nodiratime,udba=none none /new_root
+
+	 mkdir -p /new_root/aufs-ro /new_root/aufs-rw 
+
+	 mount --move /aufs-ro /new_root/aufs-ro
+	 mount --move /aufs-rw /new_root/aufs-rw
+	 mount --move /tmp /new_root/tmp 
+
+#	 [ -a /tmp ] && mv /tmp /tmp.save
+#	 [ -a /tmp ] && mv /tmp /tmp.$(uniq_token)
+#	 mkdir /tmp
+#	 mount -t tmpfs -o defaults,nodev,nosuid,noexec,mode=1777,size=25%,uid=0,gid=0,noauto,noatime,nodiratime shm /tmp
+#	 for DIR in /tmp.save /dev/shm /var/tmp; do
+#		  [ -d "$DIR" ] && {
+#				mv -nv $DIR/* $DIR/.??* /tmp/
+#				rmdir $DIR
+#		  }
+#		  [ -L "$DIR" ] && continue
+#		  [ -a "$DIR" ] && mv $DIR $DIR.$(uniq_token)
+#		  ln -s /tmp $DIR
+#	 done
+#	 rm -f /tmp.save
+
+	 read -st 3 -p "press ENTER within 5 seconds to drop a shell ;)" && {
+		  echo HAVE FUN...
+		  /bin/bash -i
+		  echo BOOTING FOR REAL NOW
+	 }
+
+}
+
+run_hook() {
+	 mount_handler=scaly_mount_handler
+}

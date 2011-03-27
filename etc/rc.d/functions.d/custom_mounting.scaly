@@ -1,0 +1,25 @@
+#!/bin/bash
+
+custom_mounting_scaly() {
+	COUNT=5
+	while let COUNT--; do
+		 mount -vt vfat /dev/disk/by-uuid/0D3D-BD20 /media/usb-fat && break
+		 sleep 3
+	done
+## /dev/disk/by-uuid/0D3D-BD20 /media/usb-fat
+#	read -st 5 -p "press ENTER within 5 seconds to drop a shell ;)" && {
+#		 /bin/bash -i
+#	}
+#	cryptsetup luksOpen /dev/disk/by-uuid/0105eeab-2fc6-4dc7-8b89-4a70605e1483 green
+	cryptsetup -d /media/usb-fat/green.key\
+		luksOpen /dev/disk/by-uuid/0105eeab-2fc6-4dc7-8b89-4a70605e1483 	green
+	umount /media/usb-fat
+
+	fsck /dev/mapper/green
+
+	read -st 3 -p "press ENTER within 5 seconds to drop a shell ;)" && {
+		 /bin/bash -i
+	}
+}
+
+add_hook sysinit_premount custom_mounting_scaly
