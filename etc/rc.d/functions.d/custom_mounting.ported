@@ -49,7 +49,7 @@ custom_mounting_ediacra() {
 #    bash -i
 }
 
-case $(hostname) in
+case $HOSTNAME in
 	 scaly)   add_hook sysinit_premount custom_mounting_scaly;;
 	 ediacra) add_hook sysinit_premount custom_mounting_ediacra;;
 esac
