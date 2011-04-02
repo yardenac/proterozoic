@@ -1,4 +1,3 @@
-[ -f /etc/bash_completion ] && . /etc/bash_completion
 [ -f /etc/bash.functions  ] && . /etc/bash.functions
 complete -f -X '!*.@(sqlite|db)' sqlite3
 complete -f emacs
