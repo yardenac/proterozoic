@@ -20,3 +20,7 @@
   (setq sgml-validate-command "tidy"))
 
 (add-hook 'html-mode-hook 'my-html-mode-hook)
+
+(global-set-key (kbd "C-c r") 'revert-buffer)
+(global-set-key (kbd "C-c p") 'shell-script-mode)
+(global-set-key (kbd "C-c l") 'toggle-truncate-lines)
