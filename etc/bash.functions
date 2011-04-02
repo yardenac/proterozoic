@@ -247,6 +247,20 @@ plyst() {
 am_root() {
 	[ "x$EUID" -eq "x0" ]
 }
+enforce_some_integrity() {
+	 lsattr ~/.bash_history >/dev/null 2>&1 && {
+		  ATTRSET=$(lsattr ~/.bash_history)
+		  [ ${ATTRSET:5:1} != a ] && chattr +a ~/.bash_history
+	 }
+	 [ -L ~/.emacs.d ] || {
+		  mv .emacs.d .emacs.d.$(uniq_token)
+		  ln -s /etc/.emacs.d ~/
+	 }
+	 am_root && {
+		  [ -f /etc/.emacs.d/init.el ] && chmod 444 /etc/.emacs.d/init.el
+		  [ -d /etc/.emacs.d ] && chmod 555 /etc/.emacs.d
+	 }
+}
 #echo finishing functions
 #holdss() {
 #	unto
