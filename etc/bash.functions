@@ -244,6 +244,9 @@ plyst() {
 	print $0	
 }'
 }
+am_root() {
+	[ "x$EUID" -eq "x0" ]
+}
 #echo finishing functions
 #holdss() {
 #	unto

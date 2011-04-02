@@ -14,7 +14,9 @@ case "$TERM" in
 	done } )\$\[\e[m\e]2;\u@\H:\w [$$]\a\] ';;
 esac
 case $(hostname) in
-	 scaly) alias pacman='pacman -r /aufs-ro -b /aufs-ro/var/lib/pacman --config /etc/pacman.conf --cachedir /aufs-ro/var/cache/pacman/pkg';;
+	 scaly) am_root \
+		  && alias pacman='pacman -r /aufs-ro -b /var/lib/pacman --config /etc/pacman.conf --cachedir /snowball/pkgcache -Q' \
+		  || alias pacman='pacman -r /aufs-ro -b /aufs-ro/var/lib/pacman --config /etc/pacman.conf --cachedir /snowball/pkgcache';;
 esac
 eval "`dircolors -b`"
 alias ls='ls -A --color=auto'
