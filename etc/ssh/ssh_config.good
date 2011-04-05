@@ -1,0 +1,8 @@
+Host *
+HashKnownHosts yes
+StrictHostKeyChecking ask
+GSSAPIAuthentication yes
+GSSAPIDelegateCredentials no
+TCPKeepAlive no
+ServerAliveInterval 60
+ServerAliveCountMax 10
