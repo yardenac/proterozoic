@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#screwy_files=(etc/ssh/ssh_config)
+
+#pre_install() {
+#	 for F in ${screwy_files[@]}; do
+#		  [ -a "$F" ] && mv -i "$F" "$F.orig."$(date +%s)
+#	 done
+#}
