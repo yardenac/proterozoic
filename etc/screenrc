@@ -4,6 +4,7 @@ vbell on
 vbell_msg "   Wuff  ----  Wuff!!  "
 obuflimit 4096
 bind ' ' eval 'stuff \004' detach
+shell /bin/bash
 altscreen on
 autonuke on
 defscrollback 9999
