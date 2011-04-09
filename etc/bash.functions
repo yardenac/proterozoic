@@ -251,6 +251,24 @@ say_and_do() {
 	 echo DOING: "$@"
 	 "$@"
 }
+perms_are() {
+	 [ -a "$2" ] || {
+		  echo BAD FILE
+		  return 2
+	 }
+	 if [[ "$1" =~ [0-9]{3} ]]; then
+		  STATS=$(stat -c %a "$2")
+		  [[ "$1" == "$STATS" ]]
+		  return $?
+	 elif [[ "$1" =~ [rwx-]{9,10} ]]; then
+		  STATS=$(stat -c %A "$2")
+		  [[ "${1: -9}" == "${STATS:1}" ]]
+		  return $?
+	 else
+		  echo UNRECOGNIZED PERMISSION STRING: $1
+		  return 2
+	 fi
+}
 enforce_some_integrity() {
 	 lsattr ~/.bash_history >/dev/null 2>&1 && {
 		  ATTRSET=$(lsattr ~/.bash_history)
