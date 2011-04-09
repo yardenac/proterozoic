@@ -251,23 +251,11 @@ say_and_do() {
 	 echo DOING: "$@"
 	 "$@"
 }
-perms_are() {
-	 [ -a "$2" ] || {
-		  echo BAD FILE
-		  return 2
-	 }
-	 if [[ "$1" =~ [0-9]{3} ]]; then
-		  STATS=$(stat -c %a "$2")
-		  [[ "$1" == "$STATS" ]]
-		  return $?
-	 elif [[ "$1" =~ [rwx-]{9,10} ]]; then
-		  STATS=$(stat -c %A "$2")
-		  [[ "${1: -9}" == "${STATS:1}" ]]
-		  return $?
-	 else
-		  echo UNRECOGNIZED PERMISSION STRING: $1
-		  return 2
-	 fi
+enforce_perms() {
+	 [[ "$1" =~ [0-7]{3} ]] || return 1 #perm string is valid
+	 [ -a "$2" ] || return 1            #file exists
+	 STATS=$(stat -c %a "$2")
+	 [[ "$1" == "$STATS" ]] || say_and_do chmod "$1" "$2" #chmod file if not set already
 }
 enforce_some_integrity() {
 	 lsattr ~/.bash_history >/dev/null 2>&1 && {
@@ -279,8 +267,8 @@ enforce_some_integrity() {
 		  ln -s /etc/.emacs.d ~/
 	 }
 	 am_root && {
-		  [ -f /etc/.emacs.d/init.el ] && say_and_do chmod 444 /etc/.emacs.d/init.el
-		  [ -d /etc/.emacs.d ] && say_and_do chmod 555 /etc/.emacs.d
+		  [ -f /etc/.emacs.d/init.el ] && enforce_perms 444 /etc/.emacs.d/init.el
+		  [ -d /etc/.emacs.d ] && enforce_perms 555 /etc/.emacs.d
 	 }
 }
 iptables-all() {
