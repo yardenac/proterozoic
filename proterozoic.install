@@ -1,9 +1,26 @@
 #!/bin/bash
 
-#screwy_files=(etc/ssh/ssh_config)
+screwy_files=(
+	 etc/bash.bash_logout
+	 etc/default/useradd
+	 etc/screenrc
+	 etc/ssh/ssh_config
+)
 
-#pre_install() {
-#	 for F in ${screwy_files[@]}; do
+dangerous_files=(
+	 etc/ssh/sshd_config
+)
+
+post_install() {
+	 for F in ${screwy_files[@]}; do
+		  echo SCREWY: $F
 #		  [ -a "$F" ] && mv -i "$F" "$F.orig."$(date +%s)
-#	 done
-#}
+	 done
+	 for F in ${dangerous_files[@]}; do
+		  echo DANGEROUS: $F
+	 done
+}
+
+post_upgrade() {
+	 post_install "$@"
+}
