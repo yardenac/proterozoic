@@ -1,26 +1,48 @@
 #!/bin/bash
 
-screwy_files=(
-	 etc/bash.bash_logout
+preowned_files=(
+#	 etc/bash.bash_logout
 	 etc/default/useradd
 	 etc/screenrc
 	 etc/ssh/ssh_config
 )
-
-dangerous_files=(
+need_attention=(
 	 etc/ssh/sshd_config
 )
-
-post_install() {
-	 for F in ${screwy_files[@]}; do
-		  echo SCREWY: $F
-#		  [ -a "$F" ] && mv -i "$F" "$F.orig."$(date +%s)
-	 done
-	 for F in ${dangerous_files[@]}; do
-		  echo DANGEROUS: $F
+are_same() {
+	 [ -a "$1" ] && [ -a "$2" ] || return 1
+	 diff -qd "$1" "$2" >/dev/null
+}
+make_backup() {
+	 for ARG in "$@"; do
+		  [ -f "$ARG" ] || continue
+		  for N in {01..999}; do
+				[ -f "$ARG.old.$N" ] && {
+					 are_same "$ARG" "$ARG.old.$N" && break
+					 continue
+				}
+				mv -i "$ARG" "$ARG.old.$N"
+				break
+		  done
 	 done
 }
-
+post_install() {
+	 for F in ${preowned_files[@]}; do
+		  [ -f "$F.ppz" ] && {
+				are_same "$F"{,.ppz} && continue
+				make_backup "$F"
+				cp -i "$F.ppz" "$F"
+		  }
+	 done
+	 for F in ${need_attention[@]}; do
+		  echo SET UP MANUALLY: $F
+	 done
+}
+pre_upgrade() {
+	 for F in ${preowned_files[@]}; do
+		  are_same "$F" "$F.ppz" && rm "$F"
+	 done
+}
 post_upgrade() {
 	 post_install "$@"
 }
