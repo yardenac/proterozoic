@@ -1,0 +1,9 @@
+server 0.north-america.pool.ntp.org iburst
+server 1.north-america.pool.ntp.org iburst
+server 2.north-america.pool.ntp.org iburst
+server 3.north-america.pool.ntp.org iburst
+#server time.fremont.cbane.org iburst prefer
+restrict default ignore
+restrict 127.0.0.1
+driftfile /var/lib/ntp/ntp.drift
+logfile /var/log/ntp.log

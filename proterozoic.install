@@ -8,6 +8,7 @@ preowned_files=(
 )
 need_attention=(
 	 etc/ssh/sshd_config
+	 etc/ntp.conf
 )
 are_same() {
 	 [ -a "$1" ] && [ -a "$2" ] || return 1
@@ -35,7 +36,7 @@ post_install() {
 		  }
 	 done
 	 for F in ${need_attention[@]}; do
-		  echo SET UP MANUALLY: $F
+		  echo SET UP MANUALLY: $F.ppz
 	 done
 }
 pre_upgrade() {
