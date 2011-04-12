@@ -9,6 +9,7 @@ preowned_files=(
 need_attention=(
 	 etc/ssh/sshd_config
 	 etc/ntp.conf
+	 etc/issue
 )
 are_same() {
 	 [ -a "$1" ] && [ -a "$2" ] || return 1
