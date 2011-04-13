@@ -7,7 +7,7 @@ arch=(any)
 license=('GPL')
 install=proterozoic.install
 makedepends=(findutils coreutils)
-depends=(emacs-nox bash bash-completion iptables sudo cryptsetup diffutils ntp openssh sshfs)
+depends=(emacs-nox bash bash-completion iptables sudo cryptsetup diffutils ntp openssh sshfs syslog-ng)
 # slim xorg-server xorg-xinit xorg-utils xorg-server-utils xfwm4 xfce4-panel xfdesktop thunar xfce4-session xfce4-settings xfce4-appfinder xfce-utils xfconf)
 #wicd
 
