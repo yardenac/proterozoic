@@ -1,0 +1,50 @@
+@version: 3.2
+options {
+  create_dirs (yes);
+  log_fifo_size (1024);
+  group ("log");
+  perm (0640);
+  time_reopen (10);
+  time_reap	 (300);
+  stats_freq (0);
+  flush_lines (0);
+  ts_format (iso);
+
+  use_dns (no);
+#  dns_cache_hosts (/etc/hosts);
+#  dns_cache_expire (86400);
+  long_hostnames (off); 
+  use_fqdn (no);
+  keep_hostname (yes);
+  #what is a chained hostname?
+
+};
+source src {
+  internal();
+  unix-stream("/dev/log");
+  file("/proc/kmsg" program_override("kernel: "));
+};
+filter		f_stompable	{ level(warning..emerg); };
+filter		f_iptables	{ match("IN=" value("MESSAGE")) and match("OUT=" value("MESSAGE")); };
+filter		f_auth		{ facility(auth, authpriv); };
+filter		f_mail		{ facility(mail); };
+filter		f_kernel		{ facility(kern) and not filter(f_iptables); };
+filter		f_daemon		{ facility(daemon); };
+filter		f_ignorable	{ facility(user, uucp, local2, news, lpr, cron); program(syslog-ng); };
+destination	d_stompable	{ file("/var/log/stomp.log");  		frac_digits(3);		usertty(root); };
+destination d_iptables	{ file("/var/log/iptables.log");		frac_digits(3); };
+destination d_auth		{ file("/var/log/auth.log");			frac_digits(3); };
+destination d_mail		{ file("/var/log/mail.log"); 			frac_digits(3); };
+destination d_kernel		{ file("/var/log/kernel.log");		frac_digits(3); };
+destination d_daemon		{ file("/var/log/daemon.log");		frac_digits(3); };
+destination	d_ignorable	{ file("/var/log/ignorable.log");	frac_digits(3); };
+destination	cracks		{ file("/var/log/cracks.log");		frac_digits(3); };
+#destination console_all { file("/dev/tty12"); };
+log	{ source(src); filter(f_stompable); destination(d_stompable);												};
+log	{ source(src); filter(f_iptables);	destination(d_iptables);  flags(final);							};
+log	{ source(src); filter(f_auth);		destination(d_auth);	  	  flags(final);							};
+log	{ source(src); filter(f_mail);		destination(d_mail); 	  flags(final);							};
+log	{ source(src); filter(f_kernel);		destination(d_kernel);	  												};
+log	{ source(src); filter(f_daemon);		destination(d_daemon);													};
+log	{ source(src); filter(f_ignorable); destination(d_ignorable); flags(final);							};
+log	{ 												destination(cracks);		  flags(catchall, fallback, final); };
