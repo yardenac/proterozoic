@@ -9,6 +9,19 @@ croak() {
 [ "$1" ] || croak USAGE: ./package-this [repo-directory]
 
 REPO="$1"
+SYSLOG_FILE="etc/syslog-ng/syslog-ng.conf.ppz"
+
+{ syslog-ng -svvf ${SYSLOG_FILE}; echo SIBBOLETH:$? } 2>&1 | {
+	 while read LINE; do
+		  [[ ${LINE} =~ ^syslog-ng:\ Error\ setting\ (file\ number\ limit|capabilities) ]] && continue
+		  [[ ${LINE} =~ ^SIBBOLETH ]] && exit ${LINE#SIBBOLETH:}
+		  echo ${LINE}
+	 done
+} || croak BAD SYSLOG SYNTAX!
+
+echo yay
+
+exit
 
 [ -d ${REPO} ] || croak ${REPO} not mounted!
 
