@@ -1,0 +1,5 @@
+#%users ALL=(root) NOPASSWD: /usr/sbin/decrypt-script
+#%power ALL=(root) NOPASSWD: /sbin/reboot
+#%power ALL=(root) NOPASSWD: /sbin/shutdown
+#%power ALL=(root) NOPASSWD: /usr/lib/xfce4/session/xfsm-shutdown-helper
+#%users  ALL=(root) NOPASSWD: syslog-ng -svvf [file] #no! i shouldn't need this, it's a bug in syslog-ng that should be fixed...

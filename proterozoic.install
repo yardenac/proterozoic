@@ -19,12 +19,15 @@ are_same() {
 make_backup() {
 	 for ARG in "$@"; do
 		  [ -f "$ARG" ] || continue
-		  for N in {01..999}; do
+		  for N in {001..999}; do
 				[ -f "$ARG.old.$N" ] && {
-					 are_same "$ARG" "$ARG.old.$N" && break
+					 are_same "$ARG" "$ARG.old.$N" && {
+						  rm -f "$ARG"
+						  break
+					 }
 					 continue
 				}
-				mv -i "$ARG" "$ARG.old.$N"
+				mv "$ARG" "$ARG.old.$N"
 				break
 		  done
 	 done
@@ -34,7 +37,7 @@ post_install() {
 		  [ -f "$F.ppz" ] && {
 				are_same "$F"{,.ppz} && continue
 				make_backup "$F"
-				cp -i "$F.ppz" "$F"
+				cp "$F.ppz" "$F"
 		  }
 	 done
 	 for F in ${need_attention[@]}; do
@@ -43,7 +46,7 @@ post_install() {
 }
 pre_upgrade() {
 	 for F in ${preowned_files[@]}; do
-		  are_same "$F" "$F.ppz" && rm "$F"
+		  are_same "$F" "$F.ppz" && rm -f "$F"
 	 done
 }
 post_upgrade() {

@@ -1,3 +1,0 @@
-#%power ALL=(root) NOPASSWD: /sbin/reboot
-#%power ALL=(root) NOPASSWD: /sbin/shutdown
-#%power ALL=(root) NOPASSWD: /usr/lib/xfce4/session/xfsm-shutdown-helper

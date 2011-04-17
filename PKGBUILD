@@ -17,6 +17,6 @@ package() {
 	 chmod 555 ${pkgdir}/etc/.emacs.d
 	 chmod 440 ${pkgdir}/etc/sudoers.d/power
 	 chmod 440 ${pkgdir}/etc/sudoers.d/decrypt-script
-	 chmod 550 ${pkgdir}/etc/sudoers.d
+#	 chmod 750 ${pkgdir}/etc/sudoers.d
 #	 install -t ${pkgdir} ${startdir}/tree/*
 }
