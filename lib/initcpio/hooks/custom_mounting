@@ -1,11 +1,8 @@
-# vim: set ft=sh:
-
+# blahblah
 uniq_token () {
 	 echo $(date +%s).$(printf "%05d" $RANDOM)
 }
-
 scaly_mount_handler() {
-
 	 XINO_FILE=/tmp/.aufs.xino #/.aufs.xino
 
 	 mkdir -p /aufs-ro /aufs-rw /tmp
@@ -26,29 +23,12 @@ scaly_mount_handler() {
 	 mount --move /aufs-rw /new_root/aufs-rw
 	 mount --move /tmp /new_root/tmp 
 
-#	 [ -a /tmp ] && mv /tmp /tmp.save
-#	 [ -a /tmp ] && mv /tmp /tmp.$(uniq_token)
-#	 mkdir /tmp
-#	 mount -t tmpfs -o defaults,nodev,nosuid,noexec,mode=1777,size=25%,uid=0,gid=0,noauto,noatime,nodiratime shm /tmp
-#	 for DIR in /tmp.save /dev/shm /var/tmp; do
-#		  [ -d "$DIR" ] && {
-#				mv -nv $DIR/* $DIR/.??* /tmp/
-#				rmdir $DIR
-#		  }
-#		  [ -L "$DIR" ] && continue
-#		  [ -a "$DIR" ] && mv $DIR $DIR.$(uniq_token)
-#		  ln -s /tmp $DIR
-#	 done
-#	 rm -f /tmp.save
-
 	 read -st 3 -p "press ENTER within 5 seconds to drop a shell ;)" && {
 		  echo HAVE FUN...
 		  /bin/bash -i
 		  echo BOOTING FOR REAL NOW
 	 }
-
 }
-
 run_hook() {
 	 mount_handler=scaly_mount_handler
 }

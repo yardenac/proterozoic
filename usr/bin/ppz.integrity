@@ -1,4 +1,10 @@
 #!/bin/bash
+# this gets run in:
+#   post_install
+#    functions.d
+#     bash.bashrc.local
+#      post_upgrade
+
 . /etc/bash.functions
 
 [ -L ~/.emacs.d ] || {
@@ -9,6 +15,15 @@
 am_root || exit
 
 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit
+
+# remove shm entries from fstab as well?
+
+# places to look for tmp:
+#   mount
+#   /etc/fstab
+#   /etc/rc.d/functions.d/custom_mounting
+#   /lib/initcpio/hooks/custom_mounting
+#   /lib/initcpio/hooks/custom_mounting.scaly
 
 for F in /{root,home/*}/.bash_history; do
 	 [ -f "$F" ] || continue

@@ -13,4 +13,5 @@ package() {
 	 chmod 444 ${pkgdir}/etc/.emacs.d/init.el
 	 chmod 555 ${pkgdir}/etc/.emacs.d
 	 chmod 440 ${pkgdir}/etc/sudoers.d/ppz
+	 chmod 750 ${pkgdir}/etc/sudoers.d
 }

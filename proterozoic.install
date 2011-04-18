@@ -27,6 +27,13 @@ rcconf_vars=(
 #	 ssh_authkeys_file /etc/ssh/sshd_authorized_keys
 #	 tmpfs_size 50%
 )
+mkinitcpio_triggers=(
+	 lib/initcpio/hooks/custom_mounting.scaly
+	 lib/initcpio/install/custom_mounting.scaly
+)
+
+kernel_name=( $(pacman -Q | grep kernel) )
+kernel_name=${kernel_name[0]:-kernel26}
 
 ######### FUNCTIONS
 
@@ -71,6 +78,19 @@ check_is_rcconf_complete() {
 	 done
 	 return $vars_not_found
 }
+check_mkinitcpio_triggers() {
+	 echo MKINITCPIO NAME: $kernel_name
+	 all_same=0
+	 for F in ${mkinitcpio_triggers[@]}; do
+		  are_same ${F}{,.last} || {
+				/bin/cp -f ${F}{,.last}
+				all_same=1
+		  }
+	 done
+	 [ $all_same -eq 0 ] || {
+		  [ -n "${kernel_name}" ] && /sbin/mkinitcpio -p ${kernel_name}
+	 }
+}
 
 ########## HOOKS
 
@@ -82,6 +102,7 @@ post_install() {
 	 /etc/rc.d/iptables restart
 	 sanitize_file_conflicts
 	 /usr/bin/ppz.integrity
+	 check_mkinitcpio_triggers
 }
 
 pre_upgrade() {
@@ -93,4 +114,5 @@ pre_upgrade() {
 post_upgrade() {
 	 sanitize_file_conflicts
 	 /usr/bin/ppz.integrity
+	 check_mkinitcpio_triggers
 }
