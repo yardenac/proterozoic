@@ -257,23 +257,6 @@ enforce_perms() {
 	 STATS=$(stat -c %a "$2")
 	 [[ "$1" == "$STATS" ]] || say_and_do chmod "$1" "$2" #chmod file if not set already
 }
-enforce_some_integrity() {
-	 [ -L ~/.emacs.d ] || {
-		  mv .emacs.d .emacs.d.$(uniq_token)
-		  ln -s /etc/.emacs.d ~/
-	 }
-	 am_root && {
-		  [ -f /etc/.emacs.d/init.el ] && enforce_perms 444 /etc/.emacs.d/init.el
-		  [ -d /etc/.emacs.d ] && enforce_perms 555 /etc/.emacs.d
-		  for F in /{root,home/*}/.bash_history; do
-				[ -f "$F" ] || continue
-				lsattr "$F" >/dev/null 2>&1 && {
-					 ATTRSET=$(lsattr "$F")
-					 [ ${ATTRSET:5:1} != a ] && say_and_do chattr +a "$F"
-				}
-		  done
-	 }
-}
 iptables-all() {
 	 iptables -t filter	-L -v -x --line-numbers
 	 iptables -t raw		-L -v -x --line-numbers

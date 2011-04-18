@@ -1,3 +1,13 @@
 
 logrotate
 
+small hashing program
+
+path
+
+/tmp sanity
+	  no rm -rf in initscripts
+	  bind mounts or symlinks?
+
+jfs/ext tuning/optimizing
+

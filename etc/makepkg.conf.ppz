@@ -1,0 +1,25 @@
+DLAGENTS=('ftp::/usr/bin/wget -c --passive-ftp -t 3 --waitretry=3 -O %o %u'
+          'http::/usr/bin/wget -c -t 3 --waitretry=3 -O %o %u'
+          'https::/usr/bin/wget -c -t 3 --waitretry=3 --no-check-certificate -O %o %u'
+          'rsync::/usr/bin/rsync -z %u %o'
+          'scp::/usr/bin/scp -C %u %o')
+CARCH="x86_64"
+CHOST="x86_64-unknown-linux-gnu"
+CFLAGS="-mcpu=native -march=native -mtune=native -O2 -pipe"
+CXXFLAGS="-mcpu=native -march=native -mtune=native -O2 -pipe"
+LDFLAGS="-Wl,--hash-style=gnu -Wl,--as-needed"
+#-- Make Flags: change this for DistCC/SMP systems
+MAKEFLAGS="-j5"
+BUILDENV=(fakeroot !distcc color !ccache check)
+OPTIONS=(strip docs libtool emptydirs zipman purge)
+INTEGRITY_CHECK=(md5) # md5, sha1, sha256, sha384, sha512
+STRIP_BINARIES="--strip-all"
+STRIP_SHARED="--strip-unneeded"
+STRIP_STATIC="--strip-debug"
+MAN_DIRS=({usr{,/local}{,/share},opt/*}/{man,info})
+DOC_DIRS=(usr/{,local/}{,share/}{doc,gtk-doc} opt/*/{doc,gtk-doc})
+STRIP_DIRS=(bin lib sbin usr/{bin,lib,lib32,sbin,local/{bin,lib,sbin}} opt/*/{bin,lib,sbin})
+PURGE_TARGETS=(usr/{,share}/info/dir .packlist *.pod)
+PACKAGER="anonymous coward"
+PKGEXT='.pkg.tar.xz'
+SRCEXT='.src.tar.gz'

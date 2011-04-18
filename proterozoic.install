@@ -1,7 +1,6 @@
 #!/bin/bash
 
 preowned_files=(
-#	 etc/bash.bash_logout
 	 etc/default/useradd
 	 etc/screenrc
 	 etc/ssh/ssh_config
@@ -9,46 +8,89 @@ preowned_files=(
 )
 need_attention=(
 	 etc/ssh/sshd_config
+	 etc/makepkg.conf
 	 etc/ntp.conf
 	 etc/issue
 )
+what_to_do_with=(
+	 etc/rc.conf
+	 etc/inittab
+	 etc/pacman.conf
+)
+rcconf_vars=(
+	 LOCALE
+	 tiMezOne
+	 daemons
+#	 draft_username_w_uid_2063
+#	 encrypted_swap_file /estaba
+#	 encrypted_home_dir /soy
+#	 ssh_authkeys_file /etc/ssh/sshd_authorized_keys
+#	 tmpfs_size 50%
+)
+
+######### FUNCTIONS
+
 are_same() {
 	 [ -a "$1" ] && [ -a "$2" ] || return 1
 	 diff -qd "$1" "$2" >/dev/null
 }
-make_backup() {
-	 for ARG in "$@"; do
-		  [ -f "$ARG" ] || continue
-		  for N in {001..999}; do
-				[ -f "$ARG.old.$N" ] && {
-					 are_same "$ARG" "$ARG.old.$N" && {
-						  rm -f "$ARG"
-						  break
-					 }
-					 continue
-				}
-				mv "$ARG" "$ARG.old.$N"
-				break
-		  done
-	 done
+clobberella() {
+	 F="$1"
+	 [ -f "$F.ppz" ] || return
+	 [ -f "$F" ] && { #do a "nice clobber" - make a (unique) backup
+		  are_same ${F}{,.ppz} && return || \
+				for N in {001..999}; do
+					 [ -f "$F.old.$N" ]			|| { mv -n ${F}{,.old.$N};	break; }
+					 are_same ${F}{,.old.$N}	&& { rm -f "$F";				break; }
+				done
+	 }
+	 cp -n "$F.ppz" "$F"
 }
-post_install() {
+enforce_locales() {
+	 PRESENT_LOCALES=$(grep -iE '^[^#$]' etc/locale.gen)
+	 [ ${PRESENT_LOCALES} ] || {
+		  clobberella etc/locale.gen
+		  locale-gen
+	 }
+}
+sanitize_file_conflicts() {
 	 for F in ${preowned_files[@]}; do
-		  [ -f "$F.ppz" ] && {
-				are_same "$F"{,.ppz} && continue
-				make_backup "$F"
-				cp "$F.ppz" "$F"
-		  }
+		  clobberella "$F"
 	 done
 	 for F in ${need_attention[@]}; do
 		  echo SET UP MANUALLY: $F.ppz
 	 done
 }
+check_is_rcconf_complete() {
+	 let vars_not_found=0
+	 for V in ${rcconf_vars[@]}; do
+		  grep -iEq ^${V}= /etc/rc.conf || {
+				let vars_not_found++
+				echo VAR NOT FOUND IN RC.CONF: ${V}
+		  }
+	 done
+	 return $vars_not_found
+}
+
+########## HOOKS
+
+pre_install() {
+	 check_is_rcconf_complete || return 1
+	 enforce_locales
+}
+post_install() {
+	 /etc/rc.d/iptables restart
+	 sanitize_file_conflicts
+	 /usr/bin/ppz.integrity
+}
+
 pre_upgrade() {
+	 check_is_rcconf_complete || return 1
 	 for F in ${preowned_files[@]}; do
-		  are_same "$F" "$F.ppz" && rm -f "$F"
+		  are_same ${F}{,.ppz} && rm -f "$F"
 	 done
 }
 post_upgrade() {
-	 post_install "$@"
+	 sanitize_file_conflicts
+	 /usr/bin/ppz.integrity
 }

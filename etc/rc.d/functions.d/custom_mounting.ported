@@ -1,5 +1,14 @@
 #!/bin/bash
 
+make_tmp_awesome() {
+	 shms=$(mount | awk '/^shm/ { print $3 }')
+	 echo shms = $shms
+}
+
+custom_mounting_everyone() {
+	 /usr/bin/ppz.integrity
+}
+
 custom_mounting_scaly() {
 	COUNT=5
 	while let COUNT--; do
@@ -48,6 +57,8 @@ custom_mounting_ediacra() {
 #    echo "done it all"
 #    bash -i
 }
+
+add_hook sysinit_premount custom_mounting_everyone
 
 case $HOSTNAME in
 	 scaly)   add_hook sysinit_premount custom_mounting_scaly;;

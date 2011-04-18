@@ -1,11 +1,13 @@
 export SHELL=/bin/bash
 [ -f /etc/bash.functions  ] && . /etc/bash.functions
-enforce_some_integrity
+/usr/bin/ppz.integrity
 complete -f -X '!*.@(sqlite|db)' sqlite3
 complete -f emacs
 complete -f rsync
+echo OLD PATH: $PATH
 export PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin
 [ -d "$HOME/bin" ] && export PATH="$HOME/bin:$PATH"
+echo NEW PATH: $PATH
 case "$TERM" in
 	 linux)   PS1='\u\D{%l%M}\w\[\e[1;33m\]$( jobs | { while read J; do echo -n \*
 	done } )\$\[\e[m\e]2\a\] ';;
