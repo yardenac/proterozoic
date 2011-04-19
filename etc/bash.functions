@@ -255,13 +255,28 @@ enforce_perms() {
 	 [[ "$1" =~ [0-7]{3} ]] || return 1 #perm string is valid
 	 [ -a "$2" ] || return 1            #file exists
 	 STATS=$(stat -c %a "$2")
-	 [[ "$1" == "$STATS" ]] || say_and_do chmod "$1" "$2" #chmod file if not set already
+	 [[ "$1" == "$STATS" ]] || {
+		  ls -FlAthr "$2"
+		  say_and_do chmod "$1" "$2" #chmod file if not set already
+	 }
 }
 iptables-all() {
 	 iptables -t filter	-L -v -x --line-numbers
 	 iptables -t raw		-L -v -x --line-numbers
 	 iptables -t nat		-L -v -x --line-numbers
 	 iptables -t mangle	-L -v -x --line-numbers
+}
+return_arg1() {
+	 return "$1"
+}
+isnt() {
+	 eval "$@"
+	 [ $? -ne 0 ]
+}
+wait_until() {
+	 while isnt "$@"; do
+		  sleep 0.5
+	 done
 }
 #echo finishing functions
 #holdss() {

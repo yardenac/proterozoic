@@ -10,7 +10,7 @@ options {
   flush_lines (0);
   ts_format (iso);
 
-  mark_freq (60);
+  mark_freq (3601);
 
   use_dns (no);
 # dns_cache_hosts (/etc/hosts);
@@ -26,26 +26,28 @@ source src {
   unix-stream("/dev/log");
   file("/proc/kmsg" program_override("kernel: "));
 };
-filter		f_stompable	{ level(warning..emerg); };
+filter		f_stompable	{ (level(err..emerg)) or (level(warning) and not facility(kern)); };
 filter		f_iptables	{ match("IN=" value("MESSAGE")) and match('OUT=' value("MESSAGE")); };
 filter		f_auth		{ facility(auth, authpriv); };
 filter		f_mail		{ facility(mail); };
 filter		f_kernel		{ facility(kern) and not filter(f_iptables); };
-filter		f_daemon		{ facility(daemon); };
-filter		f_ignorable	{ facility(user, uucp, local2, news, lpr, cron) or program(syslog-ng) or match('-- MARK --' value("MESSAGE")); };
+#filter		f_daemon		{ facility(daemon); };
+filter		f_ignorable	{ facility(user, uucp, local2, news, lpr, cron, daemon)
+								  		or program(syslog-ng)
+								  		or program(dhcpcd)
+										or match('-- MARK --' value("MESSAGE")); };
 filter		f_userunk	{ facility(auth) and program(sshd) and match('pam_unix(sshd:auth): check pass; user unknown' value("MESSAGE")); };
 filter		f_sr_ioerr	{ program(kernel) and (
 								  			match('end_request: I/O error, dev sr0, sector'	 		value("MESSAGE"))
 								  		or	match('Buffer I/O error on device sr0, logical block'	value("MESSAGE"))
 								  		or	match('sr 0:0:0:0: \[sr0\] (Unhandled sense code|CDB: cdb\[| (Result: hostbyte=|Sense Key|ASC=))'	value("MESSAGE"))
-#								  		or	match('sr 0:0:0:0: \[sr0\] '	value("MESSAGE"))
 									); };
 destination	d_stompable	{ file("/var/log/stomp.log"	 	frac_digits(3));  	usertty(root); };
 destination d_iptables	{ file("/var/log/iptables.log"	frac_digits(3)); };
 destination d_auth		{ file("/var/log/auth.log" 		frac_digits(3)); };
 destination d_mail		{ file("/var/log/mail.log" 		frac_digits(3)); };
 destination d_kernel		{ file("/var/log/kernel.log" 		frac_digits(3)); };
-destination d_daemon		{ file("/var/log/daemon.log" 		frac_digits(3)); };
+#destination d_daemon		{ file("/var/log/daemon.log" 		frac_digits(3)); };
 destination	d_ignorable	{ file("/var/log/ignorable.log"	frac_digits(3)); };
 destination	cracks		{ file("/var/log/cracks.log" 		frac_digits(3)); };
 destination	d_messy		{ file("/var/log/messy.log" 		frac_digits(3)); };
@@ -56,7 +58,7 @@ log	{ source(src); filter(f_stompable); destination(d_stompable);													};
 log	{ source(src); filter(f_iptables);	destination(d_iptables);	flags(final);								};
 log	{ source(src); filter(f_auth);		destination(d_auth);	  	  	flags(final);								};
 log	{ source(src); filter(f_mail);		destination(d_mail); 	  	flags(final);								};
-log	{ source(src); filter(f_kernel);		destination(d_kernel);	  													};
-log	{ source(src); filter(f_daemon);		destination(d_daemon);														};
 log	{ source(src); filter(f_ignorable); destination(d_ignorable); flags(final);								};
+log	{ source(src); filter(f_kernel);		destination(d_kernel);	  													};
+#log	{ source(src); filter(f_daemon);		destination(d_daemon);														};
 log	{ 												destination(cracks);		  flags(catch-all, fallback, final);	};

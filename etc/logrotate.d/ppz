@@ -1,0 +1,6 @@
+/var/log/ignorable.log /var/log/messy.log {
+	sharedscripts
+	postrotate
+		/bin/kill -HUP `cat /var/run/syslog-ng.pid 2>/dev/null`  2> /dev/null || true
+	endscript
+}

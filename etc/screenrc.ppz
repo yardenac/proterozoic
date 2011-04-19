@@ -12,6 +12,7 @@ term screen-256color
 attrcolor b ".I"															# allow bold colors - necessary for some reason
 termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'		# tell screen how to set colors. AB = background, AF=foreground
 defbce on																  	# use current bg color for erased chars
+#hardstatus alwaysmessage
 #hardstatus off
 #hardstatus string "%h%? users: %u%?"
 #defnonblock 5
@@ -45,4 +46,4 @@ terminfo hp700 'Z0=\E[?3h:Z1=\E[?3l:hs:ts=\E[62"p\E[0$~\E[2$~\E[1$}:fs=\E[0}\E[6
 termcap wy75-42 nx:xo:Z0=\E[?3h\E[31h:Z1=\E[?3l\E[31h					#wyse-75-42 must have defflow control (xo = "terminal uses xon/xoff")
 terminfo wy75-42 nx:xo:Z0=\E[?3h\E[31h:Z1=\E[?3l\E[31h				#(nowadays: nx = padding doesn't work, have to use xon/off)
 ## Set the hardstatus prop on gui terms to set the titlebar/icon title
-#termcapinfo xterm*|rxvt*|kterm*|Eterm* hs:ts=\E]0;:fs=\007:ds=\E]0;\007
+termcapinfo xterm*|rxvt*|kterm*|Eterm* hs:ts=\E]0;:fs=\007:ds=\E]0;\007

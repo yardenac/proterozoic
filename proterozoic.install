@@ -1,10 +1,10 @@
 #!/bin/bash
-
 preowned_files=(
 	 etc/default/useradd
 	 etc/screenrc
 	 etc/ssh/ssh_config
 	 etc/syslog-ng/syslog-ng.conf
+	 etc/logrotate.conf
 )
 need_attention=(
 	 etc/ssh/sshd_config
@@ -27,13 +27,6 @@ rcconf_vars=(
 #	 ssh_authkeys_file /etc/ssh/sshd_authorized_keys
 #	 tmpfs_size 50%
 )
-mkinitcpio_triggers=(
-	 lib/initcpio/hooks/custom_mounting.scaly
-	 lib/initcpio/install/custom_mounting.scaly
-)
-
-kernel_name=( $(pacman -Q | grep kernel) )
-kernel_name=${kernel_name[0]:-kernel26}
 
 ######### FUNCTIONS
 
@@ -53,6 +46,16 @@ clobberella() {
 	 }
 	 cp -n "$F.ppz" "$F"
 }
+all_triggers_same() {
+	 let changes=0
+	 for F in "$@"; do
+		  are_same ${F}{,.last} || {
+				/bin/cp -f ${F}{,.last}
+				let changes++
+		  }
+	 done
+	 [ $changes -eq 0 ]
+}
 enforce_locales() {
 	 PRESENT_LOCALES=$(grep -iE '^[^#$]' etc/locale.gen)
 	 [ ${PRESENT_LOCALES} ] || {
@@ -64,9 +67,9 @@ sanitize_file_conflicts() {
 	 for F in ${preowned_files[@]}; do
 		  clobberella "$F"
 	 done
-	 for F in ${need_attention[@]}; do
-		  echo SET UP MANUALLY: $F.ppz
-	 done
+#	 for F in ${need_attention[@]}; do
+#		  echo SET UP MANUALLY: $F.ppz
+#	 done
 }
 check_is_rcconf_complete() {
 	 let vars_not_found=0
@@ -78,16 +81,18 @@ check_is_rcconf_complete() {
 	 done
 	 return $vars_not_found
 }
-check_mkinitcpio_triggers() {
-	 echo MKINITCPIO NAME: $kernel_name
-	 all_same=0
-	 for F in ${mkinitcpio_triggers[@]}; do
-		  are_same ${F}{,.last} || {
-				/bin/cp -f ${F}{,.last}
-				all_same=1
-		  }
-	 done
-	 [ $all_same -eq 0 ] || {
+kernel_name=( $(pacman -Q | grep kernel) )
+kernel_name=${kernel_name[0]:-kernel26}
+check_triggers() {
+	 all_triggers_same etc/syslog-ng/syslog-ng.conf || {
+		  echo reloading syslog-ng....
+		  killall -SIGHUP /usr/sbin/syslog-ng
+	 }
+	 all_triggers_same lib/initcpio/{hooks,install}/custom_mounting || {
+
+		  #MAKE SURE IT'S LISTED IN THE HOOKS!
+
+
 		  [ -n "${kernel_name}" ] && /sbin/mkinitcpio -p ${kernel_name}
 	 }
 }
@@ -102,7 +107,7 @@ post_install() {
 	 /etc/rc.d/iptables restart
 	 sanitize_file_conflicts
 	 /usr/bin/ppz.integrity
-	 check_mkinitcpio_triggers
+	 check_triggers
 }
 
 pre_upgrade() {
@@ -114,5 +119,5 @@ pre_upgrade() {
 post_upgrade() {
 	 sanitize_file_conflicts
 	 /usr/bin/ppz.integrity
-	 check_mkinitcpio_triggers
+	 check_triggers
 }
