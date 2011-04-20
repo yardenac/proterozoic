@@ -90,15 +90,23 @@ check_triggers() {
 		  echo reloading syslog-ng....
 		  killall -SIGHUP /usr/sbin/syslog-ng
 	 }
-	 all_triggers_same lib/initcpio/{hooks,install}/{custom_mounting,ppz_tmp} || {
-
+	 all_triggers_same lib/initcpio/{hooks,install}/ppz_tmp || {
 		  grep -iEq '^HOOKS=".*ppz_tmp.*"' /etc/mkinitcpio.conf || {
 				echo "I was going to rebuild the initrd, but ppz_tmp is not"
 				echo "in HOOKS in /etc/mkinitcpio.conf! What's the point?"
 				return 1
 		  }
-		  [ -n "${kernel_name}" ] && /sbin/mkinitcpio -p ${kernel_name}
-		  echo MKINITCPIO RETURNED: $?
+		  [ -w /boot ] || {
+				grep -qiE '[[:space:]]/boot.*ro' /etc/mtab \
+					 && mount -o remount,rw /boot
+		  } || {
+				echo "couldn't figure out your /boot ... not building initrd!"
+				return 1
+		  }
+		  [ -n "${kernel_name}" ] && {
+				/sbin/mkinitcpio -p ${kernel_name}
+				echo MKINITCPIO RETURNED: $?
+		  }
 		  # experiment to see how it handles return values...
 		  # if it failed we want to make sure it can work again next time
 		  # so probably mess with the "last" files or something

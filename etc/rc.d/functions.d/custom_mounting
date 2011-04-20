@@ -34,7 +34,7 @@ custom_mounting_scaly() {
 custom_mounting_ediacra() {
 #   echo "havent run anything yet"
 #   bash -i
-    mount -t tmpfs -o defaults,nodev,nosuid,noexec,mode=1777,size=12%,uid=0,gid=0,noauto,noatime,nodiratime shm /tmp
+#    mount -t tmpfs -o defaults,nodev,nosuid,noexec,mode=1777,size=12%,uid=0,gid=0,noauto,noatime,nodiratime shm /tmp
     mkdir /tmp/.aufs.var
 #    echo "made tmp folder..."
 #    bash -i
