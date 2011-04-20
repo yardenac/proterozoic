@@ -35,12 +35,18 @@ filter		f_kernel		{ facility(kern) and not filter(f_iptables); };
 filter		f_ignorable	{ facility(user, uucp, local2, news, lpr, cron, daemon)
 								  		or program(syslog-ng)
 								  		or program(dhcpcd)
-										or match('-- MARK --' value("MESSAGE")); };
+										or match('-- MARK --' value("MESSAGE"))
+										or (facility(kern) and (
+												match('[a-zA-Z0-9-]+: module loaded' value("MESSAGE"))
+											or match('quiet_error: [0-9]+ callbacks suppressed' value("MESSAGE"))
+										)); };
 filter		f_userunk	{ facility(auth) and program(sshd) and match('pam_unix(sshd:auth): check pass; user unknown' value("MESSAGE")); };
 filter		f_sr_ioerr	{ program(kernel) and (
 								  			match('end_request: I/O error, dev sr0, sector'	 		value("MESSAGE"))
 								  		or	match('Buffer I/O error on device sr0, logical block'	value("MESSAGE"))
 								  		or	match('sr 0:0:0:0: \[sr0\] (Unhandled sense code|CDB: cdb\[| (Result: hostbyte=|Sense Key|ASC=))'	value("MESSAGE"))
+								  		or	match('ISO 9660 Extensions: Microsoft Joliet Level 3'	value("MESSAGE"))
+								  		or	match('ISO 9660 Extensions: RRIP_1991A'	value("MESSAGE"))
 									); };
 destination	d_stompable	{ file("/var/log/stomp.log"	 	frac_digits(3));  	usertty(root); };
 destination d_iptables	{ file("/var/log/iptables.log"	frac_digits(3)); };

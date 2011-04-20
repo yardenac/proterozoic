@@ -1,0 +1,51 @@
+#timed_prompt() {
+#	 NUM=$1; shift
+#	 read -st $NUM -p "$*"
+#}
+uniq_token () {
+	 echo $(date +%s).$(printf "%05d" $RANDOM)
+}
+do_tmpfs() {
+	 echo DOING TMPFS
+	 mkdir -p /tmp
+	 mount -t tmpfs -o defaults,nodev,nosuid,noexec,mode=1777,size=$1,uid=0,gid=0,noauto,noatime,nodiratime shm /tmp
+	 echo DID TMPFS
+}
+do_aufs() {
+	 echo DOING AUFS
+	 XINO_FILE=/tmp/.aufs.xino
+	 mkdir -p /aufs-ro /aufs-rw
+	 /sbin/fsck.jfs /dev/disk/by-uuid/$1
+	 /sbin/fsck.jfs /dev/disk/by-uuid/$2
+	 mount -t jfs -o rw,noatime,nodiratime /dev/disk/by-uuid/$1 /aufs-rw
+	 mount -t jfs -o ro,noatime,nodiratime /dev/disk/by-uuid/$2 /aufs-ro
+	 mount -t aufs -o br:/aufs-rw=rw:/aufs-ro=ro,xino=$XINO_FILE,noauto,noatime,nodiratime,udba=none none /new_root
+	 mkdir -p /new_root/aufs-ro /new_root/aufs-rw 
+	 mount --move /aufs-ro /new_root/aufs-ro
+	 mount --move /aufs-rw /new_root/aufs-rw
+	 echo DID AUFS
+}
+ppz_mount_handler() {
+	 eval $(awk '/^HOSTNAME=/' /etc/rc.conf)
+	 echo HOSTNAME IS: $HOSTNAME
+	 # create /tmp, being conscious of resources
+	 case $HOSTNAME in
+		  gabba)		do_tmpfs 10485760;; #1024*1024*10 = 10MB?
+		  scaly)		do_tmpfs 25%;;
+		  edie|*)	do_tmpfs 12%;;
+	 esac
+	 # create /new_root, either the normal way or a fancy way...
+	 case $HOSTNAME in
+		  scaly)	do_aufs   45d0d831-d045-410c-b2ec-d525ef69e36c   ac7d44cc-9edf-4dda-bd13-6731d1fb596f;;
+		  *)		${default_mount_handler} "$@";;
+	 esac
+	 mount --move /tmp /new_root/tmp 
+}
+run_hook() {
+#	 timed_prompt 2 press ENTER within 2 seconds to drop to a shelll ';)' && {
+#		  echo HAVE FUN...
+#		  /bin/bash -i
+#		  echo PHEW
+#	 }
+	 mount_handler=ppz_mount_handler
+}

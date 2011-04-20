@@ -6,7 +6,7 @@ arch=(any)
 license=('GPL')
 install=proterozoic.install
 makedepends=(findutils coreutils)
-depends=(emacs-nox bash bash-completion iptables sudo cryptsetup diffutils ntp openssh sshfs syslog-ng htop jfsutils)
+depends=(emacs-nox bash bash-completion iptables sudo cryptsetup diffutils ntp openssh sshfs syslog-ng htop jfsutils aufs2 aufs2-util)
 
 package() {
 	 cp -a ${startdir}/{etc,lib,usr} ${pkgdir}/

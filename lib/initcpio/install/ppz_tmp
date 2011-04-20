@@ -1,0 +1,15 @@
+# vim:set ft=sh:
+install ()
+{
+    MODULES="aufs"
+    BINARIES="/bin/bash /bin/date /sbin/fsck.jfs"
+    FILES="/etc/rc.conf"
+    SCRIPT="ppz_tmp"
+}
+
+help ()
+{
+cat<<HELPEOF
+   This is my nifty universal fs-logic crap :D
+HELPEOF
+}

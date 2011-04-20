@@ -1,4 +1,4 @@
-# blahblah
+# blahblahb
 uniq_token () {
 	 echo $(date +%s).$(printf "%05d" $RANDOM)
 }

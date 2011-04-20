@@ -29,7 +29,9 @@ rcconf_vars=(
 )
 
 ######### FUNCTIONS
-
+manual_changes_summary() {
+	 echo "add HOOKS=\"ppz_tmp\" to /etc/mkinitcpio.conf"
+}
 are_same() {
 	 [ -a "$1" ] && [ -a "$2" ] || return 1
 	 diff -qd "$1" "$2" >/dev/null
@@ -88,12 +90,18 @@ check_triggers() {
 		  echo reloading syslog-ng....
 		  killall -SIGHUP /usr/sbin/syslog-ng
 	 }
-	 all_triggers_same lib/initcpio/{hooks,install}/custom_mounting || {
+	 all_triggers_same lib/initcpio/{hooks,install}/{custom_mounting,ppz_tmp} || {
 
-		  #MAKE SURE IT'S LISTED IN THE HOOKS!
-
-
+		  grep -iEq '^HOOKS=".*ppz_tmp.*"' /etc/mkinitcpio.conf || {
+				echo "I was going to rebuild the initrd, but ppz_tmp is not"
+				echo "in HOOKS in /etc/mkinitcpio.conf! What's the point?"
+				return 1
+		  }
 		  [ -n "${kernel_name}" ] && /sbin/mkinitcpio -p ${kernel_name}
+		  echo MKINITCPIO RETURNED: $?
+		  # experiment to see how it handles return values...
+		  # if it failed we want to make sure it can work again next time
+		  # so probably mess with the "last" files or something
 	 }
 }
 
@@ -108,6 +116,7 @@ post_install() {
 	 sanitize_file_conflicts
 	 /usr/bin/ppz.integrity
 	 check_triggers
+	 manual_changes_summary
 }
 
 pre_upgrade() {
