@@ -1,4 +1,35 @@
-#echo starting functions
+############# ABSTRACTIONS
+uniq_token()	{ echo $(date +%s).$(printf "%05d" $RANDOM); }
+am_root()		{ [ "x$EUID" == "x0" ]; }
+say_and_do()	{ echo DOING: "$@"; "$@"; }
+return_arg1()	{ return "$1"; }
+isnt()			{ eval "$@"; [ $? -ne 0 ]; }
+wait_until()	{ while isnt "$@"; do sleep 0.5; done; }
+weekletter()	{ ARR=(S m t w T f s S); echo ${ARR[$(date +%u)]}; }
+############# PROCESS MANIP
+process_exists() { return $( ps --pid $1 -o pid= >/dev/null 2>&1 ); }
+alias pid_exists="process_exists"
+ppid_from_pid() {
+	[ -z "$1" ] && return
+	[ -z "$2" ] || GREPTEXT=' | grep -i'"$2 "
+	ps -p "$1" -o ppid= $GREPTEXT | awk '{ print $1 }' # | tail -n -1
+}
+do_unto_others() { # usage: do_unto_others [niceness [ioniceness [pid [show]]]]
+	renice -n ${1:- 19}   ${3:- $$} >/dev/null
+	ionice -c ${2:- 3} -p ${3:- $$} >/dev/null
+	[ "$4" = "show" ] && ionice -p ${3:- $$} # display what it accomplished...
+}
+niceify_tree() { # usage: niceify_tree [pid [niceness [ioniceness]]]
+	local INDENT=$INDENT"   "
+	echo "${INDENT:3}"$( ps --pid $1 -o comm= )" "$(do_unto_others ${2:- 19} ${3:- 3} $1 show)
+	for CHILD in $( ps --ppid $1 -o pid= ); do
+		niceify_tree $CHILD ${2:- 19} ${3:- 3}
+	done
+}
+family_therapy() {
+	 pid_exists $1 && INDENT="" niceify_tree $1 ${2:- 19} '3' || echo no such process
+}
+############# FILE MANIP
 full_path() {
    echo -n "$( readlink -f "$( dirname "$1" )" )/$( basename "$1" )"
 }
@@ -8,30 +39,6 @@ full_path_lax() {
 full_path_strict() {
    echo -n "$( readlink -e "$( dirname "$1" )" )/$( basename "$1" )"
 }
-uniq_token() {
-	echo $(  date +%s ).$( printf "%05d" $RANDOM )
-}
-do_unto_others() {
-	ionice -c 3 -p $$ > /dev/null
-	renice -n 19 $$ > /dev/null
-}
-alias unto=do_unto_others
-ll() {
-	if [ $# -gt 1 ]; then
-		ls --color=auto -FlAthrd "$@"
-	else
-		ls --color=auto -FlAthr  "$@"
-	fi
-}
-lls() {
-	ll | head -n 10
-}
-__expand_tilde_by_ref() {
-	sleep 0
-}
-_expand() {
-	sleep 0
-}
 repermit() {
 	for TARGET; do
 		[ -e "$TARGET" ] || continue
@@ -39,36 +46,27 @@ repermit() {
 		find "$TARGET" -type f -exec chmod 640 {} \;
 	done
 }
-ppid_from_pid() {
-	[ -z "$1" ] && return
-	[ -z "$2" ] || GREPTEXT=' | grep -i'"$2 "
-	ps -p "$1" -o ppid= $GREPTEXT | awk '{ print $1 }' # | tail -n -1
+bootable() {
+	DATA=$( od -A x -j 510 -N 2 -w16 -t x2 "$1" | colrm 1 7 )
+	[ "$DATA" == "aa55" ] && echo "$1 is bootable" >&2 || {
+		echo "$1 is not bootable" >&2
+		return 1
+	}
 }
-pid_exists() {
-	[ -z "$1" ] && return
-	VAL=$( ps -p "$1" -o pid= )
-	[ -z "$VAL" ] && return 1
-	return 0
+is_empty_dir() {
+	 D=$(find "$1" -maxdepth 0 -type d -empty)
+	 [ "$D" ]
 }
-run_in_temp_memdir() {
-	[ "$UID" -eq 0 ] && return
-	INMEM=/media/inmem
-	FOLFSEEY342534="$INMEM"/$( uniq_token )
-	mkdir "$FOLFSEEY342534"
-	cd "$FOLFSEEY342534"
-	do_in_temp_memdir "$@"
-	cd
-	rm -rf "$FOLFSEEY342534"
+enforce_perms() {
+	 [[ "$1" =~ [0-7]{3} ]] || return 1 #perm string is valid
+	 [ -a "$2" ] || return 1            #file exists
+	 STATS=$(stat -c %a "$2")
+	 [[ "$1" == "$STATS" ]] || {
+		  ls -FlAthr "$2"
+		  say_and_do chmod "$1" "$2" #chmod file if not set already
+	 }
 }
-ups() {
-	apcaccess status | grep -Ei '^(status|linev|loadpct|bcharge|timeleft)'
-}
-make_bash_script() {
-	[ -f "$1" ] && return 1
-	echo	'#!/bin/bash' > "$1"
-	chmod +x "$1"
-	emacs "$1"
-}
+############ INTERACTIVE CONSOLE TRICKS
 cursor_position() { # http://invisible-island.net/xterm/xterm.faq.html
 	 exec < /dev/tty
 	 oldstty=$(stty -g)
@@ -94,89 +92,6 @@ clear_line() {
 clear_echo() {
 	 at_line_start || echo
 	 echo "$@"
-}
-active_win_hash() {
-    #print 0x###### hash for the currently active window. bit of a hack... 
-    wmctrl -vR :ACTIVE: 2>&1 | grep -i using\ window | awk '{ print $3 }'
-}
-title_of_active_win() {
-    wmctrl -l | grep -Ri '^'$(active_win_hash) | colrm 1 22
-}
-process_exists() {
-	return $( ps --pid $1 -o pid= 1>/dev/null 2>&1 )
-}
-hatch() {
-	hatch_do() {
-		[ "$1" ] || return
-		"$@" >/dev/null 2>&1 &
-	}
-	hatch_do "$@" >/dev/null 2>&1  &
-	PROC=$!
-	while process_exists $PROC; do
-		sleep 0.1
-	done
-	sleep 0.3
-}
-woman() {
-	local IFS='
-';	[ "$1" ] && COMMAND="$@" || {
-		echo -n "Enter command to look up: "
-		read COMMAND
-		echo
-	}
-	help "$COMMAND" && read || emacs\
-		--eval '(fset '"'"'manpage "man '$COMMAND' | cat && exit\C-m")'\
-		--eval '(shell)'\
-		--eval '(execute-kbd-macro (symbol-function '"'"'manpage))'\
-		--eval '(beginning-of-buffer)'\
-		--eval '(beginning-of-buffer)'\
-		--eval '(beginning-of-buffer)'\
-		--eval '(beginning-of-buffer)'\
-		--eval '(beginning-of-buffer)'\
-		--eval '(beginning-of-buffer)'
-}
-wf() {
-#	cd /tmp
-#	[ -z "$1" ] && return 1
-	[ "$1" ] || return
-	PWD_B=$(pwd)
-	cd ~
-	local IFS=:
-	for P in $PATH; do
-		[ -a "$P" ] || continue
-		find "$P" | grep -i "$1"
-	done
-	cd "$PWD_B"
-}
-niceify_tree() {
-	local INDENT=$INDENT"   "
-	echo "${INDENT:3}"$( ps --pid $1 -o comm= )" "$(
-		renice -n $RENICE $1
-		ionice -c 3 -p $1
-		ionice -p $1 #just to display what it accomplished...                                                                                 
-	)
-	for CHILD in $( ps --ppid $1 -o pid= ); do
-		niceify_tree $CHILD
-	done
-}
-family_therapy() {
-	INDENT=""
-	RENICE=19
-	[ "$1" == "mean" ] && {
-		shift
-		RENICE='-5'
-	}
-	ps --pid $1 -o pid= 1>/dev/null 2>&1 && niceify_tree $1 || echo no such process
-}
-e() {
-   TERM=xterm emacs "$@"
-}
-bootable() {
-	DATA=$( od -A x -j 510 -N 2 -w16 -t x2 "$1" | colrm 1 7 )
-	[ "$DATA" == "aa55" ] && echo "$1 is bootable" >&2 || {
-		echo "$1 is not bootable" >&2
-		return 1
-	}
 }
 countdown() {
    COUNT=$1
@@ -210,25 +125,58 @@ askyn() {
 		  *) return 0
 	 esac
 }
-drome() {
-#	 create a new window in screen, open screen & switch to it
-#	 USAGE: drome [title [command [args]]]
-	 TOKEN=${1:-$(uniq_token)}
-	 shift
-	 screen -p - -X screen -t $TOKEN "$@"
-	 screen -x -R -p $TOKEN
+############ WRAPPERS
+ll() {
+	if [ $# -gt 1 ]; then
+		ls --color=auto -FlAthrd "$@"
+	else
+		ls --color=auto -FlAthr  "$@"
+	fi
 }
-weekletter() {
-	 NUM=$(date +%u)
-	 case "$NUM" in
-		  1) echo m;;
-		  2) echo t;;
-		  3) echo w;;
-		  4) echo T;;
-		  5) echo f;;
-		  6) echo s;;
-		  7) echo S;;
-	 esac
+lls() {
+	ll | head -n 10
+}
+make_bash_script() {
+	[ -f "$1" ] && return 1
+	echo	'#!/bin/bash' > "$1"
+	chmod +x "$1"
+	emacs "$1"
+}
+ups() {
+	apcaccess status | grep -Ei '^(status|linev|loadpct|bcharge|timeleft)'
+}
+woman() {
+	local IFS='
+';	[ "$1" ] && COMMAND="$@" || {
+		echo -n "Enter command to look up: "
+		read COMMAND
+		echo
+	}
+	set_xtitle "$COMMAND [woman]"
+	help "$COMMAND" && read || emacs\
+		--eval '(fset '"'"'manpage "man '$COMMAND' | cat && exit\C-m")'\
+		--eval '(shell)'\
+		--eval '(execute-kbd-macro (symbol-function '"'"'manpage))'\
+		--eval '(beginning-of-buffer)'\
+		--eval '(beginning-of-buffer)'\
+		--eval '(beginning-of-buffer)'\
+		--eval '(beginning-of-buffer)'\
+		--eval '(beginning-of-buffer)'\
+		--eval '(beginning-of-buffer)'
+}
+wf() {
+	[ "$1" ] || return
+	PWD_B=$(pwd)
+	cd ~
+	local IFS=:
+	for P in $PATH; do
+		[ -a "$P" ] || continue
+		find "$P" | grep -i "$1"
+	done
+	cd "$PWD_B"
+}
+e() {
+   TERM=xterm emacs "$@"
 }
 plyst() {
     pacman -r /aufs-ro \
@@ -244,51 +192,27 @@ plyst() {
 	print $0	
 }'
 }
-am_root() {
-	[ "x$EUID" == "x0" ]
-}
-say_and_do() {
-	 echo DOING: "$@"
-	 "$@"
-}
-enforce_perms() {
-	 [[ "$1" =~ [0-7]{3} ]] || return 1 #perm string is valid
-	 [ -a "$2" ] || return 1            #file exists
-	 STATS=$(stat -c %a "$2")
-	 [[ "$1" == "$STATS" ]] || {
-		  ls -FlAthr "$2"
-		  say_and_do chmod "$1" "$2" #chmod file if not set already
-	 }
-}
 iptables-all() {
 	 iptables -t filter	-L -v -x --line-numbers
 	 iptables -t raw		-L -v -x --line-numbers
 	 iptables -t nat		-L -v -x --line-numbers
 	 iptables -t mangle	-L -v -x --line-numbers
 }
-return_arg1() {
-	 return "$1"
+drome() {
+#	 create a new window in screen, open screen & switch to it
+#	 USAGE: drome [title [command [args]]]
+	 TOKEN=${1:-$(uniq_token)}
+	 shift
+	 screen -p - -X screen -t $TOKEN "$@"
+	 screen -x -R -p $TOKEN
 }
-isnt() {
-	 eval "$@"
-	 [ $? -ne 0 ]
+run_in_temp_memdir() {
+	[ "$UID" -eq 0 ] && return
+	INMEM=/media/inmem
+	FOLFSEEY342534="$INMEM"/$( uniq_token )
+	mkdir "$FOLFSEEY342534"
+	cd "$FOLFSEEY342534"
+	do_in_temp_memdir "$@"
+	cd
+	rm -rf "$FOLFSEEY342534"
 }
-wait_until() {
-	 while isnt "$@"; do
-		  sleep 0.5
-	 done
-}
-is_empty_dir() {
-	 D=$(find "$1" -maxdepth 0 -type d -empty)
-	 [ "$D" ]
-}
-#echo finishing functions
-#holdss() {
-#	unto
-#	while true; do
-#		xscreensaver-command -deactivate >/dev/null 2>&1
-#		sleep 55
-#		pid_exists $PPID && [ "$PPID" -ne "1" ] && continue
-#		break
-#	done
-#}

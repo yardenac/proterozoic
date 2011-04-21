@@ -32,8 +32,8 @@ filter		f_ignorable	{ facility(user, uucp, local2, news, lpr, cron, daemon)
 										or match('error connecting to ConsoleKit' value("MESSAGE"))
 										or (facility(kern) and (
 												match('[a-zA-Z0-9-]+: module loaded' value("MESSAGE"))
-												match('No Caching mode page present' value("MESSAGE"))
-												match('Assuming drive cache: write through' value("MESSAGE"))
+											or	match('No Caching mode page present' value("MESSAGE"))
+											or	match('Assuming drive cache: write through' value("MESSAGE"))
 											or match('quiet_error: [0-9]+ callbacks suppressed' value("MESSAGE"))
 										)); };
 filter		f_userunk	{ facility(auth) and program(sshd) and match('pam_unix(sshd:auth): check pass; user unknown' value("MESSAGE")); };

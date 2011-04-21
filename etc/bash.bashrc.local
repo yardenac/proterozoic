@@ -1,9 +1,12 @@
 export SHELL=/bin/bash
 [ -f /etc/bash.functions  ] && . /etc/bash.functions
+[ -a /usr/bin/Xorg ] && . /etc/bash.functions.xorg
 /usr/bin/ppz.integrity
 complete -f -X '!*.@(sqlite|db)' sqlite3
 complete -f emacs
 complete -f rsync
+__expand_tilde_by_ref() { sleep 0 }
+_expand() { sleep 0 }
 OLD_PATH=$PATH
 export PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin
 [ -d "$HOME/bin" ] && export PATH="$HOME/bin:$PATH"
