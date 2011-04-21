@@ -1,66 +1,65 @@
 #!/bin/bash
-
-make_tmp_awesome() {
-	 shms=$(mount | awk '/^shm/ { print $3 }')
-	 echo shms = $shms
+. /etc/bash.functions
+have_mount_point() {
+	 [ -a "$1" ] || mkdir "$1"
+	 [ -L "$1" ] && {
+		  rm -f "$1"
+		  mkdir "$1"
+	 }
+	 [ -d "$1" ] && {
+		  is_empty_dir "$1" || {
+				rsync -aAXD "$1/" /tmp
+				echo "EVERYTHING'S BEEN COPIED, DON'T WORRY..."
+				rm -ri "$1"
+				mkdir "$1"
+		  }
+	 }
+	 [ ! -d "$1" ] && {
+		  echo "$1 is not a link or a dir... weird"
+		  return 1
+	 }
 }
-
-custom_mounting_everyone() {
-	 /usr/bin/ppz.integrity
+#	 [ "$(stat -c %D /)" = "$(stat -c %D "$1")" ] || {
+#		  echo mount point is a different device than /
+#	 }
 }
-
-custom_mounting_scaly() {
+tmp_to_shm()    { have_mount_point /dev/shm && mount --bind /tmp /dev/shm; }
+tmp_to_vartmp() { have_mount_point /var/tmp && mount --bind /tmp /var/tmp; }
+do_scaly_green() {
 	COUNT=5
 	while let COUNT--; do
 		 mount -vt vfat /dev/disk/by-uuid/0D3D-BD20 /media/usb-fat && break
 		 sleep 3
 	done
-## /dev/disk/by-uuid/0D3D-BD20 /media/usb-fat
-#	read -st 5 -p "press ENTER within 5 seconds to drop a shell ;)" && {
-#		 /bin/bash -i
-#	}
-#	cryptsetup luksOpen /dev/disk/by-uuid/0105eeab-2fc6-4dc7-8b89-4a70605e1483 green
-	cryptsetup -d /media/usb-fat/green.key\
-		luksOpen /dev/disk/by-uuid/0105eeab-2fc6-4dc7-8b89-4a70605e1483 	green
+	cryptsetup -d /media/usb-fat/green.key luksOpen /dev/disk/by-uuid/0105eeab-2fc6-4dc7-8b89-4a70605e1483 green
 	umount /media/usb-fat
-
 	fsck /dev/mapper/green
-
-	read -st 3 -p "press ENTER within 5 seconds to drop a shell ;)" && {
-		 /bin/bash -i
-	}
 }
-
-custom_mounting_ediacra() {
-#   echo "havent run anything yet"
-#   bash -i
-#    mount -t tmpfs -o defaults,nodev,nosuid,noexec,mode=1777,size=12%,uid=0,gid=0,noauto,noatime,nodiratime shm /tmp
+do_edie_var() {
     mkdir /tmp/.aufs.var
-#    echo "made tmp folder..."
-#    bash -i
     if [ $( ls -A1d /var/* 2>/dev/null | wc -l ) -gt 0 ]; then
-        echo var was not empty
 		  VARHOLD=/.var.$( date +%s )
 		  mv /var $VARHOLD
 		  mkdir /var
 		  mount -t aufs -o br:/tmp/.aufs.var=rw:/.var.old=ro,xino=/tmp/.aufs.xino,noauto,noatime,nodiratime,udba=none none /var
-#	rsync -a $VARHOLD /var && rm -rf $VARHOLD
-		  echo "mounted havent moved or cleared"
-#		  bash -i
 		  cp -av $VARHOLD/* /var/
 		  rm -rv $VARHOLD
     else
-		  echo var was empty
 		  [ -a /var ] || mkdir /var
 		  mount -t aufs -o br:/tmp/.aufs.var=rw:/.var.old=ro,xino=/tmp/.aufs.xino,noauto,noatime,nodiratime,udba=none none /var
     fi
-#    echo "done it all"
-#    bash -i
+	 tmp_to_vartmp
 }
-
-add_hook sysinit_premount custom_mounting_everyone
-
+custom_mounting_everyone() {
+	 case $HOSTNAME in
+		  scaly)   do_scaly_green;;
+		  ediacra) do_edie_var;;
+	 esac
+	 /usr/bin/ppz.integrity
+}
+add_hook sysinit_udevlaunched tmp_to_shm
 case $HOSTNAME in
-	 scaly)   add_hook sysinit_premount custom_mounting_scaly;;
-	 ediacra) add_hook sysinit_premount custom_mounting_ediacra;;
+	 ediacra)	:;;
+	 *)			add_hook sysinit_udevlaunched tmp_to_vartmp;;
 esac
+add_hook sysinit_premount custom_mounting_everyone

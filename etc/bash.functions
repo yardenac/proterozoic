@@ -278,6 +278,10 @@ wait_until() {
 		  sleep 0.5
 	 done
 }
+is_empty_dir() {
+	 D=$(find "$1" -maxdepth 0 -type d -empty)
+	 [ "$D" ]
+}
 #echo finishing functions
 #holdss() {
 #	unto

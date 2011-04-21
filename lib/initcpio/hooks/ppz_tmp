@@ -1,11 +1,8 @@
 do_tmpfs() {
-	 echo DOING TMPFS
 	 mkdir -p /tmp
 	 mount -t tmpfs -o defaults,nodev,nosuid,noexec,mode=1777,size=$1,uid=0,gid=0,noauto,noatime,nodiratime shm /tmp
-	 echo DID TMPFS
 }
 do_aufs() {
-	 echo DOING AUFS
 	 XINO_FILE=/tmp/.aufs.xino
 	 mkdir -p /aufs-ro /aufs-rw
 	 /sbin/fsck.jfs /dev/disk/by-uuid/$1
@@ -16,23 +13,19 @@ do_aufs() {
 	 mkdir -p /new_root/aufs-ro /new_root/aufs-rw 
 	 mount --move /aufs-ro /new_root/aufs-ro
 	 mount --move /aufs-rw /new_root/aufs-rw
-	 echo DID AUFS
 }
 ppz_mount_handler() {
 	 eval $(awk '/^HOSTNAME=/' /etc/rc.conf)
-	 echo HOSTNAME IS: $HOSTNAME
-	 # create /tmp, being conscious of resources
 	 case $HOSTNAME in
-		  gabba)			do_tmpfs 10485760;; #1024*1024*10 = 10MB?
+		  gabba)			do_tmpfs 5%;; #~12MB
 		  scaly)			do_tmpfs 25%;;
 		  ediacra|*)	do_tmpfs 12%;;
 	 esac
-	 # create /new_root, either the normal way or a fancy way...
 	 case $HOSTNAME in
 		  scaly)			do_aufs   45d0d831-d045-410c-b2ec-d525ef69e36c   ac7d44cc-9edf-4dda-bd13-6731d1fb596f;;
 		  *)				default_mount_handler "$@";;
 	 esac
-	 mount --move /tmp /new_root/tmp 
+	 mount --move /tmp /new_root/tmp
 }
 run_hook() {
 	 mount_handler=ppz_mount_handler
