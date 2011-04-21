@@ -1,0 +1,31 @@
+hatch() {
+	hatch_do() {
+		[ "$1" ] || return
+		"$@" >/dev/null 2>&1 &
+	}
+	hatch_do "$@" >/dev/null 2>&1  &
+	PROC=$!
+	while process_exists $PROC; do
+		sleep 0.1
+	done
+	sleep 0.3
+}
+set_xtitle() {
+	 echo -en "\e]2;$*\a"
+}
+active_win_hash() {
+    #print 0x###### hash for the currently active window. bit of a hack... 
+    wmctrl -vR :ACTIVE: 2>&1 | grep -i using\ window | awk '{ print $3 }'
+}
+title_of_active_win() {
+    wmctrl -l | grep -Ri '^'$(active_win_hash) | colrm 1 22
+}
+#holdss() {
+#	unto
+#	while true; do
+#		xscreensaver-command -deactivate >/dev/null 2>&1
+#		sleep 55
+#		pid_exists $PPID && [ "$PPID" -ne "1" ] && continue
+#		break
+#	done
+#}
