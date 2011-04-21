@@ -6,7 +6,9 @@ arch=(any)
 license=('GPL')
 install=proterozoic.install
 makedepends=(findutils coreutils)
-depends=(emacs-nox bash bash-completion iptables sudo cryptsetup diffutils ntp openssh sshfs syslog-ng htop jfsutils aufs2 aufs2-util)
+depends=(emacs-nox bash bash-completion iptables sudo cryptsetup diffutils ntp openssh sshfs syslog-ng htop jfsutils)
+#aufs2 aufs2-util depend on kernel so probs wont work on gabba...
+#wmctrl is for X systems
 
 package() {
 	 cp -a ${startdir}/{etc,lib,usr} ${pkgdir}/

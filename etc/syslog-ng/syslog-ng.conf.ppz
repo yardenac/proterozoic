@@ -9,17 +9,11 @@ options {
   stats_freq (0);
   flush_lines (0);
   ts_format (iso);
-
   mark_freq (3601);
-
   use_dns (no);
-# dns_cache_hosts (/etc/hosts);
-# dns_cache_expire (86400);
   long_hostnames (off); 
   use_fqdn (no);
   keep_hostname (yes);
-  #what is a chained hostname?
-
 };
 source src {
   internal();
@@ -31,13 +25,15 @@ filter		f_iptables	{ match("IN=" value("MESSAGE")) and match('OUT=' value("MESSA
 filter		f_auth		{ facility(auth, authpriv); };
 filter		f_mail		{ facility(mail); };
 filter		f_kernel		{ facility(kern) and not filter(f_iptables); };
-#filter		f_daemon		{ facility(daemon); };
 filter		f_ignorable	{ facility(user, uucp, local2, news, lpr, cron, daemon)
 								  		or program(syslog-ng)
 								  		or program(dhcpcd)
 										or match('-- MARK --' value("MESSAGE"))
+										or match('error connecting to ConsoleKit' value("MESSAGE"))
 										or (facility(kern) and (
 												match('[a-zA-Z0-9-]+: module loaded' value("MESSAGE"))
+												match('No Caching mode page present' value("MESSAGE"))
+												match('Assuming drive cache: write through' value("MESSAGE"))
 											or match('quiet_error: [0-9]+ callbacks suppressed' value("MESSAGE"))
 										)); };
 filter		f_userunk	{ facility(auth) and program(sshd) and match('pam_unix(sshd:auth): check pass; user unknown' value("MESSAGE")); };
@@ -53,11 +49,9 @@ destination d_iptables	{ file("/var/log/iptables.log"	frac_digits(3)); };
 destination d_auth		{ file("/var/log/auth.log" 		frac_digits(3)); };
 destination d_mail		{ file("/var/log/mail.log" 		frac_digits(3)); };
 destination d_kernel		{ file("/var/log/kernel.log" 		frac_digits(3)); };
-#destination d_daemon		{ file("/var/log/daemon.log" 		frac_digits(3)); };
 destination	d_ignorable	{ file("/var/log/ignorable.log"	frac_digits(3)); };
 destination	cracks		{ file("/var/log/cracks.log" 		frac_digits(3)); };
 destination	d_messy		{ file("/var/log/messy.log" 		frac_digits(3)); };
-#destination console_all { file("/dev/tty12"); };
 log	{ source(src); filter(f_sr_ioerr);	destination(d_messy);		flags(final);								};
 log	{ source(src); filter(f_userunk);	destination(d_auth);			flags(final);								};
 log	{ source(src); filter(f_stompable); destination(d_stompable);													};
@@ -66,5 +60,4 @@ log	{ source(src); filter(f_auth);		destination(d_auth);	  	  	flags(final);				
 log	{ source(src); filter(f_mail);		destination(d_mail); 	  	flags(final);								};
 log	{ source(src); filter(f_ignorable); destination(d_ignorable); flags(final);								};
 log	{ source(src); filter(f_kernel);		destination(d_kernel);	  													};
-#log	{ source(src); filter(f_daemon);		destination(d_daemon);														};
 log	{ 												destination(cracks);		  flags(catch-all, fallback, final);	};

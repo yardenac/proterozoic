@@ -14,7 +14,7 @@ have_mount_point() {
 				mkdir "$1"
 		  }
 	 }
-	 [ ! -d "$1" ] && {
+	 [ -d "$1" ] || {
 		  echo "$1 is not a link or a dir... weird"
 		  return 1
 	 }
@@ -22,9 +22,13 @@ have_mount_point() {
 #	 [ "$(stat -c %D /)" = "$(stat -c %D "$1")" ] || {
 #		  echo mount point is a different device than /
 #	 }
+tmp_bind() {
+	 for P in "$@"; do
+		  have_mount_point "$P" && mount --bind /tmp "$P"
+	 done
 }
-tmp_to_shm()    { have_mount_point /dev/shm && mount --bind /tmp /dev/shm; }
-tmp_to_vartmp() { have_mount_point /var/tmp && mount --bind /tmp /var/tmp; }
+tmp_to_shm()    { tmp_bind /dev/shm /media/inmem; }
+tmp_to_vartmp() { tmp_bind /var/tmp; }
 do_scaly_green() {
 	COUNT=5
 	while let COUNT--; do
