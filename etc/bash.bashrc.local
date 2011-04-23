@@ -1,3 +1,4 @@
+#blah
 export SHELL=/bin/bash
 [ -f /etc/bash.functions  ] && . /etc/bash.functions
 [ -a /usr/bin/Xorg ] && . /etc/bash.functions.xorg
