@@ -216,3 +216,14 @@ run_in_temp_memdir() {
 	cd
 	rm -rf "$FOLFSEEY342534"
 }
+in_2_but_not_in_1() {
+	 BIFS=${IFS}
+	 IFS=:
+	 for P in $2; do
+		  IFS=' '
+		  P=$(readlink -f $P || echo INVALID)
+		  [[ "$1" =~ (^|:)$P(:|$) ]] || echo $P
+		  IFS=:
+	 done
+	 IFS=${BIFS}
+}
