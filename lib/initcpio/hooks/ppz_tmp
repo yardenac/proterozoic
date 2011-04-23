@@ -23,7 +23,7 @@ ppz_mount_handler() {
 		  ediacra|*)	do_tmpfs 12%;;
 	 esac
 	 case $HOSTNAME in
-		  scaly)			do_aufs   45d0d831-d045-410c-b2ec-d525ef69e36c   ac7d44cc-9edf-4dda-bd13-6731d1fb596f;;
+		  scaly)			do_aufs   45d0d831-d045-410c-b2ec-d525ef69e36c   5b25f749-ab8d-4749-a8b0-3b7d3408af19;;
 		  *)				default_mount_handler "$@";;
 	 esac
 	 mount --move /tmp /new_root/tmp
