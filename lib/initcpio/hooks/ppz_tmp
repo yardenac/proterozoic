@@ -28,10 +28,16 @@ ppz_mount_handler() {
 	 esac
 	 mount --move /tmp /new_root/tmp
 }
-run_hook() {
-	 mount_handler=ppz_mount_handler
+exec_sh_wrapper() {
+	 echo ":: Hard break requested...have fun ;)"
+	 launch_interactive_shell --exec
 }
 if [ "${hardbreak}" = "y" ]; then
-    echo ":: Hard break requested...have fun ;)"
-    launch_interactive_shell --exec
+	 run_hook() {
+		  mount_handler=exec_sh_wrapper
+	 }
+else
+	 run_hook() {
+		  mount_handler=ppz_mount_handler
+	 }
 fi
