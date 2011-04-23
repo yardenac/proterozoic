@@ -31,3 +31,7 @@ ppz_mount_handler() {
 run_hook() {
 	 mount_handler=ppz_mount_handler
 }
+if [ "${hardbreak}" = "y" ]; then
+    echo ":: Hard break requested...have fun ;)"
+    launch_interactive_shell --exec
+fi
