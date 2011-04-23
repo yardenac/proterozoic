@@ -25,7 +25,9 @@ sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit
 #   /lib/initcpio/hooks/custom_mounting
 #   /lib/initcpio/hooks/custom_mounting.scaly
 
-for F in /{root,home/*}/.bash_history; do
+IFS='
+'
+for F in $(ls -1 /{root,home/*}/.bash_history 2>/dev/null); do
 	 [ -f "$F" ] || continue
 	 lsattr "$F" >/dev/null 2>&1 && {
 		  ATTRSET=$(lsattr "$F")
