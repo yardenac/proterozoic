@@ -45,6 +45,7 @@ alias hb=handbrake
 alias   pine='alpine -P /usr/local/lib/pine.conf -d0'
 alias alpine='alpine -P /usr/local/lib/pine.conf -d0'
 alias rsync-root='rsync -aAXDxhP --stats --inplace'
+alias makepkg-native='makepkg --config /etc/makepkg.conf.native'
 export HISTCONTROL=ignoredups #$HISTCONTROL${HISTCONTROL+,}ignoredups
 shopt -s histappend
 shopt -s checkwinsize

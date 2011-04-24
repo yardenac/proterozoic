@@ -5,12 +5,11 @@ preowned_files=(
 	 etc/ssh/ssh_config
 	 etc/syslog-ng/syslog-ng.conf
 	 etc/logrotate.conf
+	 etc/issue
+	 etc/ntp.conf
 )
 need_attention=(
 	 etc/ssh/sshd_config
-	 etc/makepkg.conf
-	 etc/ntp.conf
-	 etc/issue
 )
 what_to_do_with=(
 	 etc/rc.conf
@@ -21,6 +20,7 @@ rcconf_vars=(
 	 LOCALE
 	 tiMezOne
 	 daemons
+	 fake_rc_var
 #	 draft_username_w_uid_2063
 #	 encrypted_swap_file /estaba
 #	 encrypted_home_dir /soy
@@ -65,7 +65,7 @@ enforce_locales() {
 		  locale-gen
 	 }
 }
-sanitize_file_conflicts() {
+pwn_files() {
 	 for F in ${preowned_files[@]}; do
 		  clobberella "$F"
 	 done
@@ -117,25 +117,25 @@ check_triggers() {
 ########## HOOKS
 
 pre_install() {
-	 check_is_rcconf_complete || return 1
+	 check_is_rcconf_complete
 	 enforce_locales
 }
 post_install() {
 	 /etc/rc.d/iptables restart
-	 sanitize_file_conflicts
+	 pwn_files
 	 /usr/bin/ppz.integrity
 	 check_triggers
 	 manual_changes_summary
 }
 
 pre_upgrade() {
-	 check_is_rcconf_complete || return 1
+	 check_is_rcconf_complete
 	 for F in ${preowned_files[@]}; do
 		  are_same ${F}{,.ppz} && rm -f "$F"
 	 done
 }
 post_upgrade() {
-	 sanitize_file_conflicts
+	 pwn_files
 	 /usr/bin/ppz.integrity
 	 check_triggers
 }

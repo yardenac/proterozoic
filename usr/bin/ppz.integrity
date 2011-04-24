@@ -14,16 +14,14 @@
 
 am_root || exit
 
+#comment
 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit
 
-# remove shm entries from fstab as well?
-
-# places to look for tmp:
-#   mount
-#   /etc/fstab
-#   /etc/rc.d/functions.d/custom_mounting
-#   /lib/initcpio/hooks/custom_mounting
-#   /lib/initcpio/hooks/custom_mounting.scaly
+#uncomment
+case $(hostname) in
+	 gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
+	 *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
+esac
 
 IFS='
 '
