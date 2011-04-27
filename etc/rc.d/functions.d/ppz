@@ -19,9 +19,6 @@ have_mount_point() {
 		  return 1
 	 }
 }
-#	 [ "$(stat -c %D /)" = "$(stat -c %D "$1")" ] || {
-#		  echo mount point is a different device than /
-#	 }
 tmp_bind() {
 	 for P in "$@"; do
 		  have_mount_point "$P" && mount --bind /tmp "$P"
@@ -29,16 +26,6 @@ tmp_bind() {
 }
 tmp_to_shm()    { tmp_bind /dev/shm /media/inmem; }
 tmp_to_vartmp() { tmp_bind /var/tmp; }
-do_scaly_green() {
-	COUNT=5
-	while let COUNT--; do
-		 mount -vt vfat /dev/disk/by-uuid/0D3D-BD20 /media/usb-fat && break
-		 sleep 3
-	done
-	cryptsetup -d /media/usb-fat/green.key luksOpen /dev/disk/by-uuid/0105eeab-2fc6-4dc7-8b89-4a70605e1483 green
-	umount /media/usb-fat
-	fsck /dev/mapper/green
-}
 do_edie_var() {
     mkdir /tmp/.aufs.var
     if [ $( ls -A1d /var/* 2>/dev/null | wc -l ) -gt 0 ]; then
@@ -56,7 +43,6 @@ do_edie_var() {
 }
 custom_mounting_everyone() {
 	 case $HOSTNAME in
-		  scaly)   do_scaly_green;;
 		  ediacra) do_edie_var;;
 	 esac
 	 /usr/bin/ppz.integrity

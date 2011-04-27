@@ -227,3 +227,20 @@ in_2_but_not_in_1() {
 	 done
 	 IFS=${BIFS}
 }
+do_fail() {
+   read -p "$*" CHAR
+   return 1
+}
+test_network_once() {
+   /usr/bin/wget -q --tries=30 --timeout=30 http://www.google.com/ -O - >/dev/null 2>&1
+   [ $? -ne 0 ]
+}
+wait-for-network() {
+	 SLEEPINC=1.5
+	 while test_network_once; do
+		  echo $( date +%a\ %H:%M:%S ) No internet yet, waiting...
+		  sleep $SLEEPINC
+		  SLEEPINC=$(echo "scale=30; $SLEEPINC*1.2" | bc )
+	 done
+	 echo yay, internet is up!
+}

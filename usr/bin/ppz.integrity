@@ -23,6 +23,10 @@ case $(hostname) in
 	 *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
 esac
 
+grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
+
+[ -e /media/inmem ] || mkdir /media/inmem
+
 IFS='
 '
 for F in $(ls -1 /{root,home/*}/.bash_history 2>/dev/null); do

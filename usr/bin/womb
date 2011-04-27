@@ -1,3 +1,5 @@
 #!/bin/bash
 
+sudo /usr/sbin/openmap
+
 exec -l /bin/bash "$@"

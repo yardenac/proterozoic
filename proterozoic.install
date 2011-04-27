@@ -20,10 +20,11 @@ rcconf_vars=(
 	 LOCALE
 	 tiMezOne
 	 daemons
-	 fake_rc_var
+	 enc_homedir #/soy
+	 enc_mapname
+	 enc_dev
 #	 draft_username_w_uid_2063
 #	 encrypted_swap_file /estaba
-#	 encrypted_home_dir /soy
 #	 ssh_authkeys_file /etc/ssh/sshd_authorized_keys
 #	 tmpfs_size 50%
 )
