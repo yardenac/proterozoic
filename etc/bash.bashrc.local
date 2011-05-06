@@ -50,7 +50,7 @@ export HISTIGNORE="&"
 export HISTFILESIZE=999999999999
 export EDITOR=emacs
 export VISUAL=emacs
-export GRE_HOME=/tmp
+#export GRE_HOME=/tmp
 export PROMPT_COMMAND='history -a'
 set completion-ignore-case On
 set completion-query-items 150

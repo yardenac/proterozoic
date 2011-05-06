@@ -244,3 +244,6 @@ wait-for-network() {
 	 done
 	 echo yay, internet is up!
 }
+ramsize() { #returns size of system's ram in megabytes
+	 awk '/MemTotal:/ { printf ("%0.0f\n",$2/1024); }' /proc/meminfo
+}
