@@ -6,8 +6,8 @@ arch=(any)
 license=('GPL')
 install=proterozoic.install
 makedepends=(findutils coreutils)
-depends=(emacs-nox bash bash-completion iptables sudo cryptsetup diffutils ntp openssh sshfs syslog-ng htop jfsutils bc wget)
-#aufs2 aufs2-util depend on kernel so probs wont work on gabba...
+depends=(emacs-nox bash bash-completion iptables sudo cryptsetup diffutils ntp openssh sshfs syslog-ng htop jfsutils bc wget aufs2 aufs2-util)
+#aufs* depend on kernel so probs wont work on gabba... unless using the "provides" in my new kernel26-linode package? we'll see
 #wmctrl is for X systems
 
 package() {

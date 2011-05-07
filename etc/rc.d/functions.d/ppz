@@ -45,7 +45,7 @@ custom_mounting_everyone() {
 	 case $HOSTNAME in
 		  ediacra) do_edie_var;;
 	 esac
-	 /usr/bin/ppz.integrity
+	 /usr/bin/integrity.ppz
 }
 add_hook sysinit_udevlaunched tmp_to_shm
 case $HOSTNAME in
