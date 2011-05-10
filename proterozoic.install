@@ -85,8 +85,8 @@ check_is_rcconf_complete() {
 	 done
 	 return $vars_not_found
 }
-kernel_name=( $(pacman -Q | grep kernel) )
-kernel_name=${kernel_name[0]:-kernel26}
+kernel_name=( $(pacman -Q | grep -i kernel ) )
+kernel_name=${kernel_name[0]}
 check_triggers() {
 	 all_triggers_same etc/syslog-ng/syslog-ng.conf || {
 		  echo reloading syslog-ng....
