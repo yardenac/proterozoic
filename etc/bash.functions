@@ -250,3 +250,14 @@ ramsize() { #returns size of system's ram in megabytes
 ramfree() { #returns ${1}% size of free ram in megabytes
 	 awk '/MemFree:/ { printf ("%0.0f\n",($2 * '${1}')/(1024 * 100)); }' /proc/meminfo
 }
+comm_front() {
+	 A=${1};
+    CP=$(cursor_position);
+    [ $CP -eq 0 ] || echo -en '\e[1;41m<->\e[m';
+    [ $A -eq 0 ] || echo "[${1}] "
+}
+print_jobs() {
+	 jobs | while read J; do
+		  echo -n \*
+	 done
+}
