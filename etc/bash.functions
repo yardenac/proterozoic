@@ -153,7 +153,7 @@ woman() {
 		echo
 	}
 	set_xtitle "$COMMAND [woman]"
-	help "$COMMAND" && read || emacs\
+	help "$COMMAND" 2>/dev/null && read || emacs\
 		--eval '(fset '"'"'manpage "man '$COMMAND' | cat && exit\C-m")'\
 		--eval '(shell)'\
 		--eval '(execute-kbd-macro (symbol-function '"'"'manpage))'\
@@ -221,7 +221,8 @@ in_2_but_not_in_1() {
 	 IFS=:
 	 for P in $2; do
 		  IFS=' '
-		  P=$(readlink -f $P || echo INVALID)
+		  P=$(readlink -e $P 2>/dev/null || echo INVALID)
+		  [[ $P == 'INVALID' ]] && continue
 		  [[ "$1" =~ (^|:)$P(:|$) ]] || echo $P
 		  IFS=:
 	 done
