@@ -1,0 +1,52 @@
+urxvt.borderLess: True
+urxvt.scrollBar: False
+urxvt.internalBorder: 0
+urxvt.externalBorder: 0
+urxvt.cursorColor: green
+!urxvt.foreground: white
+urxvt.reverseVideo: true
+urxvt.transparent: true
+urxvt.shading: 30
+urxvt.scrollTtyOutput: false
+urxvt.font: xft:Mono-13:antialias=false:hinting=false
+urxvt.letterSpace: -1
+urxvt.hold: false
+urxvt.perl-ext-common: default,tabbedex,url-select
+urxvt.tabbed.autohide: true
+urxvt.urlLauncher: /usr/bin/seamonkey
+urxvt.matcher.button: 1
+urxvt.saveLines: 99999
+urxvt.visualBell: false
+urxvt.pointerColor: #000000
+urxvt.pointerColor2: #000000
+urxvt.buffered: true
+
+urxvt.keysym.M-u: perl:url-select:select_next
+urxvt.underlineURLs: false
+urxvt.iconFile: /usr/share/icons/hicolor/48x48/apps/xfce-terminal.png
+urxvt.iconName: urxvt
+
+!blacks
+urxvt.color0: #000000
+urxvt.color8: #4d4d4d
+!reds
+urxvt.color1: #ff0000
+urxvt.color9: #ff3333
+!greens
+urxvt.color2:  #4e8811
+urxvt.color10: #90ee90
+!brown/yellow
+urxvt.color3:  #c4a000
+urxvt.color11: yellow
+!blues
+urxvt.color4:  #6688ee
+urxvt.color12: #6969ff
+!magentas
+urxvt.color5:  #cd00cd
+urxvt.color13: #ff00ff
+!cyans
+urxvt.color6:  #00cdcd
+urxvt.color14: #00ffff
+!whites
+urxvt.color7:  #e5e5e5
+urxvt.color15: #ffffff

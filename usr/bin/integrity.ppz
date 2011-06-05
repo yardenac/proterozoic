@@ -27,6 +27,16 @@ grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
 
 [ -e /media/inmem ] || mkdir /media/inmem
 
+#check rc.conf vars - move from install file
+#&/| make homedir
+
+case $(hostname) in
+	 gabba) #one fgetty in inittab
+	 *) 2 or 3 of them?
+esac
+
+#check for pacnew files
+
 IFS='
 '
 for F in $(ls -1 /{root,home/*}/.bash_history 2>/dev/null); do

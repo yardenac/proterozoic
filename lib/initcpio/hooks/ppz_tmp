@@ -19,7 +19,7 @@ ppz_mount_handler() {
 	 eval $(awk '/^HOSTNAME=/' /etc/rc.conf)
 	 case $HOSTNAME in
 		  gabba)			do_tmpfs 5%;; #~12MB
-		  scaly)			do_tmpfs 25%;;
+		  scaly)			do_tmpfs 40%;;
 		  ediacra|*)	do_tmpfs 12%;;
 	 esac
 	 case $HOSTNAME in
