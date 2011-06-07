@@ -31,8 +31,8 @@ grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
 #&/| make homedir
 
 case $(hostname) in
-	 gabba) #one fgetty in inittab
-	 *) 2 or 3 of them?
+	 gabba) :;;#one fgetty in inittab
+	 *) :;;#2 or 3 of them?
 esac
 
 #check for pacnew files
