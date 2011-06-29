@@ -8,7 +8,7 @@
 . /etc/bash.functions
 
 [ -L ~/.emacs.d ] || {
-	 mv .emacs.d .emacs.d.$(uniq_token)
+	 [ -d .emacs.d ] && mv .emacs.d .emacs.d.$(uniq_token)
 	 ln -s /etc/.emacs.d ~/
 }
 

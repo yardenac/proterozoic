@@ -62,7 +62,7 @@ all_triggers_same() {
 }
 enforce_locales() {
 	 PRESENT_LOCALES=$(grep -iE '^[^#$]' etc/locale.gen)
-	 [ ${PRESENT_LOCALES} ] || {
+	 [ "${PRESENT_LOCALES}" ] || {
 		  clobberella etc/locale.gen
 		  locale-gen
 	 }
