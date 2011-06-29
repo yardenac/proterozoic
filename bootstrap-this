@@ -23,13 +23,13 @@
 #mount /dev/mapper/green /media/green
 
 # prepare for proterozoic package
-wget http://schlunix.org/archlinux/extra/os/x86_64/git-1.7.5.2-1-x86_64.pkg.tar.xz -O /tmp/git-1.7.5.2-1-x86_64.pkg.tar.xz
-wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.d/mirrorlist.otown -O /etc/pacman.d/mirrorlist.otown.tmp
+wget http://schlunix.org/archlinux/extra/os/x86_64/git-1.7.5.2-1-x86_64.pkg.tar.xz -qO /tmp/git-1.7.5.2-1-x86_64.pkg.tar.xz
+wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.d/mirrorlist.otown -qO /etc/pacman.d/mirrorlist.otown.tmp
 wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.conf.bootstrap -qO - | sed s/otown/otown.tmp/ig > /tmp/pacman.conf.ppz
 
 mv /etc/sudoers{,.archiso-default}
 
-pacman --noconfirm -U /tmp/git-1.7.5.2-1-x86_64.pkg.tar.xz
-pacman --config /tmp/pacman.conf.ppz --noconfirm -Sy proterozoic
+#pacman --noconfirm -U /tmp/git-1.7.5.2-1-x86_64.pkg.tar.xz
+#pacman --config /tmp/pacman.conf.ppz --noconfirm -Sy proterozoic
 
 #rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
