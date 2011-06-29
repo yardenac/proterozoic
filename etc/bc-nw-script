@@ -1,6 +1,7 @@
-define corner(w,h,y,x) {
-	if (x < (w/2)) north=1 else north=0
-	if (y < (h/2)) west=1 else west=0
+define corner(w,h,x,y) {
+	print "ResizeDynamic "
+	if (x < (w/2)) west=1 else west=0
+	if (y < (h/2)) north=1 else north=0
 	if (north) print "N" else print "S"
 	if (west) print "W " else print "E "
 	if (north) print "top_" else print "bottom_"

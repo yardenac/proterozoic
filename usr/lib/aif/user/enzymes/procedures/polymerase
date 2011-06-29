@@ -1,0 +1,26 @@
+#!/bin/bash
+
+depend_procedure core base
+
+for F in /etc/bash.functions; do
+	[ -f "$F" ] && . "$F" || continue
+	break
+done
+
+start_process() {
+	execute worker configure
+	execute worker sysprep
+	ifconfig -a | grep -i 'Link encap:Ethernet'
+	read -p 'PICK A NETWORK INTERFACE: ' IFACE
+	while ! test_network_once; do
+		echo TRYING TO SET UP NETWORK...
+		pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
+		dhcpcd $IFACE \
+			|| giveup_prompt "Launching dhcpcd failed. Try again?"
+		ifconfig $IFACE | grep -q 'inet addr:' \
+			|| giveup_prompt "Still no ipaddr - try again?"
+	done
+	echo NETWORK IS UP!
+	var_PKG_SOURCE_TYPE=net
+
+}

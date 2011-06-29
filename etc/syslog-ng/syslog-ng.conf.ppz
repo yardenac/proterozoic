@@ -44,13 +44,14 @@ filter		f_sr_ioerr	{ program(kernel) and (
 								  		or	match('ISO 9660 Extensions: Microsoft Joliet Level 3'	value("MESSAGE"))
 								  		or	match('ISO 9660 Extensions: RRIP_1991A'	value("MESSAGE"))
 									); };
-destination	d_stompable	{ file("/var/log/stomp.log"	 	frac_digits(3));  	usertty(root); };
+destination	d_stompable	{ file("/var/log/stomp.log"	 	frac_digits(3)); };
+# 	usertty(root); };
 destination d_iptables	{ file("/var/log/iptables.log"	frac_digits(3)); };
 destination d_auth		{ file("/var/log/auth.log" 		frac_digits(3)); };
 destination d_mail		{ file("/var/log/mail.log" 		frac_digits(3)); };
 destination d_kernel		{ file("/var/log/kernel.log" 		frac_digits(3)); };
 destination	d_ignorable	{ file("/var/log/ignorable.log"	frac_digits(3)); };
-destination	cracks		{ file("/var/log/cracks.log" 		frac_digits(3)); };
+destination	d_cracks		{ file("/var/log/cracks.log" 		frac_digits(3)); };
 destination	d_messy		{ file("/var/log/messy.log" 		frac_digits(3)); };
 log	{ source(src); filter(f_sr_ioerr);	destination(d_messy);		flags(final);								};
 log	{ source(src); filter(f_userunk);	destination(d_auth);			flags(final);								};
@@ -58,6 +59,6 @@ log	{ source(src); filter(f_stompable); destination(d_stompable);													};
 log	{ source(src); filter(f_iptables);	destination(d_iptables);	flags(final);								};
 log	{ source(src); filter(f_auth);		destination(d_auth);	  	  	flags(final);								};
 log	{ source(src); filter(f_mail);		destination(d_mail); 	  	flags(final);								};
-log	{ source(src); filter(f_ignorable); destination(d_ignorable); flags(final);								};
+log	{ source(src); filter(f_ignorable); destination(d_ignorable);	flags(final);								};
 log	{ source(src); filter(f_kernel);		destination(d_kernel);	  													};
-log	{ 												destination(cracks);		  flags(catch-all, fallback, final);	};
+log	{ 												destination(d_cracks);		flags(catch-all, fallback, final);	};

@@ -1,0 +1,15 @@
+[options]
+HoldPkg     = pacman glibc
+SyncFirst   = pacman
+Architecture = auto
+IgnorePkg = 
+[core]
+Include = /etc/pacman.d/mirrorlist.otown
+[extra]
+Include = /etc/pacman.d/mirrorlist.otown
+[community]
+Include = /etc/pacman.d/mirrorlist.otown
+[multilib]
+Include = /etc/pacman.d/mirrorlist.otown
+[hir]
+Server = http://pacman-repo.hirstory.com
