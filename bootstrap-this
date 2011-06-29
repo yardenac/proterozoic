@@ -27,6 +27,6 @@ wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.conf.bootstrap 
 
 mv /etc/sudoers{,.archiso-default}
 
-pacman --config /tmp/pacman.conf.ppz --noconfirm -Sy proterozoic
+pacman --config /tmp/pacman.conf.ppz --noconfirm -Syw proterozoic
 
-rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
+#rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
