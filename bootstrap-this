@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Meant to be run DIRECTLY from a fresh archiso live cd. Try typing, for example:
+# [root@archiso]$ dhcpcd eth0
 # [root@archiso]$ . <(wget https://raw.github.com/twomen/proterozoic/master/bootstrap-this -qO -)
 
 # Then you probably want to run this:
