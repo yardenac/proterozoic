@@ -10,10 +10,9 @@ done
 start_process() {
 	execute worker configure
 	execute worker sysprep
-	ifconfig -a | grep -i 'Link encap:Ethernet'
-	read -p 'PICK A NETWORK INTERFACE: ' IFACE
 	while ! test_network_once; do
-		echo TRYING TO SET UP NETWORK...
+		ifconfig -a | grep -i 'Link encap:Ethernet'
+		read -p 'PICK INTERFACE TO SET UP NETWORK: ' IFACE
 		pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
 		dhcpcd $IFACE \
 			|| giveup_prompt "Launching dhcpcd failed. Try again?"
@@ -22,5 +21,4 @@ start_process() {
 	done
 	echo NETWORK IS UP!
 	var_PKG_SOURCE_TYPE=net
-
 }

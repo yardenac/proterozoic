@@ -5,7 +5,7 @@
 # [root@archiso]$ . <(wget https://raw.github.com/twomen/proterozoic/master/bootstrap-this -qO -)
 
 # Then you probably want to run this:
-# [root@archiso]$ aif -p enzymes/polymerase -d
+# root 123m~$ aif -p enzymes/polymerase -d
 
 # get mounts in order
 #mkdir \
@@ -29,7 +29,8 @@ wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.conf.bootstrap 
 
 mv /etc/sudoers{,.archiso-default}
 
-#pacman --noconfirm -U /tmp/git-1.7.5.2-1-x86_64.pkg.tar.xz
-#pacman --config /tmp/pacman.conf.ppz --noconfirm -Sy proterozoic
+pacman --config /tmp/pacman.conf.ppz --noconfirm -Sy
+pacman --config /tmp/pacman.conf.ppz --noconfirm -U /tmp/git-1.7.5.2-1-x86_64.pkg.tar.xz
+pacman --config /tmp/pacman.conf.ppz --noconfirm -Sy proterozoic
 
-#rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
+rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp

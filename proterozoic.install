@@ -32,7 +32,8 @@ rcconf_vars=(
 
 ######### FUNCTIONS
 manual_changes_summary() {
-	 echo "add HOOKS=\"ppz_tmp\" to /etc/mkinitcpio.conf"
+	 :
+#	 echo "add HOOKS=\"ppz_tmp\" to /etc/mkinitcpio.conf"
 }
 are_same() {
 	 [ -a "$1" ] && [ -a "$2" ] || return 1
@@ -95,8 +96,7 @@ check_triggers() {
 	 }
 	 all_triggers_same lib/initcpio/{hooks,install}/ppz_tmp || {
 		  grep -iEq '^HOOKS=".*ppz_tmp.*"' /etc/mkinitcpio.conf || {
-				echo "I was going to rebuild the initrd, but ppz_tmp is not"
-				echo "in HOOKS in /etc/mkinitcpio.conf! What's the point?"
+				echo '/etc/mkinitcpio.conf: No HOOKS="ppz_temp", so didn'"'"'t rebuild initrd'
 				rm -f lib/initcpio/install/ppz_tmp.last
 				return 1
 		  }
