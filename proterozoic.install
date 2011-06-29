@@ -3,7 +3,7 @@ preowned_files=(
 	 etc/default/useradd
 	 etc/screenrc
 	 etc/ssh/ssh_config
-	 etc/syslog-ng/syslog-ng.conf
+#	 etc/syslog-ng/syslog-ng.conf
 	 etc/logrotate.conf
 	 etc/issue
 	 etc/ntp.conf
@@ -89,8 +89,9 @@ kernel_name=( $(pacman -Q | grep -i kernel ) )
 kernel_name=${kernel_name[0]}
 check_triggers() {
 	 all_triggers_same etc/syslog-ng/syslog-ng.conf || {
-		  echo reloading syslog-ng....
-		  killall -SIGHUP /usr/sbin/syslog-ng
+#		  echo reloading syslog-ng....
+		  /etc/rc.d/syslog-ng reload
+#		  killall -SIGHUP /usr/sbin/syslog-ng
 	 }
 	 all_triggers_same lib/initcpio/{hooks,install}/ppz_tmp || {
 		  grep -iEq '^HOOKS=".*ppz_tmp.*"' /etc/mkinitcpio.conf || {

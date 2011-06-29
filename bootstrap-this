@@ -6,29 +6,27 @@
 # Then you probably want to run this:
 # [root@archiso]$ aif -p enzymes/polymerase -d
 
-mkdir \
-	 /media/arch-cold-rw \
-	 /media/arch-cold-ro \
-	 /media/rodinia \
-	 /media/green
-ln -s /media/rodinia/pub /snowball
+# get mounts in order
+#mkdir \
+#	 /media/arch-cold-rw \
+#	 /media/arch-cold-ro \
+#	 /media/rodinia \
+#	 /media/green
+#ln -s /media/rodinia/pub /snowball
 
-cryptsetup luksOpen /dev/disk/by-uuid/0105eeab-2fc6-4dc7-8b89-4a70605e1483 green
+#cryptsetup luksOpen /dev/disk/by-uuid/0105eeab-2fc6-4dc7-8b89-4a70605e1483 green
 
-mount /dev/disk/by-uuid/913e0e86-9eb2-4dd5-9513-6b34f26f37cc /media/rodinia
-mount /dev/disk/by-uuid/45d0d831-d045-410c-b2ec-d525ef69e36c /media/arch-cold-rw
-mount /dev/disk/by-uuid/5b25f749-ab8d-4749-a8b0-3b7d3408af19 /media/arch-cold-ro
-mount /dev/mapper/green /media/green
+#mount /dev/disk/by-uuid/913e0e86-9eb2-4dd5-9513-6b34f26f37cc /media/rodinia
+#mount /dev/disk/by-uuid/45d0d831-d045-410c-b2ec-d525ef69e36c /media/arch-cold-rw
+#mount /dev/disk/by-uuid/5b25f749-ab8d-4749-a8b0-3b7d3408af19 /media/arch-cold-ro
+#mount /dev/mapper/green /media/green
 
-for F in	/etc/sudoers \
-			/etc/syslog-ng/syslog-ng.conf; do
-	 mv "$F"{,.archiso-default}
-done
-
+# prepare for proterozoic package
 wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.d/mirrorlist.otown -qO /etc/pacman.d/mirrorlist.otown.tmp
 wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.conf.bootstrap -qO - | sed s/otown/otown.tmp/ig > /tmp/pacman.conf.ppz
 
+mv /etc/sudoers{,.archiso-default}
+
 pacman --config /tmp/pacman.conf.ppz --noconfirm -Sy proterozoic
 
-mv /etc/syslog-ng/syslog-ng.conf{.archiso-default,}
-/etc/rc.d/syslog-ng reload
+rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
