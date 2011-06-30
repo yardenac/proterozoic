@@ -43,7 +43,21 @@ start_process() {
 		 hwclock --systohc --utc
 	}
 	type fstype
-#	echo "THIS ASSUMES YOU ALREADY PARTITIONED!"
-#	choose_partition /boot BOOTDEV
-#	choose_partition / ROOTDEV
+	echo "THIS ASSUMES YOU ALREADY PARTITIONED!"
+	choose_partition /boot BOOTDEV
+	choose_partition / ROOTDEV
+	mkdir -p /media/targay/boot
+	mount $ROOTDEV /media/targay
+	mount $BOOTDEV /media/targay/boot
+	cat > /tmp/ppz-fstab <<EOF
+$BOOTDEV /boot	ext4 defaults,noatime,nodiratime,barrier=1,commit=30,ro 0 1
+$ROOTDEV /		ext4 defaults,noatime,nodiratime,barrier=1,commit=30,rw 0 1
+EOF
+	mkdir -pm 755 /media/targay/var/{cache/pacman/pkg,lib/pacman,log/pacman.log}
+	pacman --config /etc/pacman.conf.bootstrap \
+		 --root /media/targay \
+		 --cachedir /media/targay/var/cache/pacman/pkg \
+		 --dbpath /media/targay/var/lib/pacman \
+		 --logfile /media/targay/var/log/pacman.log \
+		 --noconfirm -Syyvv
 }
