@@ -19,7 +19,8 @@ ln -s /media/rodinia/pub /snowball
 #mount /dev/disk/by-uuid/5b25f749-ab8d-4749-a8b0-3b7d3408af19 /media/arch-cold-ro
 #mount /dev/mapper/green /media/green
 
-wget http://schlunix.org/archlinux/extra/os/x86_64/git-1.7.5.2-1-x86_64.pkg.tar.xz -qO /tmp/git-1.7.5.2-1-x86_64.pkg.tar.xz
+wget http://schlunix.org/archlinux/extra/os/x86_64/git-1.7.5.2-1-x86_64.pkg.tar.xz  -qO /tmp/git-1.7.5.2-1-x86_64.pkg.tar.xz
+wget http://schlunix.org/archlinux/core/os/x86_64/perl-5.12.3-1-x86_64.pkg.tar.xz   -qO /tmp/perl-5.12.3-1-x86_64.pkg.tar.xz
 wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.d/mirrorlist.otown -qO /etc/pacman.d/mirrorlist.otown.tmp
 wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.conf.bootstrap -qO - | sed s/otown/otown.tmp/ig > /tmp/pacman.conf.ppz
 
@@ -27,7 +28,7 @@ mv /etc/sudoers{,.archiso-default}
 
 pacman --config /tmp/pacman.conf.ppz --noconfirm -Sy
 # necessary because of the aufs/kernel drama going on. Hopefully it can be temporary...
-pacman --config /tmp/pacman.conf.ppz --noconfirm -U /tmp/git-1.7.5.2-1-x86_64.pkg.tar.xz
+pacman --config /tmp/pacman.conf.ppz --noconfirm -U /tmp/git-1.7.5.2-1-x86_64.pkg.tar.xz /tmp/perl-5.12.3-1-x86_64.pkg.tar.xz
 pacman --config /tmp/pacman.conf.ppz --noconfirm -Sy proterozoic
 
 rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp

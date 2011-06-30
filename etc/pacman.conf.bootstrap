@@ -4,7 +4,7 @@ SyncFirst   = pacman
 Architecture = auto
 IgnorePkg = perl
 [core]
-Server = file:///src/core/pkg
+#Server = file:///src/core/pkg
 Include = /etc/pacman.d/mirrorlist.otown
 [extra]
 Include = /etc/pacman.d/mirrorlist.otown
