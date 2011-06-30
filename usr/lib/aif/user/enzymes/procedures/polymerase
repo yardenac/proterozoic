@@ -1,16 +1,26 @@
 #!/bin/bash
-
 depend_procedure core base
+[ -f /etc/bash.functions ] && . /etc/bash.functions
 
-for F in /etc/bash.functions; do
-	[ -f "$F" ] && . "$F" || continue
-	break
-done
+choose_partition() {
+	unset -v "$2" || return 1
+	local DEV=
+	until [ -n "$DEV" ] && [ -a "$DEV" ]; do
+		 partprobe
+		 read -ei /dev/ -p "CHOOSE A PARTITION FOR $1 (^c to partprobe): " DEV
+	done
+	askyn "Format $DEV ext4?" && {
+		 mke2fs -t ext4 -ccE lazy_itable_init=1,discard \
+			  -O dir_index,extent,flex_bg,has_journal,uninit_bg,large_file,resize_inode,sparse_super "$DEV"
+#		 tune2fs 
+	}
+	eval $2="$DEV"
+}
 
 start_process() {
 	execute worker configure
 	execute worker sysprep
-	while ! test_network_once; do
+	until test_network_once; do
 		ifconfig -a | grep -i 'Link encap:Ethernet'
 		read -p 'PICK INTERFACE TO SET UP NETWORK: ' IFACE
 		pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
@@ -20,5 +30,20 @@ start_process() {
 			|| giveup_prompt "Still no ipaddr - try again?"
 	done
 	echo NETWORK IS UP!
-	var_PKG_SOURCE_TYPE=net
+	TZONE=/usr/share/zoneinfo/America/Los_Angeles
+	while true; do
+		 read -ei "$TZONE" -p 'Choose a timezone: ' TZONE
+		 [ -f "$TZONE" ] || continue
+		 cp -f "$TZONE" /etc/localtime
+		 break
+	done
+	askyn "Update time with ntpdate? rn it says: "$(date) && {
+		 ntpdate pool.ntp.org
+		 echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
+		 hwclock --systohc --utc
+	}
+	type fstype
+#	echo "THIS ASSUMES YOU ALREADY PARTITIONED!"
+#	choose_partition /boot BOOTDEV
+#	choose_partition / ROOTDEV
 }
