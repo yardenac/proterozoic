@@ -6,7 +6,7 @@ arch=(any)
 license=('GPL')
 install=proterozoic.install
 makedepends=(findutils coreutils)
-depends=(base emacs-nox bash-completion iptables sudo ntp openssh sshfs htop jfsutils bc iproute2 fgetty git lsof pacman-mirrorlist ca-certificates)
+depends=(emacs-nox bash-completion iptables sudo ntp openssh sshfs htop jfsutils bc iproute2 fgetty git lsof pacman-mirrorlist ca-certificates)
 #wmctrl is for X systems
 
 package() {
