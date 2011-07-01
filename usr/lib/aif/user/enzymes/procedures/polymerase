@@ -55,7 +55,7 @@ EOF
 	done
 	mkdir -pm 755 ${TARGET}/{dev,dev,sys,var/{cache/pacman/pkg,lib/pacman,log}}
 	for SPECIAL_FS in proc sys dev; do
-		 grep -iq ${TARGET}/${SPECIAL_FS} || {
+		 grep -iq ${TARGET}/${SPECIAL_FS} /etc/mtab || {
 			  case $SPECIAL_FS in
 					proc)	mount -t proc	none	${TARGET}/proc;;
 					sys)	mount -t sysfs	none	${TARGET}/sys;;
