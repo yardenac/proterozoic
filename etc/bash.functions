@@ -267,3 +267,8 @@ print_jobs() {
 		  echo -n \*
 	 done
 }
+list_sorted() {
+	 for F; do
+		  echo ${F}
+	 done | sort -u
+}
