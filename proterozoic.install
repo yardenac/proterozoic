@@ -61,12 +61,26 @@ all_triggers_same() {
 	 done
 	 [ $changes -eq 0 ]
 }
+file_empty() {
+	 grep -iqvE '^[[:space:]]*(#|;|//|$)' "$@"
+}
 enforce_locales() {
-	 PRESENT_LOCALES=$(grep -iE '^[^#$]' etc/locale.gen)
-	 [ "${PRESENT_LOCALES}" ] || {
-		  clobberella etc/locale.gen
-		  locale-gen
+	 FILE=etc/locale.gen
+	 file_empty ${FILE} && {
+		  [ -f ${FILE}.ppz ] \
+				&& clobberella ${FILE} \
+				|| cat > ${FILE} <<EOF
+en_US.UTF-8 UTF-8
+en_US ISO-8859-1
+es_US.UTF-8 UTF-8
+es_US ISO-8859-1
+he_IL.UTF-8 UTF-8
+he_IL ISO-8859-8
+iw_IL.UTF-8 UTF-8
+iw_IL ISO-8859-8
+EOF
 	 }
+	 locale-gen
 }
 pwn_files() {
 	 for F in ${preowned_files[@]}; do
