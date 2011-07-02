@@ -39,20 +39,25 @@ esac
 
 shopt -s nullglob
 IFS=$'\n'
-for F in $(ls -1 /{root,home/*}/.bash_history 2>/dev/null); do
+for F in $(ls -1 /{root,home/*,media/green/*}/.bash_history 2>/dev/null); do
 #	 if it doesn't exist (or is empty), just copy.
 #	 if it's there, check if it needs doing
 #	 if so, check if it's tiny (don't risk big files)
 #	 if so, do a swaperoo
-	 [ -s "$F" ] && {
-		  head -n 1 ${F} | grep -iqvE '^#FIRST_PPZ_COMMAND$' && [ $(du -sb ${F}) -lt 2000 ] && {
+	 skel_file=/etc/skel.ppz/.bash_history
+	 ! [ -s "$F" ] && cp ${skel_file} ${F} || {
+		  ! cmp -s <(head -n 1 ${F}) <(head -n 1 ${skel_file}) \
+				&& askyn "$F ("$(du -sh ${F} | cut -f 1)") has no skel prefix. Join them?" && {
+
 				backup_file=${F}.ppz.$(date +%s)
 				mv ${F} ${backup_file}
-				cp /etc/skel/.bash_history ${F}
+				cp ${skel_file} ${F}
 				cat ${backup_file} >> ${F}
+				cat ${skel_file} ${backup_file} | md5sum
+				cat ${F} | md5sum
 #				rm ${backup_file}
 		  }
-	 } || cp /etc/skel/.bash_history ${F}
+	 }
 	 lsattr "$F" >/dev/null 2>&1 && {
 		  ATTRSET=$(lsattr "$F")
 		  [ ${ATTRSET:5:1} != a ] && say_and_do chattr +a "$F"
