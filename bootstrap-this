@@ -27,9 +27,9 @@ wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.conf.bootstrap 
 
 mv /etc/sudoers{,.archiso-default}
 
-pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm -Sy
+pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm -Syq
 # necessary because of the aufs/kernel drama going on. Hopefully it can be temporary...
 pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm -U /tmp/git-1.7.5.2-1-$arch.pkg.tar.xz
-pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm -Sy proterozoic
+pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm -Syq proterozoic
 
 rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp

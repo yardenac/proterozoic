@@ -77,7 +77,7 @@ EOF
 		 --cachedir ${TARGET}/var/cache/pacman/pkg \
 		 --dbpath ${TARGET}/var/lib/pacman \
 		 --logfile ${TARGET}/var/log/pacman.log \
-		 --noprogressbar --noconfirm -Sy $(comm -23 \
+		 --noprogressbar --noconfirm -Syq $(comm -23 \
 			 <(pacman --config /etc/pacman.conf.bootstrap -Sgq base | sort -u) \
 			 <(list_sorted dhcpcd licenses logrotate lvm2 nano pcmciautils ppp reiserfsprogs wpa_supplicant xfsprogs) \
 		 ) btrfs-progs-unstable proterozoic

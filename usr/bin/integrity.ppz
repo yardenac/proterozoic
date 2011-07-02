@@ -40,7 +40,19 @@ esac
 shopt -s nullglob
 IFS=$'\n'
 for F in $(ls -1 /{root,home/*}/.bash_history 2>/dev/null); do
-	 [ -s "$F" ] || cp /etc/skel/.bash_history "$F"
+#	 if it doesn't exist (or is empty), just copy.
+#	 if it's there, check if it needs doing
+#	 if so, check if it's tiny (don't risk big files)
+#	 if so, do a swaperoo
+	 [ -s "$F" ] && {
+		  head -n 1 ${F} | grep -iqvE '^#FIRST_PPZ_COMMAND$' && [ $(du -sb ${F}) -lt 2000 ] && {
+				backup_file=${F}.ppz.$(date +%s)
+				mv ${F} ${backup_file}
+				cp /etc/skel/.bash_history ${F}
+				cat ${backup_file} >> ${F}
+#				rm ${backup_file}
+		  }
+	 } || cp /etc/skel/.bash_history ${F}
 	 lsattr "$F" >/dev/null 2>&1 && {
 		  ATTRSET=$(lsattr "$F")
 		  [ ${ATTRSET:5:1} != a ] && say_and_do chattr +a "$F"

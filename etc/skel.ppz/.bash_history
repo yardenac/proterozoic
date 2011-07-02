@@ -1,3 +1,4 @@
+#FIRST_PPZ_COMMAND
 dhcpcd eth0
 . <(wget http://snarkyurl.com/ppz-bootstrap -qLO -)
 aif -p enzymes/polymerase -d
