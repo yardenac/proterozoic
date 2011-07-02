@@ -21,17 +21,15 @@ start_process() {
 	until test_network_once; do
 		ifconfig -a | grep -i 'Link encap:Ethernet'
 		usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: '
-#		read -ei ${IFACE} -p 'PICK INTERFACE TO SET UP NETWORK: ' IFACE
 		pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
 		dhcpcd $IFACE \
 			|| giveup_prompt "Launching dhcpcd failed. Try again?"
 		ifconfig $IFACE | grep -q 'inet addr:' \
 			|| giveup_prompt "Still no ipaddr - try again?"
 	done
-	echo NETWORK IS UP!
+	echo_red NETWORK IS UP!
 	while true; do
 		 usetvar TZONE 'Choose a timezone: '
-#		 read -ei ${TZONE} -p 'Choose a timezone: ' TZONE
 		 [ -f ${TZONE} ] || continue
 		 cp -f ${TZONE} /etc/localtime
 		 break
@@ -42,8 +40,7 @@ start_process() {
 		 hwclock --systohc --utc
 	}
 	usetvar TARGET 'Choose a temporary mount point: '
-#	read -ei ${TARGET} -p 'Choose a temporary mount point: ' TARGET
-	echo "YOU SHOULD HAVE ALREADY PARTITIONED - A LIST TO HELP YOU ;)"
+	echo_red "YOU SHOULD HAVE ALREADY PARTITIONED - A LIST TO HELP YOU ;)"
 	blkid | grep -ivE 'raid|crypto_LUKS|squashfs' | sort -u
 	rm -f /tmp/ppz-fstab
 	for MNTPT in / /boot; do
@@ -51,7 +48,6 @@ start_process() {
 		 until [ -n "${DEV}" ] && [ -a ${DEV} ]; do
 			  partprobe 2>&1 | grep -iv /dev/sr0
 			  usetvar DEV "CHOOSE A PARTITION FOR $MNTPT (^c to partprobe): " /dev/
-#			  read -ei /dev/ -p "CHOOSE A PARTITION FOR $MNTPT (^c to partprobe): " DEV
 			  DEV=$(readlink -e ${DEV})
 		 done
 		 askyn "Format $DEV ext4?" && {
@@ -76,7 +72,12 @@ EOF
 			  esac
 		 }
 	done
-	pacman-from-livecd --noprogressbar --noconfirm -Syyvv $(comm -23 \
+	pacman --config /etc/pacman.conf.bootstrap \
+		 --root ${TARGET} \
+		 --cachedir ${TARGET}/var/cache/pacman/pkg \
+		 --dbpath ${TARGET}/var/lib/pacman \
+		 --logfile ${TARGET}/var/log/pacman.log \
+		 --noprogressbar --noconfirm -Sy $(comm -23 \
 			 <(pacman --config /etc/pacman.conf.bootstrap -Sgq base | sort -u) \
 			 <(list_sorted dhcpcd licenses logrotate lvm2 nano pcmciautils ppp reiserfsprogs wpa_supplicant xfsprogs) \
 		 ) btrfs-progs-unstable proterozoic

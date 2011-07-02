@@ -37,6 +37,11 @@ alias   pine='alpine -P /usr/local/lib/pine.conf -d0'
 alias alpine='alpine -P /usr/local/lib/pine.conf -d0'
 alias rm='rm --one-file-system -i'
 alias rsync_root='rsync -aAXDxhP --stats --inplace'
+alias pacman_from_livecd='pacman --config /etc/pacman.conf.bootstrap \
+		 --root ${TARGET} \
+		 --cachedir ${TARGET}/var/cache/pacman/pkg \
+		 --dbpath ${TARGET}/var/lib/pacman \
+		 --logfile ${TARGET}/var/log/pacman.log '
 bind '"\e[A"':history-search-backward
 bind '"\e[B"':history-search-forward
 complete -f -X '!*.@(sqlite|db)' sqlite3

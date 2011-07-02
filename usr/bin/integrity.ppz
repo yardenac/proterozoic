@@ -35,12 +35,12 @@ case $(hostname) in
 	 *) :;;#2 or 3 of them?
 esac
 
-#check for pacnew files
+#TODO: check for pacnew files
 
-IFS='
-'
+shopt -s nullglob
+IFS=$'\n'
 for F in $(ls -1 /{root,home/*}/.bash_history 2>/dev/null); do
-	 [ -f "$F" ] || continue
+	 [ -s "$F" ] || cp /etc/skel/.bash_history "$F"
 	 lsattr "$F" >/dev/null 2>&1 && {
 		  ATTRSET=$(lsattr "$F")
 		  [ ${ATTRSET:5:1} != a ] && say_and_do chattr +a "$F"

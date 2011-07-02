@@ -2,7 +2,7 @@
 install ()
 {
     MODULES="aufs"
-    BINARIES="/bin/bash /bin/date /sbin/fsck.jfs"
+    BINARIES="/bin/bash /bin/date /sbin/fsck.jfs /usr/bin/pstree"
     FILES="/etc/rc.conf"
     SCRIPT="ppz_tmp"
 }

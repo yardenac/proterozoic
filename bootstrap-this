@@ -7,7 +7,7 @@
 # Then you probably want to run this:
 # root 123m~$ aif -p enzymes/polymerase -d
 
-mkdir \
+mkdir -p \
 	 /media/arch-cold-rw \
 	 /media/arch-cold-ro \
 	 /media/rodinia \

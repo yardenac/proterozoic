@@ -118,7 +118,7 @@ clear_input_buffer() {
 askyn() {
 	 echo
 	 clear_input_buffer
-	 read -N 1 -p $'\e[1;34m'"$@"$' [*/n]):\e[m ' USERINPUT
+	 read -N 1 -p $'\e[1;34m'"$*"$' [*/n]):\e[m ' USERINPUT
 	 case $USERINPUT in "
 ") return 0;;
 		  n) echo && return 1;;
@@ -286,9 +286,3 @@ echo_red() {
 func_exists() {
 	 declare -f ${1} >/dev/null
 }
-alias pacman-from-livecd='pacman --config /etc/pacman.conf.bootstrap \
-		 --root ${TARGET} \
-		 --cachedir ${TARGET}/var/cache/pacman/pkg \
-		 --dbpath ${TARGET}/var/lib/pacman \
-		 --logfile ${TARGET}/var/log/pacman.log \
-'

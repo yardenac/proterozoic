@@ -24,7 +24,7 @@ makepkg -c \
 	 && mv $PF ${REPO}/ \
 	 && repo-add ${REPO}/hir.db.tar.gz ${REPO}/$PF
 
-declare -f echo_red >/dev/null || alias echo_red=echo
+declare -f echo_red >/dev/null || echo_red() { echo "$@"; }
 
 git diff HEAD --quiet -- bootstrap-this etc/pacman.{conf.bootstrap,d/mirrorlist.otown} \
 	 || echo_red "Bootstrap files have changed, you probably want to update git!"
