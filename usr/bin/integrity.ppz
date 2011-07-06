@@ -53,9 +53,8 @@ for F in $(ls -1 /{root,home/*,media/green/*}/.bash_history 2>/dev/null); do
 				mv ${F} ${backup_file}
 				cp ${skel_file} ${F}
 				cat ${backup_file} >> ${F}
-				cat ${skel_file} ${backup_file} | md5sum
-				cat ${F} | md5sum
-#				rm ${backup_file}
+				cmp -s <(cat ${skel_file} ${backup_file} | md5sum) <(cat ${F} | md5sum) \
+					 && rm ${backup_file} || echo_red "Delete ${backup_file} yourself, I wasn't sure..."
 		  }
 	 }
 	 lsattr "$F" >/dev/null 2>&1 && {

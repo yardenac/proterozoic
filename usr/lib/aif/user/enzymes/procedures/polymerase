@@ -72,6 +72,16 @@ EOF
 			  esac
 		 }
 	done
+	# install initscripts
+	# edit rc.conf:
+	#		keymap
+	#		consolefont
+	#		locales
+	#		network <-- use netcfg...
+	#		NEW VARS TO CONTROL:
+	#			sshd users
+	#			iptables open ports
+	#		
 	pacman --config /etc/pacman.conf.bootstrap \
 		 --root ${TARGET} \
 		 --cachedir ${TARGET}/var/cache/pacman/pkg \
@@ -81,6 +91,31 @@ EOF
 			 <(pacman --config /etc/pacman.conf.bootstrap -Sgq base | sort -u) \
 			 <(list_sorted dhcpcd licenses logrotate lvm2 nano pcmciautils ppp reiserfsprogs wpa_supplicant xfsprogs) \
 		 ) btrfs-progs-unstable proterozoic
+	# PPZ NEEDS TO DO: (integrity?)
+	#		set locale.gen from rc.conf: locales
+	#			THEN run locale-gen
+	#		set sshd.conf from rc.conf
+	#		set iptables open ports from rc.conf
+
+	# FILES TO EDIT
+	# /etc/localtime: copy from runtime
+	# /etc/fstab: append / /boot, comment /dev?
+	# /etc/profile.d/proxy.sh: unlikely to need
+	# /etc/resolv.conf: dont need if i use netcfg...
+	# mkinitcpio HOOKS (for dev/mapper?)
+	# modprobe
+	# hosts.deny/allow (ssh)
+	# pacman.conf
+	# /etc/hosts
+	# grub/menu.lst
+
+	# DO THINGS
+#   cp /etc/localtime ${var_TARGET_DIR}/etc/localtime
+#   while true; do
+#       chroot ${var_TARGET_DIR} passwd root && break
+#   done
+#   chroot $var_TARGET_DIR /sbin/mkinitcpio -p kernel26
+#   grub stuff!
 	until askyn "ready to quit? (stuff will be unmounted)"; do
 		 ll ${TARGET}/
 	done

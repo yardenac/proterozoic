@@ -64,12 +64,14 @@ all_triggers_same() {
 file_empty() {
 	 grep -iqvE '^[[:space:]]*(#|;|//|$)' "$@"
 }
+file_contents() {
+	 grep -ivE  '^[[:space:]]*(#|;|//|$)' "$@"
+}
 enforce_locales() {
 	 FILE=etc/locale.gen
-	 file_empty ${FILE} && {
-		  [ -f ${FILE}.ppz ] \
-				&& clobberella ${FILE} \
-				|| cat > ${FILE} <<EOF
+	 cp ${FILE}{,.backup.$(date +%s)}
+	 ls -FlAthr ${FILE}*
+	 cat > ${FILE} <<EOF
 en_US.UTF-8 UTF-8
 en_US ISO-8859-1
 es_US.UTF-8 UTF-8
@@ -78,9 +80,19 @@ he_IL.UTF-8 UTF-8
 he_IL ISO-8859-8
 iw_IL.UTF-8 UTF-8
 iw_IL ISO-8859-8
+de_DE.UTF-8 UTF-8
+de_DE ISO-8859-1
 EOF
-	 }
 	 locale-gen
+#	 locale
+#	 sleep 2
+#	 file_empty ${FILE} && {
+#	 } || {
+#		  echo "wat up with ${FILE}??"
+#		  du -sh ${FILE}*
+#		  file_contents ${FILE}
+#	 }
+#	 locale-gen
 }
 pwn_files() {
 	 for F in ${preowned_files[@]}; do
@@ -138,6 +150,7 @@ pre_install() {
 	 enforce_locales
 }
 post_install() {
+#	 enforce_locales
 	 /etc/rc.d/iptables restart
 	 pwn_files
 	 /usr/bin/integrity.ppz
