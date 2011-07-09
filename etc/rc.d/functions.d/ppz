@@ -53,3 +53,11 @@ case $HOSTNAME in
 	 *)			add_hook sysinit_udevlaunched tmp_to_vartmp;;
 esac
 add_hook sysinit_premount custom_mounting_everyone
+custom_iptables_rules() {
+	 for PORT in ${OPEN_PORTS[@]}; do
+		  local PROTOCOL=tcp
+		  [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
+		  iptables -A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT
+	 done
+}
+add_hook multi_end custom_iptables_rules

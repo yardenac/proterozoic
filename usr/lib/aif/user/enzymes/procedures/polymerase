@@ -16,107 +16,110 @@ at_exit() {
 trap 'at_exit' HUP QUIT EXIT INT ABRT TERM
 
 start_process() {
-	execute worker configure
-	execute worker sysprep
-	until test_network_once; do
-		ifconfig -a | grep -i 'Link encap:Ethernet'
-		usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: '
-		pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
-		dhcpcd $IFACE \
-			|| giveup_prompt "Launching dhcpcd failed. Try again?"
-		ifconfig $IFACE | grep -q 'inet addr:' \
-			|| giveup_prompt "Still no ipaddr - try again?"
-	done
-	echo_red NETWORK IS UP!
-	while true; do
-		 usetvar TZONE 'Choose a timezone: '
-		 [ -f ${TZONE} ] || continue
-		 cp -f ${TZONE} /etc/localtime
-		 break
-	done
-	askyn "Update time with ntpdate? rn it says: "$(date) && {
-		 ntpdate pool.ntp.org
-		 echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
-		 hwclock --systohc --utc
-	}
-	usetvar TARGET 'Choose a temporary mount point: '
-	echo_red "YOU SHOULD HAVE ALREADY PARTITIONED - A LIST TO HELP YOU ;)"
-	blkid | grep -ivE 'raid|crypto_LUKS|squashfs' | sort -u
-	rm -f /tmp/ppz-fstab
-	for MNTPT in / /boot; do
-		 DEV=
-		 until [ -n "${DEV}" ] && [ -a ${DEV} ]; do
-			  partprobe 2>&1 | grep -iv /dev/sr0
-			  usetvar DEV "CHOOSE A PARTITION FOR $MNTPT (^c to partprobe): " /dev/
-			  DEV=$(readlink -e ${DEV})
-		 done
-		 askyn "Format $DEV ext4?" && {
-			  askyn "Check for bad blocks?" && BBOPT=cc || BBOPT=
-			  mke2fs -t ext4 -${BBOPT}E lazy_itable_init=1,discard \
-					-O dir_index,extent,flex_bg,has_journal,uninit_bg,large_file,resize_inode,sparse_super ${DEV}
+	 askyn "Check current status of /etc/localtime! Done?"
+	 execute worker configure
+	 execute worker sysprep
+	 until test_network_once; do
+		  ifconfig -a | grep -i 'Link encap:Ethernet'
+		  usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: '
+		  pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
+		  dhcpcd $IFACE \
+				|| giveup_prompt "Launching dhcpcd failed. Try again?"
+		  ifconfig $IFACE | grep -q 'inet addr:' \
+				|| giveup_prompt "Still no ipaddr - try again?"
+	 done
+	 echo_red NETWORK IS UP!
+	 while true; do
+		  usetvar TZONE 'Choose a timezone: '
+		  [ -f ${TZONE} ] || continue
+		  cp -f ${TZONE} /etc/localtime
+		  break
+	 done
+	 askyn "Update time with ntpdate? rn it says: "$(date) && {
+		  ntpdate pool.ntp.org
+		  echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
+		  hwclock --systohc --utc
+	 }
+	 usetvar TARGET 'Choose a temporary mount point: '
+	 echo_red "YOU SHOULD HAVE ALREADY PARTITIONED - A LIST TO HELP YOU ;)"
+	 blkid | grep -ivE 'raid|crypto_LUKS|squashfs' | sort -u
+	 rm -f /tmp/ppz-fstab
+	 for MNTPT in / /boot; do
+		  DEV=
+		  until [ -n "${DEV}" ] && [ -a ${DEV} ]; do
+				partprobe 2>&1 | grep -iv /dev/sr0
+				usetvar DEV "CHOOSE A PARTITION FOR $MNTPT (^c to partprobe): " /dev/
+				DEV=$(readlink -e ${DEV})
+		  done
+		  askyn "Format $DEV ext4?" && {
+				askyn "Check for bad blocks?" && BBOPT=cc || BBOPT=
+				mke2fs -t ext4 -${BBOPT}E lazy_itable_init=1,discard \
+					 -O dir_index,extent,flex_bg,has_journal,uninit_bg,large_file,resize_inode,sparse_super ${DEV}
 			  #tune2fs 
-		 }
-		 mkdir -p ${TARGET}${MNTPT}
-		 mount ${DEV} ${TARGET}${MNTPT}
-		 cat >> /tmp/ppz-fstab <<EOF
-UUID="$(blkid -s UUID -o value ${DEV})" ${MNTPT}	ext4 defaults,noatime,nodiratime,barrier=1,commit=30,ro 0 1
-EOF
-	done
-	mkdir -pm 755 ${TARGET}/{dev,proc,sys,var/{cache/pacman/pkg,lib/pacman,log}}
-	for SPECIAL_FS in proc sys dev; do
-		 grep -iq ${TARGET}/${SPECIAL_FS} /etc/mtab || {
-			  case $SPECIAL_FS in
-					proc)	mount -t proc	none	${TARGET}/proc;;
-					sys)	mount -t sysfs	none	${TARGET}/sys;;
-					dev)	mount -o bind	/dev	${TARGET}/dev;;
-			  esac
-		 }
-	done
-	# install initscripts
-	# edit rc.conf:
-	#		keymap
-	#		consolefont
-	#		locales
-	#		network <-- use netcfg...
-	#		NEW VARS TO CONTROL:
-	#			sshd users
-	#			iptables open ports
-	#		
-	pacman --config /etc/pacman.conf.bootstrap \
-		 --root ${TARGET} \
-		 --cachedir ${TARGET}/var/cache/pacman/pkg \
-		 --dbpath ${TARGET}/var/lib/pacman \
-		 --logfile ${TARGET}/var/log/pacman.log \
-		 --noprogressbar --noconfirm -Syq $(comm -23 \
-			 <(pacman --config /etc/pacman.conf.bootstrap -Sgq base | sort -u) \
-			 <(list_sorted dhcpcd licenses logrotate lvm2 nano pcmciautils ppp reiserfsprogs wpa_supplicant xfsprogs) \
-		 ) btrfs-progs-unstable proterozoic
-	# PPZ NEEDS TO DO: (integrity?)
-	#		set locale.gen from rc.conf: locales
-	#			THEN run locale-gen
-	#		set sshd.conf from rc.conf
-	#		set iptables open ports from rc.conf
-
-	# FILES TO EDIT
-	# /etc/localtime: copy from runtime
-	# /etc/fstab: append / /boot, comment /dev?
-	# /etc/profile.d/proxy.sh: unlikely to need
-	# /etc/resolv.conf: dont need if i use netcfg...
-	# mkinitcpio HOOKS (for dev/mapper?)
-	# modprobe
-	# hosts.deny/allow (ssh)
-	# pacman.conf
-	# /etc/hosts
-	# grub/menu.lst
-
-	# DO THINGS
-#   cp /etc/localtime ${var_TARGET_DIR}/etc/localtime
-#   while true; do
-#       chroot ${var_TARGET_DIR} passwd root && break
-#   done
-#   chroot $var_TARGET_DIR /sbin/mkinitcpio -p kernel26
-#   grub stuff!
-	until askyn "ready to quit? (stuff will be unmounted)"; do
-		 ll ${TARGET}/
-	done
+		  }
+		  mkdir -p ${TARGET}${MNTPT}
+		  mount ${DEV} ${TARGET}${MNTPT}
+		  cat >> /tmp/ppz-fstab <<-EOF
+				UUID="$(blkid -s UUID -o value ${DEV})" ${MNTPT}	ext4 defaults,noatime,nodiratime,barrier=1,commit=30,ro 0 1
+				EOF
+	 done
+	 mkdir -pm 755 ${TARGET}/{dev,proc,sys,var/{cache/pacman/pkg,lib/pacman,log}}
+	 for SPECIAL_FS in proc sys dev; do
+		  grep -iq ${TARGET}/${SPECIAL_FS} /etc/mtab || {
+				case $SPECIAL_FS in
+					 proc)	mount -t proc	none	${TARGET}/proc;;
+					 sys)	mount -t sysfs	none	${TARGET}/sys;;
+					 dev)	mount -o bind	/dev	${TARGET}/dev;;
+				esac
+		  }
+	 done
+	 pacman --config /etc/pacman.conf.bootstrap \
+		  --root ${TARGET} \
+		  --cachedir ${TARGET}/var/cache/pacman/pkg \
+		  --dbpath ${TARGET}/var/lib/pacman \
+		  --logfile ${TARGET}/var/log/pacman.log \
+		  --noprogressbar --noconfirm -Syq initscripts
+	 set +o noclobber && {
+		  usetvar HOSTNAME "Choose a new hostname! Take your time ;) " new_arch_machine_$(date +%Y_%m_%d)
+		  sed s/%SET_HOSTNAME%/${HOSTNAME}/ig /etc/rc.conf.ppz > ${TARGET}/etc/rc.conf
+		  cat >  ${TARGET}/etc/fstab <<-EOF
+				devpts /dev/pts devpts defaults 0 0
+				UUID=4C93-65D0  /media/oxygen   vfat    defaults,user,noatime,nodiratime,fmask=177,dmask=077,check=s 0 0
+				EOF
+		  cat >> ${TARGET}/etc/fstab < /tmp/ppz-fstab
+		  rm -f /tmp/ppz-fstab
+		  cp -f {,$TARGET}/etc/localtime
+		  set -o noclobber
+	 }
+	 pacman --config /etc/pacman.conf.bootstrap \
+		  --root ${TARGET} \
+		  --cachedir ${TARGET}/var/cache/pacman/pkg \
+		  --dbpath ${TARGET}/var/lib/pacman \
+		  --logfile ${TARGET}/var/log/pacman.log \
+		  --noprogressbar --noconfirm --needed -Sq $(comm -23 \
+				<(pacman --config /etc/pacman.conf.bootstrap -Sgq base | sort -u) \
+				<(list_sorted dhcpcd licenses logrotate lvm2 nano pcmciautils ppp reiserfsprogs wpa_supplicant xfsprogs) \
+		  ) btrfs-progs-unstable proterozoic
+	 cp -f ${TARGET}/etc/pacman.conf{.bootstrap,}
+	 askyn "Set root password now?" && {
+		  while true; do
+				chroot ${TARGET} passwd root && break
+		  done
+	 }
+	 grex ${TARGET}/etc/mkinitcpio.conf
+	 askyn "Above is ${TARGET}/etc/mkinitcpio.conf. Edited & rebuild?" && {
+		  chroot ${TARGET} /sbin/mkinitcpio -p kernel26
+	 }
+	 askyn "Install grub?" && {
+		  echo "Grub crap not implemented yet."
+		  # find right partition
+		  # fuck with menu.lst
+	 }
+	 echo "Networking was not set up. You might want to edit these files:"
+	 echo "		/etc/rc.conf"
+	 echo "		/etc/resolv.conf"
+	 echo "		/etc/profile.d/proxy.sh"
+	 until askyn "ready to quit? (stuff will be unmounted)"; do
+		  ll ${TARGET}/
+	 done
 }

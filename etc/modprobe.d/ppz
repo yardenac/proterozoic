@@ -1,0 +1,4 @@
+blacklist pcspkr
+blacklist pcsp
+blacklist snd-pcsp
+blacklist nouveau

@@ -45,10 +45,5 @@ COMMIT
 -A evil -p icmp -m icmp --icmp-type 10 -j DROP 
 -A evil -p icmp -m icmp --icmp-type 17 -j DROP 
 -A evil -p icmp -m icmp --icmp-type 18 -j DROP 
--A open -p tcp -m tcp --dport 22 -j ACCEPT 
--A open -p tcp -m tcp --sport 41159 -j ACCEPT 
--A open -p tcp -m tcp --dport 41159 -j ACCEPT 
--A open -p udp -m udp --dport 41159 -j ACCEPT 
--A open -p udp -m udp --sport 41159 -j ACCEPT 
 COMMIT
 # Completed on Tue Feb  8 16:42:46 2011

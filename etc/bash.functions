@@ -7,7 +7,7 @@ isnt()			{ eval "$@"; [ $? -ne 0 ]; }
 wait_until()	{ while isnt "$@"; do sleep 0.5; done; }
 weekletter()	{ ARR=(S m t w T f s S); echo ${ARR[$(date +%u)]}; }
 ############# PROCESS MANIP
-process_exists() { return $( ps --pid $1 -o pid= >/dev/null 2>&1 ); }
+process_exists() { return $(ps --pid $1 -o pid= &>/dev/null); }
 alias pid_exists="process_exists"
 ppid_from_pid() {
 	[ -z "$1" ] && return
@@ -115,11 +115,23 @@ clear_input_buffer() {
     done
     echo -ne "$2"
 }
+shell_is_interactive() {
+	 local ttyvar=$(tty)
+	 [[ "${ttyvar:5}" =~ pts/* ]] || {
+		  echo_red "Shell doesn't appear interactive. tty is: ${ttyvar}"
+		  return 1
+	 }
+	 case "$-" in
+		  *i*) [ -z "${PS1}" ] || return 0
+	 esac
+	 return 1
+}
 askyn() {
 	 echo
+	 shell_is_interactive || return 1
 	 clear_input_buffer
 	 read -N 1 -p $'\e[1;34m'"$*"$' [*/n]):\e[m ' USERINPUT
-	 case $USERINPUT in "
+	 case ${USERINPUT} in "
 ") return 0;;
 		  n) echo && return 1;;
 		  *) echo && return 0
@@ -128,6 +140,8 @@ askyn() {
 usetvar() {
 #	 lets user set var with default and interactive readline
 #	 USAGE: usetvar VARNAME 'prompt: ' "default value"
+	 shell_is_interactive || return 1
+	 clear_input_buffer
 	 [ -n "${3}" ] \
 		  && local DVAL=${3} \
 		  || local DVAL=${!1}
@@ -223,16 +237,16 @@ drome() {
 run_in_temp_memdir() {
 	[ "$UID" -eq 0 ] && return
 	INMEM=/media/inmem
-	FOLFSEEY342534="$INMEM"/$( uniq_token )
-	mkdir "$FOLFSEEY342534"
-	cd "$FOLFSEEY342534"
-	do_in_temp_memdir "$@"
-	cd
-	rm -rf "$FOLFSEEY342534"
+	[ -d ${INMEM} ] || return
+	local DIR="$INMEM"/$( uniq_token )
+	mkdir ${DIR}
+	pushd ${DIR}
+	"$@" #do_in_temp_memdir "$@"
+	popd
+	rm -rf ${DIR}
 }
 in_2_but_not_in_1() {
-	 BIFS=${IFS}
-	 IFS=:
+	 local IFS=:
 	 for P in $2; do
 		  IFS=' '
 		  P=$(readlink -e $P 2>/dev/null || echo INVALID)
@@ -240,23 +254,25 @@ in_2_but_not_in_1() {
 		  [[ "$1" =~ (^|:)$P(:|$) ]] || echo $P
 		  IFS=:
 	 done
-	 IFS=${BIFS}
 }
 do_fail() {
    read -p "$*" CHAR
    return 1
 }
-test_network_once() {
-   /usr/bin/wget -q --tries=30 --timeout=30 http://www.google.com/ -O - 2>/dev/null | grep -iq 'feeling lucky'
+test_network_once() { # test_network_once [TIMEOUT [TRIES]]
+	TIMEOUT=${1:-10}	#default: wait 10 seconds
+	TRIES=${2:-1}		#default: try once
+   /usr/bin/wget -q --tries=${TRIES} --timeout=${TIMEOUT} http://www.google.com/ -O - 2>/dev/null | grep -iq 'feeling lucky'
 }
 wait-for-network() {
 	 SLEEPINC=1.5
+	 echo -n $( date +%a\ %H:%M:%S ) Testing for internet.
 	 while test_network_once; do
-		  echo $( date +%a\ %H:%M:%S ) No internet yet, waiting...
+		  echo -n .
 		  sleep $SLEEPINC
 		  SLEEPINC=$(echo "scale=30; $SLEEPINC*1.2" | bc )
 	 done
-	 echo yay, internet is up!
+	 echo \ yay, internet is up!
 }
 ramsize() { #returns size of system's ram in megabytes
 	 awk '/MemTotal:/ { printf ("%0.0f\n",$2/1024); }' /proc/meminfo
@@ -285,4 +301,13 @@ echo_red() {
 }
 func_exists() {
 	 declare -f ${1} >/dev/null
+}
+home_actual() {
+	 local U=${1:-${USER}}
+	 local H=$(awk 'BEGIN { FS = ":" } /^'${U}'/ { print $6 }' /etc/passwd)
+	 readlink -eq ${H} 2>/dev/null
+}
+sameish() {
+	 [ -f "${1}" -a -f "${2}" -a -r "${1}" -a -r "${2}" ] || return 1
+	 cmp -s <(grex ${1}) <(grex ${2})
 }

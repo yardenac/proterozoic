@@ -2,9 +2,9 @@ export DISPLAY=${DISPLAY:-:0.0}
 hatch() {
 	hatch_do() {
 		[ "$1" ] || return
-		"$@" >/dev/null 2>&1 &
+		"$@" &>/dev/null &
 	}
-	hatch_do "$@" >/dev/null 2>&1  &
+	hatch_do "$@" &>/dev/null &
 	PROC=$!
 	while process_exists $PROC; do
 		sleep 0.1
@@ -24,7 +24,7 @@ title_of_active_win() {
 #holdss() {
 #	unto
 #	while true; do
-#		xscreensaver-command -deactivate >/dev/null 2>&1
+#		xscreensaver-command -deactivate &>/dev/null
 #		sleep 55
 #		pid_exists $PPID && [ "$PPID" -ne "1" ] && continue
 #		break

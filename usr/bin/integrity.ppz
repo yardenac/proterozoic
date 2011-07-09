@@ -1,67 +1,169 @@
 #!/bin/bash
+. /etc/rc.conf
+. /etc/bash.functions
+integrity_emacsd() {
+	 local F=~/.emacs.d
+	 [ -L ${F} ] || {
+		  [ -d ${F} ] && mv ${F} ${F}.$(uniq_token)
+		  [ -a ${F} ] && echo "weird ${F}!" || ln -s /etc/.emacs.d ~/
+	 }
+	 am_root && {
+		  enforce_perms 444 /etc/.emacs.d/init.el
+		  enforce_perms 555 /etc/.emacs.d
+	 }
+}
+integrity_bashhistory() {
+	 shopt -s nullglob
+	 local IFS=$'\n'
+	 for F in $(ls -1 {/{root,home/*,media/green/*},~}/.bash_history 2>/dev/null | sort -u); do
+		  echo -n HISTFILE: ${F}
+		  ! am_root && ! [ -O "$F" ] && { echo ... X; continue; }
+		  echo ... \  \  doing
+		  skel_file=/etc/skel.ppz/.bash_history
+		  ! [ -s "$F" ] && cp ${skel_file} ${F} || {
+				! cmp -s <(head -n 1 ${F}) <(head -n 1 ${skel_file}) \
+					 && askyn "$F ("$(du -sh ${F} | cut -f 1)") has no skel prefix. Join them?" && {
+					 
+					 backup_file=${F}.ppz.$(date +%s)
+					 mv ${F} ${backup_file}
+					 cp ${skel_file} ${F}
+					 cat ${backup_file} >> ${F}
+					 cmp -s <(cat ${skel_file} ${backup_file} | md5sum) <(cat ${F} | md5sum) \
+						  && rm ${backup_file} || echo_red "Delete ${backup_file} yourself, I wasn't sure..."
+				}
+		  }
+		  am_root && lsattr "$F" &>/dev/null && {
+				ATTRSET=$(lsattr "$F")
+				[ ${ATTRSET:5:1} != a ] && say_and_do chattr +a "$F"
+		  }
+	 done
+}
+integrity_simpleconf() {
+	 am_root || return
+	 [ -e /media/inmem ] || mkdir /media/inmem
+	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
+	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
+	 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
+	 case $(hostname) in #uncomment
+		  gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
+		  *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
+	 esac
+}
+integrity_ttys() {
+	 am_root || return
+	 # customize the number of fgetty instances started from inittab
+	 case $(hostname) in
+		  gabba) :;;#one fgetty in inittab
+		  *) :;;#2 or 3 of them?
+	 esac
+}
+integrity_sshd() {
+	 am_root || return
+	 local OLDFILE=/etc/ssh/sshd_config
+	 local TMPFILE=${OLDFILE}.$(uniq_token)
+	 cat > ${TMPFILE} <<-EOF
+		ListenAddress 0.0.0.0
+		Protocol 2
+		LoginGraceTime 2m
+		PermitRootLogin no
+		#MaxAuthTries 6
+		#MaxSessions 10
+		#PasswordAuthentication yes
+		ChallengeResponseAuthentication no
+		UsePAM yes
+		X11Forwarding no
+		#X11DisplayOffset 10
+		PrintMotd no
+		PrintLastLog no
+		#UseLogin no
+		#MaxStartups 10
+		#PermitTunnel no
+		IgnoreRhosts yes
+		HostBasedAuthentication no
+		PermitEmptyPasswords no
+		Subsystem	sftp	/usr/lib/ssh/sftp-server
+
+		AllowUsers
+		EOF
+	 for USER in ${SSH_USERS[@]}; do
+		  case "${USER:0:1}" in
+				\!|@)	local BAREUSER=${USER:1};;
+				*)		local BAREUSER=${USER};;
+		  esac
+		  local USER_ALLOWED=yes
+		  [ ${USER:0:1} = \! ] && USER_ALLOWED=no
+		  [ ${BAREUSER} = root ] && \
+				sed -i 's/^#*\(PermitRootLogin\).*$/\1 '${USER_ALLOWED}'/gi' ${TMPFILE}
+		  [ ${USER_ALLOWED} = yes ] && sed -i 's/^#*\(AllowUsers\(\s[a-zA-Z]*\)*\)$/\1 '${BAREUSER}'/gi' ${TMPFILE}
+		  [ ${USER:0:1} = @ ] && cat >> ${TMPFILE} <<-EOF
+
+			Match User ${BAREUSER}
+			   ChrootDirectory $(home_actual ${BAREUSER})
+			   X11Forwarding no
+			   AllowTcpForwarding no
+			   ForceCommand cvs server
+			EOF
+	 done
+	 sameish ${OLDFILE} {$NEWFILE} && return
+	 shell_is_interactive \
+		  && askyn "Edit original & new sshd_configs?" \
+		  && {
+			  e ${OLDFILE} ${TMPFILE}
+			  askyn "Replace old w/new?" \
+					&& mv -f ${TMPFILE} ${OLDFILE} \
+					|| {
+						echo_red "keeping ${OLDFILE}, deleting temp one"
+						rm -f ${TMPFILE}
+			  }
+		  } || echo_red "you need to merge/replace from ${TMPFILE} yourself"
+	 # check rc.conf users, make homedir, etc?
+}
+integrity_locales() {
+	 echo "UNIMPLEMENTED: supposed to make sure locales are in order ... not sure what to do?"
+}
+integrity_tz() {
+	 echo "UNIMPLEMENTED: see what kind of /etc/localtime we have currently"
+	 echo "   if it is weird, prompt about replacing it with something better"
+}
+integrity_hosts() {
+	 return
+	 am_root || return
+	 #make the localhosts section make sense
+	 #add entries for the remote server hacks like g, i, etc
+	 #this function becomes the canonical place to add new entries!
+	 #besides apache.conf... ;)
+	 IPADDR=208.111.34.185
+	 HOSTSVER=2011070701
+}
+integrity_net() {
+	 return
+	 #try really quickly to establish net connection
+	 #echo notice if it doesn't work
+	 #should we prompt as well?? give user option to fix right here?
+}
+integrity_pacnew() {
+	 return
+	# TODO: check for pacnew files, do something with them
+	 # is it better to `find` the filesystem
+	 # or search pacman db for backup files and check those?
+	 #also do ppznew
+}
+integrity_inittab() {
+	 return
+}
+
+echo_red SPECIAL SHELL OPTS: $-
+echo_red CHECKING TREE FOR DEBUGGING
+pstree -phaun
+
 # this gets run in:
 #   post_install
 #    functions.d
 #     bash.bashrc.local
 #      post_upgrade
 
-. /etc/bash.functions
+for F in emacsd bashhistory locales tz hosts \
+	 net sshd simpleconf pacnew inittab; do #ttys
 
-[ -L ~/.emacs.d ] || {
-	 [ -d .emacs.d ] && mv .emacs.d .emacs.d.$(uniq_token)
-	 ln -s /etc/.emacs.d ~/
-}
-
-am_root || exit
-
-#comment
-sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit
-
-#uncomment
-case $(hostname) in
-	 gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
-	 *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
-esac
-
-grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
-
-[ -e /media/inmem ] || mkdir /media/inmem
-
-#check rc.conf vars - move from install file
-#&/| make homedir
-
-case $(hostname) in
-	 gabba) :;;#one fgetty in inittab
-	 *) :;;#2 or 3 of them?
-esac
-
-#TODO: check for pacnew files
-
-shopt -s nullglob
-IFS=$'\n'
-for F in $(ls -1 /{root,home/*,media/green/*}/.bash_history 2>/dev/null); do
-#	 if it doesn't exist (or is empty), just copy.
-#	 if it's there, check if it needs doing
-#	 if so, check if it's tiny (don't risk big files)
-#	 if so, do a swaperoo
-	 skel_file=/etc/skel.ppz/.bash_history
-	 ! [ -s "$F" ] && cp ${skel_file} ${F} || {
-		  ! cmp -s <(head -n 1 ${F}) <(head -n 1 ${skel_file}) \
-				&& askyn "$F ("$(du -sh ${F} | cut -f 1)") has no skel prefix. Join them?" && {
-
-				backup_file=${F}.ppz.$(date +%s)
-				mv ${F} ${backup_file}
-				cp ${skel_file} ${F}
-				cat ${backup_file} >> ${F}
-				cmp -s <(cat ${skel_file} ${backup_file} | md5sum) <(cat ${F} | md5sum) \
-					 && rm ${backup_file} || echo_red "Delete ${backup_file} yourself, I wasn't sure..."
-		  }
-	 }
-	 lsattr "$F" >/dev/null 2>&1 && {
-		  ATTRSET=$(lsattr "$F")
-		  [ ${ATTRSET:5:1} != a ] && say_and_do chattr +a "$F"
-	 }
+	 integrity_${F}
 done
-
-enforce_perms 444 /etc/.emacs.d/init.el
-enforce_perms 555 /etc/.emacs.d

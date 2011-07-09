@@ -2,7 +2,7 @@
 HoldPkg     = pacman glibc
 SyncFirst   = pacman
 Architecture = auto
-IgnorePkg = perl
+IgnorePkg = 
 [core]
 #Server = file:///src/core/pkg
 Include = /etc/pacman.d/mirrorlist.otown

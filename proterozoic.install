@@ -3,38 +3,13 @@ preowned_files=(
 	 etc/default/useradd
 	 etc/screenrc
 	 etc/ssh/ssh_config
-#	 etc/syslog-ng/syslog-ng.conf
+	 etc/syslog-ng/syslog-ng.conf
 	 etc/logrotate.conf
 	 etc/issue
 	 etc/ntp.conf
 	 etc/apcupsd/apcupsd.conf
 )
-need_attention=(
-	 etc/ssh/sshd_config
-)
-what_to_do_with=(
-	 etc/rc.conf
-	 etc/inittab
-	 etc/pacman.conf
-)
-rcconf_vars=(
-	 LOCALE
-	 tiMezOne
-	 daemons
-	 enc_homedir #/soy
-	 enc_mapname
-	 enc_dev
-#	 draft_username_w_uid_2063
-#	 encrypted_swap_file /estaba
-#	 ssh_authkeys_file /etc/ssh/sshd_authorized_keys
-#	 tmpfs_size 50%
-)
-
 ######### FUNCTIONS
-manual_changes_summary() {
-	 :
-#	 echo "add HOOKS=\"ppz_tmp\" to /etc/mkinitcpio.conf"
-}
 are_same() {
 	 [ -a "$1" ] && [ -a "$2" ] || return 1
 	 diff -qd "$1" "$2" >/dev/null
@@ -71,46 +46,24 @@ enforce_locales() {
 	 FILE=etc/locale.gen
 	 cp ${FILE}{,.backup.$(date +%s)}
 	 ls -FlAthr ${FILE}*
-	 cat > ${FILE} <<EOF
-en_US.UTF-8 UTF-8
-en_US ISO-8859-1
-es_US.UTF-8 UTF-8
-es_US ISO-8859-1
-he_IL.UTF-8 UTF-8
-he_IL ISO-8859-8
-iw_IL.UTF-8 UTF-8
-iw_IL ISO-8859-8
-de_DE.UTF-8 UTF-8
-de_DE ISO-8859-1
-EOF
+	 cat > ${FILE} <<-EOF
+		en_US.UTF-8 UTF-8
+		en_US ISO-8859-1
+		es_US.UTF-8 UTF-8
+		es_US ISO-8859-1
+		he_IL.UTF-8 UTF-8
+		he_IL ISO-8859-8
+		iw_IL.UTF-8 UTF-8
+		iw_IL ISO-8859-8
+		de_DE.UTF-8 UTF-8
+		de_DE ISO-8859-1
+		EOF
 	 locale-gen
-#	 locale
-#	 sleep 2
-#	 file_empty ${FILE} && {
-#	 } || {
-#		  echo "wat up with ${FILE}??"
-#		  du -sh ${FILE}*
-#		  file_contents ${FILE}
-#	 }
-#	 locale-gen
 }
 pwn_files() {
 	 for F in ${preowned_files[@]}; do
 		  clobberella "$F"
 	 done
-#	 for F in ${need_attention[@]}; do
-#		  echo SET UP MANUALLY: $F.ppz
-#	 done
-}
-check_is_rcconf_complete() {
-	 let vars_not_found=0
-	 for V in ${rcconf_vars[@]}; do
-		  grep -iEq ^${V}= /etc/rc.conf || {
-				let vars_not_found++
-				echo VAR NOT FOUND IN RC.CONF: ${V}
-		  }
-	 done
-	 return $vars_not_found
 }
 kernel_name=( $(pacman -Q | grep -i kernel ) )
 kernel_name=${kernel_name[0]}
@@ -146,20 +99,16 @@ check_triggers() {
 ########## HOOKS
 
 pre_install() {
-	 check_is_rcconf_complete
 	 enforce_locales
 }
 post_install() {
-#	 enforce_locales
 	 /etc/rc.d/iptables restart
 	 pwn_files
 	 /usr/bin/integrity.ppz
 	 check_triggers
-	 manual_changes_summary
 }
 
 pre_upgrade() {
-	 check_is_rcconf_complete
 	 for F in ${preowned_files[@]}; do
 		  are_same ${F}{,.ppz} && rm -f "$F"
 	 done
