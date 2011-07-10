@@ -3,7 +3,6 @@ depend_procedure core base
 [ -f /etc/bash.functions ] && . /etc/bash.functions
 
 IFACE=eth0
-TZONE=/usr/share/zoneinfo/America/Los_Angeles
 TARGET=/media/targay
 
 at_exit() {
@@ -16,9 +15,8 @@ at_exit() {
 trap 'at_exit' HUP QUIT EXIT INT ABRT TERM
 
 start_process() {
-	 askyn "Check current status of /etc/localtime! Done?"
-	 execute worker configure
-	 execute worker sysprep
+	 #execute worker configure #just does i/o stuff i dont use
+	 execute worker sysprep #remounts / rw
 	 until test_network_once; do
 		  ifconfig -a | grep -i 'Link encap:Ethernet'
 		  usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: '
@@ -29,12 +27,6 @@ start_process() {
 				|| giveup_prompt "Still no ipaddr - try again?"
 	 done
 	 echo_red NETWORK IS UP!
-	 while true; do
-		  usetvar TZONE 'Choose a timezone: '
-		  [ -f ${TZONE} ] || continue
-		  cp -f ${TZONE} /etc/localtime
-		  break
-	 done
 	 askyn "Update time with ntpdate? rn it says: "$(date) && {
 		  ntpdate pool.ntp.org
 		  echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
@@ -88,7 +80,9 @@ start_process() {
 				EOF
 		  cat >> ${TARGET}/etc/fstab < /tmp/ppz-fstab
 		  rm -f /tmp/ppz-fstab
-		  cp -f {,$TARGET}/etc/localtime
+		  cp -f ${TARGET}/etc/localtime /tmp/target-localtime-examine
+		  echo_red "Look at /tmp/target-localtime-examine to see what it was"
+		  cp -f {,${TARGET}}/etc/localtime
 		  set -o noclobber
 	 }
 	 pacman --config /etc/pacman.conf.bootstrap \

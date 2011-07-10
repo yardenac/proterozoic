@@ -44,8 +44,8 @@ file_contents() {
 }
 enforce_locales() {
 	 FILE=etc/locale.gen
-	 cp ${FILE}{,.backup.$(date +%s)}
-	 ls -FlAthr ${FILE}*
+#	 cp ${FILE}{,.backup.$(date +%s)}
+#	 ls -FlAthr ${FILE}*
 	 cat > ${FILE} <<-EOF
 		en_US.UTF-8 UTF-8
 		en_US ISO-8859-1
@@ -77,7 +77,7 @@ check_triggers() {
 		  grep -iEq '^HOOKS=".*ppz_tmp.*"' /etc/mkinitcpio.conf || {
 				echo '/etc/mkinitcpio.conf: No HOOKS="ppz_temp", so didn'"'"'t rebuild initrd'
 				rm -f lib/initcpio/install/ppz_tmp.last
-				return 1
+				return
 		  }
 		  [ -w /boot ] || {
 				grep -qiE '[[:space:]]/boot.*ro' /etc/mtab \
@@ -85,7 +85,7 @@ check_triggers() {
 		  } || {
 				echo "couldn't figure out your /boot ... not building initrd!"
 				rm -f lib/initcpio/install/ppz_tmp.last
-				return 1
+				return
 		  }
 		  [ -n "${kernel_name}" ] && {
 				/sbin/mkinitcpio -p ${kernel_name}

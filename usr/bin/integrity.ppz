@@ -60,8 +60,8 @@ integrity_ttys() {
 integrity_sshd() {
 	 am_root || return
 	 local OLDFILE=/etc/ssh/sshd_config
-	 local TMPFILE=${OLDFILE}.$(uniq_token)
-	 cat > ${TMPFILE} <<-EOF
+	 local NEWFILE=${OLDFILE}.$(uniq_token)
+	 cat > ${NEWFILE} <<-EOF
 		ListenAddress 0.0.0.0
 		Protocol 2
 		LoginGraceTime 2m
@@ -93,9 +93,9 @@ integrity_sshd() {
 		  local USER_ALLOWED=yes
 		  [ ${USER:0:1} = \! ] && USER_ALLOWED=no
 		  [ ${BAREUSER} = root ] && \
-				sed -i 's/^#*\(PermitRootLogin\).*$/\1 '${USER_ALLOWED}'/gi' ${TMPFILE}
-		  [ ${USER_ALLOWED} = yes ] && sed -i 's/^#*\(AllowUsers\(\s[a-zA-Z]*\)*\)$/\1 '${BAREUSER}'/gi' ${TMPFILE}
-		  [ ${USER:0:1} = @ ] && cat >> ${TMPFILE} <<-EOF
+				sed -i 's/^#*\(PermitRootLogin\).*$/\1 '${USER_ALLOWED}'/gi' ${NEWFILE}
+		  [ ${USER_ALLOWED} = yes ] && sed -i 's/^#*\(AllowUsers\(\s[a-zA-Z]*\)*\)$/\1 '${BAREUSER}'/gi' ${NEWFILE}
+		  [ ${USER:0:1} = @ ] && cat >> ${NEWFILE} <<-EOF
 
 			Match User ${BAREUSER}
 			   ChrootDirectory $(home_actual ${BAREUSER})
@@ -104,26 +104,39 @@ integrity_sshd() {
 			   ForceCommand cvs server
 			EOF
 	 done
-	 sameish ${OLDFILE} {$NEWFILE} && return
-	 shell_is_interactive \
-		  && askyn "Edit original & new sshd_configs?" \
-		  && {
-			  e ${OLDFILE} ${TMPFILE}
-			  askyn "Replace old w/new?" \
-					&& mv -f ${TMPFILE} ${OLDFILE} \
-					|| {
-						echo_red "keeping ${OLDFILE}, deleting temp one"
-						rm -f ${TMPFILE}
-			  }
-		  } || echo_red "you need to merge/replace from ${TMPFILE} yourself"
+	 sameish ${OLDFILE} {$NEWFILE} || erases_nothing ${OLDFILE} ${NEWFILE} || {
+		  shell_is_interactive && askyn "Edit original & new sshd_configs?" && {
+				e ${OLDFILE} ${NEWFILE}
+				askyn "Replace old w/new?" || {
+					 echo_red "keeping ${OLDFILE}, deleting temp one"
+					 rm -f ${NEWFILE}
+					 return
+				}
+		  }
+	 } && {
+		  mv -f ${NEWFILE} ${OLDFILE}
+		  return
+	 } || echo_red "you need to merge/replace from ${NEWFILE} yourself"
 	 # check rc.conf users, make homedir, etc?
 }
 integrity_locales() {
-	 echo "UNIMPLEMENTED: supposed to make sure locales are in order ... not sure what to do?"
+	 am_root || return
+	 local L=$(locale)
+	 [ -z "${L}" ] && askyn "You have no locale!? Should we fix this?" \
+		  && echo "Oops, Not implemented yet..."
 }
 integrity_tz() {
-	 echo "UNIMPLEMENTED: see what kind of /etc/localtime we have currently"
-	 echo "   if it is weird, prompt about replacing it with something better"
+	 am_root || return
+	 cmp -s /etc/localtime /usr/share/zoneinfo/America/Vancouver || return
+	 askyn "You have the default arch timezone. Want to replace it?" && {
+		  TZONE=/usr/share/zoneinfo/America/Los_Angeles
+		  while true; do
+				usetvar TZONE 'Choose a timezone: '
+				[ -f ${TZONE} ] || continue
+				cp -f ${TZONE} /etc/localtime
+				break
+		  done
+	 }
 }
 integrity_hosts() {
 	 return
@@ -152,9 +165,9 @@ integrity_inittab() {
 	 return
 }
 
-echo_red SPECIAL SHELL OPTS: $-
-echo_red CHECKING TREE FOR DEBUGGING
-pstree -phaun
+#echo_red SPECIAL SHELL OPTS: $- $PS1
+#echo_red CHECKING TREE FOR DEBUGGING
+#pstree -phaun
 
 # this gets run in:
 #   post_install

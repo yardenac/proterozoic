@@ -3,6 +3,7 @@ uniq_token()	{ echo $(date +%s).$(printf "%05d" $RANDOM); }
 am_root()		{ [ "x$EUID" == "x0" ]; }
 say_and_do()	{ echo DOING: "$@"; "$@"; }
 return_arg1()	{ return "$1"; }
+return_out()	{ return $("$@" 2>/dev/null); }
 isnt()			{ eval "$@"; [ $? -ne 0 ]; }
 wait_until()	{ while isnt "$@"; do sleep 0.5; done; }
 weekletter()	{ ARR=(S m t w T f s S); echo ${ARR[$(date +%u)]}; }
@@ -115,19 +116,32 @@ clear_input_buffer() {
     done
     echo -ne "$2"
 }
+pacman_is_ancestor() {
+	 local CHECKPID=${1:-$$}
+	 CHECKPID=${CHECKPID// }
+	 ps -p ${CHECKPID} -o args= | grep -iq pacman && return
+	 [ "${CHECKPID}" = "1" ] && return 1
+	 pacman_is_ancestor $(ps -p ${CHECKPID} -o ppid=)
+}
 shell_is_interactive() {
-	 local ttyvar=$(tty)
-	 [[ "${ttyvar:5}" =~ pts/* ]] || {
-		  echo_red "Shell doesn't appear interactive. tty is: ${ttyvar}"
-		  return 1
-	 }
-	 case "$-" in
-		  *i*) [ -z "${PS1}" ] || return 0
-	 esac
-	 return 1
+	 ! pacman_is_ancestor
+	 local P=$?
+	 eval "shell_is_interactive() { return $P; }"
+	 return $P
+#	 return $?
+#	 local ttyvar=$(tty)
+#	 [[ "${ttyvar:5}" =~ {pts/,tty}* ]] || {
+#		  echo_red "Shell doesn't appear interactive. tty is: ${ttyvar}"
+#		  return 1
+#	 }
+#	 case "$-" in
+#		  *i*) [ -n "${PS1}" ] && ! pacman_is_ancestor $$ && return
+#	 esac
+#	 return 1
 }
 askyn() {
 	 echo
+#	 type shell_is_interactive
 	 shell_is_interactive || return 1
 	 clear_input_buffer
 	 read -N 1 -p $'\e[1;34m'"$*"$' [*/n]):\e[m ' USERINPUT
@@ -307,7 +321,22 @@ home_actual() {
 	 local H=$(awk 'BEGIN { FS = ":" } /^'${U}'/ { print $6 }' /etc/passwd)
 	 readlink -eq ${H} 2>/dev/null
 }
+grex() {
+	 grep -iEvr '^[[:space:]]*(#|;|//|$)' "${@}"
+}
 sameish() {
+#	 type grex
 	 [ -f "${1}" -a -f "${2}" -a -r "${1}" -a -r "${2}" ] || return 1
 	 cmp -s <(grex ${1}) <(grex ${2})
+}
+erases_nothing() {
+	 [ -a "${1}" -a -a "${2}" ] && return
+#	 echo COMM STUFF: ${1} ${2}
+#	 comm -23 \
+#		  <(grex ${1} | sort -u) \
+#		  <(grex ${2} | sort -u)
+	 return $(comm -23 \
+		  <(grex ${1} | sort -u) \
+		  <(grex ${2} | sort -u) \
+		  2>/dev/null | wc -c)
 }
