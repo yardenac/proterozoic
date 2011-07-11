@@ -1,0 +1,26 @@
+#!/usr/bin/python2
+
+#import ntplib,datetime
+#x = ntplib.NTPClient()
+#datetime.datetime.utcfromtimestamp(x.request('europe.pool.ntp.org').tx_time)
+##datetime.datetime(2009, 10, 21, 7, 1, 54, 716657)
+
+#from socket import *
+import struct, sys, time, socket, math
+
+client = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+data = '\x1b' + 47 * '\0'
+beforesend = time.time()
+client.sendto( data, ( "0.us.pool.ntp.org", 123 ))
+data, address = client.recvfrom( 1024 )
+aftersend = time.time()
+if data:
+    interval = ((aftersend - beforesend) / 2)
+    us = aftersend - interval
+    them = struct.unpack( '!12I', data )[10] - 2208988800L - interval
+#    print "%036.25f" % (us)
+#    print "%036.25f" % (them)
+#    print "%036.25f" % (us - them)
+#    print "%036.25f" % (them - us)
+    prepos = "fast" if (us > them) else "slow"
+    print "Clock is %d seconds %s!" % (round(abs(them - us),0),prepos) #%4.2f
