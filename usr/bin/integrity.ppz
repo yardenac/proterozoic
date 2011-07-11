@@ -149,10 +149,15 @@ integrity_hosts() {
 	 HOSTSVER=2011070701
 }
 integrity_net() {
-	 return
-	 #try really quickly to establish net connection
-	 #echo notice if it doesn't work
-	 #should we prompt as well?? give user option to fix right here?
+	 # the goal here is to do anything we can to have CONNECTIVITY
+	 # but not steal focus for more than a second or two
+	 test_network_once 2 && {
+		  echo "You DO have fast connectivity!"
+		  # do stuff that might require fast net connection
+		  # especially ntpd
+	 } || {
+		  echo "No fast connectivity..."
+	 }
 }
 integrity_pacnew() {
 	 return
