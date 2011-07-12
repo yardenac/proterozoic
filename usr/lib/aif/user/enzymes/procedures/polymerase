@@ -2,7 +2,6 @@
 depend_procedure core base
 [ -f /etc/bash.functions ] && . /etc/bash.functions
 
-IFACE=eth0
 TARGET=/media/targay
 
 at_exit() {
@@ -17,21 +16,6 @@ trap 'at_exit' HUP QUIT EXIT INT ABRT TERM
 start_process() {
 	 #execute worker configure #just does i/o stuff i dont use
 	 execute worker sysprep #remounts / rw
-	 until test_network_once; do
-		  ifconfig -a | grep -i 'Link encap:Ethernet'
-		  usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: '
-		  pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
-		  dhcpcd $IFACE \
-				|| giveup_prompt "Launching dhcpcd failed. Try again?"
-		  ifconfig $IFACE | grep -q 'inet addr:' \
-				|| giveup_prompt "Still no ipaddr - try again?"
-	 done
-	 echo_red NETWORK IS UP!
-	 askyn "Update time with ntpdate? rn it says: "$(date) && {
-		  ntpdate pool.ntp.org
-		  echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
-		  hwclock --systohc --utc
-	 }
 	 usetvar TARGET 'Choose a temporary mount point: '
 	 echo_red "YOU SHOULD HAVE ALREADY PARTITIONED - A LIST TO HELP YOU ;)"
 	 blkid | grep -ivE 'raid|crypto_LUKS|squashfs' | sort -u
@@ -104,7 +88,7 @@ start_process() {
 	 askyn "Above is ${TARGET}/etc/mkinitcpio.conf. Edited & rebuild?" && {
 		  chroot ${TARGET} /sbin/mkinitcpio -p kernel26
 	 }
-	 askyn "Install grub?" && {
+	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
 		  echo "Grub crap not implemented yet."
 		  # find right partition
 		  # fuck with menu.lst

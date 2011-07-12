@@ -38,17 +38,6 @@ integrity_bashhistory() {
 		  }
 	 done
 }
-integrity_simpleconf() {
-	 am_root || return
-	 [ -e /media/inmem ] || mkdir /media/inmem
-	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
-	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
-	 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
-	 case $(hostname) in #uncomment
-		  gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
-		  *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
-	 esac
-}
 integrity_ttys() {
 	 am_root || return
 	 # customize the number of fgetty instances started from inittab
@@ -119,6 +108,44 @@ integrity_sshd() {
 	 } || echo_red "you need to merge/replace from ${NEWFILE} yourself"
 	 # check rc.conf users, make homedir, etc?
 }
+integrity_hosts() {
+	 # so far just prints the modified hosts file
+	 {
+		  cat <<-EOF
+			THISVER 2011070702
+			ASSIGN 127.0.0.1       localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
+			ASSIGN ::1             localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
+			ASSIGN 192.168.1.200
+			ASSIGN 192.168.1.226 fjm-wl
+			ASSIGN 192.168.1.227 fjm-eth
+			ASSIGN 192.168.1.228 dusty scaly
+			ASSIGN 192.168.1.229 lucky lucky-wf lucky-wifi edie-wl
+			ASSIGN 192.168.1.230 
+			ASSIGN 192.168.1.231 
+			ASSIGN 192.168.1.232
+			ASSIGN 192.168.1.233 #vonage 
+			ASSIGN 192.168.1.234 remorseful emo arch archean sarcopty
+			ASSIGN 192.168.3.200 #sonic.router
+			ASSIGN 192.168.3.233 
+			ASSIGN 69.162.252.119 #shop.pageturnereditions.com
+			ASSIGN 173.228.38.224 
+			ASSIGN 208.111.34.185
+			ASSIGN 208.111.39.115 g i w m k d db dm ih ihm bs s e se es he eh h lj ljm map me nz y b r v apa aur p yelp arch archp moz l n news o t grad gradd gadd music tv
+			EOF
+		  cat /etc/hosts
+	 } | awk -f /usr/share/ppz/awk-hosts
+}
+integrity_simpleconf() {
+	 am_root || return
+	 [ -e /media/inmem ] || mkdir /media/inmem
+	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
+	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
+	 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
+	 case $(hostname) in #uncomment
+		  gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
+		  *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
+	 esac
+}
 integrity_locales() {
 	 am_root || return
 	 local L=$(locale)
@@ -138,25 +165,36 @@ integrity_tz() {
 		  done
 	 }
 }
-integrity_hosts() {
-	 return
-	 am_root || return
-	 #make the localhosts section make sense
-	 #add entries for the remote server hacks like g, i, etc
-	 #this function becomes the canonical place to add new entries!
-	 #besides apache.conf... ;)
-	 IPADDR=208.111.34.185
-	 HOSTSVER=2011070701
-}
 integrity_net() {
 	 # the goal here is to do anything we can to have CONNECTIVITY
 	 # but not steal focus for more than a second or two
 	 test_network_once 2 && {
-		  echo "You DO have fast connectivity!"
+#		  echo "You DO have fast connectivity!"
+		  python-ntp
 		  # do stuff that might require fast net connection
 		  # especially ntpd
 	 } || {
-		  echo "No fast connectivity..."
+		  echo -n "No fast connectivity... Local system time: "
+		  echo_red $(date '+%l%M%S (%A %B %e, %Y)')
+	 }
+	 return
+	 # holdover from polymerase
+	 echo THIS STUFF SHOULD NEVER EXECUTE
+	 IFACE=eth0
+	 until test_network_once; do
+		  ifconfig -a | grep -i 'Link encap:Ethernet'
+		  usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: '
+		  pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
+		  dhcpcd $IFACE \
+				|| giveup_prompt "Launching dhcpcd failed. Try again?"
+		  ifconfig $IFACE | grep -q 'inet addr:' \
+				|| giveup_prompt "Still no ipaddr - try again?"
+	 done
+	 echo_red NETWORK IS UP!
+	 askyn "Update time with ntpdate? rn it says: "$(date) && {
+		  ntpdate pool.ntp.org
+		  echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
+		  hwclock --systohc --utc
 	 }
 }
 integrity_pacnew() {

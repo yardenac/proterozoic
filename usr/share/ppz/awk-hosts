@@ -1,0 +1,34 @@
+#!/bin/awk
+
+BEGIN {
+	 true			= 1
+	 false		= 0
+	 goahead		= false
+	 delete iparr
+	 delete end_strings
+} /^\s*$/ { next
+} /^THISVER.*/ { THISVER = $2; next
+}  /^ASSIGN.*/ {
+	 if (NF < 2) next
+	 iparr[length(iparr)] = $2
+	 t = ""
+	 for (f=3;f<=NF;f++)
+		  if (!($f ~ /^#/))
+				t = t " " $f
+	 if (t) end_strings[length(end_strings)] = $2 t
+	 next
+} /^#HOSTSVER=[0-9]*$/ {
+	 if (substr($0,11) >= THISVER) exit
+	 goahead = true
+} $1 ~ /^#*([0-9]+[\.\s]|::1)+/ {
+	 holder=$0
+	 gsub(/^#*/,"")
+	 for (ip in iparr)
+		  if ($1 ~ iparr[ip])
+				next
+	 $0 = holder
+} { print $0 } END {
+	 if (!goahead) exit
+	 for (i=0;i<length(end_strings);i++)
+		  print end_strings[i]
+}
