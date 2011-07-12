@@ -3,12 +3,15 @@
 BEGIN {
 	 true			= 1
 	 false		= 0
-	 goahead		= false
+	 verlyet		= false
 	 delete iparr
 	 delete end_strings
-} /^\s*$/ { next
+} /^# .etc.hosts: static lookup table for host names$/ { next
+} /^#<ip-address>.*$/ { next
+} /^# End of file$/ { next
+} /^[\s#]*$/ { next
 } /^THISVER.*/ { THISVER = $2; next
-}  /^ASSIGN.*/ {
+} /^ASSIGN.*/ {
 	 if (NF < 2) next
 	 iparr[length(iparr)] = $2
 	 t = ""
@@ -19,7 +22,7 @@ BEGIN {
 	 next
 } /^#HOSTSVER=[0-9]*$/ {
 	 if (substr($0,11) >= THISVER) exit
-	 goahead = true
+	 verlyet = true
 } $1 ~ /^#*([0-9]+[\.\s]|::1)+/ {
 	 holder=$0
 	 gsub(/^#*/,"")
@@ -28,7 +31,8 @@ BEGIN {
 				next
 	 $0 = holder
 } { print $0 } END {
-	 if (!goahead) exit
+	 if (!verlyet)
+		  print "#HOSTSVER=" THISVER
 	 for (i=0;i<length(end_strings);i++)
 		  print end_strings[i]
 }

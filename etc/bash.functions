@@ -321,20 +321,15 @@ home_actual() {
 	 local H=$(awk 'BEGIN { FS = ":" } /^'${U}'/ { print $6 }' /etc/passwd)
 	 readlink -eq ${H} 2>/dev/null
 }
-grex() {
+alias | grep -iqE '^alias grex=' || grex() {
 	 grep -iEvr '^[[:space:]]*(#|;|//|$)' "${@}"
 }
 sameish() {
-#	 type grex
 	 [ -f "${1}" -a -f "${2}" -a -r "${1}" -a -r "${2}" ] || return 1
 	 cmp -s <(grex ${1}) <(grex ${2})
 }
 erases_nothing() {
 	 [ -a "${1}" -a -a "${2}" ] && return
-#	 echo COMM STUFF: ${1} ${2}
-#	 comm -23 \
-#		  <(grex ${1} | sort -u) \
-#		  <(grex ${2} | sort -u)
 	 return $(comm -23 \
 		  <(grex ${1} | sort -u) \
 		  <(grex ${2} | sort -u) \

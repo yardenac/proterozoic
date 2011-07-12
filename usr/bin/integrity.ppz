@@ -18,6 +18,11 @@ integrity_bashhistory() {
 	 for F in $(ls -1 {/{root,home/*,media/green/*},~}/.bash_history 2>/dev/null | sort -u); do
 		  echo -n HISTFILE: ${F}
 		  ! am_root && ! [ -O "$F" ] && { echo ... X; continue; }
+		  local ATTRSET=
+		  lsattr "$F" &>/dev/null && {
+				ATTRSET=$(lsattr "$F")
+				[ ${ATTRSET:5:1} = a ] && { echo ... A; continue; }
+		  }
 		  echo ... \  \  doing
 		  skel_file=/etc/skel.ppz/.bash_history
 		  ! [ -s "$F" ] && cp ${skel_file} ${F} || {
@@ -32,10 +37,7 @@ integrity_bashhistory() {
 						  && rm ${backup_file} || echo_red "Delete ${backup_file} yourself, I wasn't sure..."
 				}
 		  }
-		  am_root && lsattr "$F" &>/dev/null && {
-				ATTRSET=$(lsattr "$F")
-				[ ${ATTRSET:5:1} != a ] && say_and_do chattr +a "$F"
-		  }
+		  am_root && [ "${ATTRSET:5:1}" = - ] && say_and_do chattr +a "$F"
 	 done
 }
 integrity_ttys() {
@@ -109,10 +111,11 @@ integrity_sshd() {
 	 # check rc.conf users, make homedir, etc?
 }
 integrity_hosts() {
-	 # so far just prints the modified hosts file
+	 local OLDFILE=/etc/hosts
+	 local NEWFILE=${OLDFILE}.$(uniq_token)
 	 {
 		  cat <<-EOF
-			THISVER 2011070702
+			THISVER 2011071201
 			ASSIGN 127.0.0.1       localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
 			ASSIGN ::1             localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
 			ASSIGN 192.168.1.200
@@ -132,8 +135,10 @@ integrity_hosts() {
 			ASSIGN 208.111.34.185
 			ASSIGN 208.111.39.115 g i w m k d db dm ih ihm bs s e se es he eh h lj ljm map me nz y b r v apa aur p yelp arch archp moz l n news o t grad gradd gadd music tv
 			EOF
-		  cat /etc/hosts
-	 } | awk -f /usr/share/ppz/awk-hosts
+		  cat ${OLDFILE}
+	 } | awk -f /usr/share/ppz/awk-hosts > ${NEWFILE}
+	 mv ${OLDFILE}{,.orig.$(uniq_token)}
+	 mv ${NEWFILE} ${OLDFILE}
 }
 integrity_simpleconf() {
 	 am_root || return
@@ -166,20 +171,17 @@ integrity_tz() {
 	 }
 }
 integrity_net() {
-	 # the goal here is to do anything we can to have CONNECTIVITY
-	 # but not steal focus for more than a second or two
-	 test_network_once 2 && {
-#		  echo "You DO have fast connectivity!"
-		  python-ntp
-		  # do stuff that might require fast net connection
-		  # especially ntpd
+	 test_network_once 4 && {
+		  ! python-ntp && askyn "Sync kernel & hwclock with ntpdate?" && {
+				ntpdate pool.ntp.org
+				echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
+				hwclock --systohc --utc
+		  } || true
 	 } || {
 		  echo -n "No fast connectivity... Local system time: "
 		  echo_red $(date '+%l%M%S (%A %B %e, %Y)')
 	 }
 	 return
-	 # holdover from polymerase
-	 echo THIS STUFF SHOULD NEVER EXECUTE
 	 IFACE=eth0
 	 until test_network_once; do
 		  ifconfig -a | grep -i 'Link encap:Ethernet'
@@ -190,12 +192,6 @@ integrity_net() {
 		  ifconfig $IFACE | grep -q 'inet addr:' \
 				|| giveup_prompt "Still no ipaddr - try again?"
 	 done
-	 echo_red NETWORK IS UP!
-	 askyn "Update time with ntpdate? rn it says: "$(date) && {
-		  ntpdate pool.ntp.org
-		  echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
-		  hwclock --systohc --utc
-	 }
 }
 integrity_pacnew() {
 	 return

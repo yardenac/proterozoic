@@ -14,4 +14,6 @@ mount /dev/disk/by-uuid/913e0e86-9eb2-4dd5-9513-6b34f26f37cc /media/rodinia
 mount /dev/disk/by-uuid/45d0d831-d045-410c-b2ec-d525ef69e36c /media/arch-cold-rw
 mount /dev/disk/by-uuid/5b25f749-ab8d-4749-a8b0-3b7d3408af19 /media/arch-cold-ro
 mount /dev/mapper/green /media/green
+pacman --config /etc/pacman.conf.bootstrap -Sy proterozoic
+ssh -t fin@edie-wl screen -x -R && exit
 #LAST_PPZ_COMMAND
