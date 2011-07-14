@@ -161,11 +161,16 @@ integrity_tz() {
 	 am_root || return
 	 cmp -s /etc/localtime /usr/share/zoneinfo/America/Vancouver || return
 	 [ -a /etc/localtime.userok ] && return
-	 while true; do
+	 local c=22; while let c--; do
 		  usetvar TZONE "You have the default arch timezone. To keep it, press C-c or C-\ ...
-To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCANCELLED
+To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCANCELLED || {
+				echo_red "Still using default time zone!"
+				break
+		  }
 		  [ "$TZONE" = "USERCANCELLED" ] && {
-				touch /etc/localtime.userok
+				echo "If this file exists, it means the system is SUPPOSED to" \
+					 "have the default timezone (Vancouver). Otherwise, root" \
+					 "would always be prompted to change it." > /etc/localtime.userok
 				echo_red "Default timezone kept. You won't be asked again."
 				break
 		  }

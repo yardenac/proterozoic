@@ -23,16 +23,25 @@ ln -s /media/rodinia/pub /snowball
 
 arch=$(uname -m)
 
-wget http://schlunix.org/archlinux/extra/os/$arch/git-1.7.5.2-1-$arch.pkg.tar.xz    -qO /tmp/git-1.7.5.2-1-$arch.pkg.tar.xz
-wget http://schlunix.org/archlinux/extra/os/$arch/python2-2.7.2-1-$arch.pkg.tar.xz  -qO /tmp/python2-2.7.2-1-$arch.pkg.tar.xz
+this_pacman() {
+	 pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm "$@"
+}
+
+# necessary because of the aufs/kernel drama going on. Hopefully it can be temporary...
+install_from_schlunix() {
+	 for P; do
+		  wget http://schlunix.org/archlinux/extra/os/$arch/$P-$arch.pkg.tar.xz    -qO /tmp/$P-$arch.pkg.tar.xz
+		  echo /tmp/$P-$arch.pkg.tar.xz
+	 done | this_pacman -U -
+}
+
 wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.d/mirrorlist.otown -qO /etc/pacman.d/mirrorlist.otown.tmp
 wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.conf.bootstrap -qO - | sed s/otown/otown.tmp/ig > /tmp/pacman.conf.ppz
 
 mv /etc/sudoers{,.archiso-default}
 
-pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm -Syq
-# necessary because of the aufs/kernel drama going on. Hopefully it can be temporary...
-pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm -U /tmp/git-1.7.5.2-1-$arch.pkg.tar.xz /tmp/python2-2.7.2-1-$arch.pkg.tar.xz
-pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm -Sq proterozoic
+this_pacman -Syq
+install_from_schlunix git-1.7.5.2-1 python2-2.7.2-1 screen-4.0.3-11
+this_pacman -Sq proterozoic
 
 rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
