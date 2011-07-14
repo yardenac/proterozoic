@@ -160,15 +160,21 @@ integrity_locales() {
 integrity_tz() {
 	 am_root || return
 	 cmp -s /etc/localtime /usr/share/zoneinfo/America/Vancouver || return
-	 askyn "You have the default arch timezone. Want to replace it?" && {
-		  TZONE=/usr/share/zoneinfo/America/Los_Angeles
-		  while true; do
-				usetvar TZONE 'Choose a timezone: '
-				[ -f ${TZONE} ] || continue
+	 [ -a /etc/localtime.userok ] && return
+	 while true; do
+		  usetvar TZONE "You have the default arch timezone. To keep it, press C-c or C-\ ...
+To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCANCELLED
+		  [ "$TZONE" = "USERCANCELLED" ] && {
+				touch /etc/localtime.userok
+				echo_red "Default timezone kept. You won't be asked again."
+				break
+		  }
+		  [ -f ${TZONE} ] && {
 				cp -f ${TZONE} /etc/localtime
 				break
-		  done
-	 }
+		  }
+		  echo_blue "That timezone doesn't exist."
+	 done
 }
 integrity_net() {
 	 test_network_once 4 && {
