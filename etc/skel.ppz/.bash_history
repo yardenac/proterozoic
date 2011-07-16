@@ -16,4 +16,5 @@ mount /dev/disk/by-uuid/5b25f749-ab8d-4749-a8b0-3b7d3408af19 /media/arch-cold-ro
 mount /dev/mapper/green /media/green
 pacman --config /etc/pacman.conf.bootstrap -Sy proterozoic
 ssh -t fin@edie-wl screen -x -R && exit
+wget https://raw.github.com/twomen/proterozoic/master/etc/rc.conf.basics -qO /etc/rc.conf.basics.ppz
 #LAST_PPZ_COMMAND

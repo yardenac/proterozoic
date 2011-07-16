@@ -23,16 +23,16 @@ GITURL=https://raw.github.com/twomen/proterozoic/master
 mv -f /etc/rc.conf{,.original}
 mv -f /etc/sudoers{,.archiso-default}
 wget $GITURL/etc/rc.conf.ppz						-qO	/etc/rc.conf
-wget $GITURL/etc/rc.conf.basics					-qO	/etc/rc.conf.basics.ppz
+wget $GITURL/etc/rc.conf.basics					-qO	/etc/rc.conf.basics.tmp
 wget $GITURL/etc/pacman.d/mirrorlist.otown	-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/etc/pacman.conf.bootstrap			-qO	/tmp/pacman.conf.ppz
 sed -i s/otown/otown.tmp/ig								/tmp/pacman.conf.ppz
-sed -i s/rc.conf.basics/rc.conf.basics.ppz/ig		/etc/rc.conf
+sed -i s/rc.conf.basics/rc.conf.basics.tmp/ig		/etc/rc.conf
 sed -i s/%SET_HOSTNAME%/archiso/ig						/etc/rc.conf
 
 this_pacman -Sqy
 install_from_schlunix git-1.7.5.2-1 python2-2.7.2-1 screen-4.0.3-11 sshfs-2.2-3
 this_pacman -Sq proterozoic smartmontools
 
-sed -i s/rc.conf.basics.ppz/rc.conf.basics/ig		/etc/rc.conf
-rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp /etc/rc.conf.basics.ppz
+sed -i s/rc.conf.basics.tmp/rc.conf.basics/ig		/etc/rc.conf
+rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp /etc/rc.conf.basics.tmp
