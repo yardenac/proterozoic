@@ -36,3 +36,7 @@ this_pacman -Sq proterozoic smartmontools
 
 sed -i s/rc.conf.basics.tmp/rc.conf.basics/ig		/etc/rc.conf
 rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp /etc/rc.conf.basics.tmp
+
+add_hook() {:;}
+. /etc/rc.d/functions.d/ppz
+custom_iptables_rules

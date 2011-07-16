@@ -107,6 +107,7 @@ integrity_pacnew() {
 integrity_users() {
 	 #make sure users exist, have homedirs
 	 #use rc.conf vars
+	 :
 }
 integrity_inittab() {
 	 return

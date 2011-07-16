@@ -26,5 +26,5 @@ makepkg -c \
 
 declare -f echo_red >/dev/null || echo_red() { echo "$@"; }
 
-git diff HEAD --quiet -- bootstrap-this etc/pacman.{conf.bootstrap,d/mirrorlist.otown} \
+git diff HEAD --quiet -- bootstrap-this etc/{rc.conf{.ppz,.basics},pacman.{conf.bootstrap,d/mirrorlist.otown}} \
 	 || echo_red "Bootstrap files have changed, you probably want to update git!"

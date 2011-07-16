@@ -87,8 +87,8 @@ enforce_perms() {
 		  say_and_do chmod "$1" "$2" #chmod file if not set already
 	 }
 }
-alias | grep -iqE '^alias grex=' || grex() {
-	 grep -iEvr '^[[:space:]]*(#|;|//|$)' "${@}"
+alias | grep -iqE '^alias grex=' || {
+	 grex() { grep -iEvr '^[[:space:]]*(#|;|//|$)' "${@}"; }
 }
 sameish() {
 	 [ -f "${1}" -a -f "${2}" -a -r "${1}" -a -r "${2}" ] || return 1
