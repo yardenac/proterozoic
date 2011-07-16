@@ -1,7 +1,7 @@
 export SHELL=/bin/bash
 [ -f /etc/bash.functions  ] && . /etc/bash.functions
 [ -a /usr/bin/Xorg ] && . /etc/bash.functions.xorg
-/usr/bin/integrity.ppz
+time /usr/bin/integrity.ppz
 [ -x /usr/bin/integrity.linode ] && /usr/bin/integrity.linode
 GOODPATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$(readlink -e ~/bin)
 for NEWDIR in $(in_2_but_not_in_1 "$GOODPATH" "$PATH"); do case $NEWDIR in

@@ -3,6 +3,7 @@ uniq_token()	{ echo $(date +%s).$(printf "%05d" $RANDOM); }
 am_root()		{ [ "x$EUID" == "x0" ]; }
 say_and_do()	{ echo DOING: "$@"; "$@"; }
 return_arg1()	{ return "$1"; }
+ifn()				{ return "${1:-99}"; }
 return_out()	{ return $("$@" 2>/dev/null); }
 isnt()			{ eval "$@"; [ $? -ne 0 ]; }
 wait_until()	{ while isnt "$@"; do sleep 0.5; done; }
@@ -86,7 +87,6 @@ enforce_perms() {
 		  say_and_do chmod "$1" "$2" #chmod file if not set already
 	 }
 }
-type alias
 alias | grep -iqE '^alias grex=' || grex() {
 	 grep -iEvr '^[[:space:]]*(#|;|//|$)' "${@}"
 }
@@ -100,6 +100,34 @@ erases_nothing() {
 		  <(grex ${1} | sort -u) \
 		  <(grex ${2} | sort -u) \
 		  2>/dev/null | wc -c)
+}
+conffile_checkup() { # conffile_checkup OLDFILE NEWFILE
+	 # return vals:
+	 # 0 if file is changed
+	 # 1 if file was identical
+	 # 2 if file is retained but needs user input
+	 [ -f "$1" ] && [ -f "$2" ] || return 1
+	 OLDFILE="${1}"; NEWFILE="${2}"
+	 cmp -s ${OLDFILE} ${NEWFILE} && {
+		  rm -f ${NEWFILE}
+		  return
+	 }
+	 sameish ${OLDFILE} {$NEWFILE} || erases_nothing ${OLDFILE} ${NEWFILE} || {
+		  askyn "Edit ${OLDFILE} ... ${NEWFILE}?" && {
+				e ${OLDFILE} ${NEWFILE}
+				askyn "Replace old w/new?" || {
+					 echo_red "keeping ${OLDFILE}, deleting temp one"
+					 rm -f ${NEWFILE}
+					 return 1
+				}
+		  }
+	 } && {
+		  mv -f ${NEWFILE} ${OLDFILE}
+		  return 1
+	 } || {
+		  echo_red "you need to merge/replace from ${NEWFILE} yourself"
+		  return
+	 }
 }
 ############ INTERACTIVE CONSOLE TRICKS
 ansi_colors=(black red green yellow blue magenta cyan white)
@@ -160,13 +188,7 @@ countdown() {
    done
 }
 shell_is_interactive() {
-	 [ -t 0 ] || echo stdin  not a terminal
-	 [ -t 1 ] || echo stdout not a terminal
-	 [ -t 2 ] || echo stderr not a terminal
-	 ! [ -t 0 ] \
-		  || ! [ -t 1 ] \
-		  || ! [ -t 2]
-#		  || ! pacman_is_ancestor
+	 [ -t 0 ] && [ -t 1 ] && [ -t 2 ]
 	 local P=$?
 	 eval "shell_is_interactive() { return $P; }"
 	 return $P
@@ -371,4 +393,15 @@ home_actual() {
 	 local U=${1:-${USER}}
 	 local H=$(awk 'BEGIN { FS = ":" } /^'${U}'/ { print $6 }' /etc/passwd)
 	 readlink -eq ${H} 2>/dev/null
+}
+makepkg_flexi() {
+	 return
+	 local A=
+	 case "$1" in
+		  32|i686)		A=i686;			shift;continue;;
+		  64|x86_64)	A=x86_64;		shift;continue;;
+		  *)				A=$(uname -m)
+	 esac
+	 B=$(grep -iEc ^processor /proc/cpuinfo); let ++B
+	 # unfinished!
 }

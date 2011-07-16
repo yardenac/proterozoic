@@ -21,7 +21,7 @@
 
 (add-hook 'html-mode-hook 'my-html-mode-hook)
 
+(global-set-key (kbd "C-c C-e") 'auto-revert-mode)
 (global-set-key (kbd "C-c C-r") 'revert-buffer)
 (global-set-key (kbd "C-c C-p") 'shell-script-mode)
-(global-set-key (kbd "C-c C-l") 'toggle-truncate-lines)
-(global-set-key (kbd "C-c C-f") 'auto-revert-mode)
+(global-set-key (kbd "C-c C-;") 'toggle-truncate-lines)

@@ -1,7 +1,9 @@
+. /etc/rc.conf.basics
+
 HOSTNAME=%SET_HOSTNAME%
 MODULES=(btrfs dm-crypt)
 #edie: ac battery button fan processor sbs video iwl3945 intel_agp drm i915 # nvidia
-DAEMONS=(syslog-ng @iptables @sshd @crond) #dbus @wicd @privoxy @tor @alsa @smartd @cups
+DAEMONS=(hwclock syslog-ng @iptables @sshd @crond) #dbus @wicd @privoxy @tor @alsa @smartd @cups
 SSH_USERS=(!root GOODUSER @sftp-user)
 ENC_HOMEDIR=/home/fin
 ENC_MAPNAME=vin
@@ -15,27 +17,3 @@ OPEN_PORTS=(22) # 41159 udp:41159)
 #	 tmpfs_size 50%
 #	 inittab settings?
 
-LOCALE=en_US.UTF-8
-DAEMON_LOCALE=no
-HARDWARECLOCK=UTC
-TIMEZONE=America/Los_Angeles
-#TIMEZONE=America/New_York
-KEYMAP=us
-CONSOLEFONT=
-CONSOLEMAP=
-USECOLOR=yes
-UDEV_TIMEOUT=30
-USEDMRAID=no
-USEBTRFS=no
-USELVM=no
-
-case "$0" in
-#	/etc/rc.d/iptables)	renice -n  1 $$;	ionice -c1 -n7 -p $$;;
-	/etc/rc.d/wicd)		renice -n  3 $$;	ionice -c2 -n2 -p $$;;
-	/etc/rc.d/sshd)		renice -n  9 $$;	ionice -c2 -n2 -p $$;;
-	/etc/rc.d/cups)		renice -n 14 $$;	ionice -c2 -n2 -p $$;;
-	/etc/rc.d/smartd)		renice -n 17 $$;	ionice -c3     -p $$;;
-	/etc/rc.d/openntpd)	renice -n 17 $$;	ionice -c3     -p $$;;
-	/etc/rc.d/crond)		renice -n 17 $$;	ionice -c3     -p $$;;
-	/etc/rc.d/alsa)		renice -n 19 $$;	ionice -c3     -p $$;;
-esac

@@ -1,6 +1,16 @@
 #!/bin/bash
 . /etc/rc.conf
 . /etc/bash.functions
+integrity_rootpw() {
+	 am_root || return
+	 while :; do
+		  roothash=$(awk 'BEGIN {FS=":"} /^root:/ {print $2}' /etc/shadow)
+		  case $roothash in
+				'') askyn "Root pw sucks! Set it?" && passwd;;
+				*) break
+		  esac
+	 done
+}
 integrity_emacsd() {
 	 local F=~/.emacs.d
 	 [ -L ${F} ] || {
@@ -40,13 +50,123 @@ integrity_bashhistory() {
 		  am_root && [ "${ATTRSET:5:1}" = - ] && say_and_do chattr +a "$F"
 	 done
 }
-integrity_ttys() {
+integrity_locales() {
 	 am_root || return
-	 # customize the number of fgetty instances started from inittab
+	 local L=$(locale)
+	 [ -z "${L}" ] && askyn "You have no locale!? Should we fix this?" \
+		  && echo "Oops, Not implemented yet..."
+}
+integrity_tz() {
+	 am_root || return
+	 cmp -s /etc/localtime /usr/share/zoneinfo/America/Vancouver || return
+	 [ -a /etc/localtime.userok ] && return
+	 local c=22; while let c--; do
+		  usetvar TZONE "You have the default arch timezone. To keep it, press C-c or C-\ ...
+To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCANCELLED || {
+				echo_red "Still using default time zone!"
+				break
+		  }
+		  [ "$TZONE" = "USERCANCELLED" ] && {
+				echo "If this file exists, it means the system is SUPPOSED to" \
+					 "have the default timezone (Vancouver). Otherwise, root" \
+					 "would always be prompted to change it." > /etc/localtime.userok
+				echo_red "Default timezone kept. You won't be asked again."
+				break
+		  }
+		  [ -f ${TZONE} ] && {
+				cp -f ${TZONE} /etc/localtime
+				break
+		  }
+		  echo_blue "That timezone doesn't exist."
+	 done
+}
+integrity_simpleconf() {
+	 am_root || return
+	 [ -e /media/inmem ] || mkdir /media/inmem
+	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
+	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
+	 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
+	 case $(hostname) in #uncomment
+		  gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
+		  *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
+	 esac
+	 mkdir -p \
+		  /media/arch-cold-rw \
+		  /media/arch-cold-ro \
+		  /media/rodinia \
+		  /media/green
+	 [ -L /snowball ] || ln -s /media/rodinia/pub /snowball
+}
+integrity_pacnew() {
+	 return
+	# TODO: check for pacnew files, do something with them
+	 # is it better to `find` the filesystem
+	 # or search pacman db for backup files and check those?
+	 #also do ppznew
+}
+integrity_users() {
+	 #make sure users exist, have homedirs
+	 #use rc.conf vars
+}
+integrity_inittab() {
+	 return
 	 case $(hostname) in
 		  gabba) :;;#one fgetty in inittab
 		  *) :;;#2 or 3 of them?
 	 esac
+}
+integrity_hosts() {
+	 local OLDFILE=/etc/hosts
+	 local NEWFILE=${OLDFILE}.$(uniq_token)
+	 {
+		  cat <<-EOF
+			THISVER 2011071201
+			ASSIGN 127.0.0.1       localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
+			ASSIGN ::1             localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
+			ASSIGN 192.168.1.200
+			ASSIGN 192.168.1.226 fjm-wl
+			ASSIGN 192.168.1.227 fjm-eth
+			ASSIGN 192.168.1.228 dusty scaly
+			ASSIGN 192.168.1.229 lucky lucky-wf lucky-wifi edie-wl
+			ASSIGN 192.168.1.230 
+			ASSIGN 192.168.1.231 
+			ASSIGN 192.168.1.232
+			ASSIGN 192.168.1.233 #vonage 
+			ASSIGN 192.168.1.234 remorseful emo arch archean sarcopty
+			ASSIGN 192.168.3.200 #sonic.router
+			ASSIGN 192.168.3.233 
+			ASSIGN 69.162.252.119 #shop.pageturnereditions.com
+			ASSIGN 173.228.38.224 
+			ASSIGN 208.111.34.185
+			ASSIGN 208.111.39.115 g i w m k d db dm ih ihm bs s e se es he eh h lj ljm map me nz y b r v apa aur p yelp arch archp moz l n news o t grad gradd gadd music tv
+			EOF
+		  cat ${OLDFILE}
+	 } | awk -f /usr/share/ppz/awk-hosts > ${NEWFILE}
+	 mv ${OLDFILE}{,.orig.$(uniq_token)}
+	 mv ${NEWFILE} ${OLDFILE}
+}
+integrity_net() {
+	 test_network_once 4 && {
+		  ! python-ntp && am_root && askyn "Sync kernel & hwclock with ntpdate?" && {
+				ntpdate pool.ntp.org
+				echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
+				hwclock --systohc --utc
+		  } || true
+	 } || {
+		  echo -n "No fast connectivity... Local system time: "
+		  echo_red $(date '+%l%M%S (%A %B %e, %Y)')
+	 }
+	 return
+	 IFACE=eth0
+	 until test_network_once; do
+		  ifconfig -a | grep -i 'Link encap:Ethernet'
+		  usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: '
+		  pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
+		  dhcpcd $IFACE \
+				|| giveup_prompt "Launching dhcpcd failed. Try again?"
+		  ifconfig $IFACE | grep -q 'inet addr:' \
+				|| giveup_prompt "Still no ipaddr - try again?"
+	 done
 }
 integrity_sshd() {
 	 am_root || return
@@ -95,129 +215,19 @@ integrity_sshd() {
 			   ForceCommand cvs server
 			EOF
 	 done
-	 sameish ${OLDFILE} {$NEWFILE} || erases_nothing ${OLDFILE} ${NEWFILE} || {
-		  shell_is_interactive && askyn "Edit original & new sshd_configs?" && {
-				e ${OLDFILE} ${NEWFILE}
-				askyn "Replace old w/new?" || {
-					 echo_red "keeping ${OLDFILE}, deleting temp one"
-					 rm -f ${NEWFILE}
-					 return
-				}
-		  }
-	 } && {
-		  mv -f ${NEWFILE} ${OLDFILE}
-		  return
-	 } || echo_red "you need to merge/replace from ${NEWFILE} yourself"
-	 # check rc.conf users, make homedir, etc?
-}
-integrity_hosts() {
-	 local OLDFILE=/etc/hosts
-	 local NEWFILE=${OLDFILE}.$(uniq_token)
-	 {
-		  cat <<-EOF
-			THISVER 2011071201
-			ASSIGN 127.0.0.1       localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
-			ASSIGN ::1             localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
-			ASSIGN 192.168.1.200
-			ASSIGN 192.168.1.226 fjm-wl
-			ASSIGN 192.168.1.227 fjm-eth
-			ASSIGN 192.168.1.228 dusty scaly
-			ASSIGN 192.168.1.229 lucky lucky-wf lucky-wifi edie-wl
-			ASSIGN 192.168.1.230 
-			ASSIGN 192.168.1.231 
-			ASSIGN 192.168.1.232
-			ASSIGN 192.168.1.233 #vonage 
-			ASSIGN 192.168.1.234 remorseful emo arch archean sarcopty
-			ASSIGN 192.168.3.200 #sonic.router
-			ASSIGN 192.168.3.233 
-			ASSIGN 69.162.252.119 #shop.pageturnereditions.com
-			ASSIGN 173.228.38.224 
-			ASSIGN 208.111.34.185
-			ASSIGN 208.111.39.115 g i w m k d db dm ih ihm bs s e se es he eh h lj ljm map me nz y b r v apa aur p yelp arch archp moz l n news o t grad gradd gadd music tv
-			EOF
-		  cat ${OLDFILE}
-	 } | awk -f /usr/share/ppz/awk-hosts > ${NEWFILE}
-	 mv ${OLDFILE}{,.orig.$(uniq_token)}
-	 mv ${NEWFILE} ${OLDFILE}
-}
-integrity_simpleconf() {
-	 am_root || return
-	 [ -e /media/inmem ] || mkdir /media/inmem
-	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
-	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
-	 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
-	 case $(hostname) in #uncomment
-		  gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
-		  *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
-	 esac
-}
-integrity_locales() {
-	 am_root || return
-	 local L=$(locale)
-	 [ -z "${L}" ] && askyn "You have no locale!? Should we fix this?" \
-		  && echo "Oops, Not implemented yet..."
-}
-integrity_tz() {
-	 am_root || return
-	 cmp -s /etc/localtime /usr/share/zoneinfo/America/Vancouver || return
-	 [ -a /etc/localtime.userok ] && return
-	 local c=22; while let c--; do
-		  usetvar TZONE "You have the default arch timezone. To keep it, press C-c or C-\ ...
-To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCANCELLED || {
-				echo_red "Still using default time zone!"
-				break
-		  }
-		  [ "$TZONE" = "USERCANCELLED" ] && {
-				echo "If this file exists, it means the system is SUPPOSED to" \
-					 "have the default timezone (Vancouver). Otherwise, root" \
-					 "would always be prompted to change it." > /etc/localtime.userok
-				echo_red "Default timezone kept. You won't be asked again."
-				break
-		  }
-		  [ -f ${TZONE} ] && {
-				cp -f ${TZONE} /etc/localtime
-				break
-		  }
-		  echo_blue "That timezone doesn't exist."
-	 done
-}
-integrity_net() {
-	 test_network_once 4 && {
-		  ! python-ntp && askyn "Sync kernel & hwclock with ntpdate?" && {
-				ntpdate pool.ntp.org
-				echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
-				hwclock --systohc --utc
-		  } || true
+	 conffile_checkup "${OLDFILE}" "${NEWFILE}" && {
+		  #file changed
+		  pkill -HUP -f /usr/sbin/sshd; SSHD_ON=$?
 	 } || {
-		  echo -n "No fast connectivity... Local system time: "
-		  echo_red $(date '+%l%M%S (%A %B %e, %Y)')
+		  #file didnt change
+		  [ -n "$(pgrep -f /usr/sbin/sshd)" ]; SSHD_ON=$?
 	 }
-	 return
-	 IFACE=eth0
-	 until test_network_once; do
-		  ifconfig -a | grep -i 'Link encap:Ethernet'
-		  usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: '
-		  pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
-		  dhcpcd $IFACE \
-				|| giveup_prompt "Launching dhcpcd failed. Try again?"
-		  ifconfig $IFACE | grep -q 'inet addr:' \
-				|| giveup_prompt "Still no ipaddr - try again?"
-	 done
+	 ifn $SSHD_ON || {
+		  askyn "sshd is not running. Start it?" && {
+				/etc/rc.d/sshd start
+		  }
+	 }
 }
-integrity_pacnew() {
-	 return
-	# TODO: check for pacnew files, do something with them
-	 # is it better to `find` the filesystem
-	 # or search pacman db for backup files and check those?
-	 #also do ppznew
-}
-integrity_inittab() {
-	 return
-}
-
-#echo_red SPECIAL SHELL OPTS: $- $PS1
-#echo_red CHECKING TREE FOR DEBUGGING
-#pstree -phaun
 
 # this gets run in:
 #   post_install
@@ -225,8 +235,9 @@ integrity_inittab() {
 #     bash.bashrc.local
 #      post_upgrade
 
-for F in emacsd bashhistory locales tz hosts \
-	 net sshd simpleconf pacnew inittab; do #ttys
-
+for F in rootpw emacsd bashhistory locales tz \
+	 simpleconf pacnew users inittab \
+	 hosts net sshd; do
+	 echo doing ${F}
 	 integrity_${F}
 done

@@ -1,32 +1,15 @@
 #!/bin/bash
-
 # Meant to be run DIRECTLY from a fresh archiso live cd. Try typing, for example:
 # [root@archiso]$ dhcpcd eth0
 # [root@archiso]$ . <(wget https://raw.github.com/twomen/proterozoic/master/bootstrap-this -qO -)
 
 # Then you probably want to run this:
 # root 123m~$ aif -p enzymes/polymerase -d
-
 echo bootstrapping for the 2011.06.10 live cd...
-
-mkdir -p \
-	 /media/arch-cold-rw \
-	 /media/arch-cold-ro \
-	 /media/rodinia \
-	 /media/green
-ln -s /media/rodinia/pub /snowball
-#cryptsetup luksOpen /dev/disk/by-uuid/0105eeab-2fc6-4dc7-8b89-4a70605e1483 green
-#mount /dev/disk/by-uuid/913e0e86-9eb2-4dd5-9513-6b34f26f37cc /media/rodinia
-#mount /dev/disk/by-uuid/45d0d831-d045-410c-b2ec-d525ef69e36c /media/arch-cold-rw
-#mount /dev/disk/by-uuid/5b25f749-ab8d-4749-a8b0-3b7d3408af19 /media/arch-cold-ro
-#mount /dev/mapper/green /media/green
-
-arch=$(uname -m)
 
 this_pacman() {
 	 pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm "$@"
 }
-
 # necessary because of the aufs/kernel drama going on. Hopefully it can be temporary...
 install_from_schlunix() {
 	 for P; do
@@ -34,14 +17,22 @@ install_from_schlunix() {
 		  echo /tmp/$P-$arch.pkg.tar.xz
 	 done | this_pacman -U -
 }
+arch=$(uname -m)
+GITURL=https://raw.github.com/twomen/proterozoic/master
 
-wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.d/mirrorlist.otown -qO /etc/pacman.d/mirrorlist.otown.tmp
-wget https://raw.github.com/twomen/proterozoic/master/etc/pacman.conf.bootstrap -qO - | sed s/otown/otown.tmp/ig > /tmp/pacman.conf.ppz
+mv -f /etc/rc.conf{,.original}
+mv -f /etc/sudoers{,.archiso-default}
+wget $GITURL/etc/rc.conf.ppz						-qO	/etc/rc.conf
+wget $GITURL/etc/rc.conf.basics					-qO	/etc/rc.conf.basics.ppz
+wget $GITURL/etc/pacman.d/mirrorlist.otown	-qO	/etc/pacman.d/mirrorlist.otown.tmp
+wget $GITURL/etc/pacman.conf.bootstrap			-qO	/tmp/pacman.conf.ppz
+sed -i s/otown/otown.tmp/ig								/tmp/pacman.conf.ppz
+sed -i s/rc.conf.basics/rc.conf.basics.ppz/ig		/etc/rc.conf
+sed -i s/%SET_HOSTNAME%/archiso/ig						/etc/rc.conf
 
-mv /etc/sudoers{,.archiso-default}
+this_pacman -Sqy
+install_from_schlunix git-1.7.5.2-1 python2-2.7.2-1 screen-4.0.3-11 sshfs-2.2-3
+this_pacman -Sq proterozoic smartmontools
 
-this_pacman -Syq
-install_from_schlunix git-1.7.5.2-1 python2-2.7.2-1 screen-4.0.3-11
-this_pacman -Sq proterozoic
-
-rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
+sed -i s/rc.conf.basics.ppz/rc.conf.basics/ig		/etc/rc.conf
+rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp /etc/rc.conf.basics.ppz
