@@ -7,8 +7,6 @@ license=('GPL')
 install=proterozoic.install
 makedepends=(findutils coreutils net-tools)
 depends=(emacs-nox bash-completion iptables sudo ntp openssh sshfs htop jfsutils bc iproute2 fgetty git lsof pacman-mirrorlist ca-certificates screen net-tools aif python2)
-#wpa_actiond ifplugd
-#wmctrl is for X systems
 
 package() {
 	 cp -a ${startdir}/{etc,lib,usr} ${pkgdir}/

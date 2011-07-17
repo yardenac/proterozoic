@@ -21,7 +21,7 @@ start_process() {
 	 blkid | grep -ivE 'raid|crypto_LUKS|squashfs' | sort -u
 	 rm -f /tmp/ppz-fstab
 	 for MNTPT in / /boot; do
-		  DEV=
+		  local DEV=
 		  until [ -n "${DEV}" ] && [ -a ${DEV} ]; do
 				partprobe 2>&1 | grep -iv /dev/sr0
 				usetvar DEV "CHOOSE A PARTITION FOR $MNTPT (^c to partprobe): " /dev/
@@ -38,6 +38,7 @@ start_process() {
 		  cat >> /tmp/ppz-fstab <<-EOF
 				UUID="$(blkid -s UUID -o value ${DEV})" ${MNTPT}	ext4 defaults,noatime,nodiratime,barrier=1,commit=30,ro 0 1
 				EOF
+		  enhash targmnt${MNTPT//\/} ${DEV}
 	 done
 	 mkdir -pm 755 ${TARGET}/{dev,proc,sys,var/{cache/pacman/pkg,lib/pacman,log}}
 	 for SPECIAL_FS in proc sys dev; do
@@ -69,15 +70,27 @@ start_process() {
 		  cp -f {,${TARGET}}/etc/localtime
 		  set -o noclobber
 	 }
+	 pkgs_groups=(desktop wireless laptop neverneed)
+	 pkgs_desktop=(xorg-server seamonkey fvwm wmctrl xclip) #squeaker
+	 pkgs_wireless=(wpa_supplicant) #wpa_actiond ifplugd
+	 pkgs_laptop=(pcmciautils dhcpcd)
+	 pkgs_neverneed=(licenses logrotate lvm2 nano ppp reiserfsprogs xfsprogs)
+	 pkgs_go=($(comm -23 \
+		  <(pacman --config /etc/pacman.conf.bootstrap -Sgq base | sort -u) \
+		  <(eval eval list_sorted '\$\{pkgs_'$(commalist ${pkgs_groups[@]})'[@]\}') \
+		  ))
+	 local A=; for A in ${pkgs_groups[@]}; do
+		  eval askyn 'Install $A things? \(${pkgs_'$A'[@]}\)' && eval 'pkgs_go+=(${pkgs_'$A'[@]})'
+	 done
+	 pkgs_go+=(btrfs-progs-unstable proterozoic)
+	 usetvar others "Type in any other packages you want to add: " '' ''
+	 pkgs_go+=(${others//,/ })
 	 pacman --config /etc/pacman.conf.bootstrap \
 		  --root ${TARGET} \
 		  --cachedir ${TARGET}/var/cache/pacman/pkg \
 		  --dbpath ${TARGET}/var/lib/pacman \
 		  --logfile ${TARGET}/var/log/pacman.log \
-		  --noprogressbar --noconfirm --needed -Sq $(comm -23 \
-				<(pacman --config /etc/pacman.conf.bootstrap -Sgq base | sort -u) \
-				<(list_sorted dhcpcd licenses logrotate lvm2 nano pcmciautils ppp reiserfsprogs wpa_supplicant xfsprogs) \
-		  ) btrfs-progs-unstable proterozoic
+		  --noprogressbar --noconfirm --needed -Sq ${pkgs_go[@]}
 	 cp -f ${TARGET}/etc/pacman.conf{.bootstrap,}
 	 askyn "Set root password now?" && {
 		  while true; do
@@ -89,9 +102,16 @@ start_process() {
 		  chroot ${TARGET} /sbin/mkinitcpio -p kernel26
 	 }
 	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
-		  echo "Grub crap not implemented yet."
-		  # find right partition
-		  # fuck with menu.lst
+		  DMAPF=/tmp/grub-device-map-ppz
+		  echo "quit" | ${TARGET}/sbin/grub --no-floppy --device-map ${DMAPF}
+		  local BOOT_RAWDEVICE=$(unhash targmntboot | sed 's/[0-9]*$//')
+		  local BOOT_PARTNUMBR=$(unhash targmntboot | sed 's/^[^0-9]*//')
+		  local BIOS_HDNUM=$(awk '$2 == "'$BOOT_RAWDEVICE'" {gsub(/[()]/,"",$1);print $1}' ${DMAPF})
+		  echo "You need to finish grub. Make /boot/grub/menu.lst & do:"
+		  echo "    device ($BIOS_HDNUM) $BOOT_RAWDEVICE"
+		  echo "    root ($BIOS_HDNUM,$BOOT_PARTNUMBR)"
+		  echo "    setup ($BIOS_HDNUM)"
+#		  rm -f ${DMAPF}
 	 }
 	 echo "Networking was not set up. You might want to edit these files:"
 	 echo "		/etc/rc.conf"

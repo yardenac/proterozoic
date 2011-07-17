@@ -87,8 +87,18 @@ enforce_perms() {
 		  say_and_do chmod "$1" "$2" #chmod file if not set already
 	 }
 }
+remove_line_number() {
+	 sed -i "${1}"' s/^.*$//' "${2}"
+}
+biggest_files_in_dir() {
+	 local IFS=$'\n'; {
+		  for F in $(find "$@" -type f 2>/dev/null); do
+				du -sh "${F}"
+		  done
+	 } | sort -hu | tail -n 20
+}
 alias | grep -iqE '^alias grex=' || {
-	 grex() { grep -iEvr '^[[:space:]]*(#|;|//|$)' "${@}"; }
+	 eval 'grex() { grep -iEvr '\''^[[:space:]]*(#|;|//|$)'\'' "${@}"; }'
 }
 sameish() {
 	 [ -f "${1}" -a -f "${2}" -a -r "${1}" -a -r "${2}" ] || return 1
@@ -263,6 +273,33 @@ usetvar() {
 	 poptrap
 	 return $RV
 }
+commalist() {
+	 [ "$2" ] || return
+	 local A=
+	 echo '{'
+	 for A; do
+		  echo "$A,"
+	 done
+	 echo '}'
+}
+unhash() {
+   KEY=${1^^}
+   eval echo '${hash'"$KEY"'#hash}'
+}
+enhash() {
+   KEY=$1
+   shift
+   [ "$1" == "cc" ] && { #concat previous values                                                                                              
+      VAL=""
+      while shift; do
+         VAL=${VAL}' '$( unhash "${1}" )
+      done
+   } || VAL="$*"
+   eval hash${KEY}=\$\{VAL\}
+} 
+ckhash() {
+   return $( eval '[ ! -z "${hash'${1}'}" ]' )
+} 
 ############ WRAPPERS
 ll() {
 	if [ $# -gt 1 ]; then

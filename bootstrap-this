@@ -27,16 +27,19 @@ wget $GITURL/etc/rc.conf.basics					-qO	/etc/rc.conf.basics.tmp
 wget $GITURL/etc/pacman.d/mirrorlist.otown	-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/etc/pacman.conf.bootstrap			-qO	/tmp/pacman.conf.ppz
 sed -i s/otown/otown.tmp/ig								/tmp/pacman.conf.ppz
-sed -i s/rc.conf.basics/rc.conf.basics.tmp/ig		/etc/rc.conf
-sed -i s/%SET_HOSTNAME%/archiso/ig						/etc/rc.conf
+sed -i \
+	 -e s/rc.conf.basics/rc.conf.basics.tmp/ig \
+	 -e s/%SET_HOSTNAME%/archiso/ig \
+	 -e s/^SSH_USERS.*$/SSH_USERS=(root)/ig			/etc/rc.conf
 
 this_pacman -Sqy
-install_from_schlunix git-1.7.5.2-1 python2-2.7.2-1 screen-4.0.3-11 sshfs-2.2-3
-this_pacman -Sq proterozoic smartmontools
+install_from_schlunix	git-1.7.5.2-1 python2-2.7.2-1 screen-4.0.3-11 sshfs-2.2-3
+this_pacman -Sq			proterozoic smartmontools
 
 sed -i s/rc.conf.basics.tmp/rc.conf.basics/ig		/etc/rc.conf
 rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp /etc/rc.conf.basics.tmp
 
 add_hook() {:;}
+. /etc/rc.conf
 . /etc/rc.d/functions.d/ppz
 custom_iptables_rules
