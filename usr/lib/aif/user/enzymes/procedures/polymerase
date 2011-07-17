@@ -22,8 +22,8 @@ start_process() {
 	 rm -f /tmp/ppz-fstab
 	 for MNTPT in / /boot; do
 		  local DEV=
-		  until [ -n "${DEV}" ] && [ -a ${DEV} ]; do
-				partprobe 2>&1 | grep -iv /dev/sr0
+		  until [ -b "${DEV}" ]; do
+				[ "$DEV" ] && partprobe 2>&1 | grep -iv /dev/sr0
 				usetvar DEV "CHOOSE A PARTITION FOR $MNTPT (^c to partprobe): " /dev/
 				DEV=$(readlink -e ${DEV})
 		  done
@@ -65,9 +65,9 @@ start_process() {
 				EOF
 		  cat >> ${TARGET}/etc/fstab < /tmp/ppz-fstab
 		  rm -f /tmp/ppz-fstab
-		  cp -f ${TARGET}/etc/localtime /tmp/target-localtime-examine
-		  echo_red "Look at /tmp/target-localtime-examine to see what it was"
-		  cp -f {,${TARGET}}/etc/localtime
+#		  cp -f ${TARGET}/etc/localtime /tmp/target-localtime-examine
+#		  echo_red "Look at /tmp/target-localtime-examine to see what it was"
+		  cp -i {,${TARGET}}/etc/localtime
 		  set -o noclobber
 	 }
 	 pkgs_groups=(desktop wireless laptop neverneed)
@@ -83,7 +83,7 @@ start_process() {
 		  eval askyn 'Install $A things? \(${pkgs_'$A'[@]}\)' && eval 'pkgs_go+=(${pkgs_'$A'[@]})'
 	 done
 	 pkgs_go+=(btrfs-progs-unstable proterozoic)
-	 usetvar others "Type in any other packages you want to add: " '' ''
+	 usetvar others "Type in any other packages you want to add: " 'nvidia' ''
 	 pkgs_go+=(${others//,/ })
 	 pacman --config /etc/pacman.conf.bootstrap \
 		  --root ${TARGET} \

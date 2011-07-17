@@ -220,7 +220,6 @@ askyn() {
 	 esac
 }
 pushtrap() {
-	 echo pushtrap
 	 local C=0
 	 while let ++C; do
 		  local varname=TRAPSTACK_$C
@@ -231,7 +230,6 @@ pushtrap() {
 	 [ "$*" ] && trap "$@"
 }
 poptrap() {
-	 echo poptrap
 	 [ "${TRAPSTACK_1}" ] || return
 	 local C=0
 	 while let ++C; do
@@ -268,7 +266,7 @@ usetvar() {
 	 }
 	 pushtrap 'poptrap; echo; return;' INT QUIT
 	 clear_input_buffer
-	 read -ei ${DVAL} -p $'\e[1;34m'"${2}"$'\e[m' ${1}
+	 read -ei "${DVAL}" -p $'\e[1;34m'"${2}"$'\e[m' "${1}"
 	 RV=$?
 	 poptrap
 	 return $RV
@@ -276,9 +274,9 @@ usetvar() {
 commalist() {
 	 [ "$2" ] || return
 	 local A=
-	 echo '{'
+	 echo -n '{'
 	 for A; do
-		  echo "$A,"
+		  echo -n "$A,"
 	 done
 	 echo '}'
 }

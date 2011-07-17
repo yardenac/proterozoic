@@ -3,6 +3,7 @@
 . /etc/bash.functions
 integrity_rootpw() {
 	 am_root || return
+	 shell_is_interactive || return
 	 while :; do
 		  roothash=$(awk 'BEGIN {FS=":"} /^root:/ {print $2}' /etc/shadow)
 		  case $roothash in

@@ -1,4 +1,4 @@
-MODULES="intel_agp drm i915 dm-crypt btrfs" #aufs
+MODULES="intel_agp drm i915 dm-crypt btrfs fuse" #aufs
 BINARIES="/bin/bash /bin/cat /usr/bin/head /usr/bin/pstree /bin/date /sbin/fsck.jfs"
 FILES=""
 HOOKS="base udev autodetect sata pata scsi ide raid encrypt filesystems ppz_tmp"
