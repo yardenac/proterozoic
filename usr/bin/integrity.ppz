@@ -148,7 +148,7 @@ integrity_hosts() {
 	 mv ${NEWFILE} ${OLDFILE}
 }
 integrity_net() {
-	 test_network_once 4 && {
+	 test_network_once 5 && {
 		  ! python-ntp && am_root && askyn "Sync kernel & hwclock with ntpdate?" && {
 				ntpdate pool.ntp.org
 				echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
@@ -156,7 +156,7 @@ integrity_net() {
 		  } || true
 	 } || {
 		  echo -n "No fast connectivity... Local system time: "
-		  echo_red $(date '+%l%M%S (%A %B %e, %Y)')
+		  echo_red $(date '+%l:%M:%S (%A %B %e, %Y)')
 	 }
 	 return
 	 IFACE=eth0

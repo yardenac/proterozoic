@@ -3,24 +3,33 @@ depend_procedure core base
 [ -f /etc/bash.functions ] && . /etc/bash.functions
 
 TARGET=/media/targay
+MNTPTS=( /boot ) # / is implied
 
-at_exit() {
-	for MNTD_FS in /proc /sys /dev /boot /; do
-		 grep -iq ${TARGET}${MNTD_FS} /etc/mtab \
-			  && umount ${TARGET}${MNTD_FS}
-	done
+unmount_all() {
+	 local RV=0
+	 for MNTD_FS in /proc /sys /dev ${MNTPTS[@]} /; do
+		  grep -iq ${TARGET}${MNTD_FS} /etc/mtab \
+				&& {
+				umount ${TARGET}${MNTD_FS} || RV=1
+		  }
+	 done
+	 return $RV
 }
 
-trap 'at_exit' HUP QUIT EXIT INT ABRT TERM
+trap 'unmount_all; exit $?' HUP QUIT EXIT INT ABRT TERM
 
 start_process() {
 	 #execute worker configure #just does i/o stuff i dont use
 	 execute worker sysprep #remounts / rw
 	 usetvar TARGET 'Choose a temporary mount point: '
+	 unmount_all || {
+		  mount
+		  until askyn "Unmounting all failed. You'll have to deal with that first. Whenever you're ready... :)"; do :; done
+	 }
 	 echo_red "YOU SHOULD HAVE ALREADY PARTITIONED - A LIST TO HELP YOU ;)"
 	 blkid | grep -ivE 'raid|crypto_LUKS|squashfs' | sort -u
 	 rm -f /tmp/ppz-fstab
-	 for MNTPT in / /boot; do
+	 for MNTPT in / ${MNTPTS[@]}; do
 		  local DEV=
 		  until [ -b "${DEV}" ]; do
 				[ "$DEV" ] && partprobe 2>&1 | grep -iv /dev/sr0
@@ -29,8 +38,9 @@ start_process() {
 		  done
 		  askyn "Format $DEV ext4?" && {
 				askyn "Check for bad blocks?" && BBOPT=cc || BBOPT=
-				mke2fs -t ext4 -${BBOPT}E lazy_itable_init=1,discard \
-					 -O dir_index,extent,flex_bg,has_journal,uninit_bg,large_file,resize_inode,sparse_super ${DEV}
+				mke2fs -qt ext4 -${BBOPT}E lazy_itable_init=1,discard \
+					 -O dir_index,extent,flex_bg,has_journal,uninit_bg,large_file,resize_inode,sparse_super ${DEV} \
+					 || askyn "mkfs failed. Continue?"
 			  #tune2fs 
 		  }
 		  mkdir -p ${TARGET}${MNTPT}
@@ -71,7 +81,7 @@ start_process() {
 		  set -o noclobber
 	 }
 	 pkgs_groups=(desktop wireless laptop neverneed)
-	 pkgs_desktop=(xorg-server seamonkey fvwm wmctrl xclip) #squeaker
+	 pkgs_desktop=(xorg-server seamonkey fvwm wmctrl xclip mplayer urxvt-url-select gimp fbpanel) #squeaker
 	 pkgs_wireless=(wpa_supplicant) #wpa_actiond ifplugd
 	 pkgs_laptop=(pcmciautils dhcpcd)
 	 pkgs_neverneed=(licenses logrotate lvm2 nano ppp reiserfsprogs xfsprogs)
@@ -82,7 +92,7 @@ start_process() {
 	 local A=; for A in ${pkgs_groups[@]}; do
 		  eval askyn 'Install $A things? \(${pkgs_'$A'[@]}\)' && eval 'pkgs_go+=(${pkgs_'$A'[@]})'
 	 done
-	 pkgs_go+=(btrfs-progs-unstable proterozoic)
+	 pkgs_go+=(btrfs-progs-unstable proterozoic) # grub2-bios
 	 usetvar others "Type in any other packages you want to add: " 'nvidia' ''
 	 pkgs_go+=(${others//,/ })
 	 pacman --config /etc/pacman.conf.bootstrap \
@@ -98,7 +108,8 @@ start_process() {
 		  done
 	 }
 	 grex ${TARGET}/etc/mkinitcpio.conf
-	 askyn "Above is ${TARGET}/etc/mkinitcpio.conf. Edited & rebuild?" && {
+	 askyn "Above is ${TARGET}/etc/mkinitcpio.conf. If you edit it
+in another tty now, this will rebuild. Do it?" && {
 		  chroot ${TARGET} /sbin/mkinitcpio -p kernel26
 	 }
 	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
@@ -108,6 +119,7 @@ start_process() {
 		  local BOOT_PARTNUMBR=$(unhash targmntboot | sed 's/^[^0-9]*//')
 		  local BIOS_HDNUM=$(awk '$2 == "'$BOOT_RAWDEVICE'" {gsub(/[()]/,"",$1);print $1}' ${DMAPF})
 		  echo "You need to finish grub. Make /boot/grub/menu.lst & do:"
+		  echo "    targmntboot was: "$(unhash targmntboot)
 		  echo "    device ($BIOS_HDNUM) $BOOT_RAWDEVICE"
 		  echo "    root ($BIOS_HDNUM,$BOOT_PARTNUMBR)"
 		  echo "    setup ($BIOS_HDNUM)"

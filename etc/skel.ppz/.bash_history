@@ -17,4 +17,5 @@ mount /dev/mapper/green /media/green
 pacman --config /etc/pacman.conf.bootstrap -Sy proterozoic
 ssh -t fin@edie-wl screen -x -R && exit
 wget https://raw.github.com/twomen/proterozoic/master/etc/rc.conf.basics -qO /etc/rc.conf.basics.ppz
+smartd -d -i 600
 #LAST_PPZ_COMMAND

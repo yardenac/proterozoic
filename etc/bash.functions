@@ -11,6 +11,7 @@ weekletter()	{ ARR=(S m t w T f s S); echo ${ARR[$(date +%u)]}; }
 func_exists()	{ declare -f ${1} >/dev/null; }
 list_sorted()	{ for F; do echo "${F}"; done | sort -u; }
 print_jobs()	{ jobs | while read; do echo -n \*; done; }
+croak()			{ echo "ERROR: $@"; exit; }
 giveup_prompt() { askyn "$@" && continue 2 || break 2; }
 ############################
 ############################
@@ -213,8 +214,8 @@ askyn() {
 	 shell_is_interactive || return 1
 	 clear_input_buffer
 	 read -N 1 -p $'\e[1;34m'"$*"$' [*/n]):\e[m ' USERINPUT
-	 case ${USERINPUT} in "
-") return 0;;
+	 case ${USERINPUT} in ''|'
+') return 0;;
 		  n) echo && return 1;;
 		  *) echo && return 0
 	 esac
@@ -280,12 +281,8 @@ commalist() {
 	 done
 	 echo '}'
 }
-unhash() {
-   KEY=${1^^}
-   eval echo '${hash'"$KEY"'#hash}'
-}
 enhash() {
-   KEY=$1
+   KEY=${1^^}
    shift
    [ "$1" == "cc" ] && { #concat previous values                                                                                              
       VAL=""
@@ -296,8 +293,12 @@ enhash() {
    eval hash${KEY}=\$\{VAL\}
 } 
 ckhash() {
-   return $( eval '[ ! -z "${hash'${1}'}" ]' )
+   return $( eval '[ ! -z "${hash'${1^^}'}" ]' )
 } 
+unhash() {
+   KEY=${1^^}
+   eval echo '${hash'"$KEY"'#hash}'
+}
 ############ WRAPPERS
 ll() {
 	if [ $# -gt 1 ]; then
@@ -439,4 +440,8 @@ makepkg_flexi() {
 	 esac
 	 B=$(grep -iEc ^processor /proc/cpuinfo); let ++B
 	 # unfinished!
+}
+screentitle_and_do() {
+	 echo -ne "\ek$USER: $*\e\\"
+	 "$@"
 }
