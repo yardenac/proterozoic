@@ -33,13 +33,3 @@ do_edie_cache() {
 case $(hostname) in
 	 ediacra) do_edie_cache "$@";;
 esac
-
-#wait-for-network
-#true && {
-#  grep -iq eo@arch.hirstory.com:/ /etc/mtab\
-#   || /usr/bin/sshfs -o ro,allow_other,umask=227,compression=yes,uid=0,gid=1001 eo@arch.hirstory.com:/ $FDIR/arch\
-#   || /usr/bin/sshfs -o ro,allow_other,umask=227,compression=yes,uid=0,gid=1001 eo@arch:/ $FDIR/arch\
-#   || /usr/bin/sshfs -o ro,allow_other,umask=227,compression=yes,uid=0,gid=1001 eo@arch-fiddled:/ $FDIR/arch
-#} &
-
-exit 0
