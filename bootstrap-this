@@ -13,7 +13,13 @@ this_pacman() {
 # necessary because of the aufs/kernel drama going on. Hopefully it can be temporary...
 install_from_schlunix() {
 	 for P; do
-		  wget http://schlunix.org/archlinux/extra/os/$arch/$P-$arch.pkg.tar.xz    -qO /tmp/$P-$arch.pkg.tar.xz
+#		  local package=${P##*/}
+#		  local repo=${P%%/*} # -q
+		  wget http://schlunix.org/archlinux/extra/os/$arch/$P-$arch.pkg.tar.xz    -O /tmp/$P-$arch.pkg.tar.xz \
+				|| {
+				echo FAILED TO DOWNLOAD
+				exit
+		  }
 		  echo /tmp/$P-$arch.pkg.tar.xz
 	 done | this_pacman -U -
 }
