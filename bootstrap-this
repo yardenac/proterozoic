@@ -15,7 +15,7 @@ install_from_schlunix() {
 	 local repo=${1}; shift
 	 local suff=${1}; shift
 	 for P; do
-		  wget http://schlunix.org/archlinux/${repo}/os/$arch/$P-$arch.pkg.tar.${suff}    -O /tmp/$P-$arch.pkg.tar.${suff}
+		  wget http://schlunix.org/archlinux/${repo}/os/$arch/$P-$arch.pkg.tar.${suff} -qO /tmp/$P-$arch.pkg.tar.${suff}
 		  echo /tmp/$P-$arch.pkg.tar.${suff}
 	 done | this_pacman -U -
 }
@@ -42,7 +42,7 @@ this_pacman -Sq			proterozoic smartmontools
 sed -i s/rc.conf.basics.tmp/rc.conf.basics/ig		/etc/rc.conf
 rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp /etc/rc.conf.basics.tmp
 
-add_hook() {:;}
+add_hook() { :; }
 . /etc/rc.conf
 . /etc/rc.d/functions.d/ppz
 custom_iptables_rules
