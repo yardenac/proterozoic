@@ -1,0 +1,151 @@
+DestroyFunc InitFunction
+AddToFunc InitFunction
++ I exec xsetroot -mod 2 2 -fg rgb:55/40/55 -bg rgb:70/50/70
++ I exec fvwm-root --retain-pixmap /usr/share/xfce4/backdrops/xfce-in-the-moon.png
++ I exec xscreensaver
++ I exec xhost +local:si
+
+DestroyFunc StartFunction
+AddToFunc StartFunction
++ I Module FvwmCommandS
++ I exec /usr/bin/one-instance /usr/bin/fbpanel
+
+DeskTopSize 1x1
+DesktopName 0 Krypton
+DesktopName 1 Rubidium
+DesktopName 2 Strontium
+EwmhNumberOfDesktops 3 3
+EdgeScroll 0 0
+EdgeThickness 0
+
+ClickTime 750
+MoveThreshold 3
+
+HideGeometryWindow
+OpaqueMoveSize unlimited
+
+#		  HilightFore black, HilightBack cornflowerblue, \
+#		  Font -adobe-times-bold-r-*-*-12-*-*-*-*-*-*-*, \
+#		  IconFont -adobe-times-bold-r-*-*-12-*-*-*-*-*-*-*, \
+#SloppyFocus, MouseFocusClickRaises, FocusFollowsMouse
+FocusStyle * !EnterToFocus, !LeaveToUnfocus, !FocusByProgram, \
+			FocusByFunction, !FocusByFunctionWarpPointer, !Lenient, \
+			FocusClickButtons 1, PassFocusClick, AllowFocusClickFunction
+Style * !Borders, !Handles, MWMFunctions, MWMDecor, HintOverride, \
+		  Icon unknown1.xpm, Color lightgrey/dimgrey, !Title, SortWindowListByFocus, \
+		  !UsePPosition, NoUsePPosition, NoPPosition, NoIcon, \
+		  DecorateTransient, EdgeMoveResistance 50 50, \
+		  IconBox 0 -10 -280 -1, SnapAttraction 10, ClickToFocus, ResizeOpaque
+Style Fvwm*       NoTitle,  Sticky, WindowListSkip, \
+		BorderWidth 2, CirculateSkipIcon, CirculateSkip
+Style urxvt ResizeHintOverride
+Style xscreensaver FPFocusByProgram
+Style acroread PositionPlacement UnderMouse
+
+MenuStyle * fvwm, Foreground white, Background cornflowerblue, Greyed grey40
+#MenuStyle * Font -adobe-times-bold-r-*-*-14-*-*-*-*-*-*-*
+
+ColormapFocus FollowsFocus
+
+IgnoreModifiers L25
+
+# Nop functions are needed to override defaults
+Key	Help			R		A			-
+Key	Escape		A		MC			EscapeFunc
+Key	Tab			A		M			WindowListMakeFunc
+Key	Tab			A		MS			WindowListMakeFunc
+# NoDeskSort
+Key	F1				R		A			-
+Key 	F4 			SFTW	M			Current Delete
+Key	F10			SFTW	M			Current Maximize
+Key	Left			A		CMS		Current WinTo $[w.id] -1
+Key	Right			A		CMS		Current WinTo $[w.id] +1
+Key	Left			A		CM			GoToDeskBetter -1
+Key	Right			A		CM			GoToDeskBetter +1
+Key	space			A		M			Menu MenuFvwmWindowOps2 Window 0 0 Nop
+Key 	apostrophe	A		4			exec terminal -x bash --init-file /dev/null --rcfile /dev/null --noprofile --norc -ic \
+												'xhost +local:%ENCUSER% && su - %ENCUSER% -c "urxvtd -q -f -o && urxvtc && exit"'
+Key	b				A		4			exec terminal --geometry=40x39 -x /usr/bin/bc -lq /etc/bcrc
+Key	c				A		4			exec terminal --geometry=67x36 -x bash -c "cal -y && read"
+Key	m				A		4			exec terminal --geometry=80x51 -x bash -ic woman
+Mouse 0				A 		A			-
+Mouse 1				R		A			-
+Mouse 1				SFTW	M			DragNMove
+Mouse 3				SFTW	M			ResizeDynamicFromVars
+Mouse 3				R     A			Menu MenuFvwmRoot Nop
+
+DestroyFunc WindowListMakeFunc
+AddToFunc WindowListMakeFunc
++ I WindowList (CurrentDesk) Root c c \
+  	 	NoGeometry, NoCurrentDeskTitle, CurrentAtEnd, \
+		IconifiedAtEnd, MaxLabelWidth 200
+
+DestroyFunc WindowListFunc
+AddToFunc WindowListFunc
++ I Iconify off
++ I FlipFocus NoWarp
++ I Raise
+
+DestroyMenuStyle WindowList
+MenuStyle WindowList \
+			 BorderWidth 0, \
+			 SelectOnRelease Meta_L, \
+			 ItemFormat "%.4i%l"
+
+DestroyFunc FuncFvwmRaiseLowerX
+DestroyFunc WinTo
+AddToFunc WinTo
++ I WindowId $0 MoveToDesk $1 0 2
++ I WindowId $0 GoToDesk $1 0 2
++ I WindowId $0 Raise
++ I WindowId $0 Focus
+
+DestroyFunc GoToDeskBetter
+AddToFunc GoToDeskBetter
++ I GoToDesk $0 0 2
++ I Next (CurrentDesk,Raised) Focus
+
+DestroyFunc DragNMove
+AddToFunc DragNMove
++ I Raise
++ M Move
+
+DestroyFunc ResizeDynamicFromVars
+AddToFunc ResizeDynamicFromVars
++ I PipeRead `echo "corner($[w.width],$[w.height],$[pointer.wx],$[pointer.wy]);" | bc /etc/bc-nw-script`
+#Current PipeRead
+
+DestroyFunc ResizeDynamic
+AddToFunc ResizeDynamic
++ I CursorStyle RESIZE $1_corner
++ I Resize direction $0
++ I CursorStyle RESIZE
+
+######################## Menus ###################
+DestroyMenu MenuFvwmRoot
+AddToMenu MenuFvwmRoot
++ "&1. XTerm"             Exec exec xterm
++  Console      Module FvwmConsole
++ "&F. $[gt.Refresh Screen]"   Refresh
++ "&C. $[gt.Recapture Screen]" Recapture
++ "&R. $[gt.Restart]"          Restart
++ "Window Ops"         Popup MenuFvwmWindowOps2
+
+DestroyMenu MenuFvwmWindowOps2
+AddToMenu MenuFvwmWindowOps2
++ "$[gt.R&aise]"             Raise
++ "$[gt.&Lower]"             Lower
++ "$[gt.(De)&Iconify]"       Iconify
++ "$[gt.(Un)&Stick]"         Stick
+
+DestroyMenu MenuFvwmForms
+AddToMenu MenuFvwmForms
++ "&C. Capture"       Module FvwmForm FvwmForm-Capture
++ "&D. Form Defaults" Module FvwmForm FvwmForm-Form
++ "&R. Rlogin"        Module FvwmForm FvwmForm-Rlogin
++ "&P. RootCursor"    Module FvwmForm FvwmForm-RootCursor
++ "&S. Setup"         Module FvwmForm FvwmForm-Setup
++ "&T. Talk Form"     Module FvwmForm FvwmForm-Talk
++ "&Q. QuitVerify"    Module FvwmForm FvwmForm-QuitVerify
+
+read ConfigFvwmTaskBar

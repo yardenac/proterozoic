@@ -1,19 +1,6 @@
-
 do_tmpfs() {
 	 mkdir -p /tmp
 	 mount -t tmpfs -o defaults,nodev,nosuid,noexec,mode=1777,size=$1,uid=0,gid=0,noauto,noatime,nodiratime shm /tmp
-}
-do_aufs() {
-	 XINO_FILE=/tmp/.aufs.xino
-	 mkdir -p /aufs-ro /aufs-rw
-	 /sbin/fsck.jfs /dev/disk/by-uuid/$1
-	 /sbin/fsck.jfs /dev/disk/by-uuid/$2
-	 mount -t jfs -o rw,noatime,nodiratime /dev/disk/by-uuid/$1 /aufs-rw
-	 mount -t jfs -o ro,noatime,nodiratime /dev/disk/by-uuid/$2 /aufs-ro
-	 mount -t aufs -o br:/aufs-rw=rw:/aufs-ro=ro,xino=$XINO_FILE,noauto,noatime,nodiratime,udba=none none /new_root
-	 mkdir -p /new_root/aufs-ro /new_root/aufs-rw 
-	 mount --move /aufs-ro /new_root/aufs-ro
-	 mount --move /aufs-rw /new_root/aufs-rw
 }
 ppz_mount_handler() {
 	 eval $(awk '/^HOSTNAME=/' /etc/rc.conf)
@@ -23,7 +10,7 @@ ppz_mount_handler() {
 		  ediacra|*)	do_tmpfs 12%;;
 	 esac
 	 case $HOSTNAME in
-		  scaly)			do_aufs   45d0d831-d045-410c-b2ec-d525ef69e36c   5b25f749-ab8d-4749-a8b0-3b7d3408af19;;
+		  something)	:;; # some_other_mount_handler :)
 		  *)				default_mount_handler "$@";;
 	 esac
 	 mount --move /tmp /new_root/tmp

@@ -8,9 +8,10 @@ MNTPTS=( /boot ) # / is implied
 unmount_all() {
 	 local RV=0
 	 for MNTD_FS in /proc /sys /dev ${MNTPTS[@]} /; do
-		  grep -iq ${TARGET}${MNTD_FS} /etc/mtab \
+		  local FULLPATH=${TARGET}${MNTD_FS}
+		  grep -iq ${FULLPATH//\/} /etc/mtab \
 				&& {
-				umount ${TARGET}${MNTD_FS} || RV=1
+				umount ${FULLPATH//\/} || RV=1
 		  }
 	 done
 	 return $RV
@@ -37,8 +38,8 @@ start_process() {
 				DEV=$(readlink -e ${DEV})
 		  done
 		  askyn "Format $DEV ext4?" && {
-				askyn "Check for bad blocks?" && BBOPT=cc || BBOPT=
-				mke2fs -qt ext4 -${BBOPT}E lazy_itable_init=1,discard \
+				askyn "Check for bad blocks?" && BBOPT=cc || BBOPT=q
+				mke2fs -t ext4 -${BBOPT}E lazy_itable_init=1,discard \
 					 -O dir_index,extent,flex_bg,has_journal,uninit_bg,large_file,resize_inode,sparse_super ${DEV} \
 					 || askyn "mkfs failed. Continue?"
 			  #tune2fs 
@@ -67,8 +68,14 @@ start_process() {
 		  --logfile ${TARGET}/var/log/pacman.log \
 		  --noprogressbar --noconfirm -Syq initscripts
 	 set +o noclobber && {
-		  usetvar HOSTNAME "Choose a new hostname! Take your time ;) " new_arch_machine_$(date +%Y_%m_%d)
+		  usetvar    HOSTNAME "Choose a new hostname! Take your time ;) " new_arch_machine_$(date +%Y_%m_%d)
 		  sed s/%SET_HOSTNAME%/${HOSTNAME}/ig /etc/rc.conf.ppz > ${TARGET}/etc/rc.conf
+		  usetvar    XRGUSER "Choose name of X user to boot into (blank for none): " '' ''
+		  sed s/%SET_XRGUSER%/${XRGUSER}/ig /etc/rc.conf.ppz > ${TARGET}/etc/rc.conf
+		  usetvar    ENCUSER "Choose name of encrypted user (blank for none): " '' ''
+		  sed s/%SET_ENCUSER%/${ENCUSER}/ig /etc/rc.conf.ppz > ${TARGET}/etc/rc.conf
+#		  chroot adduser 54344 XARGUSER /usr/share/xuser
+#		  chroot adduser 54345 ENCUSER  /media/encuser
 		  cat >  ${TARGET}/etc/fstab <<-EOF
 				devpts /dev/pts devpts defaults 0 0
 				UUID=4C93-65D0  /media/oxygen   vfat    defaults,user,noatime,nodiratime,fmask=177,dmask=077,check=s 0 0
@@ -107,20 +114,28 @@ start_process() {
 				chroot ${TARGET} passwd root && break
 		  done
 	 }
+	 grep -iqE '^HOOKS="[^"]*ppz_tmp[^"]*"' ${TARGET}/etc/mkinitcpio.conf || {
+		  askyn "Add ppz_tmp to HOOKS?" \
+				&& sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' ${TARGET}/etc/mkinitcpio.conf
+	 }
 	 grex ${TARGET}/etc/mkinitcpio.conf
-	 askyn "Above is ${TARGET}/etc/mkinitcpio.conf. If you edit it
-in another tty now, this will rebuild. Do it?" && {
+	 askyn "Above is ${TARGET}/etc/mkinitcpio.conf. You have a chance to edit
+in another tty, if you wish. YES here to rebuild." && {
 		  chroot ${TARGET} /sbin/mkinitcpio -p kernel26
 	 }
 	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
+		  cp -a ${TARGET}/usr/lib/grub/i386-pc/* ${TARGET}/boot/grub/
 		  DMAPF=/tmp/grub-device-map-ppz
 		  echo "quit" | ${TARGET}/sbin/grub --no-floppy --device-map ${DMAPF}
 		  local BOOT_RAWDEVICE=$(unhash targmntboot | sed 's/[0-9]*$//')
 		  local BOOT_PARTNUMBR=$(unhash targmntboot | sed 's/^[^0-9]*//')
+		  let BOOT_PARTNUMBER-- || echo "partition number was zero -- wtf??"
 		  local BIOS_HDNUM=$(awk '$2 == "'$BOOT_RAWDEVICE'" {gsub(/[()]/,"",$1);print $1}' ${DMAPF})
 		  echo "You need to finish grub. Make /boot/grub/menu.lst & do:"
+		  echo "  ${TARGET}/sbin/grub --no-floppy --batch "'<<-EOF blah blah blah... '
 		  echo "    targmntboot was: "$(unhash targmntboot)
 		  echo "    device ($BIOS_HDNUM) $BOOT_RAWDEVICE"
+		  echo "    geometry ($BIOS_HDNUM)"
 		  echo "    root ($BIOS_HDNUM,$BOOT_PARTNUMBR)"
 		  echo "    setup ($BIOS_HDNUM)"
 #		  rm -f ${DMAPF}

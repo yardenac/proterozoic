@@ -1,13 +1,12 @@
 . /etc/rc.conf.basics
 
 HOSTNAME=%SET_HOSTNAME%
-MODULES=(btrfs dm-crypt fuse dm-mod)
+MODULES=(btrfs dm-crypt fuse dm-mod dm-snapshot)
 #edie: ac battery button fan processor sbs video iwl3945 intel_agp drm i915 # nvidia
 DAEMONS=(hwclock syslog-ng @iptables @sshd @crond) #dbus @wicd @privoxy @tor @alsa @smartd @cups
+XRGUSER=%SET_XRGUSER%
+ENCUSER=%SET_ENCUSER%
 SSH_USERS=(!root GOODUSER @sftp-user)
-ENC_HOMEDIR=/home/fin
-ENC_MAPNAME=vin
-ENC_DEV=/dev/disk/by-uuid/300aad28-6fff-4bbc-b30e-4225ea8c5c85
 OPEN_PORTS=(22) # 41159 udp:41159)
 
 #TMPFS_SIZE_OVERRIDE=50% # not implemented

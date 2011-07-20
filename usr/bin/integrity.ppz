@@ -26,9 +26,15 @@ integrity_emacsd() {
 integrity_bashhistory() {
 	 shopt -s nullglob
 	 local IFS=$'\n'
-	 for F in $(ls -1 {/{root,home/*,media/green/*},~}/.bash_history 2>/dev/null | sort -u); do
+	 ${HISTFILE}
+	 for RAW_F in $(ls -1 {/{root,home/*,media/green/*},~}/.bash_history "$HISTFILE" 2>/dev/null | sort -u); do
+		  local F=$RAW_F
+		  am_root || make_sure_its_mine "$F" || { # dont rearrange or might end up creating every file!
+					 HISTFILE=/tmp/.bash.history.$USER
+					 touch $HISTFILE
+					 F=$HISTFILE
+		  }
 		  echo -n HISTFILE: ${F}
-		  ! am_root && ! [ -O "$F" ] && { echo ... X; continue; }
 		  local ATTRSET=
 		  lsattr "$F" &>/dev/null && {
 				ATTRSET=$(lsattr "$F")
@@ -95,7 +101,8 @@ integrity_simpleconf() {
 		  /media/arch-cold-rw \
 		  /media/arch-cold-ro \
 		  /media/rodinia \
-		  /media/green
+		  /media/green \
+		  /media/encuser
 	 [ -L /snowball ] || ln -s /media/rodinia/pub /snowball
 }
 integrity_pacnew() {
@@ -106,9 +113,8 @@ integrity_pacnew() {
 	 #also do ppznew
 }
 integrity_users() {
-	 #make sure users exist, have homedirs
-	 #use rc.conf vars
-	 :
+	 am_root || return
+	 sed -i s/%ENCUSER%/${ENCUSER}/ig /etc/skel.ppz/.fvwm/.fvwm2rc
 }
 integrity_inittab() {
 	 return
@@ -240,6 +246,6 @@ integrity_sshd() {
 for F in rootpw emacsd bashhistory locales tz \
 	 simpleconf pacnew users inittab \
 	 hosts net sshd; do
-	 echo doing ${F}
+#	 echo doing ${F}
 	 integrity_${F}
 done

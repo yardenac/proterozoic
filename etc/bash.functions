@@ -98,6 +98,32 @@ biggest_files_in_dir() {
 		  done
 	 } | sort -hu | tail -n 20
 }
+make_sure_its_mine() {
+	 local HOW=touch
+	 [ "$1" == 'mkdir' ] && {
+		  HOW=mkdir
+		  shift
+	 }
+	 local IT=${1}
+	 [ -z "$IT" ] && return 1 # empty = def no
+	 [ -O "$IT" ] && return   # owned = def yes
+	 [ -a "$IT" ] && return 1 # exists, not owned = def no
+	 make_sure_its_mine mkdir ${IT%/*} || return 1   # test parent
+	 $HOW $IT
+}
+first_to_exist() {
+	 return 1
+	 #this is fucked up
+	 PREFIX=$1
+	 c=0
+	 while let ++c; do
+					 LOCKDIR=/tmp/lock.file.first-to-exist
+					 mkdir ${LOCKDIR} 2>/dev/null || return
+		  [ -a "$PREFIX$c" ] || break
+	 done
+	 touch $PREFIX$c
+	 echo $PREFIX$c
+}
 alias | grep -iqE '^alias grex=' || {
 	 eval 'grex() { grep -iEvr '\''^[[:space:]]*(#|;|//|$)'\'' "${@}"; }'
 }

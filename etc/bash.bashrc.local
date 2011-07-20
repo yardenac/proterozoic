@@ -1,7 +1,7 @@
 export SHELL=/bin/bash
 [ -f /etc/bash.functions  ] && . /etc/bash.functions
 [ -a /usr/bin/Xorg ] && . /etc/bash.functions.xorg
-time /usr/bin/integrity.ppz
+/usr/bin/integrity.ppz
 [ -x /usr/bin/integrity.linode ] && /usr/bin/integrity.linode
 GOODPATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$(readlink -e ~/bin)
 for NEWDIR in $(in_2_but_not_in_1 "$GOODPATH" "$PATH"); do case $NEWDIR in
@@ -44,9 +44,6 @@ alias pacman_from_livecd='pacman --config /etc/pacman.conf.bootstrap \
 		 --logfile ${TARGET}/var/log/pacman.log '
 bind '"\e[A"':history-search-backward
 bind '"\e[B"':history-search-forward
-complete -f -X '!*.@(sqlite|db)' sqlite3
-complete -f emacs
-complete -f rsync
 eval "`dircolors -b`"
 export PATH=${GOODPATH}
 export HISTCONTROL=ignoredups #$HISTCONTROL${HISTCONTROL+,}ignoredups
@@ -65,4 +62,8 @@ set -o noclobber
 setterm -blength 0
 shopt -s histappend
 shopt -s checkwinsize
+complete -f -X '!*.@(sqlite|db)' sqlite3
+for c in emacs rsync mv cp; do
+	 complete -f $c
+done
 [ "$BASH" ] && [ -f ~/.bashrc ] && . ~/.bashrc
