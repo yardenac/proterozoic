@@ -33,7 +33,7 @@ integrity_bashhistory() {
 					 HISTFILE=/tmp/.bash.history.$USER
 					 touch $HISTFILE
 					 F=$HISTFILE
-		  }
+		  } || continue
 		  echo -n HISTFILE: ${F}
 		  local ATTRSET=
 		  lsattr "$F" &>/dev/null && {

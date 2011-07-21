@@ -17,9 +17,8 @@ unmount_all() {
 	 return $RV
 }
 
-trap 'unmount_all; exit $?' HUP QUIT EXIT INT ABRT TERM
-
 start_process() {
+	 pushtrap 'poptrap; unmount_all; exit $?;' HUP QUIT EXIT INT ABRT TERM
 	 #execute worker configure #just does i/o stuff i dont use
 	 execute worker sysprep #remounts / rw
 	 usetvar TARGET 'Choose a temporary mount point: '
@@ -68,14 +67,16 @@ start_process() {
 		  --logfile ${TARGET}/var/log/pacman.log \
 		  --noprogressbar --noconfirm -Syq initscripts
 	 set +o noclobber && {
+		  cp -f /etc/rc.conf.ppz ${TARGET}/etc/rc.conf
 		  usetvar    HOSTNAME "Choose a new hostname! Take your time ;) " new_arch_machine_$(date +%Y_%m_%d)
-		  sed s/%SET_HOSTNAME%/${HOSTNAME}/ig /etc/rc.conf.ppz > ${TARGET}/etc/rc.conf
 		  usetvar    XRGUSER "Choose name of X user to boot into (blank for none): " '' ''
-		  sed s/%SET_XRGUSER%/${XRGUSER}/ig /etc/rc.conf.ppz > ${TARGET}/etc/rc.conf
 		  usetvar    ENCUSER "Choose name of encrypted user (blank for none): " '' ''
-		  sed s/%SET_ENCUSER%/${ENCUSER}/ig /etc/rc.conf.ppz > ${TARGET}/etc/rc.conf
-#		  chroot adduser 54344 XARGUSER /usr/share/xuser
-#		  chroot adduser 54345 ENCUSER  /media/encuser
+		  sed -i \
+				-e s/%SET_HOSTNAME%/${HOSTNAME}/ig \
+				-e s/%SET_XRGUSER%/${XRGUSER}/ig \
+				-e s/%SET_ENCUSER%/${ENCUSER}/ig ${TARGET}/etc/rc.conf
+		  chroot ${TARGET} /usr/sbin/useradd -lMNd /etc/skel.ppz  -u 54344 ${XRGUSER}
+		  chroot ${TARGET} /usr/sbin/useradd -lMNd /media/encuser -u 54345 -s /usr/bin/womb ${ENCUSER}
 		  cat >  ${TARGET}/etc/fstab <<-EOF
 				devpts /dev/pts devpts defaults 0 0
 				UUID=4C93-65D0  /media/oxygen   vfat    defaults,user,noatime,nodiratime,fmask=177,dmask=077,check=s 0 0
@@ -109,6 +110,19 @@ start_process() {
 		  --logfile ${TARGET}/var/log/pacman.log \
 		  --noprogressbar --noconfirm --needed -Sq ${pkgs_go[@]}
 	 cp -f ${TARGET}/etc/pacman.conf{.bootstrap,}
+	 askyn "Use present net config as static on target?" && {
+		  cp -f {,${TARGET}}/etc/resolv.conf
+		  ifconfig | awk <(cat <<-EOF
+				/^lo/ {exit}
+				$1 ~ /^inet$/ {
+					sub(/addr:/,"address=",$2)
+					sub(/Mask:/,"netmask=",$4)
+					print $2 "\n" $4
+				}
+				EOF
+		  ) >> ${TARGET}/etc/rc.conf
+		  ip route show | awk '/^default via/ {print "gateway=" $3 "\ninterface=" $5}' >> ${TARGET}/etc/rc.conf
+	 }
 	 askyn "Set root password now?" && {
 		  while true; do
 				chroot ${TARGET} passwd root && break
@@ -129,7 +143,7 @@ in another tty, if you wish. YES here to rebuild." && {
 		  echo "quit" | ${TARGET}/sbin/grub --no-floppy --device-map ${DMAPF}
 		  local BOOT_RAWDEVICE=$(unhash targmntboot | sed 's/[0-9]*$//')
 		  local BOOT_PARTNUMBR=$(unhash targmntboot | sed 's/^[^0-9]*//')
-		  let BOOT_PARTNUMBER-- || echo "partition number was zero -- wtf??"
+		  let BOOT_PARTNUMBR-- || echo "partition number was zero -- wtf??"
 		  local BIOS_HDNUM=$(awk '$2 == "'$BOOT_RAWDEVICE'" {gsub(/[()]/,"",$1);print $1}' ${DMAPF})
 		  echo "You need to finish grub. Make /boot/grub/menu.lst & do:"
 		  echo "  ${TARGET}/sbin/grub --no-floppy --batch "'<<-EOF blah blah blah... '
@@ -147,4 +161,6 @@ in another tty, if you wish. YES here to rebuild." && {
 	 until askyn "ready to quit? (stuff will be unmounted)"; do
 		  ll ${TARGET}/
 	 done
+	 unmount_all
+	 poptrap
 }
