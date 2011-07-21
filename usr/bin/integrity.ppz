@@ -31,6 +31,7 @@ integrity_bashhistory() {
 		  local F=$RAW_F
 		  am_root || make_sure_its_mine "$F" || { # dont rearrange or might end up creating every file!
 					 HISTFILE=/tmp/.bash.history.$USER
+					 export XAUTHORITY=/tmp/.Xauthority.xuser
 					 touch $HISTFILE
 					 F=$HISTFILE
 		  } || continue
@@ -124,6 +125,7 @@ integrity_inittab() {
 	 esac
 }
 integrity_hosts() {
+	 am_root || return
 	 local OLDFILE=/etc/hosts
 	 local NEWFILE=${OLDFILE}.$(uniq_token)
 	 {
@@ -163,6 +165,13 @@ integrity_net() {
 	 } || {
 		  echo -n "No fast connectivity... Local system time: "
 		  echo_red $(date '+%l:%M:%S (%A %B %e, %Y)')
+	 }
+	 am_root && {
+		  grep -iq broadcast /etc/rc.d/network || {
+				mv -f /etc/rc.d/network{,.forget}
+				wget http://projects.archlinux.org/initscripts.git/plain/network -O /etc/rc.d/network
+				askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
+		  }
 	 }
 	 return
 	 IFACE=eth0

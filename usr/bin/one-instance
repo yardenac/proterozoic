@@ -2,7 +2,7 @@
 
 PROG_TO_KILL=${1:-/usr/bin/fbpanel}
 
-[ -d $PROG_TO_KILL ] || return 1
+[ -x $PROG_TO_KILL ] || exit 1
 
 LOCKDIR=/tmp/lock.file.${PROG_TO_KILL//\/}
 
@@ -21,7 +21,12 @@ mkdir ${LOCKDIR} 2>/dev/null && {
 	 trap "rm -rf ${LOCKDIR}; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
 	 c=8
 	 while let c*=2 && pgrep -f ${PROG_TO_KILL} &>/dev/null; do
-		  pkill -SIGTERM -f ${PROG_TO_KILL}
+		  for P in $(pgrep -f ${PROG_TO_KILL}); do
+				case $P in
+					 $$) ;;
+					 *) kill -SIGTERM $P
+				esac
+		  done
 		  [ $c -gt 2000 ] && break || millisleep $c
 	 done
 	 nohup ${PROG_TO_KILL} &>/dev/null &

@@ -1,7 +1,7 @@
 DestroyFunc InitFunction
 AddToFunc InitFunction
 + I exec xsetroot -mod 2 2 -fg rgb:55/40/55 -bg rgb:70/50/70
-+ I exec fvwm-root --retain-pixmap /usr/share/xfce4/backdrops/xfce-in-the-moon.png
+#+ I exec fvwm-root --retain-pixmap /usr/share/xfce4/backdrops/xfce-in-the-moon.png
 + I exec xscreensaver
 + I exec xhost +local:si
 
@@ -27,13 +27,13 @@ OpaqueMoveSize unlimited
 #		  HilightFore black, HilightBack cornflowerblue, \
 #		  Font -adobe-times-bold-r-*-*-12-*-*-*-*-*-*-*, \
 #		  IconFont -adobe-times-bold-r-*-*-12-*-*-*-*-*-*-*, \
-#SloppyFocus, MouseFocusClickRaises, FocusFollowsMouse
+#SloppyFocus, MouseFocusClickRaises, FocusFollowsMouse, NoUsePPosition, 
 FocusStyle * !EnterToFocus, !LeaveToUnfocus, !FocusByProgram, \
 			FocusByFunction, !FocusByFunctionWarpPointer, !Lenient, \
 			FocusClickButtons 1, PassFocusClick, AllowFocusClickFunction
 Style * !Borders, !Handles, MWMFunctions, MWMDecor, HintOverride, \
-		  Icon unknown1.xpm, Color lightgrey/dimgrey, !Title, SortWindowListByFocus, \
-		  !UsePPosition, NoUsePPosition, NoPPosition, NoIcon, \
+		  Icon unknown1.xpm, Color lightgrey/dimgrey, !Title, FPSortWindowlistByFocus, \
+		  !UsePPosition, NoPPosition, NoIcon, \
 		  DecorateTransient, EdgeMoveResistance 50 50, \
 		  IconBox 0 -10 -280 -1, SnapAttraction 10, ClickToFocus, ResizeOpaque
 Style Fvwm*       NoTitle,  Sticky, WindowListSkip, \

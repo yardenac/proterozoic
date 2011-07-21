@@ -89,7 +89,9 @@ start_process() {
 		  set -o noclobber
 	 }
 	 pkgs_groups=(desktop wireless laptop neverneed)
-	 pkgs_desktop=(xorg-server seamonkey fvwm wmctrl xclip mplayer urxvt-url-select gimp fbpanel) #squeaker
+	 pkgs_desktop=(xorg-{server,xinit,xrdb,xsetroot,xhost} xf86-input-{keyboard,mouse} \
+		  consolekit fvwm perl-xml-parser xscreensaver fbpanel xclip wmctrl \
+		  seamonkey mplayer urxvt-url-select gimp) #squeaker
 	 pkgs_wireless=(wpa_supplicant) #wpa_actiond ifplugd
 	 pkgs_laptop=(pcmciautils dhcpcd)
 	 pkgs_neverneed=(licenses logrotate lvm2 nano ppp reiserfsprogs xfsprogs)
@@ -115,9 +117,10 @@ start_process() {
 		  ifconfig | awk <(cat <<-EOF
 				/^lo/ {exit}
 				$1 ~ /^inet$/ {
-					sub(/addr:/,"address=",$2)
-					sub(/Mask:/,"netmask=",$4)
-					print $2 "\n" $4
+					sub(/addr:/ ,"address=",$2)
+					sub(/Bcast:/,"broadcast=",$3)
+					sub(/Mask:/ ,"netmask=",$4)
+					print $2 "\n" $3 "\n" $4
 				}
 				EOF
 		  ) >> ${TARGET}/etc/rc.conf
@@ -154,7 +157,8 @@ in another tty, if you wish. YES here to rebuild." && {
 		  echo "    setup ($BIOS_HDNUM)"
 #		  rm -f ${DMAPF}
 	 }
-	 echo "Networking was not set up. You might want to edit these files:"
+	 echo "You might want to edit these files:"
+	 echo "		/boot/grub/menu.lst"
 	 echo "		/etc/rc.conf"
 	 echo "		/etc/resolv.conf"
 	 echo "		/etc/profile.d/proxy.sh"
