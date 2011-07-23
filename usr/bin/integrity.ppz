@@ -105,6 +105,9 @@ integrity_simpleconf() {
 		  /media/green \
 		  /media/encuser
 	 [ -L /snowball ] || ln -s /media/rodinia/pub /snowball
+	 local SLINK=/etc/skel.ppz/.Xauthority.xuser
+	 [ -L $SLINK ] && [ $(readlink -m $SLINK) = /tmp/.Xauthority.xuser ] \
+		  || ln -s /tmp/.Xauthority.xuser $SLINK
 }
 integrity_pacnew() {
 	 return
