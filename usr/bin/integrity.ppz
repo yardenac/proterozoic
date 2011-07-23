@@ -203,6 +203,7 @@ integrity_net() {
 #		  || giveup_prompt "Launching dhcpcd failed. Try again?"
 #	 ifconfig $IFACE | grep -q 'inet addr:' \
 #		  || giveup_prompt "Still no ipaddr - try again?"
+	 }
 }
 integrity_sshd() {
 	 am_root || return
