@@ -1,6 +1,6 @@
 #!/bin/bash
 . /etc/rc.conf
-. /etc/bash.functions
+. /usr/share/ppz/bash.functions
 integrity_rootpw() {
 	 am_root || return
 	 shell_is_interactive || return

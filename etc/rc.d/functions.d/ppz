@@ -1,5 +1,5 @@
 #!/bin/bash
-. /etc/bash.functions
+. /usr/share/ppz/bash.functions
 have_mount_point() {
 	 [ -a "$1" ] || mkdir "$1"
 	 [ -L "$1" ] && {

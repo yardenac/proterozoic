@@ -1,6 +1,6 @@
 #!/bin/bash
 . /etc/rc.conf
-. /etc/bash.functions
+. /usr/share/ppz/bash.functions
 
 if [ -e /dev/mapper/$ENC_MAPNAME ]; then
     [ "$1" = "verbose" ] && echo already unencrypted: /dev/mapper/$ENC_MAPNAME

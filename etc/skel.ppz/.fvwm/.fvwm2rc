@@ -115,7 +115,7 @@ AddToFunc DragNMove
 
 DestroyFunc ResizeDynamicFromVars
 AddToFunc ResizeDynamicFromVars
-+ I PipeRead `echo "corner($[w.width],$[w.height],$[pointer.wx],$[pointer.wy]);" | bc /etc/bc-nw-script`
++ I PipeRead `echo "corner($[w.width],$[w.height],$[pointer.wx],$[pointer.wy]);" | bc /usr/share/ppz/bc-nw-script`
 #Current PipeRead
 
 DestroyFunc ResizeDynamic

@@ -471,6 +471,7 @@ makepkg_flexi() {
 	 esac
 	 B=$(grep -iEc ^processor /proc/cpuinfo); let ++B
 	 # unfinished!
+	 #makepkg --config /etc/makepkg.conf.native'
 }
 screentitle_and_do() {
 	 echo -ne "\ek$USER: $*\e\\"

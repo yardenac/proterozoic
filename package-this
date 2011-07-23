@@ -3,7 +3,7 @@
 	 echo "You have to run this from the same directory!"
 	 exit 1
 }
-. etc/bash.functions
+. usr/share/ppz/bash.functions
 
 
 [ "$1" ] && REPO="$1" || croak USAGE: ./package-this [repo-directory]

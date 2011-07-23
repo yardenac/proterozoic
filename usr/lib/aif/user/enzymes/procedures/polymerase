@@ -1,6 +1,6 @@
 #!/bin/bash
 depend_procedure core base
-[ -f /etc/bash.functions ] && . /etc/bash.functions
+[ -f /usr/share/ppz/bash.functions ] && . /usr/share/ppz/bash.functions
 
 TARGET=/media/targay
 MNTPTS=( /boot ) # / is implied
@@ -60,7 +60,7 @@ start_process() {
 				esac
 		  }
 	 done
-	 pacman --config /etc/pacman.conf.bootstrap \
+	 pacman --config /usr/share/ppz/default-pacman.conf \
 		  --root ${TARGET} \
 		  --cachedir ${TARGET}/var/cache/pacman/pkg \
 		  --dbpath ${TARGET}/var/lib/pacman \
@@ -94,7 +94,7 @@ start_process() {
 	 pkgs_laptop=(pcmciautils dhcpcd)
 	 pkgs_neverneed=(licenses logrotate lvm2 nano ppp reiserfsprogs xfsprogs)
 	 pkgs_go=($(comm -23 \
-		  <(pacman --config /etc/pacman.conf.bootstrap -Sgq base | sort -u) \
+		  <(pacman --config /usr/share/ppz/default-pacman.conf -Sgq base | sort -u) \
 		  <(eval eval list_sorted '\$\{pkgs_'$(commalist ${pkgs_groups[@]})'[@]\}') \
 		  ))
 	 local A=; for A in ${pkgs_groups[@]}; do
@@ -103,7 +103,7 @@ start_process() {
 	 pkgs_go+=(btrfs-progs-unstable proterozoic) # grub2-bios
 	 usetvar others "Type in any other packages you want to add: " 'nvidia' ''
 	 pkgs_go+=(${others//,/ })
-	 pacman --config /etc/pacman.conf.bootstrap \
+	 pacman --config /usr/share/ppz/default-pacman.conf \
 		  --root ${TARGET} \
 		  --cachedir ${TARGET}/var/cache/pacman/pkg \
 		  --dbpath ${TARGET}/var/lib/pacman \
