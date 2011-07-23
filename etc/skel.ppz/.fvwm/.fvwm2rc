@@ -1,7 +1,7 @@
 DestroyFunc InitFunction
 AddToFunc InitFunction
 + I exec xsetroot -mod 2 2 -fg rgb:55/40/55 -bg rgb:70/50/70
-#+ I exec fvwm-root --retain-pixmap /usr/share/xfce4/backdrops/xfce-in-the-moon.png
++ I exec fvwm-root --retain-pixmap /usr/share/ppz/wallpaper.png
 + I exec xscreensaver
 + I exec xhost +local:si
 
@@ -9,6 +9,7 @@ DestroyFunc StartFunction
 AddToFunc StartFunction
 + I Module FvwmCommandS
 + I exec /usr/bin/one-instance /usr/bin/fbpanel
+
 
 DeskTopSize 1x1
 DesktopName 0 Krypton
@@ -38,9 +39,11 @@ Style * !Borders, !Handles, MWMFunctions, MWMDecor, HintOverride, \
 		  IconBox 0 -10 -280 -1, SnapAttraction 10, ClickToFocus, ResizeOpaque
 Style Fvwm*       NoTitle,  Sticky, WindowListSkip, \
 		BorderWidth 2, CirculateSkipIcon, CirculateSkip
+Style panel StaysOnTop
 Style urxvt ResizeHintOverride
 Style xscreensaver FPFocusByProgram
 Style acroread PositionPlacement UnderMouse
+#Style Active
 
 MenuStyle * fvwm, Foreground white, Background cornflowerblue, Greyed grey40
 #MenuStyle * Font -adobe-times-bold-r-*-*-14-*-*-*-*-*-*-*

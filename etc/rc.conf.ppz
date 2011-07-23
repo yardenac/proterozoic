@@ -9,10 +9,12 @@ ENCUSER=%SET_ENCUSER%
 SSH_USERS=(!root GOODUSER @sftp-user)
 OPEN_PORTS=(22) # 41159 udp:41159)
 
+REMOTE_SYNC_FILE_1=(/boot/memtest86plus.bin.gz   4640a702c3e7a5a74af069f51ab8345f http://www.memtest.org/download/4.20/memtest86+-4.20.bin.gz)
+REMOTE_SYNC_FILE_2=(/usr/share/ppz/wallpaper.png 4144796068d749af1a1c0adbae93717e http://pacman-repo.hirstory.com/hongkong.radial.blue.png)
+
 #TMPFS_SIZE_OVERRIDE=50% # not implemented
 #	 draft_username_w_uid_2063
 #	 encrypted_swap_file /estaba
 #	 ssh_authkeys_file /etc/ssh/sshd_authorized_keys
 #	 tmpfs_size 50%
 #	 inittab settings?
-

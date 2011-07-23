@@ -155,6 +155,23 @@ integrity_hosts() {
 	 mv ${OLDFILE}{,.orig.$(uniq_token)}
 	 mv ${NEWFILE} ${OLDFILE}
 }
+can_work_with_boot() {
+	 [ -d /boot/grub ] || return 1 #not mounted at all!
+	 [ -w /boot ] && return #can write to it - ok
+	 grep -iq /boot /etc/mtab && return 1 #probably chrooted
+	 mount -o remount,rw /boot &>/dev/null
+	 [ -w /boot ] || return 1 #weve done all we can
+}
+remote_sync_file() { # $0 '/local/path' 'md5sum464a702cf...' 'http://source'
+	 check_file ${1} ${2} && return
+	 [ "${1:0:6}" = /boot/ ] && ! can_work_with_boot && return 1
+	 wget ${3} -qO ${1}
+	 check_file $F $PROPER_MD5 || {
+		  rm -f $F
+		  echo_red "Problem downloading /boot/$F - have to get it later"
+	 }
+	 [ "${1:0:6}" = /boot/ ] && mount -o remount,ro /boot &>/dev/null
+}
 integrity_net() {
 	 test_network_once 5 && {
 		  ! python-ntp && am_root && askyn "Sync kernel & hwclock with ntpdate?" && {
@@ -165,6 +182,7 @@ integrity_net() {
 	 } || {
 		  echo -n "No fast connectivity... Local system time: "
 		  echo_red $(date '+%l:%M:%S (%A %B %e, %Y)')
+		  return
 	 }
 	 am_root && {
 		  grep -iq broadcast /etc/rc.d/network || {
@@ -172,18 +190,19 @@ integrity_net() {
 				wget http://projects.archlinux.org/initscripts.git/plain/network -O /etc/rc.d/network
 				askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
 		  }
-	 }
-	 return
-	 IFACE=eth0
-	 until test_network_once; do
-		  ifconfig -a | grep -i 'Link encap:Ethernet'
-		  usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: '
-		  pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
-		  dhcpcd $IFACE \
-				|| giveup_prompt "Launching dhcpcd failed. Try again?"
-		  ifconfig $IFACE | grep -q 'inet addr:' \
-				|| giveup_prompt "Still no ipaddr - try again?"
-	 done
+		  local c=0
+		  while let ++c; do
+				local var=REMOTE_SYNC_FILE_$c
+				[ {!var} ] || break
+				remote_sync_file $(eval echo '${'$var'[@]}')
+		  done
+#	 ifconfig -a | grep -i 'Link encap:Ethernet'
+#	 usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: ' eth0
+#	 pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
+#	 dhcpcd $IFACE \
+#		  || giveup_prompt "Launching dhcpcd failed. Try again?"
+#	 ifconfig $IFACE | grep -q 'inet addr:' \
+#		  || giveup_prompt "Still no ipaddr - try again?"
 }
 integrity_sshd() {
 	 am_root || return

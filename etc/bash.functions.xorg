@@ -30,3 +30,7 @@ title_of_active_win() {
 #		break
 #	done
 #}
+win_from_pid() {
+	 type wmctrl &>/dev/null || return 1
+	 wmctrl -l | awk '/^.*\['"$1"'\]$/ { print $1 }'
+}

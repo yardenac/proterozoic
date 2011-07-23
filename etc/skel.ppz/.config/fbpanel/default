@@ -43,7 +43,7 @@ Plugin {
 	padding = 0
 	expand = false
 	config {
-		ClockFmt = <span font="Sans 15" style="normal" weight="bold" rise="-19965" letter_spacing="-2048" font_stretch="ultracondensed">%l:%M<span font="Sans 10" weight="normal">:%S</span></span>
+		ClockFmt = <span color="#ffffcc" font="Sans 15" style="normal" weight="bold" rise="-19965" letter_spacing="-2048" font_stretch="ultracondensed">%l:%M<span font="Sans 10" weight="normal">:%S</span></span>
 		ShowCalendar = false
 		ShowTooltip = true
 		TooltipFmt = <span stretch="ultracondensed"><span font="Sans 19">%A</span>&#xA;<span font="Sans 12">%B %-e, %Y</span></span>

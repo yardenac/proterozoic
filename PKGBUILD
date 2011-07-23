@@ -8,7 +8,6 @@ install=proterozoic.install
 makedepends=(findutils coreutils net-tools)
 depends=(emacs-nox bash-completion iptables sudo ntp openssh sshfs htop jfsutils bc iproute2 fgetty git lsof pacman-mirrorlist ca-certificates screen net-tools aif python2 rsync) # gptfdisk)
 # fakeroot xz bzip2 lzop less gzip rankmirrors curl ca-certificates)
-#source=('http://www.memtest.org/download/4.20/memtest86+-4.20.bin.gz')
 
 package() {
 	 cp -a ${startdir}/{etc,lib,usr} ${pkgdir}/

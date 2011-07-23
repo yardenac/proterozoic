@@ -83,13 +83,11 @@ start_process() {
 				EOF
 		  cat >> ${TARGET}/etc/fstab < /tmp/ppz-fstab
 		  rm -f /tmp/ppz-fstab
-#		  cp -f ${TARGET}/etc/localtime /tmp/target-localtime-examine
-#		  echo_red "Look at /tmp/target-localtime-examine to see what it was"
 		  cp -i {,${TARGET}}/etc/localtime
 		  set -o noclobber
 	 }
 	 pkgs_groups=(desktop wireless laptop neverneed)
-	 pkgs_desktop=(xorg-{server,xinit,xrdb,xsetroot,xhost} xf86-input-{keyboard,mouse} \
+	 pkgs_desktop=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo} xf86-input-{keyboard,mouse} \
 		  consolekit fvwm perl-xml-parser xscreensaver fbpanel xclip wmctrl \
 		  seamonkey mplayer urxvt-url-select gimp) #squeaker
 	 pkgs_wireless=(wpa_supplicant) #wpa_actiond ifplugd
@@ -142,19 +140,41 @@ in another tty, if you wish. YES here to rebuild." && {
 	 }
 	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
 		  cp -a ${TARGET}/usr/lib/grub/i386-pc/* ${TARGET}/boot/grub/
-		  DMAPF=/tmp/grub-device-map-ppz
+		  local DMAPF=/tmp/grub-device-map-ppz
 		  echo "quit" | ${TARGET}/sbin/grub --no-floppy --device-map ${DMAPF}
+		  local BOOT_DEVICE_CN=$(unhash targmntboot)
 		  local BOOT_RAWDEVICE=$(unhash targmntboot | sed 's/[0-9]*$//')
 		  local BOOT_PARTNUMBR=$(unhash targmntboot | sed 's/^[^0-9]*//')
 		  let BOOT_PARTNUMBR-- || echo "partition number was zero -- wtf??"
 		  local BIOS_HDNUM=$(awk '$2 == "'$BOOT_RAWDEVICE'" {gsub(/[()]/,"",$1);print $1}' ${DMAPF})
-		  echo "You need to finish grub. Make /boot/grub/menu.lst & do:"
-		  echo "  ${TARGET}/sbin/grub --no-floppy --batch "'<<-EOF blah blah blah... '
-		  echo "    targmntboot was: "$(unhash targmntboot)
-		  echo "    device ($BIOS_HDNUM) $BOOT_RAWDEVICE"
-		  echo "    geometry ($BIOS_HDNUM)"
-		  echo "    root ($BIOS_HDNUM,$BOOT_PARTNUMBR)"
-		  echo "    setup ($BIOS_HDNUM)"
+		  local GRUB_DEV="(${BIOS_HDNUM},${BOOT_PARTNUMBR})"
+		  local ROOT_UUID=$(blkid -o value -s UUID ${BOOT_DEVICE_CN})
+		  cp -f ${TARGET}{/usr/share/ppz/default-menu.lst,/boot/grub/menu.lst}
+		  sed -i \
+				-e s/%SET_HOSTNAME%/${HOSTNAME}/ig \
+				-e s/%SET_BOOTPART%/${GRUB_DEV}/ig \
+				-e s/%SET_ROOT_DEVICE%/\/dev\/disk\/by-uuid\/${ROOT_UUID}/ig ${TARGET}/boot/grub/menu.lst
+		  usetvar GRUBPW "Enter a (raw) grub password, if you like: " '' '' # unset so doesnt need to be local
+		  [ "$GRUBPW" ] && {
+				local GRUBPWENC=$(echo -e "md5crypt\n${GRUBPW}\nquit" | ${TARGET}/sbin/grub --no-floppy \
+					 --batch --device-map ${DMAPF} | sed 's/^Encrypted: //ig';t;d) #sed commands: only print if matched
+				[ "$GRUBPWENC" ] && sed -i 's/%SET_PASSWORD%/'${GRUBPWENC//\//\\\/}'/ig' ${TARGET}/boot/grub/menu.lst
+				unset GRUBPWENC GRUBPW
+		  }
+		  cat ${DMAPF} >> ${TARGET}/boot/grub/menu.lst
+		  read -d W GRUBCOMMANDS <<-EOF
+
+				device ($BIOS_HDNUM) $BOOT_RAWDEVICE
+				geometry ($BIOS_HDNUM)
+				root ($BIOS_HDNUM,$BOOT_PARTNUMBR)
+				setup ($BIOS_HDNUM)"
+				EOF
+		  askyn "ENTER to Install grub in MBR of ${BOOT_RAWDEVICE} aka ($BIOS_HDNUM),
+					pointing to ${BOOT_DEVICE_CN} aka ($BIOS_HDNUM,$BOOT_PARTNUMBR),
+					as follows: ${GRUBCOMMANDS}" \
+				&& {
+				echo "$GRUBCOMMANDS" | ${TARGET}/sbin/grub --no-floppy --batch --device-map ${DMAPF}
+		  }
 #		  rm -f ${DMAPF}
 	 }
 	 echo "You might want to edit these files:"
