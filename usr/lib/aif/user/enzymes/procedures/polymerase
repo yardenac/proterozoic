@@ -9,9 +9,9 @@ unmount_all() {
 	 local RV=0
 	 for MNTD_FS in /proc /sys /dev ${MNTPTS[@]} /; do
 		  local FULLPATH=${TARGET}${MNTD_FS}
-		  grep -iq ${FULLPATH//\/} /etc/mtab \
+		  grep -iq ${FULLPATH%%\/} /etc/mtab \
 				&& {
-				umount ${FULLPATH//\/} || RV=1
+				umount ${FULLPATH%%\/} || RV=1
 		  }
 	 done
 	 return $RV
@@ -67,7 +67,7 @@ start_process() {
 		  --logfile ${TARGET}/var/log/pacman.log \
 		  --noprogressbar --noconfirm -Syq initscripts
 	 set +o noclobber && {
-		  cp -f /etc/rc.conf.ppz ${TARGET}/etc/rc.conf
+		  cp -f /usr/share/ppz/default-rc.conf ${TARGET}/etc/rc.conf
 		  usetvar    HOSTNAME "Choose a new hostname! Take your time ;) " new_arch_machine_$(date +%Y_%m_%d)
 		  usetvar    XRGUSER "Choose name of X user to boot into (blank for none): " '' ''
 		  usetvar    ENCUSER "Choose name of encrypted user (blank for none): " '' ''
@@ -153,21 +153,30 @@ in another tty, if you wish. YES here to rebuild." && {
 		  sed -i \
 				-e s/%SET_HOSTNAME%/${HOSTNAME}/ig \
 				-e s/%SET_BOOTPART%/${GRUB_DEV}/ig \
-				-e s/%SET_ROOT_DEVICE%/\/dev\/disk\/by-uuid\/${ROOT_UUID}/ig ${TARGET}/boot/grub/menu.lst
-		  usetvar GRUBPW "Enter a (raw) grub password, if you like: " '' '' # unset so doesnt need to be local
-		  [ "$GRUBPW" ] && {
-				local GRUBPWENC=$(echo -e "md5crypt\n${GRUBPW}\nquit" | ${TARGET}/sbin/grub --no-floppy \
-					 --batch --device-map ${DMAPF} | sed 's/^Encrypted: //ig';t;d) #sed commands: only print if matched
-				[ "$GRUBPWENC" ] && sed -i 's/%SET_PASSWORD%/'${GRUBPWENC//\//\\\/}'/ig' ${TARGET}/boot/grub/menu.lst
-				unset GRUBPWENC GRUBPW
-		  }
-		  cat ${DMAPF} >> ${TARGET}/boot/grub/menu.lst
+				-e s/%SET_ROOT_DEVICE%/\/dev\/disk\/by-uuid\/${ROOT_UUID//\//\\\/}/ig ${TARGET}/boot/grub/menu.lst
+		  while :; do
+				usetvar GRUBPW "Enter a (raw) grub password, if you like: " '' '' -s # unset so doesnt need to be local
+				[ "$GRUBPW" ] || break
+				usetvar GRUBPWDUB "And once more, please: " '' '' -s
+				[ "$GRUBPW" != "$GRUBPWDUB" ] || {
+					 echo_red "They did not match!"
+					 continue
+				}
+				local GHASH=$(echo -e "md5crypt\n${GRUBPW}\nquit" | ${TARGET}/sbin/grub --no-floppy \
+					 --batch --device-map ${DMAPF} | sed 's/^Encrypted: //ig;t;d') #sed commands: only print if matched
+				[ "$GHASH" ] && [ "$GHASH" = "${GHASH// }" ] \
+					 && sed -i 's/%SET_PASSWORD%/'${GHASH//\//\\\/}'/ig' ${TARGET}/boot/grub/menu.lst \
+					 || echo_red "Setting grub password failed somehow..."
+				break
+		  done
+		  unset GHASH GRUBPW GRUBPWDUB
+		  sed 's/^/#/ig' ${DMAPF} >> ${TARGET}/boot/grub/menu.lst
 		  read -d W GRUBCOMMANDS <<-EOF
 
 				device ($BIOS_HDNUM) $BOOT_RAWDEVICE
 				geometry ($BIOS_HDNUM)
 				root ($BIOS_HDNUM,$BOOT_PARTNUMBR)
-				setup ($BIOS_HDNUM)"
+				setup ($BIOS_HDNUM)
 				EOF
 		  askyn "ENTER to Install grub in MBR of ${BOOT_RAWDEVICE} aka ($BIOS_HDNUM),
 					pointing to ${BOOT_DEVICE_CN} aka ($BIOS_HDNUM,$BOOT_PARTNUMBR),
@@ -177,6 +186,7 @@ in another tty, if you wish. YES here to rebuild." && {
 		  }
 #		  rm -f ${DMAPF}
 	 }
+	 echo_red "Grub finished."
 	 echo "You might want to edit these files:"
 	 echo "		/boot/grub/menu.lst"
 	 echo "		/etc/rc.conf"

@@ -24,7 +24,7 @@ GITURL=https://raw.github.com/twomen/proterozoic/master
 
 mv -f /etc/rc.conf{,.original}
 mv -f /etc/sudoers{,.archiso-default}
-wget $GITURL/etc/rc.conf.ppz						-qO	/etc/rc.conf
+wget $GITURL/usr/share/ppz/default-rc.conf	-qO	/etc/rc.conf
 wget $GITURL/etc/rc.conf.basics					-qO	/etc/rc.conf.basics.tmp
 wget $GITURL/etc/pacman.d/mirrorlist.otown	-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/etc/pacman.conf.bootstrap			-qO	/tmp/pacman.conf.ppz

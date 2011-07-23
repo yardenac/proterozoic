@@ -166,9 +166,11 @@ remote_sync_file() { # $0 '/local/path' 'md5sum464a702cf...' 'http://source'
 	 check_file ${1} ${2} && return
 	 [ "${1:0:6}" = /boot/ ] && ! can_work_with_boot && return 1
 	 wget ${3} -qO ${1}
-	 check_file $F $PROPER_MD5 || {
-		  rm -f $F
-		  echo_red "Problem downloading /boot/$F - have to get it later"
+	 check_file ${1} ${2} && {
+		  echo_red "Successfully retrieved $1"
+	 } || {
+		  rm -f ${1}
+		  echo_red "Problem downloading $1 - have to get it later"
 	 }
 	 [ "${1:0:6}" = /boot/ ] && mount -o remount,ro /boot &>/dev/null
 }
@@ -187,14 +189,15 @@ integrity_net() {
 	 am_root && {
 		  grep -iq broadcast /etc/rc.d/network || {
 				mv -f /etc/rc.d/network{,.forget}
-				wget http://projects.archlinux.org/initscripts.git/plain/network -O /etc/rc.d/network
+				wget http://projects.archlinux.org/initscripts.git/plain/network -qO /etc/rc.d/network
 				askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
 		  }
 		  local c=0
 		  while let ++c; do
 				local var=REMOTE_SYNC_FILE_$c
-				[ {!var} ] || break
+				[ ${!var} ] || break
 				remote_sync_file $(eval echo '${'$var'[@]}')
+				sleep 0.5
 		  done
 #	 ifconfig -a | grep -i 'Link encap:Ethernet'
 #	 usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: ' eth0

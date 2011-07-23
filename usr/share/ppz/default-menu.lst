@@ -19,7 +19,7 @@ initrd /kernel26.img
 title  memtest86+ 4.20
 lock
 root   (%SET_BOOTPART%)
-kernel /memtest86plus-4.20.bin.gz
+kernel /memtest86plus.bin.gz
 
 title  memdisk test - DOESNT WORK
 lock
@@ -38,3 +38,4 @@ lock
 root   (hd1,0)
 kernel /vmlinuz26 root=/dev/disk/by-uuid/5b25f749-ab8d-4749-a8b0-3b7d3408af19 ro
 initrd /kernel26-fallback.img
+

@@ -6,7 +6,7 @@ urxvt.cursorColor: green
 !urxvt.foreground: white
 urxvt.reverseVideo: true
 urxvt.transparent: true
-urxvt.shading: 30
+urxvt.shading: 50
 urxvt.scrollTtyOutput: false
 urxvt.font: xft:Mono-13:antialias=false:hinting=false
 urxvt.letterSpace: -1

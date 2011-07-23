@@ -113,8 +113,8 @@ make_sure_its_mine() {
 }
 check_file() {
 	 [ -a "$1" ] || return 1
-	 local LMD5=$(md5sum "$1" &>/dev/null)
-	 [ "$LMD5" = "${2:-NEVERMATCH}" ]
+	 local LMD5=$(md5sum "$1" 2>/dev/null)
+	 [ "${LMD5%% *}" = "${2:-NEVERMATCH}" ]
 }
 first_to_exist() {
 	 return 1
@@ -298,7 +298,7 @@ usetvar() {
 	 }
 	 pushtrap 'poptrap; echo; return;' INT QUIT
 	 clear_input_buffer
-	 read -ei "${DVAL}" -p $'\e[1;34m'"${2}"$'\e[m' "${1}"
+	 read -ei "${DVAL}" -p $'\e[1;34m'"${2}"$'\e[m' $4 $5 "${1}"
 	 RV=$?
 	 poptrap
 	 return $RV
