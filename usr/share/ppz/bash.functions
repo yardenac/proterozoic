@@ -298,7 +298,7 @@ usetvar() {
 	 }
 	 pushtrap 'poptrap; echo; return;' INT QUIT
 	 clear_input_buffer
-	 read -ei "${DVAL}" -p $'\e[1;34m'"${2}"$'\e[m' $4 $5 "${1}"
+	 read -ei "${DVAL}" -p $'\e[1;34m'"${2}"$'\e[m' $5 $6 $7 "${1}"
 	 RV=$?
 	 poptrap
 	 return $RV
