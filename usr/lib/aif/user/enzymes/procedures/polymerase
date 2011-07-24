@@ -67,7 +67,7 @@ start_process() {
 		  --cachedir ${TARGET}/var/cache/pacman/pkg \
 		  --dbpath ${TARGET}/var/lib/pacman \
 		  --logfile ${TARGET}/var/log/pacman.log \
-		  --noprogressbar --noconfirm -Syq initscripts
+		  --noprogressbar --noconfirm --needed -Syq initscripts
 	 grep -iq oxygen ${TARGET}/etc/fstab &>/dev/null \
 		  && askyn "Looks like we already did some basic configging ... skip that?" || {
 		  set +o noclobber
@@ -184,6 +184,7 @@ in another tty, if you wish. YES here to rebuild." && {
 		  unset GHASH GRUBPW GRUBPWDUB
 		  sed -i 's/\(^.*%SET_PASSWORD%\)/#\1/ig' ${TARGET}/boot/grub/menu.lst
 		  sed 's/^/#/ig' ${DMAPF} >> ${TARGET}/boot/grub/menu.lst
+		  blkid | sed 's/^/#/ig' >> ${TARGET}/boot/grub/menu.lst
 		  grep -iqE '^[^#].*%SET_' ${TARGET}/boot/grub/menu.lst && askyn "Something is still wrong with
 					${TARGET}/boot/grub/menu.lst. You should really check it..."
 		  read -d W GRUBCOMMANDS <<-EOF

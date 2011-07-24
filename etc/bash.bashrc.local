@@ -53,6 +53,8 @@ export EDITOR=emacs
 export VISUAL=emacs
 #export GRE_HOME=/tmp
 export PROMPT_COMMAND='history -a'
+export XAUTHORITY=/tmp/.Xauthority.$USER
+export RXVT_SOCKET=/tmp/.rxvt-unicode.socket.$USER.$EUID
 set completion-ignore-case On
 set completion-query-items 150
 set page-completions Off

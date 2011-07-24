@@ -43,7 +43,7 @@ integrity_bashhistory() {
 		  }
 		  echo ... \  \  doing
 		  skel_file=/etc/skel.ppz/.bash_history
-		  ! [ -s "$F" ] && cp ${skel_file} ${F} || {
+		  ! [ -s "$F" ] && cp -f ${skel_file} ${F} || {
 				! cmp -s <(head -n 1 ${F}) <(head -n 1 ${skel_file}) \
 					 && askyn "$F ("$(du -sh ${F} | cut -f 1)") has no skel prefix. Join them?" && {
 					 
@@ -105,9 +105,7 @@ integrity_simpleconf() {
 		  /media/green \
 		  /media/encuser
 	 [ -L /snowball ] || ln -s /media/rodinia/pub /snowball
-	 local SLINK=/etc/skel.ppz/.Xauthority.xuser
-	 [ -L $SLINK ] && [ $(readlink -m $SLINK) = /tmp/.Xauthority.xuser ] \
-		  || ln -s /tmp/.Xauthority.xuser $SLINK
+	 enforce_perms 440 /etc/sudoers.d/wheel
 }
 integrity_pacnew() {
 	 return
@@ -168,6 +166,7 @@ can_work_with_boot() {
 remote_sync_file() { # $0 '/local/path' 'md5sum464a702cf...' 'http://source'
 	 check_file ${1} ${2} && return
 	 [ "${1:0:6}" = /boot/ ] && ! can_work_with_boot && return 1
+	 mkdir -p $(dirname ${1})
 	 wget ${3} -qO ${1}
 	 check_file ${1} ${2} && {
 		  echo_red "Successfully retrieved $1"
@@ -193,6 +192,7 @@ integrity_net() {
 		  grep -iq broadcast /etc/rc.d/network || {
 				mv -f /etc/rc.d/network{,.forget}
 				wget http://projects.archlinux.org/initscripts.git/plain/network -qO /etc/rc.d/network
+				chmod +x /etc/rc.d/network
 				askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
 		  }
 		  local c=0
@@ -277,6 +277,8 @@ integrity_sshd() {
 #    functions.d
 #     bash.bashrc.local
 #      post_upgrade
+
+echo INTERGRITY WAS CALLED AS: "$0 $@"
 
 for F in rootpw emacsd bashhistory locales tz \
 	 simpleconf pacnew users inittab \

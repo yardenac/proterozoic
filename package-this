@@ -23,5 +23,5 @@ makepkg -c \
 	 && mv $PF ${REPO}/ \
 	 && repo-add ${REPO}/hir.db.tar.gz ${REPO}/$PF
 
-git diff HEAD --quiet -- bootstrap-this etc/{rc.conf{.ppz,.basics},pacman.{conf.bootstrap,d/mirrorlist.otown}} \
+git diff HEAD --quiet -- bootstrap-this etc/{rc.conf.basics,pacman.d/mirrorlist.otown} usr/share/ppz/default-{rc,pacman}.conf \
 	 || echo_red "Bootstrap files have changed, you probably want to update git!"

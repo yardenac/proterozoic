@@ -4,6 +4,7 @@ AddToFunc InitFunction
 + I exec fvwm-root --retain-pixmap /usr/share/ppz/wallpaper.png
 + I exec xscreensaver
 + I exec xhost +local:si
++ I exec urxvtd -q -f -o
 
 DestroyFunc StartFunction
 AddToFunc StartFunction
