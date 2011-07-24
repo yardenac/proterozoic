@@ -279,6 +279,7 @@ integrity_sshd() {
 #      post_upgrade
 
 echo INTERGRITY WAS CALLED AS: "$0 $@"
+echo PARENT PROC IS: $(ps --pid $(ps --pid $$ -o ppid=) -o args=)
 
 for F in rootpw emacsd bashhistory locales tz \
 	 simpleconf pacnew users inittab \
