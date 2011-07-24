@@ -112,7 +112,7 @@ start_process() {
 	 cp -f ${TARGET}/etc/pacman.conf{.bootstrap,}
 	 askyn "Use present net config as static on target?" && {
 		  cp -f {,${TARGET}}/etc/resolv.conf
-		  ifconfig | awk <(cat <<-EOF
+		  ifconfig | awk -f <(cat <<-'EOF'
 				/^lo/ {exit}
 				$1 ~ /^inet$/ {
 					sub(/addr:/ ,"address=",$2)
@@ -133,6 +133,8 @@ start_process() {
 		  askyn "Add ppz_tmp to HOOKS?" \
 				&& sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' ${TARGET}/etc/mkinitcpio.conf
 	 }
+	 usetvar mmodules "Add any initrd modules (delete what you dont want): " 'nvidia' ''
+	 sed -i 's/^\(MODULES="[^"]*\)"/\1 '"${mmodules[@]}"'"/ig' ${TARGET}/etc/mkinitcpio.conf
 	 grex ${TARGET}/etc/mkinitcpio.conf
 	 askyn "Above is ${TARGET}/etc/mkinitcpio.conf. You have a chance to edit
 in another tty, if you wish. YES here to rebuild." && {
@@ -153,15 +155,19 @@ in another tty, if you wish. YES here to rebuild." && {
 		  sed -i \
 				-e s/%SET_HOSTNAME%/${HOSTNAME}/ig \
 				-e s/%SET_BOOTPART%/${GRUB_DEV}/ig \
-				-e s/%SET_ROOT_DEVICE%/\/dev\/disk\/by-uuid\/${ROOT_UUID//\//\\\/}/ig ${TARGET}/boot/grub/menu.lst
+				-e 's/%SET_ROOT_DEVICE%/\/dev\/disk\/by-uuid\/'${ROOT_UUID//\//\\\/}/ig ${TARGET}/boot/grub/menu.lst
 		  while :; do
+				echo STARTING @$GRUBPW@$GRUBPWDUB@
 				usetvar GRUBPW "Enter a (raw) grub password, if you like: " '' '' -s # unset so doesnt need to be local
+				echo THEN @$GRUBPW@$GRUBPWDUB@
 				[ "$GRUBPW" ] || break
 				usetvar GRUBPWDUB "And once more, please: " '' '' -s
+				echo OR @$GRUBPW@$GRUBPWDUB@
 				[ "$GRUBPW" != "$GRUBPWDUB" ] || {
 					 echo_red "They did not match!"
 					 continue
 				}
+				echo WEIRD @$GRUBPW@$GRUBPWDUB@
 				local GHASH=$(echo -e "md5crypt\n${GRUBPW}\nquit" | ${TARGET}/sbin/grub --no-floppy \
 					 --batch --device-map ${DMAPF} | sed 's/^Encrypted: //ig;t;d') #sed commands: only print if matched
 				[ "$GHASH" ] && [ "$GHASH" = "${GHASH// }" ] \
@@ -170,7 +176,10 @@ in another tty, if you wish. YES here to rebuild." && {
 				break
 		  done
 		  unset GHASH GRUBPW GRUBPWDUB
+		  sed -i 's/\(^.*%SET_PASSWORD%\)/#\1/ig' ${TARGET}/boot/grub/menu.lst
 		  sed 's/^/#/ig' ${DMAPF} >> ${TARGET}/boot/grub/menu.lst
+		  grep -iq '^[^#].*%SET_' ${TARGET}/boot/grub/menu.lst && askyn "Something is still wrong with
+					${TARGET}/boot/grub/menu.lst. You should really check it..."
 		  read -d W GRUBCOMMANDS <<-EOF
 
 				device ($BIOS_HDNUM) $BOOT_RAWDEVICE
