@@ -34,3 +34,15 @@ win_from_pid() {
 	 type wmctrl &>/dev/null || return 1
 	 wmctrl -l | awk '/^.*\['"$1"'\]$/ { print $1 }'
 }
+cb() { #cb from term | cb to remotehost | cb to term | ...
+	 [ "$2" = term -o -z "$2" ] && {
+		  local COMMAND="xclip -selection primary"
+	 } || {
+		  local COMMAND="ssh $2 xclip -d :0.0 -selection clipboard"
+	 }
+	 [ "$1" = to -o -z "$1" ] && {
+		  xclip -selection clipboard -o | $COMMAND -i -l 2
+	 } || {
+		  $COMMAND -o | xclip -selection clipboard -i -l 2
+	 }
+}

@@ -171,6 +171,40 @@ conffile_checkup() { # conffile_checkup OLDFILE NEWFILE
 		  return
 	 }
 }
+fsconv() { #usage: fsconv 5mb in k; 1G in s;
+	 local STR=
+	 local DIVIS=b
+	 while [ "$1" ]; do
+		  case "$1" in
+				in) shift; DIVIS=$1;;
+				*)STR=$STR$1
+		  esac
+		  shift
+	 done
+	 echo "(1*${STR})/(1*$DIVIS)" | sed '
+			s/[^0-9bskmgtp./()*]//ig
+			s/b/*1/ig
+			s/s/*512/ig
+			s/k/*1024/ig
+			s/m/*1024*1024/ig
+			s/g/*1024*1024*1024/ig
+			s/t/*1024*1024*1024*1024/ig
+			s/p/*1024*1024*1024*1024*1024/ig
+			s/\*\([^0-9]\)/\1/ig
+	 ' | bc <(echo 'scale=0;obase=10;ibase=10;')
+}
+dd_with_progress() {
+	 local SLEEPSECS=$1; shift
+	 dd "$@" &
+	 local DDPID=$!
+	 while :; do
+		  sleep $SLEEPSECS
+		  jobs -l | grep -iq $DDPID || break
+		  kill -SIGUSR1 $DDPID
+		  echo -e "\e[4A"
+	 done
+	 echo $'\n\n\n'
+}
 ############ INTERACTIVE CONSOLE TRICKS
 ansi_colors=(black red green yellow blue magenta cyan white)
 c=${#ansi_colors[@]}
@@ -298,7 +332,7 @@ usetvar() {
 	 }
 	 pushtrap 'poptrap; echo; return;' INT QUIT
 	 clear_input_buffer
-	 read -ei "${DVAL}" -p $'\e[1;34m'"${2}"$'\e[m' $5 $6 $7 "${1}"
+	 read -ei "${DVAL}" -p $'\e[1;34m'"${2//	}"$'\e[m' $5 $6 $7 "${1}"
 	 RV=$?
 	 poptrap
 	 return $RV

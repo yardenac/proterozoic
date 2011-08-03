@@ -141,6 +141,12 @@ AddToMenu MenuFvwmWindowOps2
 + "$[gt.&Lower]"             Lower
 + "$[gt.(De)&Iconify]"       Iconify
 + "$[gt.(Un)&Stick]"         Stick
++ "Toggle OnTop"				  ToggleOnTopFunc
+
+DestroyFunc ToggleOnTopFunc
+AddToFunc ToggleOnTopFunc
++ I ThisWindow (Layer 6) Layer
++ I TestRc (NoMatch) Layer 0 6
 
 DestroyMenu MenuFvwmForms
 AddToMenu MenuFvwmForms

@@ -23,14 +23,12 @@ arch=$(uname -m)
 GITURL=https://raw.github.com/twomen/proterozoic/master
 
 mv -f /etc/rc.conf{,.original}
-mv -f /etc/sudoers{,.archiso-default}
+mv -f /etc/sudoers{,.original}
 wget $GITURL/usr/share/ppz/default-rc.conf		-qO	/etc/rc.conf
-wget $GITURL/etc/rc.conf.basics						-qO	/etc/rc.conf.basics.tmp
 wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/usr/share/ppz/default-pacman.conf	-qO	/tmp/pacman.conf.ppz
 sed -i s/otown/otown.tmp/ig									/tmp/pacman.conf.ppz
 sed -i \
-	 -e s/rc.conf.basics/rc.conf.basics.tmp/ig \
 	 -e s/%SET_HOSTNAME%/archiso/ig \
 	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
 
@@ -39,8 +37,7 @@ install_from_schlunix	extra xz git-1.7.5.2-1 python2-2.7.2-1 screen-4.0.3-11
 install_from_schlunix	extra gz sshfs-2.2-3
 this_pacman -Sq			proterozoic smartmontools
 
-sed -i s/rc.conf.basics.tmp/rc.conf.basics/ig		/etc/rc.conf
-rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp /etc/rc.conf.basics.tmp
+rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
 
 add_hook() { :; }
 . /etc/rc.conf

@@ -98,12 +98,7 @@ integrity_simpleconf() {
 		  gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
 		  *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
 	 esac
-	 mkdir -p \
-		  /media/arch-cold-rw \
-		  /media/arch-cold-ro \
-		  /media/rodinia \
-		  /media/green \
-		  /media/encuser
+	 mkdir -p /media/{arch-cold-r{w,o},rodinia,green,encuser}
 	 [ -L /snowball ] || ln -s /media/rodinia/pub /snowball
 	 enforce_perms 440 /etc/sudoers.d/wheel
 }
@@ -117,6 +112,24 @@ integrity_pacnew() {
 integrity_users() {
 	 am_root || return
 	 sed -i s/%ENCUSER%/${ENCUSER}/ig /etc/skel.ppz/.fvwm/.fvwm2rc
+}
+integrity_encuser() { local DDSIZE=
+	 am_root || return
+	 [ -a $ENCLF ] || {
+		  usetvar DDSIZE "There is NO encrypted container named
+				\"$ENCLF\"! To make one, enter a size: " 3G '' \
+					 && [ -n $DDSIZE ] \
+					 && askyn "Did you mean to enter $DDSIZE?" && {
+				dd_with_progress if=/dev/urandom of=$ENCLF bs=512 count=$(fsconv $DDSIZE in s)
+				ls -FlAthr $ENCLF
+		  }
+	 } && {
+		  local BTYPE=$(blkid -o value -s TYPE $ENCLF)
+		  case $BTYPE in
+				ext4) :;;
+		  esac
+		  : #it defo exists now
+	 }
 }
 integrity_inittab() {
 	 return
@@ -282,7 +295,7 @@ echo INTERGRITY WAS CALLED AS: "$0 $@"
 echo PARENT PROC IS: $(ps --pid $(ps --pid $$ -o ppid=) -o args=)
 
 for F in rootpw emacsd bashhistory locales tz \
-	 simpleconf pacnew users inittab \
+	 simpleconf pacnew users encuser inittab \
 	 hosts net sshd; do
 #	 echo doing ${F}
 	 integrity_${F}
