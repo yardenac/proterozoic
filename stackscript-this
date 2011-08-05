@@ -38,8 +38,11 @@ this_pacman -Sqy pacman
 pacman-db-upgrade
 this_pacman -Sqyu
 sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' ${TARGET}/etc/mkinitcpio.conf
-this_pacman -Sq proterozoic linux-linode
-# give k-l ipv6 support
+this_pacman -Sq proterozoic
+cat > /etc/mkinitcpio.conf <<-EOF
+	HOOKS="base udev autodetect ppz_tmp"
+EOF
+this_pacman -Sq linux-linode
 
 rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
 
