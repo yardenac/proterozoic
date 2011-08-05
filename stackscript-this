@@ -20,9 +20,23 @@ sed -i \
 	 -e s/=UTC/=xen/ig \
 	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
 
+cat > /etc/locale.gen <<-EOF
+		en_US.UTF-8 UTF-8
+		en_US ISO-8859-1
+		es_US.UTF-8 UTF-8
+		es_US ISO-8859-1
+		he_IL.UTF-8 UTF-8
+		he_IL ISO-8859-8
+		iw_IL.UTF-8 UTF-8
+		iw_IL ISO-8859-8
+		de_DE.UTF-8 UTF-8
+		de_DE ISO-8859-1
+		EOF
+locale-gen
+
 this_pacman -Sqy pacman
 pacman-db-upgrade
-this_pacman -Squ
+this_pacman -Sqyu
 sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' ${TARGET}/etc/mkinitcpio.conf
 this_pacman -Sq proterozoic linux-linode
 # give k-l ipv6 support

@@ -35,7 +35,7 @@ sed -i \
 this_pacman -Sqy
 install_from_schlunix	extra xz git-1.7.5.2-1 python2-2.7.2-1 screen-4.0.3-11
 install_from_schlunix	extra gz sshfs-2.2-3
-this_pacman -Sq			proterozoic smartmontools
+this_pacman -Sq			proterozoic smartmontools aif
 
 rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
 
