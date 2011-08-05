@@ -1,44 +1,38 @@
 #!/bin/bash
 # <UDF name="ss_hostname" label="hostname" />
+# <UDF name="ss_encuser"  label="encrypted user" />
+echo bootstrapping for the 2010.05 linode image...
 
-say_and_do()	{ echo DOING: "$@"; "$@"; }
-fsls_quote()	{ echo "$@" | sed 's_/_\\/_gi'; }
-
-setbashvar() { # USAGE: setbashvar VAR value /file/path
-	 HASHTXT='#\|'
-	 OCCS=$(grep -iEc '^[#[:space:]]*'${1}= ${3})
-	 [ $OCCS -gt 1 ] && {
-		  NOCCS=$(grep -iEc '^[[:space:]]*'${1}= ${3})
-		  [ $NOCCS -gt 1 ] && return 1
-		  HASHTXT=''
-	 }
-	 PATTERN=$(fsls_quote "${2}")
-	 say_and_do sed -i 's/^\('${HASHTXT}'\s\)*'${1}'=.*$/'${1}'="'"${PATTERN}"'"/i' ${3}
+this_pacman() {
+	 pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm "$@"
 }
+GITURL=https://raw.github.com/twomen/proterozoic/master
 
-setbashvar HOSTNAME			${SS_HOSTNAME}			/etc/rc.conf
-setbashvar HARDWARECLOCK	xen						/etc/rc.conf
-setbashvar TIMEZONE			America/Los_Angeles	/etc/rc.conf
-say_and_do sed -i 's/^\(127.0.0.1.*\)$/\1 '${SS_HOSTNAME}'/' /etc/hosts
+mv -f /etc/rc.conf{,.original}
+mv -f /etc/sudoers{,.original}
+wget $GITURL/usr/share/ppz/default-rc.conf		-qO	/etc/rc.conf
+wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
+wget $GITURL/usr/share/ppz/default-pacman.conf	-qO	/tmp/pacman.conf.ppz
+sed -i s/otown/otown.tmp/ig									/tmp/pacman.conf.ppz
+sed -i \
+	 -e s/%SET_HOSTNAME%/${SS_HOSTNAME}/ig \
+	 -e s/%SET_ENCUSER%/${SS_ENCUSER}/ig \
+	 -e s/=UTC/=xen/ig \
+	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
 
-say_and_do hostname ${SS_HOSTNAME}
-
-#wget sane mirrorlist
-
-echo -e "\n[hir]\nServer = http://pacman-repo.hirstory.com\n" >> /etc/pacman.conf
-
-pacman -Sy  --noconfirm pacman
+this_pacman -Sqy pacman
 pacman-db-upgrade
-pacman -Syu --noconfirm
-pacman -Sy  --noconfirm proterozoic kernel26-linode
+this_pacman -Squ
+sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' ${TARGET}/etc/mkinitcpio.conf
+this_pacman -Sq proterozoic linux-linode
 # give k-l ipv6 support
 
-ret_ipaddr() {
-	 IPADDR=$(ip -4 address show dev eth0 | grep -iEo '([0-9]{1,3})(\.[0-9]{1,3}){3}/24')
-	 echo ${IPADDR%%/*}
-}
-SS_IPADDR=$(ret_ipaddr)
+rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
 
-setbashvar eth0				"eth0 ${SS_IPADDR}      netmask 255.255.255.0" /etc/rc.conf
-setbashvar gateway			"eth0 ${SS_IPADDR%.*}.1 netmask 255.255.255.0" /etc/rc.conf
-setbashvar routes				gateway					/etc/rc.conf
+add_hook() { :; }
+. /etc/rc.conf
+. /etc/rc.d/functions.d/ppz
+. /usr/share/ppz/bash.functions.install
+custom_iptables_rules
+static_networking_from_runtime /
+useradd -lMNd /media/encuser -u 54345 -s /usr/bin/womb ${SS_ENCUSER}

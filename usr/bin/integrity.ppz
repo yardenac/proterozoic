@@ -141,7 +141,7 @@ integrity_inittab() {
 integrity_hosts() {
 	 am_root || return
 	 local OLDFILE=/etc/hosts
-	 local NEWFILE=${OLDFILE}.$(uniq_token)
+	 local NEWFILE=/tmp/root.etchosts.$(uniq_token)
 	 {
 		  cat <<-EOF
 			THISVER 2011071201
@@ -166,8 +166,11 @@ integrity_hosts() {
 			EOF
 		  cat ${OLDFILE}
 	 } | awk -f /usr/share/ppz/awk-hosts > ${NEWFILE}
-	 mv ${OLDFILE}{,.orig.$(uniq_token)}
-	 mv ${NEWFILE} ${OLDFILE}
+	 cmp -s ${OLDFILE} ${NEWFILE} || {
+		  mv ${OLDFILE}{,.orig.$(uniq_token)}
+		  mv ${NEWFILE} ${OLDFILE}
+		  hostname ${HOSTNAME}
+	 }
 }
 can_work_with_boot() {
 	 [ -d /boot/grub ] || return 1 #not mounted at all!

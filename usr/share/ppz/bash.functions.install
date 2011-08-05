@@ -1,0 +1,89 @@
+#!/bin/bash
+static_networking_from_runtime() {
+	 local TARGET=${1%%/}
+	 [ "${TARGET}" ] && cp -f {,${TARGET}}/etc/resolv.conf
+	 ifconfig | awk -f <(cat <<-'EOF'
+		/^lo/ {exit}
+		$1 ~ /^inet$/ {
+			sub(/addr:/ ,"address=",$2)
+			sub(/Bcast:/,"broadcast=",$3)
+			sub(/Mask:/ ,"netmask=",$4)
+			print $2 "\n" $3 "\n" $4
+		}
+		EOF
+	 ) >> ${TARGET}/etc/rc.conf
+	 ip route show | awk '/^default via/ {print "gateway=" $3 "\ninterface=" $5}' \
+		  >> ${TARGET}/etc/rc.conf
+}
+
+fix_initcpio_ppz() {
+	 local TARGET=${1%%/}
+	 grep -iqE '^HOOKS="[^"]*ppz_tmp[^"]*"' ${TARGET}/etc/mkinitcpio.conf || {
+		  askyn "Add ppz_tmp to HOOKS?" \
+				&& sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' ${TARGET}/etc/mkinitcpio.conf
+	 }
+	 usetvar mmodules "Add any initrd modules (delete what you dont want): " 'nvidia' ''
+	 sed -i 's/^\(MODULES="[^"]*\)"/\1 '"${mmodules[@]}"'"/ig' ${TARGET}/etc/mkinitcpio.conf
+	 grex ${TARGET}/etc/mkinitcpio.conf
+	 askyn "Above is ${TARGET}/etc/mkinitcpio.conf. You have a chance to edit
+			in another tty, if you wish. YES here to rebuild." && {
+		  chroot ${TARGET} /sbin/mkinitcpio -p kernel26
+	 }
+}
+
+install_grub_ppz() { #USAGE: install_grub /media/targay /dev/sda1 hostname_of_target
+	 local TARGET=${1%%/}
+	 local BOOT_DEVICE_CN=${2}
+	 cp -af ${TARGET}/usr/lib/grub/i386-pc/* ${TARGET}/boot/grub/
+	 cp -f ${TARGET}{/usr/share/ppz/default-menu.lst,/boot/grub/menu.lst}
+	 local DMAPF=/tmp/grub-device-map-ppz
+	 echo "quit" | ${TARGET}/sbin/grub --no-floppy --device-map ${DMAPF}
+	 local BOOT_RAWDEVICE=$(echo $BOOT_DEVICE_CN | sed 's/[0-9]*$//')
+	 local BOOT_PARTNUMBR=$(echo $BOOT_DEVICE_CN | sed 's/^[^0-9]*//')
+	 let BOOT_PARTNUMBR-- || echo "partition number was zero -- wtf??"
+	 local BIOS_HDNUM=$(awk '$2 == "'$BOOT_RAWDEVICE'" {gsub(/[()]/,"",$1);print $1}' ${DMAPF})
+	 local GRUB_DEV="(${BIOS_HDNUM},${BOOT_PARTNUMBR})"
+	 local ROOT_UUID=$(blkid -o value -s UUID ${BOOT_DEVICE_CN})
+	 sed -i \
+		  -e s/%SET_HOSTNAME%/${3// 	}/ig \
+		  -e s/%SET_BOOTPART%/${GRUB_DEV}/ig \
+		  -e 's/%SET_ROOT_DEVICE%/\/dev\/disk\/by-uuid\/'${ROOT_UUID//\//\\\/}/ig ${TARGET}/boot/grub/menu.lst
+	 while :; do
+		 echo STARTING @$GRUBPW@$GRUBPWDUB@
+		 usetvar GRUBPW "Enter a (raw) grub password, if you like: " '' '' -s # unset so doesnt need to be local
+		 echo THEN @$GRUBPW@$GRUBPWDUB@
+		 [ "$GRUBPW" ] || break
+		 usetvar GRUBPWDUB "And once more, please: " '' '' -s
+		 echo OR @$GRUBPW@$GRUBPWDUB@
+		 [ "$GRUBPW" = "$GRUBPWDUB" ] || {
+			  echo_red "They did not match!"
+			  continue
+		 }
+		 echo WEIRD @$GRUBPW@$GRUBPWDUB@
+		 local GHASH=$(echo -e "md5crypt\n${GRUBPW}\nquit" | ${TARGET}/sbin/grub --no-floppy \
+			  --batch --device-map ${DMAPF} | sed 's/^Encrypted: //ig;t;d') #sed commands: only print if matched
+		 [ "$GHASH" ] && [ "$GHASH" = "${GHASH// }" ] \
+			  && sed -i 's/%SET_PASSWORD%/'${GHASH//\//\\\/}'/ig' ${TARGET}/boot/grub/menu.lst \
+			  || echo_red "Setting grub password failed somehow..."
+		 break
+	 done
+	 unset GHASH GRUBPW GRUBPWDUB
+	 sed -i 's/\(^.*%SET_PASSWORD%\)/#\1/ig' ${TARGET}/boot/grub/menu.lst
+	 sed 's/^/#/ig' ${DMAPF} >> ${TARGET}/boot/grub/menu.lst
+	 blkid | sed 's/^/#/ig' >> ${TARGET}/boot/grub/menu.lst
+	 grep -iqE '^[^#].*%SET_' ${TARGET}/boot/grub/menu.lst && askyn "Something is still wrong with
+					${TARGET}/boot/grub/menu.lst. You should really check it..."
+	 read -d W GRUBCOMMANDS <<-EOF
+
+		device ($BIOS_HDNUM) $BOOT_RAWDEVICE
+		geometry ($BIOS_HDNUM)
+		root ($BIOS_HDNUM,$BOOT_PARTNUMBR)
+		setup ($BIOS_HDNUM)
+		EOF
+	 askyn "ENTER to Install grub in MBR of ${BOOT_RAWDEVICE} aka ($BIOS_HDNUM),
+					pointing to ${BOOT_DEVICE_CN} aka ($BIOS_HDNUM,$BOOT_PARTNUMBR),
+					as follows: ${GRUBCOMMANDS}" && {
+		  echo "$GRUBCOMMANDS" | ${TARGET}/sbin/grub --no-floppy --batch --device-map ${DMAPF}
+	 }
+#		  rm -f ${DMAPF}
+}
