@@ -194,14 +194,16 @@ fsconv() { #usage: fsconv 5mb in k; 1G in s;
 	 ' | bc <(echo 'scale=0;obase=10;ibase=10;')
 }
 dd_with_progress() {
-	 local SLEEPSECS=$1; shift
+	 local SLEEPSECS=5
+	 [[ "$1" =~ ^[0-9]+$ ]] && SLEEPSECS=$1 && shift
 	 dd "$@" &
 	 local DDPID=$!
 	 while :; do
 		  sleep $SLEEPSECS
-		  jobs -l | grep -iq $DDPID || break
-		  kill -SIGUSR1 $DDPID
-		  echo -e "\e[4A"
+#		  jobs -l | grep -iq $DDPID || break
+		  ps --pid $DDPID -o pid= >/dev/null || break
+		  kill -SIGUSR1 $DDPID >/dev/null \
+				&& echo -e "\e[4A"
 	 done
 	 echo $'\n\n\n'
 }

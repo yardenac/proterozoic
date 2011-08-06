@@ -38,13 +38,15 @@ this_pacman -Sqy pacman
 pacman-db-upgrade
 this_pacman -Sqyu
 sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' ${TARGET}/etc/mkinitcpio.conf
-this_pacman -Sq proterozoic
+this_pacman -Sq proterozoic mkinitcpio
 cat > /etc/mkinitcpio.conf <<-EOF
 	HOOKS="base udev autodetect ppz_tmp"
 EOF
 this_pacman -Sq linux-linode
 
 rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
+
+# deal with all the pacnew files
 
 add_hook() { :; }
 . /etc/rc.conf
