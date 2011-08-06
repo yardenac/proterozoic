@@ -296,6 +296,7 @@ integrity_sshd() {
 
 echo INTERGRITY WAS CALLED AS: "$0 $@"
 echo PARENT PROC IS: $(ps --pid $(ps --pid $$ -o ppid=) -o args=)
+pstree -phaun
 
 for F in rootpw emacsd bashhistory locales tz \
 	 simpleconf pacnew users encuser inittab \

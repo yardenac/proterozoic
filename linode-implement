@@ -1,0 +1,39 @@
+#!/bin/bash
+
+. ~/.linoderc
+[ $API_KEY ] && [ $LINODEADDR ] || {
+	 echo "You need to make a ~/.linoderc to initialize auth variables"
+	 return 1
+}
+
+REVNOTE=${1:-unnamed revision}
+
+LINODEURL='https://api.linode.com?api_key='$API_KEY'&api_action='
+
+do_or_report() {
+	 result=$(curl -sS ${LINODEURL}"$@")
+	 (( $(echo $result | jshon -e ERRORARRAY -l) )) || {
+		  echo "FAILED AT: $*"
+		  echo $result | jshon
+		  return 2
+	 }
+}
+destroy_running() {
+	 ssh $LINODEADDR.linode.com destroy
+}
+update_stackscript() { # params are the revision note
+	 do_or_report 'stackscript.update&stackScriptID=2511' \
+		  --data-urlencode script@./stackscript-this --data-urlencode rev_note="$@" || return 1
+}
+delete_disks() {
+	 local linodeid=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 1 -e LINODEID)
+	 local disklist=$(curl -sS ${LINODEURL}'linode.disk.list&linodeid='$linodeid)
+	 while (( $(echo $disklist | jshon -e DATA -l) )); do
+		  local firstdiskid=$(echo $disklist | jshon -e DATA -e 1 -e DISKID)
+		  do_or_report 'linode.disk.list&linodeid='$linodeid'&diskid='$firstdiskid || return 1
+	 done
+}
+
+destroy_running || echo 'destroy failed...'
+update_stackscript "$REVNOTE" || echo 'stackscript update failed...'
+delete_disks || echo 'deleting failed...'

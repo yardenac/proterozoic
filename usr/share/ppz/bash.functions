@@ -5,6 +5,7 @@ say_and_do()	{ echo DOING: "$@"; "$@"; }
 return_arg1()	{ return "$1"; }
 ifn()				{ return "${1:-99}"; }
 return_out()	{ return $("$@" 2>/dev/null); }
+return_stdin()	{ read && return $REPLY; }
 isnt()			{ eval "$@"; [ $? -ne 0 ]; }
 wait_until()	{ while isnt "$@"; do sleep 0.5; done; }
 weekletter()	{ ARR=(S m t w T f s S); echo ${ARR[$(date +%u)]}; }
@@ -202,8 +203,8 @@ dd_with_progress() {
 		  sleep $SLEEPSECS
 #		  jobs -l | grep -iq $DDPID || break
 		  ps --pid $DDPID -o pid= >/dev/null || break
-		  kill -SIGUSR1 $DDPID >/dev/null \
-				&& echo -e "\e[4A"
+		  kill -SIGUSR1 $DDPID >/dev/null #\
+#				&& echo -e "\e[4A"
 	 done
 	 echo $'\n\n\n'
 }
