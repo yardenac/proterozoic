@@ -37,8 +37,9 @@ locale-gen
 this_pacman -Sqy pacman
 pacman-db-upgrade
 this_pacman -Sqyu
-sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' ${TARGET}/etc/mkinitcpio.conf
-this_pacman -Sq proterozoic mkinitcpio
+this_pacman -Sq mkinitcpio
+sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' /etc/mkinitcpio.conf
+this_pacman -Sq proterozoic
 cat > /etc/mkinitcpio.conf <<-EOF
 	HOOKS="base udev autodetect ppz_tmp"
 EOF
@@ -46,7 +47,15 @@ this_pacman -Sq linux-linode
 
 rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
 
-# deal with all the pacnew files
+# pacnew list:
+# /etc/locale.gen
+# /etc/bash.bashrc
+# gshadow hosts securetty inittab rc.conf
+# /etc/pacman.d/mirrorlist
+# 
+# modules not found: dm-crypt, fuse
+# why does integrity get called twice??
+# why do the remote sync files not happen together
 
 add_hook() { :; }
 . /etc/rc.conf

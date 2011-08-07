@@ -117,7 +117,7 @@ integrity_encuser() { local DDSIZE=
 	 am_root || return
 	 [ -a $ENCLF ] || {
 		  usetvar DDSIZE "There is NO encrypted container named
-				\"$ENCLF\"! To make one, enter a size: " 3G '' \
+				\"$ENCLF\"! To make one, enter a size: " 32m '' \
 					 && [ -n $DDSIZE ] \
 					 && askyn "Did you mean to enter $DDSIZE?" && {
 				dd_with_progress if=/dev/urandom of=$ENCLF bs=512 count=$(fsconv $DDSIZE in s)
@@ -215,6 +215,7 @@ integrity_net() {
 		  while let ++c; do
 				local var=REMOTE_SYNC_FILE_$c
 				[ ${!var} ] || break
+				echo_red "trying to get $c..."
 				remote_sync_file $(eval echo '${'$var'[@]}')
 				sleep 0.5
 		  done
@@ -301,6 +302,6 @@ pstree -phaun
 for F in rootpw emacsd bashhistory locales tz \
 	 simpleconf pacnew users encuser inittab \
 	 hosts net sshd; do
-#	 echo doing ${F}
-	 integrity_${F}
+	 echo doing ${F}
+	 integrity_${F} || echo "${F} failed..."
 done
