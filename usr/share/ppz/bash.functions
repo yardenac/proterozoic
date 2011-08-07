@@ -300,6 +300,7 @@ pushtrap() {
 }
 poptrap() {
 	 [ "${TRAPSTACK_1}" ] || return
+	 local IFS=$' \t\n'
 	 local C=0
 	 while let ++C; do
 		  local varname=TRAPSTACK_$((C+1))
@@ -322,9 +323,11 @@ poptrap() {
 usetvar() {
 #	 lets user set var with default and interactive readline
 #	 USAGE: usetvar VARNAME 'prompt: ' "default val" 'val if cancelled'
-	 [ -n "${3}" ] \
-		  && local DVAL=${3} \
-		  || local DVAL=${!1}
+	 case "${3}" in
+		  ''|'	')	local DVAL=${!1};;
+		  BLANK)		local DVAL='';;
+		  *)			local DVAL=${3}
+	 esac
 	 [ -n "${4}" ] && {
 		  unset -v "${1}"
 		  eval $1='"${4}"'
@@ -407,15 +410,12 @@ woman() {
 		--eval '(beginning-of-buffer)'
 }
 wf() {
-	[ "$1" ] || return
-	PWD_B=$(pwd)
-	cd ~
 	local IFS=:
+	pushd ~
 	for P in $PATH; do
-		[ -a "$P" ] || continue
-		find "$P" | grep -i "$1"
+		find "$P" 2>/dev/null | grep -i --color=auto ${@// }
 	done
-	cd "$PWD_B"
+	popd
 }
 e() {
 	case "$TERM" in

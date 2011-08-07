@@ -1,39 +1,117 @@
 #!/bin/bash
-
+. usr/share/ppz/bash.functions
 . ~/.linoderc
 [ $API_KEY ] && [ $LINODEADDR ] || {
 	 echo "You need to make a ~/.linoderc to initialize auth variables"
 	 return 1
 }
-
-REVNOTE=${1:-unnamed revision}
-
 LINODEURL='https://api.linode.com?api_key='$API_KEY'&api_action='
+linodeid=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 1 -e LINODEID)
+ss_id=2511 #preference i guess
+ss_file=$(readlink -e ./stackscript-this)
 
 do_or_report() {
-	 result=$(curl -sS ${LINODEURL}"$@")
-	 (( $(echo $result | jshon -e ERRORARRAY -l) )) || {
+	 [ "$1" == "say" ] && {
+		  local say=1
+		  shift
+	 } || local say=0
+	 local result=$(curl -sS ${LINODEURL}"$@")
+#	 echo THIS IS WHAT WE DID
+#	 echo $result | jshon
+	 (( $(echo $result | jshon -e ERRORARRAY -l) )) && {
 		  echo "FAILED AT: $*"
 		  echo $result | jshon
-		  return 2
-	 }
+		  return 1
+	 }; :
+	 (( $say )) && echo "$result"
+	 return 0
 }
-destroy_running() {
-	 ssh $LINODEADDR.linode.com destroy
-}
-update_stackscript() { # params are the revision note
-	 do_or_report 'stackscript.update&stackScriptID=2511' \
-		  --data-urlencode script@./stackscript-this --data-urlencode rev_note="$@" || return 1
-}
-delete_disks() {
-	 local linodeid=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 1 -e LINODEID)
-	 local disklist=$(curl -sS ${LINODEURL}'linode.disk.list&linodeid='$linodeid)
-	 while (( $(echo $disklist | jshon -e DATA -l) )); do
-		  local firstdiskid=$(echo $disklist | jshon -e DATA -e 1 -e DISKID)
-		  do_or_report 'linode.disk.list&linodeid='$linodeid'&diskid='$firstdiskid || return 1
+block_for_job() { #returns when no more jobs pending
+	 while (( $(curl -sS ${LINODEURL}'linode.job.list&linodeid='$linodeid'&pendingonly=1' | jshon -e DATA -l) )); do
+		  echo -n .
+		  sleep 1
 	 done
+	 echo done!
 }
 
-destroy_running || echo 'destroy failed...'
-update_stackscript "$REVNOTE" || echo 'stackscript update failed...'
-delete_disks || echo 'deleting failed...'
+destroy_running() {
+	 local status=$(ssh $LINODEADDR.linode.com status)
+	 echo "Linode status is: $status"
+	 case $status in
+		  'Powered Off') :;;
+		  'Running')
+				echo "Going to destroy running instance..."
+				ssh $LINODEADDR.linode.com destroy;;
+		  *) echo "unrecognized status string"
+	 esac
+}
+update_stackscript() { local SS_COMMIT_TXT
+	 cmp -s $ss_file <(curl -sS ${LINODEURL}'stackscript.list&stackscriptid='$ss_id | jshon -e DATA -e 1 -e SCRIPT -u) && {
+		  echo "Stackscript does not need updating"
+		  return
+	 }
+	 usetvar SS_COMMIT_TXT "Please write a stackscript commit entry: " 'unnamed revision' ''
+	 do_or_report 'stackscript.update&stackScriptID='$ss_id \
+		  --data-urlencode script@$ss_file --data-urlencode rev_note="$SS_COMMIT_TXT" || return 1
+}
+delete_disks() {
+	 while :; do
+		  local disklist=$(curl -sS ${LINODEURL}'linode.disk.list&linodeid='$linodeid)
+		  local numdisks=$(echo $disklist | jshon -e DATA -l)
+		  echo "Disks left: $numdisks"
+		  (( $numdisks )) || break # while there are disks left
+		  local firstdiskid=$(echo $disklist | jshon -e DATA -e 1 -e DISKID)
+		  echo -n "Deleting disk with id # $firstdiskid"
+		  do_or_report 'linode.disk.delete&linodeid='$linodeid'&diskid='$firstdiskid || return 1
+		  block_for_job
+	 done
+}
+delete_configs() {
+	 while :; do
+		  local configlist=$(curl -sS ${LINODEURL}'linode.config.list&linodeid='$linodeid)
+		  local numconfigs=$(echo $configlist | jshon -e DATA -l)
+		  echo "Configs left: $numconfigs"
+		  (( $numconfigs )) || break #while configs left
+		  local firstconfig=$(echo $configlist | jshon -e DATA -e 1 -e ConfigID)
+		  echo -n "Deleting config with id # $firstconfig"
+		  do_or_report 'linode.config.delete&linodeid='$linodeid'&configid='$firstconfig || return 1
+		  block_for_job
+	 done
+}
+deploy() {
+	 local udf_vars=$(sed 's_^#\s<UDF\s.*name="\([^"]*\)".*\s/>$_\1_ig;t;d;' ./stackscript-this)
+	 local nvp_str rootpass result
+	 local IFS=$'\n'
+	 for v in $udf_vars; do
+		  usetvar this_val "Enter value for ${v^^}: " BLANK ''
+		  nvp_str+=\"${v}\":\"${this_val}\",
+	 done
+	 usetvar rootpass "Enter root password: " '' '' -s
+	 echo -n "Creating disk image & config"
+	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid=58&label=SSDISK&size=4096&linodeid='$linodeid'&stackscriptid='$ss_id \
+		  --data-urlencode stackscriptudfresponses=\{"${nvp_str%,}"\} \
+		  --data-urlencode rootpass="$rootpass") || return 1
+	 diskid=$(echo $result | jshon -e DATA -e DiskID)
+	 result=$(do_or_report say 'linode.config.create&kernelid=136&label=SSCONF&linodeid='$linodeid \
+		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1
+	 configid=$(echo $result | jshon -e DATA -e ConfigID)
+	 block_for_job
+	 echo -n "Booting now"
+	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$configid || return 1
+	 block_for_job
+}
+do_all() {
+	 askyn "This script will DESTROY YOUR EXISTING LINODE. Do you want to cancel?" && exit
+	 for thing in \
+		  destroy_running \
+		  update_stackscript \
+		  delete_disks \
+		  delete_configs \
+		  deploy; do
+
+		  say_and_do $thing && continue
+		  echo "$thing failed..."
+		  return 1
+	 done
+}
+do_all
