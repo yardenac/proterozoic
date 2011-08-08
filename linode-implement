@@ -79,20 +79,30 @@ delete_configs() {
 	 done
 }
 deploy() {
+	 local ssdate=.$(date +%F.%k-%M-%S)
 	 local udf_vars=$(sed 's_^#\s<UDF\s.*name="\([^"]*\)".*\s/>$_\1_ig;t;d;' ./stackscript-this)
 	 local nvp_str rootpass result
 	 local IFS=$'\n'
 	 for v in $udf_vars; do
-		  usetvar this_val "Enter value for ${v^^}: " BLANK ''
+		  [ "$1" ] && {
+				this_val="$1"
+				shift
+		  } || usetvar this_val "Enter value for ${v^^}: " BLANK ''
 		  nvp_str+=\"${v}\":\"${this_val}\",
 	 done
-	 usetvar rootpass "Enter root password: " '' '' -s
+	 [ "$1" ] && rootpass="$1" || usetvar rootpass "Enter root password: " '' '' -s
+	 echo
 	 echo -n "Creating disk image & config"
-	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid=58&label=SSDISK&size=4096&linodeid='$linodeid'&stackscriptid='$ss_id \
+	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid=58&label=D'$ssdate'&size=4096&linodeid='$linodeid'&stackscriptid='$ss_id \
 		  --data-urlencode stackscriptudfresponses=\{"${nvp_str%,}"\} \
 		  --data-urlencode rootpass="$rootpass") || return 1
 	 diskid=$(echo $result | jshon -e DATA -e DiskID)
-	 result=$(do_or_report say 'linode.config.create&kernelid=136&label=SSCONF&linodeid='$linodeid \
+	 # 136 = 3.0.0-x86_64-linode20
+	 # 111 = Latest Paravirt (2.6.39.1-x86_64-linode19)
+	 # 133 = 2.6.39.1-x86_64-linode19
+	 result=$(do_or_report say 'linode.config.create&kernelid=61&label=F'$ssdate'&linodeid='$linodeid \
+		  --data-urlencode disklist=25665,$diskid,,,,,,,25669) || return 1
+	 result=$(do_or_report say 'linode.config.create&kernelid=111&label=C'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1
 	 configid=$(echo $result | jshon -e DATA -e ConfigID)
 	 block_for_job
@@ -109,9 +119,9 @@ do_all() {
 		  delete_configs \
 		  deploy; do
 
-		  say_and_do $thing && continue
+		  say_and_do $thing "$@" && continue
 		  echo "$thing failed..."
 		  return 1
 	 done
 }
-do_all
+do_all "$@"

@@ -3,14 +3,16 @@
 # <UDF name="ss_encuser"  label="encrypted user" />
 echo bootstrapping for the 2010.05 linode image...
 
+echo "stackscript actually ran!" > /etc/telltale-file
+
 gshmd=$(md5sum /etc/gshadow)
 case "$gshmd" in
 	 3e5a0173e8b706c4416c6ec43e89c866)	echo "linode image COMES with the altered gshadow (they added dbus)";;
 	 eb238381144e9e6b2adc0d11f528e431)	echo "they just added the one dbus line at some point... but when?";;
 	 *)	echo "for some reason gshadow md5sum is: $gshmd"
-			echo_red "Contents of gshadow:"
+			echo "Contents of gshadow:"
 			cat /etc/gshadow
-			echo_red "End gshadow"
+			echo "End gshadow"
 esac
 
 this_pacman() {

@@ -69,7 +69,7 @@ integrity_tz() {
 	 am_root || return
 	 local suspicious_tzs=(America/Vancouver America/New_York)
 	 local matches=0
-	 for stz in "$suspicious_tzs[@]"; do
+	 for stz in "${suspicious_tzs[@]}"; do
 		  cmp -s /etc/localtime /usr/share/zoneinfo/$stz || let matches++
 	 done
 	 (( $matches )) || return
@@ -187,7 +187,9 @@ integrity_hosts() {
 	 }
 }
 can_work_with_boot() {
-	 [ -d /boot/grub ] || return 1 #not mounted at all!
+	 grep -iq /boot /etc/fstab \
+		  && ! [ -d /boot/grub ] \
+		  && return 1 #should be mounted but isnt
 	 [ -w /boot ] && return #can write to it - ok
 	 grep -iq /boot /etc/mtab && return 1 #probably chrooted
 	 mount -o remount,rw /boot &>/dev/null
@@ -232,7 +234,7 @@ integrity_net() {
 				askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
 		  }
 		  for tuple in "${REMOTE_SYNC_FILES[@]}"; do
-				echo_red "trying to get $c..."
+				echo_red "trying to get ${tuple%%___*}"
 				local part12="${tuple%___*}"
 				remote_sync_file "${tuple%%___*}" "${part12##*___}" "${tuple##*___}"
 		  done
