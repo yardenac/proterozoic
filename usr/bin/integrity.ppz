@@ -2,8 +2,7 @@
 . /etc/rc.conf
 . /usr/share/ppz/bash.functions
 integrity_rootpw() {
-	 am_root || return
-	 shell_is_interactive || return
+	 am_root && shell_is_interactive || return
 	 while :; do
 		  roothash=$(awk 'BEGIN {FS=":"} /^root:/ {print $2}' /etc/shadow)
 		  case $roothash in
@@ -25,8 +24,9 @@ integrity_emacsd() {
 }
 integrity_bashhistory() {
 	 shopt -s nullglob
+	 local RAW_F
 	 local IFS=$'\n'
-	 ${HISTFILE}
+	 touch ${HISTFILE} &>/dev/null
 	 for RAW_F in $(ls -1 {/{root,home/*,media/green/*},~}/.bash_history "$HISTFILE" 2>/dev/null | sort -u); do
 		  local F=$RAW_F
 		  am_root || make_sure_its_mine "$F" || { # dont rearrange or might end up creating every file!
@@ -61,23 +61,29 @@ integrity_bashhistory() {
 integrity_locales() {
 	 am_root || return
 	 local L=$(locale)
-	 [ -z "${L}" ] && askyn "You have no locale!? Should we fix this?" \
+	 [ "${L}" ] && return #has locale, so ok
+	 askyn "You have no locale!? Should we fix this?" \
 		  && echo "Oops, Not implemented yet..."
 }
 integrity_tz() {
 	 am_root || return
-	 cmp -s /etc/localtime /usr/share/zoneinfo/America/Vancouver || return
+	 local suspicious_tzs=(America/Vancouver America/New_York)
+	 local matches=0
+	 for stz in "$suspicious_tzs[@]"; do
+		  cmp -s /etc/localtime /usr/share/zoneinfo/$stz || let matches++
+	 done
+	 (( $matches )) || return
 	 [ -a /etc/localtime.userok ] && return
 	 local c=22; while let c--; do
-		  usetvar TZONE "You have the default arch timezone. To keep it, press C-c or C-\ ...
+		  usetvar TZONE "You have a default arch timezone. To keep it, press C-c or C-\ ...
 To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCANCELLED || {
 				echo_red "Still using default time zone!"
 				break
 		  }
 		  [ "$TZONE" = "USERCANCELLED" ] && {
 				echo "If this file exists, it means the system is SUPPOSED to" \
-					 "have the default timezone (Vancouver). Otherwise, root" \
-					 "would always be prompted to change it." > /etc/localtime.userok
+					 "have the default timezone (Vancouver or NY). Otherwise," \
+					 "root would always be prompted to change it." > /etc/localtime.userok
 				echo_red "Default timezone kept. You won't be asked again."
 				break
 		  }
@@ -117,19 +123,22 @@ integrity_encuser() { local DDSIZE=
 	 am_root || return
 	 [ -a $ENCLF ] || {
 		  usetvar DDSIZE "There is NO encrypted container named
-				\"$ENCLF\"! To make one, enter a size: " 32m '' \
-					 && [ -n $DDSIZE ] \
-					 && askyn "Did you mean to enter $DDSIZE?" && {
-				dd_with_progress if=/dev/urandom of=$ENCLF bs=512 count=$(fsconv $DDSIZE in s)
-				ls -FlAthr $ENCLF
+				\"$ENCLF\"! To make one, enter a size: " 32m '' || {
+				echo_red "Did not create enc device!"
+				return
 		  }
-	 } && {
-		  local BTYPE=$(blkid -o value -s TYPE $ENCLF)
-		  case $BTYPE in
-				ext4) :;;
-		  esac
-		  : #it defo exists now
+		  [ "$DDSIZE" ] && askyn "Did you mean to enter $DDSIZE?" && {
+				dd_with_progress if=/dev/urandom of=$ENCLF bs=512 count=$(fsconv $DDSIZE 'in' s)
+				ls -FlAthr $ENCLF
+		  } || {
+				echo_red "Fine, never mind then!"
+				return
+		  }
 	 }
+	 local BTYPE=$(blkid -o value -s TYPE $ENCLF)
+	 case $BTYPE in
+		  ext4) :;;
+	 esac
 }
 integrity_inittab() {
 	 return
@@ -185,8 +194,14 @@ can_work_with_boot() {
 	 [ -w /boot ] || return 1 #weve done all we can
 }
 remote_sync_file() { # $0 '/local/path' 'md5sum464a702cf...' 'http://source'
-	 check_file ${1} ${2} && return
-	 [ "${1:0:6}" = /boot/ ] && ! can_work_with_boot && return 1
+	 check_file ${1} ${2} && {
+		  echo_red checked out
+		  return
+	 }
+	 [ "${1:0:6}" = /boot/ ] && ! can_work_with_boot && {
+		  echo_red is boot but no boot
+		  return 1
+	 }
 	 mkdir -p $(dirname ${1})
 	 wget ${3} -qO ${1}
 	 check_file ${1} ${2} && {
@@ -216,21 +231,11 @@ integrity_net() {
 				chmod +x /etc/rc.d/network
 				askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
 		  }
-		  local c=0
-		  while let ++c; do
-				local var=REMOTE_SYNC_FILE_$c
-				[ ${!var} ] || break
+		  for tuple in "${REMOTE_SYNC_FILES[@]}"; do
 				echo_red "trying to get $c..."
-				remote_sync_file $(eval echo '${'$var'[@]}')
-				sleep 0.5
+				local part12="${tuple%___*}"
+				remote_sync_file "${tuple%%___*}" "${part12##*___}" "${tuple##*___}"
 		  done
-#	 ifconfig -a | grep -i 'Link encap:Ethernet'
-#	 usetvar IFACE 'PICK INTERFACE TO SET UP NETWORK: ' eth0
-#	 pgrep dhcpcd >/dev/null && dhcpcd -k $IFACE
-#	 dhcpcd $IFACE \
-#		  || giveup_prompt "Launching dhcpcd failed. Try again?"
-#	 ifconfig $IFACE | grep -q 'inet addr:' \
-#		  || giveup_prompt "Still no ipaddr - try again?"
 	 }
 }
 integrity_sshd() {
@@ -300,9 +305,9 @@ integrity_sshd() {
 #     bash.bashrc.local
 #      post_upgrade
 
-echo INTERGRITY WAS CALLED AS: "$0 $@"
-echo PARENT PROC IS: $(ps --pid $(ps --pid $$ -o ppid=) -o args=)
-pstree -phaun
+#echo INTERGRITY WAS CALLED AS: "$0 $@"
+#echo PARENT PROC IS: $(ps --pid $(ps --pid $$ -o ppid=) -o args=)
+#pstree -phaun
 
 for F in rootpw emacsd bashhistory locales tz \
 	 simpleconf pacnew users encuser inittab \

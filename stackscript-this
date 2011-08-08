@@ -7,7 +7,10 @@ gshmd=$(md5sum /etc/gshadow)
 case "$gshmd" in
 	 3e5a0173e8b706c4416c6ec43e89c866)	echo "linode image COMES with the altered gshadow (they added dbus)";;
 	 eb238381144e9e6b2adc0d11f528e431)	echo "they just added the one dbus line at some point... but when?";;
-	 *)											echo "for some reason gshadow md5sum is: $gshmd"
+	 *)	echo "for some reason gshadow md5sum is: $gshmd"
+			echo_red "Contents of gshadow:"
+			cat /etc/gshadow
+			echo_red "End gshadow"
 esac
 
 this_pacman() {
@@ -27,6 +30,9 @@ sed -i \
 	 -e s/%SET_ENCUSER%/${SS_ENCUSER}/ig \
 	 -e s/=UTC/=xen/ig \
 	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
+
+# not to dl sync files, use after troubleshooting
+#	 -e 's`^[\t ]*/.*___[a-f0-9]*___.*\.\(png\|bin\.gz\)$``ig' \
 
 cat > /etc/locale.gen <<-EOF
 		en_US.UTF-8 UTF-8
@@ -59,8 +65,8 @@ rm -f \
 	 /etc/pacman.d/mirrorlist.otown.tmp \
 	 /etc/{locale.gen,securetty,hosts,inittab,pacman.d/mirrorlist}.pacnew
 
-# modules not found: dm-crypt, fuse
 # why do the remote sync files not happen together
+# how to get proper "kernel name" in install file?
 
 add_hook() { :; }
 . /etc/rc.conf
