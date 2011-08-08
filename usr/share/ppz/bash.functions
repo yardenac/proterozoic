@@ -268,7 +268,7 @@ has_hardstatus() {
 	 # we failed, but still should delete text we just wrote...
 	 local chars_to_del=14
 	 while let chars_to_del--; do
-		  echo -en '\b'
+		  echo -en '\b \b'
 	 done
 	 return 1
 }
@@ -291,16 +291,15 @@ countdown() {
 		done
    done
 }
-shell_is_interactive() {
+shell_is_interactive_test() {
+	 [[ "$(ps --pid $PPID -o args=)" =~ /bin/bash[[:space:]]+/etc/rc.sysinit ]] && return 1
 	 [ -t 0 ] && [ -t 1 ] && [ -t 2 ]
+}
+shell_is_interactive() {
+	 shell_is_interactive_test
 	 local P=$?
 	 eval "shell_is_interactive() { return $P; }"
 	 return $P
-#	 /proc/self/fd/{0,1,2} etc
-#	 [[ -t 0 || -p /dev/stdin ]] <--why?
-#	 stat --printf=%F $(readlink -e /dev/fd/0)
-#	 tty | { read; [[ "${REPLY:5}" =~ {pts/,tty}* ]]; }
-#	 case "$-" in; *i*) [ -n "${PS1}" ] && return 0; esac
 }
 askyn() {
 	 echo

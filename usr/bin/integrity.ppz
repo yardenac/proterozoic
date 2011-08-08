@@ -145,8 +145,13 @@ integrity_hosts() {
 	 {
 		  cat <<-EOF
 			THISVER 2011071201
-			ASSIGN 127.0.0.1       localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
-			ASSIGN ::1             localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
+			ASSIGN 127.0.0.1		localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
+			ASSIGN ::1				localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
+			ASSIGN fe00::0			ip6-localnet
+			ASSIGN ff00::0			ip6-mcastprefix
+			ASSIGN ff02::1			ip6-allnodes
+			ASSIGN ff02::2			ip6-allrouters
+			ASSIGN ff02::3			ip6-allhosts
 			ASSIGN 192.168.1.200
 			ASSIGN 192.168.1.226 fjm-wl
 			ASSIGN 192.168.1.227 fjm-eth
