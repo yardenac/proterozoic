@@ -3,11 +3,10 @@
 . /usr/share/ppz/bash.functions
 integrity_rootpw() {
 	 am_root && shell_is_interactive || return 0
-	 echo_red shell is interactive so...
 	 while :; do
 		  roothash=$(awk 'BEGIN {FS=":"} /^root:/ {print $2}' /etc/shadow)
 		  case $roothash in
-				'') askyn "Root pw sucks! Set it?" && passwd;;
+				'') askyn "Root pw sucks! Set it?" && passwd || return;;
 				*) break
 		  esac
 	 done
@@ -71,9 +70,9 @@ integrity_tz() {
 	 local suspicious_tzs=(America/Vancouver America/New_York)
 	 local matches=0
 	 for stz in "${suspicious_tzs[@]}"; do
-		  cmp -s /etc/localtime /usr/share/zoneinfo/$stz || let matches++
+		  cmp -s /etc/localtime /usr/share/zoneinfo/$stz && let matches++
 	 done
-	 (( $matches )) || return
+	 (( $matches )) || return 0
 	 [ -a /etc/localtime.userok ] && return
 	 local c=22; while let c--; do
 		  usetvar TZONE "You have a default arch timezone. To keep it, press C-c or C-\ ...
@@ -311,6 +310,6 @@ integrity_sshd() {
 for F in rootpw emacsd bashhistory locales tz \
 	 simpleconf pacnew users encuser inittab \
 	 hosts net sshd; do
-	 echo doing ${F}
+#	 echo doing ${F}
 	 integrity_${F} || echo "${F} failed..."
 done
