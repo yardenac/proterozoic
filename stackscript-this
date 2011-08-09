@@ -2,19 +2,6 @@
 # <UDF name="ss_hostname" label="hostname" />
 # <UDF name="ss_encuser"  label="encrypted user" />
 echo bootstrapping for the 2010.05 linode image...
-
-echo "stackscript actually ran!" > /etc/telltale-file
-
-gshmd=$(md5sum /etc/gshadow)
-case "$gshmd" in
-	 3e5a0173e8b706c4416c6ec43e89c866)	echo "linode image COMES with the altered gshadow (they added dbus)";;
-	 eb238381144e9e6b2adc0d11f528e431)	echo "they just added the one dbus line at some point... but when?";;
-	 *)	echo "for some reason gshadow md5sum is: $gshmd"
-			echo "Contents of gshadow:"
-			cat /etc/gshadow
-			echo "End gshadow"
-esac
-
 this_pacman() {
 	 pacman --config /etc/pacman.conf --noprogressbar --noconfirm "$@"
 }
@@ -23,6 +10,7 @@ GITURL=https://raw.github.com/twomen/proterozoic/master
 mv -f /etc/rc.conf{,.original}
 mv -f /etc/sudoers{,.original}
 mv -f /etc/pacman.conf{,.original}
+wget $GITURL/usr/share/ppz/default-locale.gen	-qO	/etc/locale.gen
 wget $GITURL/usr/share/ppz/default-rc.conf		-qO	/etc/rc.conf
 wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/usr/share/ppz/default-pacman.conf	-qO	/etc/pacman.conf
@@ -33,21 +21,7 @@ sed -i \
 	 -e s/=UTC/=xen/ig \
 	 -e 's`^[\t ]*/.*___[a-f0-9]*___.*\.\(png\|bin\.gz\)$``ig' \
 	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
-
-cat > /etc/locale.gen <<-EOF
-		en_US.UTF-8 UTF-8
-		en_US ISO-8859-1
-		es_US.UTF-8 UTF-8
-		es_US ISO-8859-1
-		he_IL.UTF-8 UTF-8
-		he_IL ISO-8859-8
-		iw_IL.UTF-8 UTF-8
-		iw_IL ISO-8859-8
-		de_DE.UTF-8 UTF-8
-		de_DE ISO-8859-1
-		EOF
 locale-gen
-
 this_pacman -Sqy pacman
 pacman-db-upgrade
 this_pacman -Sqyu

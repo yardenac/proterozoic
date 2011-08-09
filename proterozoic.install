@@ -89,6 +89,8 @@ check_triggers() {
 		  }
 		  [ -n "${kernel_name}" ] && {
 				/sbin/mkinitcpio -p ${kernel_name}
+		  } || {
+				echo "kernel name is $kernel_name ..."
 		  }
 		  # experiment to see how it handles return values...
 		  # if it failed we want to make sure it can work again next time
