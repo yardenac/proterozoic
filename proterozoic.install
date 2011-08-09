@@ -1,7 +1,6 @@
 #!/bin/bash
 preowned_files=(
 	 etc/default/useradd
-	 etc/screenrc
 	 etc/ssh/ssh_config
 	 etc/syslog-ng/syslog-ng.conf
 	 etc/logrotate.conf
