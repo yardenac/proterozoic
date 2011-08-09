@@ -199,14 +199,16 @@ dd_with_progress() {
 	 [[ "$1" =~ ^[0-9]+$ ]] && SLEEPSECS=$1 && shift
 	 dd "$@" &
 	 local DDPID=$!
+	 echo $'\n\n\n'
 	 while :; do
 		  sleep $SLEEPSECS
 #		  jobs -l | grep -iq $DDPID || break
 		  ps --pid $DDPID -o pid= >/dev/null || break
+		  echo -e "\e[4A"
 		  kill -SIGUSR1 $DDPID >/dev/null #\
 #				&& echo -e "\e[4A"
 	 done
-	 echo $'\n\n\n'
+#	 echo $'\n\n\n'
 }
 ############ INTERACTIVE CONSOLE TRICKS
 ansi_colors=(black red green yellow blue magenta cyan white)
@@ -435,11 +437,11 @@ woman() {
 }
 wf() {
 	local IFS=:
-	pushd ~
+	pushd ~ >/dev/null
 	for P in $PATH; do
 		find "$P" 2>/dev/null | grep -i --color=auto ${@// }
 	done
-	popd
+	popd >/dev/null
 }
 e() {
 	case "$TERM" in

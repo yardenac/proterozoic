@@ -31,10 +31,8 @@ sed -i \
 	 -e s/%SET_HOSTNAME%/${SS_HOSTNAME}/ig \
 	 -e s/%SET_ENCUSER%/${SS_ENCUSER}/ig \
 	 -e s/=UTC/=xen/ig \
+	 -e 's`^[\t ]*/.*___[a-f0-9]*___.*\.\(png\|bin\.gz\)$``ig' \
 	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
-
-# not to dl sync files, use after troubleshooting
-#	 -e 's`^[\t ]*/.*___[a-f0-9]*___.*\.\(png\|bin\.gz\)$``ig' \
 
 cat > /etc/locale.gen <<-EOF
 		en_US.UTF-8 UTF-8
@@ -53,11 +51,13 @@ locale-gen
 this_pacman -Sqy pacman
 pacman-db-upgrade
 this_pacman -Sqyu
+echo 'utmp:x::' >> /etc/gshadow
 mv -f /etc/bash.bashrc{.pacnew,}
 this_pacman -Sq mkinitcpio
 sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' /etc/mkinitcpio.conf
 mv -f /etc/hosts{.pacnew,}
 this_pacman -Sq proterozoic
+sed -i s/otown.tmp/otown/ig /etc/pacman.conf
 cat > /etc/mkinitcpio.conf <<-EOF
 	HOOKS="base udev autodetect ppz_tmp"
 EOF
@@ -65,9 +65,8 @@ this_pacman -Sq linux-linode
 
 rm -f \
 	 /etc/pacman.d/mirrorlist.otown.tmp \
-	 /etc/{locale.gen,securetty,hosts,inittab,pacman.d/mirrorlist}.pacnew
+	 /etc/{gshadow,locale.gen,securetty,hosts,inittab,pacman.d/mirrorlist}.pacnew
 
-# why do the remote sync files not happen together
 # how to get proper "kernel name" in install file?
 
 add_hook() { :; }

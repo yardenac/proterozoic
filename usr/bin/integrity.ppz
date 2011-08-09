@@ -135,10 +135,13 @@ integrity_encuser() { local DDSIZE=
 				return
 		  }
 	 }
-	 local BTYPE=$(blkid -o value -s TYPE $ENCLF)
-	 case $BTYPE in
-		  ext4) :;;
-	 esac
+	 zgrep -iE 'CONFIG_CRYPTO_XTS=[my]' /proc/config.gz || {
+		  echo_red "no xts encryption, pass on luks"
+	 }
+#	 local BTYPE=$(blkid -o value -s TYPE $ENCLF)
+#	 case $BTYPE in
+#		  ext4) :;;
+#	 esac
 }
 integrity_inittab() {
 	 return
@@ -196,14 +199,8 @@ can_work_with_boot() {
 	 [ -w /boot ] || return 1 #weve done all we can
 }
 remote_sync_file() { # $0 '/local/path' 'md5sum464a702cf...' 'http://source'
-	 check_file ${1} ${2} && {
-		  echo_red checked out
-		  return
-	 }
-	 [ "${1:0:6}" = /boot/ ] && ! can_work_with_boot && {
-		  echo_red is boot but no boot
-		  return 1
-	 }
+	 check_file ${1} ${2} && return
+	 [ "${1:0:6}" = /boot/ ] && ! can_work_with_boot && return 1
 	 mkdir -p $(dirname ${1})
 	 wget ${3} -qO ${1}
 	 check_file ${1} ${2} && {
@@ -234,7 +231,6 @@ integrity_net() {
 				askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
 		  }
 		  for tuple in "${REMOTE_SYNC_FILES[@]}"; do
-				echo_red "trying to get ${tuple%%___*}"
 				local part12="${tuple%___*}"
 				remote_sync_file "${tuple%%___*}" "${part12##*___}" "${tuple##*___}"
 		  done
