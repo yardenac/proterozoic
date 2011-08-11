@@ -33,6 +33,21 @@ block_for_job() { #returns when no more jobs pending
 	 done
 	 echo done!
 }
+block_for_shutdown() { #returns when linode shuts itself down
+	 echo -n "Waiting for linode to shut down..."
+	 while :; do
+		  local status=$(ssh $LINODEADDR.linode.com status)
+		  case $status in
+				'Powered Off')
+					 echo done!
+					 return;;
+				Running|*)
+					 echo -n .
+					 sleep 1
+					 continue
+		  esac
+	 done
+}
 
 destroy_running() {
 	 local status=$(ssh $LINODEADDR.linode.com status)
@@ -42,7 +57,7 @@ destroy_running() {
 		  'Running')
 				echo "Going to destroy running instance..."
 				ssh $LINODEADDR.linode.com destroy;;
-		  *) echo "unrecognized status string"
+		  *) echo "unrecognized status string: $status"
 	 esac
 }
 update_stackscript() { local SS_COMMIT_TXT
@@ -100,14 +115,22 @@ deploy() {
 	 # 136 = 3.0.0-x86_64-linode20
 	 # 111 = Latest Paravirt (2.6.39.1-x86_64-linode19)
 	 # 133 = 2.6.39.1-x86_64-linode19
+	 result=$(do_or_report say 'linode.config.create&kernelid=95&helper_xen=false&helper_automount=false&helper_depmod=false&label=G'$ssdate'&linodeid='$linodeid \
+		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pv-grub
+	 config_pvgrub=$(echo $result | jshon -e DATA -e ConfigID)
 	 result=$(do_or_report say 'linode.config.create&kernelid=61&label=F'$ssdate'&linodeid='$linodeid \
-		  --data-urlencode disklist=25665,$diskid,,,,,,,25669) || return 1
+		  --data-urlencode disklist=25665,$diskid,,,,,,,25669) || return 1 #finnix rescue
+	 config_finnix=$(echo $result | jshon -e DATA -e ConfigID)
 	 result=$(do_or_report say 'linode.config.create&kernelid=111&label=C'$ssdate'&linodeid='$linodeid \
-		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1
-	 configid=$(echo $result | jshon -e DATA -e ConfigID)
+		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pre-linux-linode boot
+	 config_prebuilt=$(echo $result | jshon -e DATA -e ConfigID)
 	 block_for_job
 	 echo -n "Booting now"
-	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$configid || return 1
+	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_prebuilt || return 1
+	 block_for_job
+	 block_for_shutdown
+	 echo -n "Booting the REAL one now!"
+	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_pvgrub || return 1
 	 block_for_job
 }
 do_all() {

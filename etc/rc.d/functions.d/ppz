@@ -26,35 +26,16 @@ tmp_bind() {
 }
 tmp_to_shm()    { tmp_bind /dev/shm /media/inmem; }
 tmp_to_vartmp() { tmp_bind /var/tmp; }
-do_edie_var() {
-    mkdir /tmp/.aufs.var
-    if [ $( ls -A1d /var/* 2>/dev/null | wc -l ) -gt 0 ]; then
-		  VARHOLD=/.var.$( date +%s )
-		  mv /var $VARHOLD
-		  mkdir /var
-		  mount -t aufs -o br:/tmp/.aufs.var=rw:/.var.old=ro,xino=/tmp/.aufs.xino,noauto,noatime,nodiratime,udba=none none /var
-		  cp -av $VARHOLD/* /var/
-		  rm -rv $VARHOLD
-    else
-		  [ -a /var ] || mkdir /var
-		  mount -t aufs -o br:/tmp/.aufs.var=rw:/.var.old=ro,xino=/tmp/.aufs.xino,noauto,noatime,nodiratime,udba=none none /var
-    fi
-	 tmp_to_vartmp
-}
 custom_mounting_everyone() {
-	 case $HOSTNAME in
-		  ediacra) do_edie_var;;
-	 esac
 	 /usr/bin/integrity.ppz
 }
 add_hook sysinit_udevlaunched tmp_to_shm
-case $HOSTNAME in
-	 ediacra)	:;;
-	 *)			add_hook sysinit_udevlaunched tmp_to_vartmp;;
-esac
+add_hook sysinit_udevlaunched tmp_to_vartmp
 add_hook sysinit_premount custom_mounting_everyone
 custom_iptables_rules() {
+	 echo DOING IPTABLES RULES
 	 for PORT in ${OPEN_PORTS[@]}; do
+		  echo OPENING PORT $PORT
 		  local PROTOCOL=tcp
 		  [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
 		  iptables -A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT
