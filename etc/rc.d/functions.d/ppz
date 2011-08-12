@@ -20,25 +20,27 @@ have_mount_point() {
 	 }
 }
 tmp_bind() {
-	 for P in "$@"; do
-		  have_mount_point "$P" && mount --bind /tmp "$P"
+	 umount /dev/shm &>/dev/null
+	 for P in /dev/shm /var/tmp /media/inmem; do
+		  have_mount_point "$P" || continue
+		  mount --bind /tmp "$P"
 	 done
 }
-tmp_to_shm()    { tmp_bind /dev/shm /media/inmem; }
-tmp_to_vartmp() { tmp_bind /var/tmp; }
-custom_mounting_everyone() {
-	 /usr/bin/integrity.ppz
-}
-add_hook sysinit_udevlaunched tmp_to_shm
-add_hook sysinit_udevlaunched tmp_to_vartmp
-add_hook sysinit_premount custom_mounting_everyone
 custom_iptables_rules() {
-	 echo DOING IPTABLES RULES
+	 printf "DOING IPTABLES RULES\n"
 	 for PORT in ${OPEN_PORTS[@]}; do
-		  echo OPENING PORT $PORT
+		  printf "OPENING PORT $PORT\n"
 		  local PROTOCOL=tcp
 		  [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
 		  iptables -A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT
 	 done
 }
-add_hook multi_end custom_iptables_rules
+resolv_override() {
+	 [ -f /etc/resolv.conf.override ] \
+		  && rm -f /etc/resolv.conf \
+		  && cp -f /etc/resolv.conf{.override,}
+}
+add_hook sysinit_start		tmp_bind
+add_hook sysinit_premount	/usr/bin/integrity.ppz
+add_hook multi_start			resolv_override
+add_hook multi_end			custom_iptables_rules

@@ -43,7 +43,7 @@ block_for_shutdown() { #returns when linode shuts itself down
 					 return;;
 				Running|*)
 					 echo -n .
-					 sleep 1
+					 sleep 5
 					 continue
 		  esac
 	 done
@@ -111,6 +111,8 @@ deploy() {
 	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid=58&label=D'$ssdate'&size=4096&linodeid='$linodeid'&stackscriptid='$ss_id \
 		  --data-urlencode stackscriptudfresponses=\{"${nvp_str%,}"\} \
 		  --data-urlencode rootpass="$rootpass") || return 1
+#	 result=$(do_or_report say 'linode.disk.createfromdistribution&distributionid=58&label=D'$ssdate'&size=4096&linodeid='$linodeid \
+#		  --data-urlencode rootpass="$rootpass") || return 1
 	 diskid=$(echo $result | jshon -e DATA -e DiskID)
 	 # 136 = 3.0.0-x86_64-linode20
 	 # 111 = Latest Paravirt (2.6.39.1-x86_64-linode19)
@@ -128,6 +130,7 @@ deploy() {
 	 echo -n "Booting now"
 	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_prebuilt || return 1
 	 block_for_job
+#	 return
 	 block_for_shutdown
 	 echo -n "Booting the REAL one now!"
 	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_pvgrub || return 1

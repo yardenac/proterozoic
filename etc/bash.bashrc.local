@@ -1,4 +1,5 @@
 export SHELL=/bin/bash
+export HISTFILE
 [ -f /usr/share/ppz/bash.functions  ] && . /usr/share/ppz/bash.functions
 [ -a /usr/bin/Xorg ] && . /usr/share/ppz/bash.functions.xorg
 /usr/bin/integrity.ppz
@@ -37,6 +38,7 @@ alias pacman_from_livecd='pacman --config /usr/share/ppz/default-pacman.conf \
 		 --cachedir ${TARGET}/var/cache/pacman/pkg \
 		 --dbpath ${TARGET}/var/lib/pacman \
 		 --logfile ${TARGET}/var/log/pacman.log '
+alias zgrep='zgrep -i --color=auto'
 bind '"\e[A"':history-search-backward
 bind '"\e[B"':history-search-forward
 eval "`dircolors -b`"

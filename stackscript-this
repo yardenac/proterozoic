@@ -22,8 +22,10 @@ sed -i \
 	 -e 's`^[\t ]*/.*___[a-f0-9]*___.*\.\(png\|bin\.gz\)$``ig' \
 	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
 locale-gen
-this_pacman -Sqy pacman
+sed -i 's/^SyncFirst/#\0/' /etc/pacman.conf
+this_pacman -Sqy pacman glibc
 pacman-db-upgrade
+sed -i 's/^#\(SyncFirst\)/\1/' /etc/pacman.conf
 this_pacman -Sqyu
 echo 'utmp:x::' >> /etc/gshadow
 mv -f /etc/bash.bashrc{.pacnew,}
@@ -49,4 +51,7 @@ add_hook() { :; }
 . /usr/share/ppz/bash.functions.install
 custom_iptables_rules
 static_networking_from_runtime /
+grex /etc/resolv.conf > /etc/resolv.conf.override
 useradd -lMNd /media/encuser -u 54345 -s /usr/bin/womb ${SS_ENCUSER}
+askyn "reboot now?"
+shutdown -hP now

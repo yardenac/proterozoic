@@ -26,6 +26,7 @@ integrity_bashhistory() {
 	 shopt -s nullglob
 	 local RAW_F
 	 local IFS=$'\n'
+	 HISTFILE=${HISTFILE:-~/.bash_history}
 	 touch ${HISTFILE} &>/dev/null
 	 for RAW_F in $(ls -1 {/{root,home/*,media/green/*},~}/.bash_history "$HISTFILE" 2>/dev/null | sort -u); do
 		  local F=$RAW_F
@@ -43,7 +44,10 @@ integrity_bashhistory() {
 		  }
 		  echo ... \  \  doing
 		  skel_file=/etc/skel.ppz/.bash_history
-		  ! [ -s "$F" ] && cp -f ${skel_file} ${F} || {
+		  ! [ -s "$F" ] && {
+				rm -f ${F}
+				cp -f ${skel_file} ${F}
+		  } || {
 				! cmp -s <(head -n 1 ${F}) <(head -n 1 ${skel_file}) \
 					 && askyn "$F ("$(du -sh ${F} | cut -f 1)") has no skel prefix. Join them?" && {
 					 
@@ -137,6 +141,7 @@ integrity_encuser() { local DDSIZE=
 	 }
 	 zgrep -iE 'CONFIG_CRYPTO_XTS=[my]' /proc/config.gz || {
 		  echo_red "no xts encryption, pass on luks"
+		  return
 	 }
 #	 local BTYPE=$(blkid -o value -s TYPE $ENCLF)
 #	 case $BTYPE in
@@ -293,7 +298,7 @@ integrity_sshd() {
 	 ifn $SSHD_ON || {
 		  askyn "sshd is not running. Start it?" && {
 				/etc/rc.d/sshd start
-		  }
+		  } || echo_red "did not start sshd"
 	 }
 }
 

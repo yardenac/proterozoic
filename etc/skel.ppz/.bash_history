@@ -18,4 +18,7 @@ pacman --config /usr/share/ppz/default-pacman.conf -Sy proterozoic
 ssh -t fin@edie-wl screen -x -R && exit
 wget https://raw.github.com/twomen/proterozoic/master/usr/share/ppz/default-rc.conf -qO /tmp/rc.conf.ppz
 smartd -d -i 600
+shutdown -hP now && exit
+pacman -Syu
+pstree -phaun
 #LAST_PPZ_COMMAND
