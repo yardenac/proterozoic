@@ -127,7 +127,7 @@ integrity_encuser() { local DDSIZE=
 	 am_root || return
 	 [ -a $ENCLF ] || {
 		  usetvar DDSIZE "There is NO encrypted container named
-				\"$ENCLF\"! To make one, enter a size: " 32m '' || {
+				\"$ENCLF\"! To make one, enter a size: " 128m '' || {
 				echo_red "Did not create enc device!"
 				return
 		  }
