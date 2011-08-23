@@ -14,7 +14,7 @@ list_sorted()	{ for F; do echo "${F}"; done | sort -u; }
 print_jobs()	{ jobs | while read; do echo -n \*; done; }
 croak()			{ echo_red "ERROR: $@"; exit; }
 giveup_prompt() { askyn "$@" && continue 2 || break 2; }
-y()				{ local v="$1"; shift; "$@"; eval ${!v}=$? }
+y()				{ local v="$1"; shift; "$@"; eval ${!v}=$?; }
 z()				{ (( ${!1} )) && false || :; }
 ############################
 ############################
@@ -350,7 +350,7 @@ poptrap() {
 usetvar() { local ctxt temp; local confirm=0
 #	 lets user set var with default and interactive readline
 #	 USAGE: usetvar VARNAME 'prompt: ' "default val" 'val if cancelled'
-	 [ "$1" = confirm ] && { confirm=1; shift }
+	 [ "$1" = confirm ] && { confirm=1; shift; }
 	 case "${3}" in
 		  ''|'	')	local DVAL=${!1};;
 		  BLANK)		local DVAL='';;
