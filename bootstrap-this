@@ -26,7 +26,9 @@ mv -f /etc/rc.conf{,.original}
 wget $GITURL/usr/share/ppz/default-rc.conf		-qO	/etc/rc.conf
 wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/usr/share/ppz/default-pacman.conf	-qO	/tmp/pacman.conf.ppz
-sed -i s/otown/otown.tmp/ig									/tmp/pacman.conf.ppz
+sed -i \
+	 -e s/^IgnorePkg = /\0aif/ig
+	 -e s/otown/otown.tmp/ig									/tmp/pacman.conf.ppz
 sed -i \
 	 -e s/%SET_HOSTNAME%/archiso/ig \
 	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
