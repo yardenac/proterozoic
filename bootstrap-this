@@ -36,7 +36,7 @@ sed -i \
 [ $arch = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /tmp/pacman.conf.ppz
 
 this_pacman -Sqy			pacman
-this_pacman -Squ			proterozoic smartmontools aif
+this_pacman -Squ			proterozoic smartmontools #aif
 
 [ $arch = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 
