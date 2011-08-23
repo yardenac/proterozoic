@@ -8,7 +8,7 @@
 echo bootstrapping for the 2011.08.19 live cd...
 
 this_pacman() {
-	 pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm "$@"
+	 pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm --needed "$@"
 }
 # not used or needed right now, but preserve function for later?
 install_from_schlunix() {
