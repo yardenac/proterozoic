@@ -5,12 +5,12 @@
 
 # Then you probably want to run this:
 # root 123m~$ aif -p enzymes/polymerase -d
-echo bootstrapping for the 2011.06.10 live cd...
+echo bootstrapping for the 2011.08.19 live cd...
 
 this_pacman() {
 	 pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm "$@"
 }
-# necessary because of the aufs/kernel drama going on. Hopefully it can be temporary...
+# not used or needed right now, but preserve function for later?
 install_from_schlunix() {
 	 local repo=${1}; shift
 	 local suff=${1}; shift
@@ -23,7 +23,6 @@ arch=$(uname -m)
 GITURL=https://raw.github.com/twomen/proterozoic/master
 
 mv -f /etc/rc.conf{,.original}
-mv -f /etc/sudoers{,.original}
 wget $GITURL/usr/share/ppz/default-rc.conf		-qO	/etc/rc.conf
 wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/usr/share/ppz/default-pacman.conf	-qO	/tmp/pacman.conf.ppz
@@ -32,10 +31,8 @@ sed -i \
 	 -e s/%SET_HOSTNAME%/archiso/ig \
 	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
 
-this_pacman -Sqy
-install_from_schlunix	extra xz git-1.7.5.2-1 python2-2.7.2-1 screen-4.0.3-11
-install_from_schlunix	extra gz sshfs-2.2-3
-this_pacman -Sq			proterozoic smartmontools aif
+this_pacman -Sqy			pacman
+this_pacman -Squ			proterozoic smartmontools aif
 
 rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
 

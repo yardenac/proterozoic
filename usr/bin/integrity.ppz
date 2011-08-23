@@ -102,7 +102,8 @@ integrity_simpleconf() {
 	 am_root || return
 	 [ -e /media/inmem ] || mkdir /media/inmem
 	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
-	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
+	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow 2>/dev/null \
+		  || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
 	 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
 	 case $(hostname) in #uncomment
 		  gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
@@ -123,30 +124,8 @@ integrity_users() {
 	 am_root || return
 	 sed -i s/%ENCUSER%/${ENCUSER}/ig /etc/skel.ppz/.fvwm/.fvwm2rc
 }
-integrity_encuser() { local DDSIZE=
-	 am_root || return
-	 [ -a $ENCLF ] || {
-		  usetvar DDSIZE "There is NO encrypted container named
-				\"$ENCLF\"! To make one, enter a size: " 128m '' || {
-				echo_red "Did not create enc device!"
-				return
-		  }
-		  [ "$DDSIZE" ] && askyn "Did you mean to enter $DDSIZE?" && {
-				dd_with_progress if=/dev/urandom of=$ENCLF bs=512 count=$(fsconv $DDSIZE 'in' s)
-				ls -FlAthr $ENCLF
-		  } || {
-				echo_red "Fine, never mind then!"
-				return
-		  }
-	 }
-	 zgrep -iE 'CONFIG_CRYPTO_XTS=[my]' /proc/config.gz || {
-		  echo_red "no xts encryption, pass on luks"
-		  return
-	 }
-#	 local BTYPE=$(blkid -o value -s TYPE $ENCLF)
-#	 case $BTYPE in
-#		  ext4) :;;
-#	 esac
+integrity_encuser() {
+	 /usr/bin/integrity.encuser
 }
 integrity_inittab() {
 	 return
@@ -214,7 +193,7 @@ remote_sync_file() { # $0 '/local/path' 'md5sum464a702cf...' 'http://source'
 		  rm -f ${1}
 		  echo_red "Problem downloading $1 - have to get it later"
 	 }
-	 [ "${1:0:6}" = /boot/ ] && mount -o remount,ro /boot &>/dev/null
+	 [ "${1:0:6}" = /boot/ ] && mount -o remount,ro /boot &>/dev/null; :
 }
 integrity_net() {
 	 test_network_once 5 && {

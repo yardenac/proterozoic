@@ -49,17 +49,8 @@ install_grub_ppz() { #USAGE: install_grub /media/targay /dev/sda1 hostname_of_ta
 		  -e s/%SET_BOOTPART%/${GRUB_DEV}/ig \
 		  -e 's/%SET_ROOT_DEVICE%/\/dev\/disk\/by-uuid\/'${ROOT_UUID//\//\\\/}/ig ${TARGET}/boot/grub/menu.lst
 	 while :; do
-		 echo STARTING @$GRUBPW@$GRUBPWDUB@
-		 usetvar GRUBPW "Enter a (raw) grub password, if you like: " '' '' -s # unset so doesnt need to be local
-		 echo THEN @$GRUBPW@$GRUBPWDUB@
+		 usetvar confirm GRUBPW "Enter a (raw) grub password, if you like: " '' '' -s # unset so doesnt need to be local
 		 [ "$GRUBPW" ] || break
-		 usetvar GRUBPWDUB "And once more, please: " '' '' -s
-		 echo OR @$GRUBPW@$GRUBPWDUB@
-		 [ "$GRUBPW" = "$GRUBPWDUB" ] || {
-			  echo_red "They did not match!"
-			  continue
-		 }
-		 echo WEIRD @$GRUBPW@$GRUBPWDUB@
 		 local GHASH=$(echo -e "md5crypt\n${GRUBPW}\nquit" | ${TARGET}/sbin/grub --no-floppy \
 			  --batch --device-map ${DMAPF} | sed 's/^Encrypted: //ig;t;d') #sed commands: only print if matched
 		 [ "$GHASH" ] && [ "$GHASH" = "${GHASH// }" ] \
@@ -86,4 +77,17 @@ install_grub_ppz() { #USAGE: install_grub /media/targay /dev/sda1 hostname_of_ta
 		  echo "$GRUBCOMMANDS" | ${TARGET}/sbin/grub --no-floppy --batch --device-map ${DMAPF}
 	 }
 #		  rm -f ${DMAPF}
+}
+format_ext4() { local BBOPT=q
+	 case "$1" in
+		  automatic|auto) shift;;
+		  interactive)
+				shift
+				askyn "Format $1 ext4?" || return
+				askyn "Check for bad blocks?" && BBOPT=cc;;
+	 esac
+	 mke2fs -t ext4 -${BBOPT}E lazy_itable_init=1,discard \
+		  -O dir_index,extent,flex_bg,has_journal,uninit_bg,large_file,resize_inode,sparse_super ${1} \
+		  || askyn "mkfs failed. Continue?"
+			  #tune2fs 
 }

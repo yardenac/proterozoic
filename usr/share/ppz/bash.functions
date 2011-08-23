@@ -12,8 +12,10 @@ weekletter()	{ ARR=(S m t w T f s S); echo ${ARR[$(date +%u)]}; }
 func_exists()	{ declare -f ${1} >/dev/null; }
 list_sorted()	{ for F; do echo "${F}"; done | sort -u; }
 print_jobs()	{ jobs | while read; do echo -n \*; done; }
-croak()			{ echo "ERROR: $@"; exit; }
+croak()			{ echo_red "ERROR: $@"; exit; }
 giveup_prompt() { askyn "$@" && continue 2 || break 2; }
+y()				{ local v="$1"; shift; "$@"; eval ${!v}=$? }
+z()				{ (( ${!1} )) && false || :; }
 ############################
 ############################
 ############# PROCESS MANIP
@@ -199,16 +201,15 @@ dd_with_progress() {
 	 [[ "$1" =~ ^[0-9]+$ ]] && SLEEPSECS=$1 && shift
 	 dd "$@" &
 	 local DDPID=$!
-	 echo $'\n\n\n'
+	 echo $'\n\n\n\n'
 	 while :; do
 		  sleep $SLEEPSECS
-#		  jobs -l | grep -iq $DDPID || break
-		  ps --pid $DDPID -o pid= >/dev/null || break
-		  echo -e "\e[4A"
-		  kill -SIGUSR1 $DDPID >/dev/null #\
-#				&& echo -e "\e[4A"
+		  ps --pid $DDPID -o pid= &>/dev/null || break
+		  echo -e "\e[3A"
+		  kill -SIGUSR1 $DDPID >/dev/null
+		  ps --pid $DDPID -o pid= &>/dev/null || echo $'\n\n\n\n'
+		  sleep 1
 	 done
-#	 echo $'\n\n\n'
 }
 ############ INTERACTIVE CONSOLE TRICKS
 ansi_colors=(black red green yellow blue magenta cyan white)
@@ -346,9 +347,10 @@ poptrap() {
 				|| traptmp="${traptmp#*$'\n'}"
 	 done
 }
-usetvar() {
+usetvar() { local ctxt temp; local confirm=0
 #	 lets user set var with default and interactive readline
 #	 USAGE: usetvar VARNAME 'prompt: ' "default val" 'val if cancelled'
+	 [ "$1" = confirm ] && { confirm=1; shift }
 	 case "${3}" in
 		  ''|'	')	local DVAL=${!1};;
 		  BLANK)		local DVAL='';;
@@ -364,8 +366,14 @@ usetvar() {
 	 }
 	 pushtrap 'poptrap; echo; return;' INT QUIT
 	 clear_input_buffer
-	 read -ei "${DVAL}" -p $'\e[1;34m'"${2//	}"$'\e[m' $5 $6 $7 "${1}"
-	 RV=$?
+	 while :; do
+		  read -ei "${DVAL}" -p $'\e[1;34m'"${2//	}"$'\e[m' $5 $6 $7 "${1}"
+		  RV=$?
+		  (( $confirm )) || break
+		  read -ei '' -p $'\e[1;34mOnce more, please: \e[m' $5 $6 $7 ctxt
+		  [ "$DVAL" = "$ctxt" ] && break
+		  echo_red "They did not match! Trying again!"
+	 done
 	 poptrap
 	 return $RV
 }
@@ -539,4 +547,7 @@ makepkg_flexi() {
 screentitle_and_do() {
 	 echo -ne "\ek$USER: $*\e\\"
 	 "$@"
+}
+opsudo() { #opportunistic sudo
+	 am_root && "$@" || sudo "$@"
 }

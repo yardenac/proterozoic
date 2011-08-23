@@ -3,6 +3,7 @@
 (setq inhibit-splash-screen t)
 (setq line-number-mode t)
 (setq column-number-mode t)
+(setq menu-bar-mode nil)
 (setq auto-save-list-file-prefix (concat (getenv "HOME") "/.emacs-save-" ))
 (setq auto-mode-alist (cons '("\\.lua$" . lua-mode) auto-mode-alist))
 (autoload 'lua-mode "lua-mode" "Lua editing mode." t)

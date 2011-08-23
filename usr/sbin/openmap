@@ -1,35 +1,46 @@
 #!/bin/bash
+PATH=/sbin:/bin:/usr/bin
+
 . /etc/rc.conf
 . /usr/share/ppz/bash.functions
 
-if [ -e /dev/mapper/$ENC_MAPNAME ]; then
-    [ "$1" = "verbose" ] && echo already unencrypted: /dev/mapper/$ENC_MAPNAME
-else
-    echo uncrypting: /dev/mapper/$ENC_MAPNAME
-    /sbin/cryptsetup luksOpen $ENC_DEV $ENC_MAPNAME || do_fail can\'t open luks!
-fi
-if grep -iq /dev/mapper/$ENC_MAPNAME /etc/mtab; then
-    [ "$1" = "verbose" ] && echo already mounted: /dev/mapper/$ENC_MAPNAME
-else
-    echo mounting: /dev/mapper/$ENC_MAPNAME
-	 case $(/sbin/blkid -s TYPE -o value /dev/mapper/$ENC_MAPNAME) in
-		  btrfs)	:;;
-		  *) /sbin/fsck /dev/mapper/$ENC_MAPNAME || {
+am_root || echo "must be root!"
+
+case "$1" in
+	 loop)
+		  while loops=($(losetup -j "$2" | grep -io '^[^:]*')); do
+				[ ${#loops[@]} -eq 0 ] && losetup -f "$2"
+				[ ${#loops[@]} -eq 1 ] && break
+				losetup -d "$2"
+		  done;;
+	 cryptmap)
+		  until [ -e /dev/mapper/$enc_mapname ]; do
+				if [ -a $tmp_keyfile ]; then
+					 cat "tmp_keyfile" | \
+						  cryptsetup luksOpen "$2" $enc_mapname -d - \
+						  || croak "luksopen failed with raw key"
+				elif [ -a "$enc_keyfile" ]; then
+					 usetvar PW "Enter the password for your LUKS key: " '' '' -s \
+						  || croak "No password entered"
+					 echo "$PW" \
+						  | gpg --no-tty --no-mdc-warning --passphrase-fd 0 -qd "$enc_keyfile" \
+						  | cryptsetup luksOpen "$2" $enc_mapname -d - \
+						  || croak "luksopen failed with gpg'd key"
+				else
+					 cryptsetup luksOpen "$2" $enc_mapname \
+						  || croak "luksopen failed with password"
+				fi
+		  done;;
+	 mount)
+		  until grep -iq /dev/mapper/$enc_mapname /etc/mtab; do
+				case $(blkid -s TYPE -o value /dev/mapper/$enc_mapname) in
+					 btrfs)	:;;
+					 *)		fsck /dev/mapper/$enc_mapname
+				esac
+				(( $? )) && {
 					 echo fsck failed ... jsyk
 					 read
-				};;
-	 esac
-    /bin/mount -o rw,relatime,nodiratime /dev/mapper/$ENC_MAPNAME $ENC_HOMEDIR
-fi
-do_edie_cache() {
-	 FDIR=/home/fin/fuse
-	 if grep -iq $FDIR/aufs /etc/mtab; then
-		  [ "$1" = "verbose" ] && echo already mounted: $FDIR/aufs
-	 else
-		  echo mounting: $FDIR/aufs
-		  /bin/mount -t aufs -o br:$FDIR/local=rw:$FDIR/arch-cache=ro,xino=/tmp/.aufs.xino.fin,noauto,noatime,nodiratime,udba=none none $FDIR/aufs
-	 fi
-}
-case $(hostname) in
-	 ediacra) do_edie_cache "$@";;
+				}
+				mount -o rw,relatime,nodiratime /dev/mapper/$enc_mapname $enc_mountpt
+		  done
 esac

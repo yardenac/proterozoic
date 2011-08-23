@@ -5,6 +5,7 @@ depend_procedure core base
 
 TARGET=/media/targay
 MNTPTS=( /boot ) # / is implied
+ENCLF=/fort
 
 unmount_all() {
 	 local RV=0
@@ -37,13 +38,7 @@ start_process() {
 				usetvar DEV "CHOOSE A PARTITION FOR $MNTPT (^c to partprobe): " /dev/
 				DEV=$(readlink -e ${DEV})
 		  done
-		  askyn "Format $DEV ext4?" && {
-				askyn "Check for bad blocks?" && BBOPT=cc || BBOPT=q
-				mke2fs -t ext4 -${BBOPT}E lazy_itable_init=1,discard \
-					 -O dir_index,extent,flex_bg,has_journal,uninit_bg,large_file,resize_inode,sparse_super ${DEV} \
-					 || askyn "mkfs failed. Continue?"
-			  #tune2fs 
-		  }
+		  format_ext4 interactive "$DEV"
 		  mkdir -p ${TARGET}${MNTPT}
 		  mount ${DEV} ${TARGET}${MNTPT}
 		  cat >> /tmp/ppz-fstab <<-EOF
@@ -76,10 +71,17 @@ start_process() {
 		  usetvar    HOSTNAME "Choose a new hostname! Take your time ;) " new_arch_machine_$(date +%Y_%m_%d)
 		  usetvar    XRGUSER "Choose name of X user to boot into (blank for none): " '' ''
 		  usetvar    ENCUSER "Choose name of encrypted user (blank for none): " '' ''
+		  askyn "Use default enclf? [ $ENCLF ]" && {
+				echo_red "Existing luks partitions, if any:"
+				blkid | grep luks
+				usetvar ENCLF "Choose encrypted filesystem mountpoint:" \
+					 /dev/disk/by-uuid/ "$ENCLF"
+		  }
 		  sed -i \
 				-e s/%SET_HOSTNAME%/${HOSTNAME}/ig \
 				-e s/%SET_XRGUSER%/${XRGUSER}/ig \
-				-e s/%SET_ENCUSER%/${ENCUSER}/ig ${TARGET}/etc/rc.conf
+				-e s/%SET_ENCUSER%/${ENCUSER}/ig \
+				-e s_=/fort_=${ENCLF}_ig ${TARGET}/etc/rc.conf
 		  chroot ${TARGET} /usr/sbin/useradd -lMNd /etc/skel.ppz  -u 54344 ${XRGUSER}
 		  chroot ${TARGET} /usr/sbin/useradd -lMNd /media/encuser -u 54345 -s /usr/bin/womb ${ENCUSER}
 #		  chroot ${TARGET} /usr/sbin/useradd -lMNd /media/green/si -u 1001 -s /usr/bin/womb si

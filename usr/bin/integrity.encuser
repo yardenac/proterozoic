@@ -1,0 +1,94 @@
+#!/bin/bash
+# This script takes care of the (semi-) automated encryption features of proterozoic
+# It manages the volume / loopback file / device mentioned in rc.conf as ENCLF
+# it ONLY manages that one. Other ones are ignored and left to the user.
+# It inspects the situation and generates files as needed with as little
+# interaction as possible. Can (and is meant to) be run during initial installation
+# to make everything from scratch. Can also (and is meant to) be run on each login
+# to make sure things are okay, and as part of the wrapper shell for a user whose 
+# homedir is ON the encrypted device (solving that catch-22...). In that respect 
+# it should replace the older openmap script.
+
+. /etc/rc.conf
+. /usr/share/ppz/bash.functions
+. /usr/share/ppz/bash.functions.install
+
+tmp_is_safe() {
+	 grep -iqE '^shm /tmp tmpfs ' /etc/mtab
+}
+make_sure_exists() {
+	 local given="$1"
+	 until edev=$(readlink -e "$given"); do
+		  [ "${given:0:4}" = /dev ] && croak "Encrypted device doesn't exist! Check hardware."
+		  echo_red "Encrypted loopback file doesn't exist!"
+		  am_root && echo_red "Touching it..." || croak "Root must fix!"
+		  local intermediate=$(readlink -m "$given")
+		  mkdir -p "$(dirname "$intermediate")"
+		  touch "$intermediate"
+		  chmod 400 "$intermediate"
+	 done
+}
+make_sure_kernel_supports() {
+	 zgrep -iqE 'CONFIG_CRYPTO_XTS=[my]' /proc/config.gz || croak "no xts encryption, pass on luks"
+}
+make_sure_is_luks() {
+	 local type=$(blkid -o value -s TYPE "$edev"); local typerv=$?
+	 [ "$type" = crypto_LUKS ] && return #Already LUKS formatted, assuming ok...
+	 am_root || croak "Non-root user cannot fix or create the LUKS device"
+	 make_sure_kernel_supports
+	 [ -s "$edev"] && {
+		  [ "$type" ] && echo_red "Encrypted device $edev is formatted as: $type!" \
+				|| echo_red "Encrypted device $edev is not in a known block format!"
+		  am_root || croak "Root must fix!"
+		  shell_is_interactive || croak "Will not overwrite anything without your permission..."
+		  askyn "Skip and preserve data? (Otherwise we'll overwrite it...)" && croak
+	 }
+	 # at this point edev is either empty file or user has consented to overwriting
+	 local counttxt=
+	 [ -b "$edev" ] || {
+		  usetvar ddsize "Enter a size for encrypted loop file $edev: " 128m 128m
+		  echo_red "Making a file 128m in size"
+		  counttxt=$(fsconv $DDSIZE 'in' s)
+	 }
+	 tmp_is_safe || croak "Not making a key for you unless we have a safe ramdisk!"
+	 dd					if=/dev/urandom of="$tmp_keyfile" bs=512 count=64
+	 chmod 400 "$tmp_keyfile"
+	 dd_with_progress	if=/dev/urandom of="$edev"        bs=512 $counttxt
+	 cat "$tmp_keyfile" | \
+		  cryptsetup -c aes-xts-plain -s 512 -h whirlpool -qv luksFormat "$edev" -i 9999 -d -
+}
+make_sure_formatted() {
+	 until type=$(blkid -o value -s TYPE /dev/mapper/$enc_mapname); do
+		  am_root || croak "map device unformatted, root muxt fix!"
+		  format_ext4 automatic /dev/mapper/$enc_mapname || croak "Formatting failed"
+	 done
+	 case $type in
+		  ext4) :;;
+		  *)	echo_red "/dev/mapper/$enc_mapname is already formatted something else"
+	 esac
+}
+make_sure_key_preserved() { local keye dk1 pwbu pw
+	 #dk1 = first disabled key
+	 dk1=$(cryptsetup luksDump cunt -S 1 | grep -iEm 1 'DISABLED$')
+	 y pwbu [ "$dk1" -ge 2 ]    # there is a backup password slot
+	 y keye [ -a $enc_keyfile ] # the gpg'd key file exists
+	 z pwbu && z keye && return
+	 usetvar confirm pw "Enter a password for your key file and luks slot 2!" '' '' -s \
+		  || croak "Cant make stable luks key, non-interactive"
+	 z keye || { # make permanent gpg'd copy of key
+		  [ -a $tmp_keyfile ] || croak "lost only key file! you're screwed!"
+		  echo $pw | gpg -qc --no-tty --no-mdc-warning --passphrase-fd 0 \
+				-o $enc_keyfile $tmp_keyfile
+	 }
+	 z pwbu || { #add slot for pure password
+		  echo -n $pw | cryptsetup luksAddKey "$edev" - -d "$tmp_keyfile" -i 9999
+	 }
+	 rm -f "$tmp_keyfile" # finally remove insecure raw key
+}
+make_sure_exists "$ENCLF" #sets the edev var also
+make_sure_is_luks
+#opsudo openmap loop     "$edev"
+opsudo openmap cryptmap "$edev"
+make_sure_formatted
+opsudo openmap mount
+make_sure_key_preserved
