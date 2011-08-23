@@ -16,4 +16,5 @@ package() {
 	 chmod 555 ${pkgdir}/etc/.emacs.d
 	 chmod 440 ${pkgdir}/etc/sudoers.d/ppz
 	 chmod 750 ${pkgdir}/etc/sudoers.d
+	 chmod +x ${pkgdir}/usr/{s,}bin/*
 }

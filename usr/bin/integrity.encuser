@@ -14,7 +14,7 @@
 . /usr/share/ppz/bash.functions.install
 
 tmp_is_safe() {
-	 grep -iqE '^shm /tmp tmpfs ' /etc/mtab
+	 grep -iqE '^(shm|tmpfs) /tmp tmpfs ' /etc/mtab
 }
 make_sure_exists() {
 	 local given="$1"
@@ -31,31 +31,39 @@ make_sure_exists() {
 make_sure_kernel_supports() {
 	 zgrep -iqE 'CONFIG_CRYPTO_XTS=[my]' /proc/config.gz || croak "no xts encryption, pass on luks"
 }
-make_sure_is_luks() {
+make_sure_is_luks() { local ddsize=128m
 	 local type=$(blkid -o value -s TYPE "$edev"); local typerv=$?
 	 [ "$type" = crypto_LUKS ] && return #Already LUKS formatted, assuming ok...
 	 am_root || croak "Non-root user cannot fix or create the LUKS device"
 	 make_sure_kernel_supports
-	 [ -s "$edev"] && {
+	 [ -s "$edev" ] && {
 		  [ "$type" ] && echo_red "Encrypted device $edev is formatted as: $type!" \
 				|| echo_red "Encrypted device $edev is not in a known block format!"
 		  am_root || croak "Root must fix!"
 		  shell_is_interactive || croak "Will not overwrite anything without your permission..."
 		  askyn "Skip and preserve data? (Otherwise we'll overwrite it...)" && croak
 	 }
+	 local rootsize=$(df / | awk '/^\// {print $2}')
+	 echo "Root partition is $(( $rootsize / 1024))M / $(( $rootsize / (1024 * 1024) ))G"
+	 [ $(( $rootsize / (1024*1024) )) -lt 3 ] && ddsize=32m
 	 # at this point edev is either empty file or user has consented to overwriting
 	 local counttxt=
 	 [ -b "$edev" ] || {
-		  usetvar ddsize "Enter a size for encrypted loop file $edev: " 128m 128m
+		  usetvar ddsize "Enter a size for encrypted loop file $edev: " $ddsize $ddsize
 		  echo_red "Making a file 128m in size"
 		  counttxt=$(fsconv $DDSIZE 'in' s)
 	 }
-	 tmp_is_safe || croak "Not making a key for you unless we have a safe ramdisk!"
-	 dd					if=/dev/urandom of="$tmp_keyfile" bs=512 count=64
-	 chmod 400 "$tmp_keyfile"
-	 dd_with_progress	if=/dev/urandom of="$edev"        bs=512 $counttxt
-	 cat "$tmp_keyfile" | \
-		  cryptsetup -c aes-xts-plain -s 512 -h whirlpool -qv luksFormat "$edev" -i 9999 -d -
+	 if tmp_is_safe; then
+		  dd						if=/dev/urandom of="$tmp_keyfile" bs=512 count=64
+		  chmod 400 "$tmp_keyfile"
+		  dd_with_progress	if=/dev/urandom of="$edev"        bs=512 $counttxt
+		  cat "$tmp_keyfile" | \
+				cryptsetup -c aes-xts-plain -s 512 -h whirlpool -qv luksFormat "$edev" -i 9999 -d -
+#	 elif is_shell_interactive; then
+#		  
+	 else
+		  croak "Not making a key for you unless we have a safe ramdisk or you can enter a password!"
+	 fi
 }
 make_sure_formatted() {
 	 until type=$(blkid -o value -s TYPE /dev/mapper/$enc_mapname); do
