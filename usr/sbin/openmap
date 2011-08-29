@@ -7,6 +7,39 @@ PATH=/sbin:/bin:/usr/bin
 am_root || echo "must be root!"
 
 case "$1" in
+	 rcconf)
+		  TARGET=${2:-/}; TARGET=${TARGET%%/}
+		  grep -iq %SET_XRGUSER% ${TARGET}/etc/rc.conf && {
+				usetvar    XRGUSER "Choose name of X user to boot into (blank for none): " '' '' \
+					 || croak "Not setting X user right now"
+				sed -i s/%SET_XRGUSER%/${XRGUSER}/ig ${TARGET}/etc/rc.conf
+		  }
+		  grep -iq %SET_ENCUSER% ${TARGET}/etc/rc.conf && {
+				usetvar    ENCUSER "Choose name of encrypted user (blank for none): " '' '' \
+					 || croak "Not setting enc user right now"
+				sed -i s/%SET_ENCUSER%/${ENCUSER}/ig ${TARGET}/etc/rc.conf
+		  }
+		  ;;
+	 users)
+		  eval $(awk '/^XRGUSER=/ {print}' /etc/rc.conf) \
+				&& [ "$XRGUSER" != %SET_XRGUSER% ] \
+				&& ! grep -iqE ^$XRGUSER /etc/passwd \
+				&& useradd -lMNd /etc/skel.ppz -u 54344 $XRGUSER
+		  eval $(awk '/^ENCUSER=/ {print}' /etc/rc.conf) \
+				&& [ "$ENCUSER" != %SET_ENCUSER% ] \
+				&& ! grep -iqE ^$ENCUSER /etc/passwd \
+				&& useradd -lMNd /media/enc/u -u 54345 -s /usr/bin/womb ${ENCUSER}
+
+
+		  [ -a "$ENCLF" ] || {
+				askyn "Use default enclf? [ $ENCLF ]" || {
+					 echo_red "Existing luks partitions, if any:"
+					 blkid | grep luks
+					 usetvar ENCLF "Choose encrypted filesystem mountpoint:" \
+						  /dev/disk/by-uuid/ "$ENCLF"
+					 sed -i s_=/fort_=${ENCLF}_ig /etc/rc.conf
+				}
+		  };;
 	 loop)
 		  while loops=($(losetup -j "$2" | grep -io '^[^:]*')); do
 				[ ${#loops[@]} -eq 0 ] && losetup -f "$2"
@@ -39,9 +72,10 @@ case "$1" in
 				esac
 				(( $? )) && {
 					 echo fsck failed ... jsyk
-					 read
+#					 read
 				}
 				mkdir -p /media/enc
 				mount -o rw,relatime,nodiratime /dev/mapper/$enc_mapname $enc_mountpt || croak "mount failed"
+				[ -a /media/enc/u ] || cp -r /etc/skel.ppz /media/enc/u
 		  done
 esac

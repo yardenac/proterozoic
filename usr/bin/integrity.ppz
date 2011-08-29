@@ -109,7 +109,7 @@ integrity_simpleconf() {
 		  gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
 		  *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
 	 esac
-	 mkdir -p /media/{arch-cold-r{w,o},rodinia,green,encuser}
+	 mkdir -p /media/{arch-cold-r{w,o},rodinia,green,encuser,enc}
 	 [ -L /snowball ] || ln -s /media/rodinia/pub /snowball
 	 enforce_perms 440 /etc/sudoers.d/wheel
 }

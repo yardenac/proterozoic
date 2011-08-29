@@ -7,6 +7,14 @@ TARGET=/media/targay
 MNTPTS=( /boot ) # / is implied
 ENCLF=/fort
 
+pacman_target() {
+	 /usr/bin/pacman --config /usr/share/ppz/default-pacman.conf \
+		  --root ${TARGET} \
+		  --cachedir ${TARGET}/var/cache/pacman/pkg \
+		  --dbpath ${TARGET}/var/lib/pacman \
+		  --logfile ${TARGET}/var/log/pacman.log \
+		  --noprogressbar --noconfirm --needed "$@"
+}
 unmount_all() {
 	 local RV=0
 	 for MNTD_FS in /proc /sys /dev ${MNTPTS[@]} /; do
@@ -58,35 +66,18 @@ start_process() {
 	 done
 	 [ -a ${TARGET}/etc/rc.conf ] \
 		  && askyn "Base system already looks populated ... skip reinstalling that?" \
-		  || pacman --config /usr/share/ppz/default-pacman.conf \
-		  --root ${TARGET} \
-		  --cachedir ${TARGET}/var/cache/pacman/pkg \
-		  --dbpath ${TARGET}/var/lib/pacman \
-		  --logfile ${TARGET}/var/log/pacman.log \
-		  --noprogressbar --noconfirm --needed -Syq initscripts
+		  || pacman_target -Syq initscripts
 	 grep -iq oxygen ${TARGET}/etc/fstab &>/dev/null \
 		  && askyn "Looks like we already did some basic configging ... skip that?" || {
 		  set +o noclobber
 		  cp -f /usr/share/ppz/default-rc.conf ${TARGET}/etc/rc.conf
 		  usetvar    HOSTNAME "Choose a new hostname! Take your time ;) " new_arch_machine_$(date +%Y_%m_%d)
-		  usetvar    XRGUSER "Choose name of X user to boot into (blank for none): " '' ''
-		  usetvar    ENCUSER "Choose name of encrypted user (blank for none): " '' ''
-		  askyn "Use default enclf? [ $ENCLF ]" && {
-				echo_red "Existing luks partitions, if any:"
-				blkid | grep luks
-				usetvar ENCLF "Choose encrypted filesystem mountpoint:" \
-					 /dev/disk/by-uuid/ "$ENCLF"
-		  }
-		  sed -i \
-				-e s/%SET_HOSTNAME%/${HOSTNAME}/ig \
-				-e s/%SET_XRGUSER%/${XRGUSER}/ig \
-				-e s/%SET_ENCUSER%/${ENCUSER}/ig \
-				-e s_=/fort_=${ENCLF}_ig ${TARGET}/etc/rc.conf
-		  chroot ${TARGET} /usr/sbin/useradd -lMNd /etc/skel.ppz  -u 54344 ${XRGUSER}
-		  chroot ${TARGET} /usr/sbin/useradd -lMNd /media/encuser -u 54345 -s /usr/bin/womb ${ENCUSER}
-#		  chroot ${TARGET} /usr/sbin/useradd -lMNd /media/green/si -u 1001 -s /usr/bin/womb si
+		  sed -i s/%SET_HOSTNAME%/${HOSTNAME}/ig ${TARGET}/etc/rc.conf
+		  until askyn "Did you figure out what's on the target so far?"; do :; done
+		  opsudo openmap rcconf ${TARGET}
 		  cat >  ${TARGET}/etc/fstab <<-EOF
 				devpts /dev/pts devpts defaults 0 0
+				/dev/mapper/enc /media/enc auto defaults,rw,relatime,nodiratime 0 0
 				UUID=4C93-65D0  /media/oxygen   vfat    defaults,user,noatime,nodiratime,fmask=177,dmask=077,check=s 0 0
 				EOF
 		  cat >> ${TARGET}/etc/fstab < /tmp/ppz-fstab
@@ -112,12 +103,7 @@ start_process() {
 		  pkgs_go+=(btrfs-progs-unstable proterozoic) # grub2-bios
 		  usetvar others "Type in any other packages you want to add: " 'nvidia aif' ''
 		  pkgs_go+=(${others//,/ })
-		  pacman --config /usr/share/ppz/default-pacman.conf \
-				--root ${TARGET} \
-				--cachedir ${TARGET}/var/cache/pacman/pkg \
-				--dbpath ${TARGET}/var/lib/pacman \
-				--logfile ${TARGET}/var/log/pacman.log \
-				--noprogressbar --noconfirm --needed -Sq ${pkgs_go[@]}
+		  pacman_target -Sq ${pkgs_go[@]}
 		  cp -f ${TARGET}/{usr/share/ppz/default,etc/}-pacman.conf
 	 }
 	 askyn "Use present net config as static on target?" && {
@@ -128,6 +114,7 @@ start_process() {
 				chroot ${TARGET} passwd root && break
 		  done
 	 }
+	 chroot ${TARGET} /usr/sbin/openmap users
 	 fix_initcpio_ppz ${TARGET}
 	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
 		  install_grub_ppz ${TARGET} $(unhash targmntboot) ${HOSTNAME}

@@ -11,6 +11,8 @@
 
 #set -v
 
+opsudo openmap users
+
 . /etc/rc.conf
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.install
@@ -83,6 +85,7 @@ make_sure_key_preserved() { local keye dk1 pwbu pw
 	 y pwbu [ "${dk1:9:1}" -ge 2 ]    # there is a backup password slot
 	 y keye [ -a $enc_keyfile ] # the gpg'd key file exists
 	 z pwbu && z keye && return
+	 am_root || croak "Root needs to deal with encryption key!"
 	 usetvar confirm pw "Enter a password for your key file and luks slot 2!" '' '' -s \
 		  || croak "Cant make stable luks key, non-interactive"
 	 z keye || { # make permanent gpg'd copy of key
@@ -97,7 +100,6 @@ make_sure_key_preserved() { local keye dk1 pwbu pw
 }
 make_sure_exists "$ENCLF" #sets the edev var also
 make_sure_is_luks
-#opsudo openmap loop     "$edev"
 opsudo openmap cryptmap "$edev"
 make_sure_formatted
 opsudo openmap mount
