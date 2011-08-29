@@ -9,6 +9,8 @@
 # homedir is ON the encrypted device (solving that catch-22...). In that respect 
 # it should replace the older openmap script.
 
+#set -v
+
 . /etc/rc.conf
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.install
@@ -50,8 +52,8 @@ make_sure_is_luks() { local ddsize=128m
 	 local counttxt=
 	 [ -b "$edev" ] || {
 		  usetvar ddsize "Enter a size for encrypted loop file $edev: " $ddsize $ddsize
-		  echo_red "Making a file 128m in size"
-		  counttxt=$(fsconv $DDSIZE 'in' s)
+		  echo_red "Making a file $ddsize in size"
+		  counttxt=count=$(fsconv $ddsize 'in' s)
 	 }
 	 if tmp_is_safe; then
 		  dd						if=/dev/urandom of="$tmp_keyfile" bs=512 count=64
@@ -77,8 +79,8 @@ make_sure_formatted() {
 }
 make_sure_key_preserved() { local keye dk1 pwbu pw
 	 #dk1 = first disabled key
-	 dk1=$(cryptsetup luksDump cunt -S 1 | grep -iEm 1 'DISABLED$')
-	 y pwbu [ "$dk1" -ge 2 ]    # there is a backup password slot
+	 dk1=$(cryptsetup luksDump "$edev" -S 1 | grep -iEm 1 'DISABLED$')
+	 y pwbu [ "${dk1:9:1}" -ge 2 ]    # there is a backup password slot
 	 y keye [ -a $enc_keyfile ] # the gpg'd key file exists
 	 z pwbu && z keye && return
 	 usetvar confirm pw "Enter a password for your key file and luks slot 2!" '' '' -s \

@@ -16,6 +16,8 @@ mount /dev/disk/by-uuid/5b25f749-ab8d-4749-a8b0-3b7d3408af19 /media/arch-cold-ro
 mount /dev/mapper/green /media/green
 pacman --config /usr/share/ppz/default-pacman.conf -Sy proterozoic
 ssh -t fin@edie-wl screen -x -R && exit
+ssh -t si@scaly screen -x -R && exit
+ssh -t compsognathus@majel.net screen -x -R && exit
 wget https://raw.github.com/twomen/proterozoic/master/usr/share/ppz/default-rc.conf -qO /tmp/rc.conf.ppz
 smartd -d -i 600
 shutdown -hP now && exit

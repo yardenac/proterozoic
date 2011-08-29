@@ -16,7 +16,7 @@ case "$1" in
 	 cryptmap)
 		  until [ -e /dev/mapper/$enc_mapname ]; do
 				if [ -a $tmp_keyfile ]; then
-					 cat "tmp_keyfile" | \
+					 cat "$tmp_keyfile" | \
 						  cryptsetup luksOpen "$2" $enc_mapname -d - \
 						  || croak "luksopen failed with raw key"
 				elif [ -a "$enc_keyfile" ]; then
@@ -41,6 +41,7 @@ case "$1" in
 					 echo fsck failed ... jsyk
 					 read
 				}
-				mount -o rw,relatime,nodiratime /dev/mapper/$enc_mapname $enc_mountpt
+				mkdir -p /media/enc
+				mount -o rw,relatime,nodiratime /dev/mapper/$enc_mapname $enc_mountpt || croak "mount failed"
 		  done
 esac

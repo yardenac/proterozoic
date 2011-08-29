@@ -12,6 +12,7 @@ for NEWDIR in $(in_2_but_not_in_1 "$GOODPATH" "$PATH"); do case $NEWDIR in
 	/usr/bin/core_perl)					GOODPATH=$GOODPATH:$NEWDIR;;
 	*)											echo weird path component: $NEWDIR;;
 esac; done
+has_hardstatus
 PS1="$(appropriate_ps1)"
 case $(hostname) in
 	 scaly) am_root \
