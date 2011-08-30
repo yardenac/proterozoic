@@ -5,7 +5,6 @@ depend_procedure core base
 
 TARGET=/media/targay
 MNTPTS=( /boot ) # / is implied
-ENCLF=/fort
 
 pacman_target() {
 	 /usr/bin/pacman --config /usr/share/ppz/default-pacman.conf \
@@ -74,7 +73,6 @@ start_process() {
 		  usetvar    HOSTNAME "Choose a new hostname! Take your time ;) " new_arch_machine_$(date +%Y_%m_%d)
 		  sed -i s/%SET_HOSTNAME%/${HOSTNAME}/ig ${TARGET}/etc/rc.conf
 		  until askyn "Did you figure out what's on the target so far?"; do :; done
-		  opsudo openmap rcconf ${TARGET}
 		  cat >  ${TARGET}/etc/fstab <<-EOF
 				devpts /dev/pts devpts defaults 0 0
 				/dev/mapper/enc /media/enc auto defaults,rw,relatime,nodiratime 0 0
@@ -104,7 +102,7 @@ start_process() {
 		  usetvar others "Type in any other packages you want to add: " 'nvidia aif' ''
 		  pkgs_go+=(${others//,/ })
 		  pacman_target -Sq ${pkgs_go[@]}
-		  cp -f ${TARGET}/{usr/share/ppz/default,etc/}-pacman.conf
+		  cp -f ${TARGET}/{usr/share/ppz/default-,etc/}pacman.conf
 	 }
 	 askyn "Use present net config as static on target?" && {
 		  static_networking_from_runtime ${TARGET}
@@ -114,7 +112,6 @@ start_process() {
 				chroot ${TARGET} passwd root && break
 		  done
 	 }
-	 chroot ${TARGET} /usr/sbin/openmap users
 	 fix_initcpio_ppz ${TARGET}
 	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
 		  install_grub_ppz ${TARGET} $(unhash targmntboot) ${HOSTNAME}

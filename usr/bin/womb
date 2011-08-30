@@ -1,6 +1,7 @@
 #!/bin/bash
 
-sudo /usr/sbin/openmap
+#sudo /usr/sbin/openmap
+/usr/bin/integrity.ppz
 
 cd ~
 

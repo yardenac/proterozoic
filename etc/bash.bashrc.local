@@ -2,8 +2,10 @@ export SHELL=/bin/bash
 export HISTFILE
 [ -f /usr/share/ppz/bash.functions  ] && . /usr/share/ppz/bash.functions
 [ -a /usr/bin/Xorg ] && . /usr/share/ppz/bash.functions.xorg
-/usr/bin/integrity.ppz
-[ -x /usr/bin/integrity.linode ] && /usr/bin/integrity.linode
+am_root && {
+	 /usr/bin/integrity.ppz
+	 [ -x /usr/bin/integrity.linode ] && /usr/bin/integrity.linode
+}
 GOODPATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$(readlink -e ~/bin)
 for NEWDIR in $(in_2_but_not_in_1 "$GOODPATH" "$PATH"); do case $NEWDIR in
 	/opt/java/jre/bin|\

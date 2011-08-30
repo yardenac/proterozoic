@@ -1,8 +1,19 @@
 #!/bin/bash
 . /etc/rc.conf
 . /usr/share/ppz/bash.functions
+
+echo_red HOME: ~
+echo_red EUID: $EUID
+echo_red UID: $UID
+echo_red mtab:
+cat /etc/mtab
+echo_red mount:
+mount
+echo_red ok.
+
 integrity_rootpw() {
 	 am_root && shell_is_interactive || return 0
+	 # check user pw too. (someday)
 	 while :; do
 		  roothash=$(awk 'BEGIN {FS=":"} /^root:/ {print $2}' /etc/shadow)
 		  case $roothash in
@@ -23,6 +34,7 @@ integrity_emacsd() {
 	 }
 }
 integrity_bashhistory() {
+	 # THIS IS A MESS
 	 shopt -s nullglob
 	 local RAW_F
 	 local IFS=$'\n'
@@ -84,7 +96,7 @@ To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCAN
 				echo_red "Still using default time zone!"
 				break
 		  }
-		  [ "$TZONE" = "USERCANCELLED" ] && {
+		  [ "$TZONE" = "USERCANCELLED" ] && { #THIS WILL NEVER RUN! IT'S BROKEN!
 				echo "If this file exists, it means the system is SUPPOSED to" \
 					 "have the default timezone (Vancouver or NY). Otherwise," \
 					 "root would always be prompted to change it." > /etc/localtime.userok
@@ -106,6 +118,7 @@ integrity_simpleconf() {
 		  || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
 	 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
 	 case $(hostname) in #uncomment
+		  # needs a better test for linode-ness. probably check ip.
 		  gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
 		  *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
 	 esac
@@ -122,10 +135,13 @@ integrity_pacnew() {
 }
 integrity_users() {
 	 am_root || return
+	 ENCUSER=eu #instead, have it default to eu and just check whether the user exists
 	 sed -i s/%ENCUSER%/${ENCUSER}/ig /etc/skel.ppz/.fvwm/.fvwm2rc
 }
 integrity_encuser() {
-	 /usr/bin/integrity.encuser
+	 echo_red NOT DOING ENCUSER - TESTING STUFF
+	 return
+#	 /usr/bin/integrity.encuser
 }
 integrity_inittab() {
 	 return
