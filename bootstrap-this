@@ -7,40 +7,28 @@
 # root 123m~$ aif -p enzymes/polymerase -d
 echo bootstrapping for the 2011.08.19 live cd...
 
-this_pacman() {
-	 pacman --config /tmp/pacman.conf.ppz --noprogressbar --noconfirm --needed "$@"
-}
-# not used or needed right now, but preserve function for later?
-install_from_schlunix() {
-	 local repo=${1}; shift
-	 local suff=${1}; shift
-	 for P; do
-		  wget http://schlunix.org/archlinux/${repo}/os/$arch/$P-$arch.pkg.tar.${suff} -qO /tmp/$P-$arch.pkg.tar.${suff}
-		  echo /tmp/$P-$arch.pkg.tar.${suff}
-	 done | this_pacman -U -
-}
 arch=$(uname -m)
 GITURL=https://raw.github.com/twomen/proterozoic/master
 
 mv -f /etc/rc.conf{,.original}
+mv -f /etc/pacman.conf{,.original}
 wget $GITURL/usr/share/ppz/default-rc.conf		-qO	/etc/rc.conf
 wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
-wget $GITURL/usr/share/ppz/default-pacman.conf	-qO	/tmp/pacman.conf.ppz
+wget $GITURL/usr/share/ppz/default-pacman.conf	-qO	/etc/pacman.conf
 sed -i \
 	 -e 's/^IgnorePkg = /\0aif/ig' \
-	 -e s/otown/otown.tmp/ig									/tmp/pacman.conf.ppz
+	 -e s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
 	 -e s/%SET_HOSTNAME%/archiso/ig \
 	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
 
-[ $arch = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /tmp/pacman.conf.ppz
-
-this_pacman -Sqy			pacman
-this_pacman -Squ			proterozoic smartmontools #aif
-
 [ $arch = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 
-rm /tmp/pacman.conf.ppz /etc/pacman.d/mirrorlist.otown.tmp
+pacman --noprogressbar --noconfirm --needed -Sqy pacman
+pacman --noprogressbar --noconfirm --needed -Squ smartmontools base-devel proterozoic #aif
+
+sed -i s/otown.tmp/otown/ig									/etc/pacman.conf
+rm -f /etc/pacman.d/mirrorlist.otown.tmp
 
 add_hook() { :; }
 . /etc/rc.conf

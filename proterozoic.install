@@ -64,7 +64,7 @@ pwn_files() {
 		  clobberella "$F"
 	 done
 }
-kernel_name=( $(pacman -Q | grep -iE 'kernel|linux-linode' ) )
+kernel_name=( $(pacman -Q | grep -i -e kernel -e linux-linode ) )
 kernel_name=${kernel_name[0]}
 check_triggers() {
 	 all_triggers_same etc/syslog-ng/syslog-ng.conf || {

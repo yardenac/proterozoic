@@ -463,18 +463,14 @@ e() {
 	esac
 }
 plyst() {
-    pacman -r /aufs-ro \
-	--dbpath /aufs-ro/var/lib/pacman \
-	--config /etc/pacman.conf \
-	--logfile /var/log/pacman.log\
-	--cachedir /root/snowball/pkgcache -Ss "$1" | tr '\n' '#' | sed 's%#    % %ig' | tr '#' '\n' | sed 's%^[a-z]*/%%i' | sort | awk '{
-	twotxt = ""
-	spaces = length($1)
-	maxl = 20
-	for ( i = maxl ; i > spaces ; i-- ) twotxt = twotxt " "
-	$2 = twotxt
-	print $0	
-}'
+   pacman -Ss "$1" | tr '\n' '#' | sed 's%#    % %ig' | tr '#' '\n' | sed 's%^[a-z]*/%%i' | sort | awk '{
+		twotxt = ""
+		spaces = length($1)
+		maxl = 20
+		for ( i = maxl ; i > spaces ; i-- ) twotxt = twotxt " "
+		$2 = twotxt
+		print $0	
+	}'
 }
 iptables-all() {
 	 iptables -t filter	-L -v -x --line-numbers

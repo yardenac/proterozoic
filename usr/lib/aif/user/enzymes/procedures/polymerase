@@ -7,8 +7,8 @@ TARGET=/media/targay
 MNTPTS=( /boot ) # / is implied
 
 pacman_target() {
-	 /usr/bin/pacman --config /usr/share/ppz/default-pacman.conf \
-		  --root ${TARGET} \
+	 # --config /usr/share/ppz/default-pacman.conf
+	 /usr/bin/pacman --root ${TARGET} \
 		  --cachedir ${TARGET}/var/cache/pacman/pkg \
 		  --dbpath ${TARGET}/var/lib/pacman \
 		  --logfile ${TARGET}/var/log/pacman.log \
@@ -91,10 +91,8 @@ start_process() {
 		  pkgs_wireless=(wpa_supplicant) #wpa_actiond ifplugd
 		  pkgs_laptop=(pcmciautils dhcpcd)
 		  pkgs_neverneed=(licenses logrotate lvm2 nano ppp reiserfsprogs xfsprogs)
-		  pkgs_go=($(comm -23 \
-				<(pacman --config /usr/share/ppz/default-pacman.conf -Sgq base | sort -u) \
-				<(eval eval list_sorted '\$\{pkgs_'$(commalist ${pkgs_groups[@]})'[@]\}') \
-				))
+		  pkgs_go=($(comm -23 <(pacman -Sgq base | sort -u) \
+				<(eval eval list_sorted '\$\{pkgs_'$(commalist ${pkgs_groups[@]})'[@]\}') ))
 		  local A=; for A in ${pkgs_groups[@]}; do
 				eval askyn 'Install $A things? \(${pkgs_'$A'[@]}\)' && eval 'pkgs_go+=(${pkgs_'$A'[@]})'
 		  done
