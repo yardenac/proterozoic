@@ -1,51 +1,18 @@
 #!/bin/bash
 PATH=/sbin:/bin:/usr/bin
 
+# should not be run directly except from the integrity scripts.
+# exists so that users with encrypted homedirs can set them up
+# with root privileges. thats the ONLY good reason to write code in here...
+# do not use in AIF! pacman installation will call integrity scripts,
+# and that is enough.
+
 . /etc/rc.conf
 . /usr/share/ppz/bash.functions
 
 am_root || echo "must be root!"
 
 case "$1" in
-	 rcconf)
-		  TARGET=${2:-/}; TARGET=${TARGET%%/}
-		  grep -iq %SET_XRGUSER% ${TARGET}/etc/rc.conf && {
-				usetvar    XRGUSER "Choose name of X user to boot into (blank for none): " '' '' \
-					 || croak "Not setting X user right now"
-				sed -i s/%SET_XRGUSER%/${XRGUSER}/ig ${TARGET}/etc/rc.conf
-		  }
-		  grep -iq %SET_ENCUSER% ${TARGET}/etc/rc.conf && {
-				usetvar    ENCUSER "Choose name of encrypted user (blank for none): " '' '' \
-					 || croak "Not setting enc user right now"
-				sed -i s/%SET_ENCUSER%/${ENCUSER}/ig ${TARGET}/etc/rc.conf
-		  }
-		  ;;
-	 users)
-		  eval $(awk '/^XRGUSER=/ {print}' /etc/rc.conf) \
-				&& [ "$XRGUSER" != %SET_XRGUSER% ] \
-				&& ! grep -iqE ^$XRGUSER /etc/passwd \
-				&& useradd -lMNd /etc/skel.ppz -u 54344 $XRGUSER
-		  eval $(awk '/^ENCUSER=/ {print}' /etc/rc.conf) \
-				&& [ "$ENCUSER" != %SET_ENCUSER% ] \
-				&& ! grep -iqE ^$ENCUSER /etc/passwd \
-				&& useradd -lMNd /media/enc/u -u 54345 -s /usr/bin/womb ${ENCUSER}
-
-
-		  [ -a "$ENCLF" ] || {
-				askyn "Use default enclf? [ $ENCLF ]" || {
-					 echo_red "Existing luks partitions, if any:"
-					 blkid | grep luks
-					 usetvar ENCLF "Choose encrypted filesystem mountpoint:" \
-						  /dev/disk/by-uuid/ "$ENCLF"
-					 sed -i s_=/fort_=${ENCLF}_ig /etc/rc.conf
-				}
-		  };;
-	 loop)
-		  while loops=($(losetup -j "$2" | grep -io '^[^:]*')); do
-				[ ${#loops[@]} -eq 0 ] && losetup -f "$2"
-				[ ${#loops[@]} -eq 1 ] && break
-				losetup -d "$2"
-		  done;;
 	 cryptmap)
 		  until [ -e /dev/mapper/$enc_mapname ]; do
 				if [ -a $tmp_keyfile ]; then

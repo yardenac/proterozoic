@@ -68,7 +68,7 @@ Key	Left			A		CM			GoToDeskBetter -1
 Key	Right			A		CM			GoToDeskBetter +1
 Key	space			A		M			Menu MenuFvwmWindowOps2 Window 0 0 Nop
 Key 	apostrophe	A		4			exec terminal -x bash --init-file /dev/null --rcfile /dev/null --noprofile --norc -ic \
-												'xhost +local:%ENCUSER% && su - %ENCUSER% -c "urxvtd -q -f -o && urxvtc && exit"'
+												'xhost +local:eu && su - eu -c "urxvtd -q -f -o && urxvtc && exit"'
 Key	b				A		4			exec terminal --geometry=40x39 -x /usr/bin/bc -lq /etc/bcrc
 Key	c				A		4			exec terminal --geometry=67x36 -x bash -c "cal -y && read"
 Key	m				A		4			exec terminal --geometry=80x51 -x bash -ic woman

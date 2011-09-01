@@ -2,6 +2,12 @@
 . /etc/rc.conf
 . /usr/share/ppz/bash.functions
 
+# functions should not assume anything. We might be running:
+#   with or without root privs
+#   interactively or with messed up input/output
+#   before or after rc.multi scripts (they could be backgrounded!)
+#   inside a chroot (check /etc/mtab)
+
 echo_red HOME: ~
 echo_red EUID: $EUID
 echo_red UID: $UID
@@ -135,13 +141,39 @@ integrity_pacnew() {
 }
 integrity_users() {
 	 am_root || return
-	 ENCUSER=eu #instead, have it default to eu and just check whether the user exists
-	 sed -i s/%ENCUSER%/${ENCUSER}/ig /etc/skel.ppz/.fvwm/.fvwm2rc
+
+	 # "extra" users are declared in rc.conf. this makes sure they really exist.
+
+	 local user arr u_name u_nums u_home u_mnpt IFS=$'\n'
+	 for user in $(awk '/^:/ { if ($2 == "user") print }' /etc/rc.conf); do
+		  IFS=$'\n\r\t ' arr=($user)
+		  u_name=${v[2]}
+		  u_nums=${v[3]}
+		  u_home=${v[5]}
+		  #u_home might be a partial reference to encrypted device!
+		  [ ${u_home:0:1} = / ] || {
+				# search for device in rc.conf and translate to mountpoint
+				u_mnpt=$(awk '/^:/ {
+						if (($2 == "encpart") && ($3 == "'${u_home%%/*}'")) {
+							print ($5 == null) ? "/media/" $3 : $5
+						} }' /etc/rc.conf)
+				[ "$u_mnpt" ] || {
+					 echo_red "user $u_name on undeclared encrypted device!"
+					 continue
+				}
+				u_home=$u_mnpt/${u_home##*/}
+		  }
+		  # if we're still here, u_home is now a real path :)
+		  # it's not the job of this function to CREATE the path
+		  # if user isn't in passwd, create it
+		  grep -qiE "^${u_name}:" /etc/passwd || {
+				echo_red "adding user ${u_name}!"
+				useradd -lMNd ${u_home} -u ${u_nums%%:*} -g ${u_nums##*:} -s ${arr[4]} ${u_name}
+		  }
+	 done
 }
-integrity_encuser() {
-	 echo_red NOT DOING ENCUSER - TESTING STUFF
-	 return
-#	 /usr/bin/integrity.encuser
+integrity_encrypted_devices() {
+	 /usr/bin/integrity.encdev
 }
 integrity_inittab() {
 	 return
@@ -230,10 +262,11 @@ integrity_net() {
 				chmod +x /etc/rc.d/network
 				askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
 		  }
-		  for tuple in "${REMOTE_SYNC_FILES[@]}"; do
-				local part12="${tuple%___*}"
-				remote_sync_file "${tuple%%___*}" "${part12##*___}" "${tuple##*___}"
-		  done
+		  eval $(awk '/^:/ {
+				if ($2 == "sync") {
+					printf "remote_sync_file %s %s %s;\n", $3,$4,$5
+				}
+		  }' /etc/rc.conf)
 	 }
 }
 integrity_sshd() {
@@ -308,8 +341,8 @@ integrity_sshd() {
 #pstree -phaun
 
 for F in rootpw emacsd bashhistory locales tz \
-	 simpleconf pacnew users encuser inittab \
-	 hosts net sshd; do
+	 simpleconf pacnew users encrypted_devices \
+	 inittab hosts net sshd; do
 #	 echo doing ${F}
 	 integrity_${F} || echo "${F} failed..."
 done

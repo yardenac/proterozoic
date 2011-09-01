@@ -11,8 +11,6 @@
 
 #set -v
 
-opsudo openmap users
-
 . /etc/rc.conf
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.install

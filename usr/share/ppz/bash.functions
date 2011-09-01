@@ -361,6 +361,7 @@ usetvar() { local ctxt temp; local confirm=0
 		  BLANK)		local DVAL='';;
 		  *)			local DVAL=${3}
 	 esac
+	 (( $confirm )) && DVAL=
 	 [ -n "${4}" ] && {
 		  unset -v "${1}"
 		  eval $1='"${4}"'
@@ -375,7 +376,9 @@ usetvar() { local ctxt temp; local confirm=0
 		  read -ei "${DVAL}" -p $'\e[1;34m'"${2//	}"$'\e[m' $5 $6 $7 "${1}"
 		  RV=$?
 		  (( $confirm )) || break
+		  echo FIRST GO: @$DVAL@
 		  read -ei '' -p $'\e[1;34mOnce more, please: \e[m' $5 $6 $7 ctxt
+		  echo SECOND GO: @$DVAL@
 		  [ "$DVAL" = "$ctxt" ] && break
 		  echo_red "They did not match! Trying again!"
 	 done
@@ -551,4 +554,27 @@ screentitle_and_do() {
 }
 opsudo() { #opportunistic sudo
 	 am_root && "$@" || sudo "$@"
+}
+strpad() { local str="$1"
+	 until [ "${#str}" -ge "$2" ]; do
+		  str="$3$str"
+	 done
+	 echo $str
+}
+vars_in_series() { local prefix n var width
+	 # hopefully dont need anymore, its an evil hack anyway
+	 prefix="$1"
+	 n=1
+	 width=0
+	 while let ++width; do
+		  var=${prefix}_$(strpad $n $width 0)
+		  [ "${!var}" ] && break
+		  [ $width -gt 5 ] && return 1
+	 done
+	 while :; do
+		  var=${prefix}_$(strpad $n $width 0)
+		  [ "${!var}" ] || break
+		  echo $var #: ${!var}
+		  let n++
+	 done
 }

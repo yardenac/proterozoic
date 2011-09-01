@@ -18,12 +18,15 @@
 	 done
 } || croak BAD SYSLOG SYNTAX!
 
-arch=$(uname -m)
-
 makepkg -cd \
 	 && PF=$(ls -1tr *.pkg.tar.xz | tail -n 1) \
-	 && mv $PF ${REPO}/$arch/ \
-	 && repo-add ${REPO}/$arch/hir.db.tar.gz ${REPO}/$arch/$PF
+	 && {
+	 for arch in i686 x86_64; do
+		  cp $PF ${REPO}/$arch/ || continue
+		  repo-add ${REPO}/$arch/hir.db.tar.gz ${REPO}/$arch/$PF
+	 done
+	 rm -f $PF
+}
 
 git diff HEAD --quiet -- bootstrap-this etc/pacman.d/mirrorlist.otown usr/share/ppz/default-{rc,pacman}.conf \
 	 || echo_red "Bootstrap files have changed, you probably want to update git!"

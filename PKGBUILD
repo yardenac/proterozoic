@@ -6,8 +6,8 @@ arch=(any)
 license=('GPL')
 install=proterozoic.install
 makedepends=(findutils coreutils net-tools)
-depends=(emacs-nox bash-completion iptables sudo ntp openssh sshfs htop jfsutils bc iproute2 fgetty git lsof pacman-mirrorlist ca-certificates screen-best net-tools python2 rsync mingetty ddrescue cryptsetup)
- # gptfdisk)
+depends=(emacs-nox bash-completion iptables sudo ntp openssh sshfs htop jfsutils bc iproute2 fgetty git lsof pacman-mirrorlist ca-certificates screen-best net-tools python2 rsync ddrescue cryptsetup)
+# gptfdisk mingetty
 # fakeroot xz bzip2 lzop less gzip rankmirrors curl ca-certificates)
 
 package() {
