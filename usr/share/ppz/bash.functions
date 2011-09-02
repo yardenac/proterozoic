@@ -1,6 +1,6 @@
 ############# ABSTRACTIONS
 uniq_token()	{ echo $(date +%s).$(printf "%05d" $RANDOM); }
-am_root()		{ [ "x$EUID" == "x0" ]; }
+am_root()		{ [ "x$EUID" = "x0" ]; }
 say_and_do()	{ echo DOING: "$@"; "$@"; }
 return_arg1()	{ return "$1"; }
 ifn()				{ return "${1:-99}"; }
@@ -577,4 +577,29 @@ vars_in_series() { local prefix n var width
 		  echo $var #: ${!var}
 		  let n++
 	 done
+}
+kernel_supports_luks() {
+	 zgrep -iqE 'CONFIG_CRYPTO_XTS=[my]' /proc/config.gz
+}
+encdev_from_user() { local u=${1:-$(whoami)}
+	 awk '/^:/ { if (($2 == "user") && ($3 == "'"$u"'") && !($6 ~ /^\//)) {
+		sub(/\/.*$/,"",$6)
+		print $6
+	 } }' /etc/rc.conf	 
+}
+translate_encdev_path() { local u_mnpt u_home="$1"
+	 # u_home might be a partial reference to encrypted device!
+	 [ ${u_home:0:1} = / ] || {
+		  # search for device in rc.conf and translate to mountpoint
+		  u_mnpt=$(awk '/^:/ {
+				if (($2 == "edev") && ($3 == "'${u_home%%/*}'")) {
+					print ($5 == null) ? "/media/" $3 : $5
+		  } }' /etc/rc.conf)
+		  [ "$u_mnpt" ] || {
+				echo_red "homedir $u_home on undeclared encrypted device!"
+				return 1
+		  }
+		  u_home=$u_mnpt/${u_home##*/}
+	 }
+	 echo "$u_home"
 }

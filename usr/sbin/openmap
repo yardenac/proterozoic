@@ -11,38 +11,64 @@ PATH=/sbin:/bin:/usr/bin
 . /usr/share/ppz/bash.functions
 
 am_root || echo "must be root!"
+[ -s /etc/mtab ] || croak "Cannot run this in chroot!"
+echo_red UID IS: $UID
+[ "$1" ] || croak "Must pass a username as first arg"
+user="$1"
+dev=$(encdev_from_user "$user")
+[ "$dev" ] || croak "No device for user $1 exists."
+homedir=$(awk -F : "/^$user:/ { print \$6 }" /etc/passwd)
+[ "$homedir" ] || croak "Could not read user's homedir - maybe you didnt make it yet?"
 
-case "$1" in
-	 cryptmap)
-		  until [ -e /dev/mapper/$enc_mapname ]; do
-				if [ -a $tmp_keyfile ]; then
-					 cat "$tmp_keyfile" | \
-						  cryptsetup luksOpen "$2" $enc_mapname -d - \
-						  || croak "luksopen failed with raw key"
-				elif [ -a "$enc_keyfile" ]; then
-					 usetvar PW "Enter the password for your LUKS key: " '' '' -s \
-						  || croak "No password entered"
-					 echo "$PW" \
-						  | gpg --no-tty --no-mdc-warning --passphrase-fd 0 -qd "$enc_keyfile" \
-						  | cryptsetup luksOpen "$2" $enc_mapname -d - \
-						  || croak "luksopen failed with gpg'd key"
-				else
-					 cryptsetup luksOpen "$2" $enc_mapname \
-						  || croak "luksopen failed with password"
-				fi
-		  done;;
-	 mount)
-		  until grep -iq /dev/mapper/$enc_mapname /etc/mtab; do
-				case $(blkid -s TYPE -o value /dev/mapper/$enc_mapname) in
-					 btrfs)	:;;
-					 *)		fsck /dev/mapper/$enc_mapname
-				esac
-				(( $? )) && {
-					 echo fsck failed ... jsyk
-#					 read
-				}
-				mkdir -p /media/enc
-				mount -o rw,relatime,nodiratime /dev/mapper/$enc_mapname $enc_mountpt || croak "mount failed"
-				[ -a /media/enc/u ] || cp -r /etc/skel.ppz /media/enc/u
-		  done
-esac
+# we know the device. now we open it.
+
+open_dev() { local name dev mountpoint mapname arg
+
+	 name=$3
+	 dev=$4
+	 mapname=$name
+	 mountpoint=/media/$name
+	 shift 4
+	 for arg; do
+		  shopt -s nocasematch
+		  if [ ${arg:0:1} = / ]; then 						# it's a path, mountpoint
+				mountpoint=$arg
+		  elif [[ $arg =~ ^[0-9.]+[bskmgtp]?$ ]]; then	# it's a size
+				:
+		  elif [[ $arg =~ ^[a-z0-9]+$ ]]; then		# its a mapper name
+				mapname=$arg
+		  else
+		  fi
+	 done
+
+	 # make sure it's mapped - user enters password here
+	 [ -a /dev/mapper/$mapname ] || {
+		  cryptsetup luksOpen $dev $mapname || croak "luksOpen failed"
+	 }
+
+	 # if it's mounted already, leave it be
+	 grep -iqE ^/dev/mapper/$mapname /etc/mtab && {
+		  echo "/dev/mapper/$mapname is already mounted"
+		  return
+	 }
+	 # if we're still here, it's not mounted.
+
+	 # make sure filesystem exists, and fsck it
+	 case $(blkid -o value -s TYPE /dev/mapper/$mapname) in
+		  ext2|ext3|ext4)	e2fsck /dev/mapper/$mapname;;
+		  '')		croak "/dev/mapper/$mapname is not formatted with a filesystem";;
+		  *)		croak "Did not create fsck method for $type yet.";;
+	 esac
+	 (( $? )) && {
+		  echo_red fsck failed ... jsyk
+		  shell_is_interactive && read
+	 }
+
+	 # now mount it
+	 mkdir -p $mountpoint
+	 mount -o rw,relatime,nodiratime /dev/mapper/$mapname $mountpoint || croak "mount failed"
+	 [ -a $homedir ] || cp -r /etc/skel.ppz $homedir
+}
+
+# find the devline for this device, pass it as arguments
+open_dev $(awk '/^:/ { if (($2 == "edev") && ($3 == "'$dev'")) print }' /etc/rc.conf)
