@@ -8,7 +8,7 @@
 echo bootstrapping for the 2011.08.19 live cd...
 
 mkdir -p /tmp/pkgcache
-[ -L ] /var/cache/pacman/pkg || {
+[ -L /var/cache/pacman/pkg ] || {
 	 rm -rfv /var/cache/pacman/pkg
 	 ln -s /tmp/pkgcache /var/cache/pacman/pkg
 }

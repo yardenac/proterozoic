@@ -176,7 +176,7 @@ integrity_users() {
 	 done
 }
 ribbit() {
-	 local num=2
+	 local num=1
 	 [[ "$1" =~ ^[0-9]+$ ]] && {
 		  num=$1
 		  shift
@@ -210,7 +210,7 @@ integrity_encdev() {
 		  elif [[ $arg =~ ^[a-z0-9]+$ ]]; then		# its a mapper name
 				mapname=$arg
 		  else
-				ribbit 3 "What the hell is this? $arg"
+				ribbit 2 "What the hell is this? $arg"
 		  fi
 	 done
 
@@ -225,10 +225,10 @@ integrity_encdev() {
 	 # make sure it exists
 	 until dev_canon=$(readlink -e "$dev"); do
 		  # apparently it doesn't. if it was supposed to be a device, screw that
-		  [ "${dev:0:4}" = /dev ] && ribbit 3 "edev '$dev' doesn't exist! Check hardware."
+		  [ "${dev:0:4}" = /dev ] && ribbit 2 "edev '$dev' doesn't exist! Check hardware."
 		  # otherwise, we make it
 		  echo_red "Encrypted loopback file doesn't exist! Touching it..."
-		  am_root || ribbit 3 "Root must fix."
+		  am_root || ribbit 2 "Root must fix."
 		  local dev_intermediate=$(readlink -m "$dev")
 		  mkdir -p "$(dirname "$dev_intermediate")"
 		  touch "$dev_intermediate"
@@ -239,15 +239,15 @@ integrity_encdev() {
 	 # make sure it's luks formatted
 	 until type=$(blkid -o value -s TYPE "$dev") && [ "$type" = crypto_LUKS ]; do
 		  echo_red "$dev is NOT luks formatted!"
-		  am_root || ribbit 3 "Non-root user cannot fix or create the LUKS device"
-		  kernel_supports_luks || ribbit 3 "no xts encryption, cannot fix or create"
+		  am_root || ribbit 2 "Non-root user cannot fix or create the LUKS device"
+		  kernel_supports_luks || ribbit 2 "no xts encryption, cannot fix or create"
 		  # make sure dev is either empty OR we have permission to override!
 		  [ -s "$dev" ] && {
 				[ "$type" ] \
 					 && echo_red "Encrypted device $edev is formatted as: $type!" \
 					 || echo_red "Encrypted device $edev is not in a known block format!"
-				shell_is_interactive || ribbit 3 "Will not overwrite anything without your permission..."
-				askyn "Skip and preserve data? (Otherwise we'll overwrite it...)" && ribbit 3
+				shell_is_interactive || ribbit 2 "Will not overwrite anything without your permission..."
+				askyn "Skip and preserve data? (Otherwise we'll overwrite it...)" && ribbit 2
 		  }
 
 		  # fill w/random data, using given size if it's a file (or all of partition)
@@ -266,17 +266,17 @@ integrity_encdev() {
 		  # open it once, format ext4, then close it
 		  echo -n "loosest slots in town" | \
 				cryptsetup luksOpen "$dev" "$mapname" -d - \
-				|| ribbit 3 "Can't open luks device we just made! Something is fucked."
+				|| ribbit 2 "Can't open luks device we just made! Something is fucked."
 
 		  # format ext4
 		  . /usr/share/ppz/bash.functions.install
-		  format_ext4 automatic /dev/mapper/$mapname || ribbit 3 "Formatting ext4 failed"
+		  format_ext4 automatic /dev/mapper/$mapname || ribbit 2 "Formatting ext4 failed"
 
 		  if type=$(blkid -o value -s TYPE /dev/mapper/$mapname) \
 				&& [ "$type" = ext4 ]; then
 				echo "Formatting ext4 was successful"
 		  else
-				ribbit 3 "Formatting $dev ext4 returned 0 but did not seem to work."
+				ribbit 2 "Formatting $dev ext4 returned 0 but did not seem to work."
 		  fi
 
 		  cryptsetup luksClose $mapname
@@ -288,7 +288,7 @@ integrity_encdev() {
 
 		  # $size is number of 512-byte sectors we want it to be.
 		  # We subtract from that the number of sectors it ACTUALLY is.
-		  sectors_wanting=$(( $size - ( $(stat -c %s /tmp/testloop) / 512 ) ))
+		  sectors_wanting=$(( $size - ( $(stat -c %s $dev) / 512 ) ))
 
 		  [[ "$sectors_wanting" =~ ^[0-9]+$ ]] || ribbit "Reading loop size fucked up."
 
