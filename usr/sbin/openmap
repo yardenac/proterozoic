@@ -38,6 +38,7 @@ open_dev() { local name dev mountpoint mapname arg
 		  elif [[ $arg =~ ^[a-z0-9]+$ ]]; then		# its a mapper name
 				mapname=$arg
 		  else
+				ribbit "What the hell is this? $arg"
 		  fi
 	 done
 

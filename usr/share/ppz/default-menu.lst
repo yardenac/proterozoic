@@ -7,14 +7,14 @@ password --md5 %SET_PASSWORD%
 
 title  Arch Linux "%SET_HOSTNAME%"!
 root   %SET_BOOTPART%
-kernel /vmlinuz26 root=%SET_ROOT_DEVICE% ro
-initrd /kernel26.img
+kernel /vmlinuz-linux root=%SET_ROOT_DEVICE% ro
+initrd /initramfs-linux.img
 
 title  Arch Linux "%SET_HOSTNAME%" (Fallback)!
 lock
 root   %SET_BOOTPART%
-kernel /vmlinuz26 root=%SET_ROOT_DEVICE% ro
-initrd /kernel26.img
+kernel /vmlinuz-linux root=%SET_ROOT_DEVICE% ro
+initrd /initramfs-linux-fallback.img
 
 title  memtest86+ 4.20
 lock

@@ -41,67 +41,15 @@ integrity_rootpw() {
 		  esac
 	 done
 }
-integrity_emacsd() {
-	 local F=~/.emacs.d
-	 [ -L ${F} ] || {
-		  [ -d ${F} ] && mv ${F} ${F}.$(uniq_token)
-		  [ -a ${F} ] && echo "weird ${F}!" || ln -s /etc/.emacs.d ~/
-	 }
-	 am_root && {
-		  enforce_perms 444 /etc/.emacs.d/init.el
-		  enforce_perms 555 /etc/.emacs.d
-	 }
-}
-integrity_bashhistory() {
-	 # THIS IS A MESS
-	 shopt -s nullglob
-	 local RAW_F
-	 local IFS=$'\n'
-	 HISTFILE=${HISTFILE:-~/.bash_history}
-	 touch ${HISTFILE} &>/dev/null
-	 for RAW_F in $(ls -1 {/{root,home/*,media/green/*},~}/.bash_history "$HISTFILE" 2>/dev/null | sort -u); do
-		  local F=$RAW_F
-		  am_root || make_sure_its_mine "$F" || { # dont rearrange or might end up creating every file!
-					 HISTFILE=/tmp/.bash.history.$USER
-					 export XAUTHORITY=/tmp/.Xauthority.xuser
-					 touch $HISTFILE
-					 F=$HISTFILE
-		  } || continue
-		  echo -n HISTFILE: ${F}
-		  local ATTRSET=
-		  lsattr "$F" &>/dev/null && {
-				ATTRSET=$(lsattr "$F")
-				[ ${ATTRSET:5:1} = a ] && { echo ... A; continue; }
-		  }
-		  echo ... \  \  doing
-		  skel_file=/etc/skel.ppz/.bash_history
-		  ! [ -s "$F" ] && {
-				rm -f ${F}
-				cp -f ${skel_file} ${F}
-		  } || {
-				! cmp -s <(head -n 1 ${F}) <(head -n 1 ${skel_file}) \
-					 && askyn "$F ("$(du -sh ${F} | cut -f 1)") has no skel prefix. Join them?" && {
-					 
-					 backup_file=${F}.ppz.$(date +%s)
-					 mv ${F} ${backup_file}
-					 cp ${skel_file} ${F}
-					 cat ${backup_file} >> ${F}
-					 cmp -s <(cat ${skel_file} ${backup_file} | md5sum) <(cat ${F} | md5sum) \
-						  && rm ${backup_file} || echo_red "Delete ${backup_file} yourself, I wasn't sure..."
-				}
-		  }
-		  am_root && [ "${ATTRSET:5:1}" = - ] && say_and_do chattr +a "$F"
-	 done
-}
 integrity_locales() {
-	 am_root || return
+	 am_root || return 0
 	 local L=$(locale)
 	 [ "${L}" ] && return #has locale, so ok
 	 askyn "You have no locale!? Should we fix this?" \
 		  && echo "Oops, Not implemented yet..."
 }
 integrity_tz() {
-	 am_root || return
+	 am_root || return 0
 	 local suspicious_tzs=(America/Vancouver America/New_York)
 	 local matches=0
 	 for stz in "${suspicious_tzs[@]}"; do
@@ -130,7 +78,7 @@ To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCAN
 	 done
 }
 integrity_simpleconf() {
-	 am_root || return
+	 am_root || return 0
 	 [ -e /media/inmem ] || mkdir /media/inmem
 	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
 	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow 2>/dev/null \
@@ -152,8 +100,54 @@ integrity_pacnew() {
 	 # or search pacman db for backup files and check those?
 	 #also do ppznew
 }
+integrity_inittab() {
+	 return
+	 case $(hostname) in
+		  gabba) :;;#one fgetty in inittab
+		  *) :;;#2 or 3 of them?
+	 esac
+}
+integrity_hosts() {
+	 am_root || return 0
+	 local OLDFILE=/etc/hosts
+	 local NEWFILE=/tmp/root.etchosts.$(uniq_token)
+	 {
+		  cat <<-EOF
+			THISVER 2011071201
+			ASSIGN 127.0.0.1		localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
+			ASSIGN ::1				localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
+			ASSIGN fe00::0			ip6-localnet
+			ASSIGN ff00::0			ip6-mcastprefix
+			ASSIGN ff02::1			ip6-allnodes
+			ASSIGN ff02::2			ip6-allrouters
+			ASSIGN ff02::3			ip6-allhosts
+			ASSIGN 192.168.1.200
+			ASSIGN 192.168.1.226 fjm-wl
+			ASSIGN 192.168.1.227 fjm-eth
+			ASSIGN 192.168.1.228 dusty scaly
+			ASSIGN 192.168.1.229 lucky lucky-wf lucky-wifi edie-wl
+			ASSIGN 192.168.1.230 
+			ASSIGN 192.168.1.231 
+			ASSIGN 192.168.1.232
+			ASSIGN 192.168.1.233 #vonage 
+			ASSIGN 192.168.1.234 remorseful emo arch archean sarcopty
+			ASSIGN 192.168.3.200 #sonic.router
+			ASSIGN 192.168.3.233 
+			ASSIGN 69.162.252.119 #shop.pageturnereditions.com
+			ASSIGN 173.228.38.224 
+			ASSIGN 208.111.34.185
+			ASSIGN 208.111.39.115 g i w m k d db dm ih ihm bs s e se es he eh h lj ljm map me nz y b r v apa aur p yelp arch archp moz l n news o t grad gradd gadd music tv
+			EOF
+		  cat ${OLDFILE}
+	 } | awk -f /usr/share/ppz/awk-hosts > ${NEWFILE}
+	 cmp -s ${OLDFILE} ${NEWFILE} || {
+		  mv ${OLDFILE}{,.orig.$(uniq_token)}
+		  mv ${NEWFILE} ${OLDFILE}
+		  hostname ${HOSTNAME}
+	 }
+}
 integrity_users() {
-	 am_root || return
+	 am_root || return 0
 
 	 # "extra" users are declared in rc.conf. this makes sure they really exist.
 
@@ -175,14 +169,54 @@ integrity_users() {
 		  }
 	 done
 }
-ribbit() {
-	 local num=1
-	 [[ "$1" =~ ^[0-9]+$ ]] && {
-		  num=$1
-		  shift
+can_work_with_boot() {
+	 grep -iq /boot /etc/fstab \
+		  && ! [ -d /boot/grub ] \
+		  && return 1 #should be mounted but isnt
+	 [ -w /boot ] && return #can write to it - ok
+	 grep -iq /boot /etc/mtab && return 1 #probably chrooted
+	 mount -o remount,rw /boot &>/dev/null
+	 [ -w /boot ] || return 1 #weve done all we can
+}
+remote_sync_file() { # $0 '/local/path' 'md5sum464a702cf...' 'http://source'
+	 check_file ${1} ${2} && return
+	 [ "${1:0:6}" = /boot/ ] && ! can_work_with_boot && return 1
+	 mkdir -p $(dirname ${1})
+	 wget ${3} -qO ${1}
+	 check_file ${1} ${2} && {
+		  echo_red "Successfully retrieved $1"
+	 } || {
+		  rm -f ${1}
+		  echo_red "Problem downloading $1 - have to get it later"
 	 }
-	 echo_red "$@"
-	 continue $num
+	 [ "${1:0:6}" = /boot/ ] && mount -o remount,ro /boot &>/dev/null; :
+}
+integrity_net() {
+	 test_network_once 5 && {
+		  ! python-ntp && am_root && askyn "Sync kernel & hwclock with ntpdate?" && {
+				ntpdate pool.ntp.org
+				echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
+				hwclock --systohc --utc
+		  } || true
+	 } || {
+		  echo -n "No fast connectivity... Local system time: "
+		  echo_red $(date '+%l:%M:%S (%A %B %e, %Y)')
+		  return
+	 }
+	 am_root && {
+		  grep -iq broadcast /etc/rc.d/network || {
+				mv -f /etc/rc.d/network{,.forget}
+				wget http://projects.archlinux.org/initscripts.git/plain/network -qO /etc/rc.d/network
+				chmod +x /etc/rc.d/network
+				askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
+		  }
+		  eval $(awk '/^:/ {
+				if ($2 == "sync") {
+					printf "remote_sync_file %s %s %s;\n", $3,$4,$5
+				}
+		  }' /etc/rc.conf)
+	 }
+	 return 0
 }
 integrity_encdev() {
 	 local size arg name type dev{,_canon,_intermediate} mountpoint mapname loop IFS=$'\n\r\t '
@@ -360,102 +394,60 @@ integrity_encdevs() { local devcond devline IFS=$'\n'
 		  IFS=$'\n\r\t ' integrity_encdev $devline
 	 done
 }
-integrity_inittab() {
-	 return
-	 case $(hostname) in
-		  gabba) :;;#one fgetty in inittab
-		  *) :;;#2 or 3 of them?
-	 esac
-}
-integrity_hosts() {
-	 am_root || return
-	 local OLDFILE=/etc/hosts
-	 local NEWFILE=/tmp/root.etchosts.$(uniq_token)
-	 {
-		  cat <<-EOF
-			THISVER 2011071201
-			ASSIGN 127.0.0.1		localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
-			ASSIGN ::1				localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
-			ASSIGN fe00::0			ip6-localnet
-			ASSIGN ff00::0			ip6-mcastprefix
-			ASSIGN ff02::1			ip6-allnodes
-			ASSIGN ff02::2			ip6-allrouters
-			ASSIGN ff02::3			ip6-allhosts
-			ASSIGN 192.168.1.200
-			ASSIGN 192.168.1.226 fjm-wl
-			ASSIGN 192.168.1.227 fjm-eth
-			ASSIGN 192.168.1.228 dusty scaly
-			ASSIGN 192.168.1.229 lucky lucky-wf lucky-wifi edie-wl
-			ASSIGN 192.168.1.230 
-			ASSIGN 192.168.1.231 
-			ASSIGN 192.168.1.232
-			ASSIGN 192.168.1.233 #vonage 
-			ASSIGN 192.168.1.234 remorseful emo arch archean sarcopty
-			ASSIGN 192.168.3.200 #sonic.router
-			ASSIGN 192.168.3.233 
-			ASSIGN 69.162.252.119 #shop.pageturnereditions.com
-			ASSIGN 173.228.38.224 
-			ASSIGN 208.111.34.185
-			ASSIGN 208.111.39.115 g i w m k d db dm ih ihm bs s e se es he eh h lj ljm map me nz y b r v apa aur p yelp arch archp moz l n news o t grad gradd gadd music tv
-			EOF
-		  cat ${OLDFILE}
-	 } | awk -f /usr/share/ppz/awk-hosts > ${NEWFILE}
-	 cmp -s ${OLDFILE} ${NEWFILE} || {
-		  mv ${OLDFILE}{,.orig.$(uniq_token)}
-		  mv ${NEWFILE} ${OLDFILE}
-		  hostname ${HOSTNAME}
-	 }
-}
-can_work_with_boot() {
-	 grep -iq /boot /etc/fstab \
-		  && ! [ -d /boot/grub ] \
-		  && return 1 #should be mounted but isnt
-	 [ -w /boot ] && return #can write to it - ok
-	 grep -iq /boot /etc/mtab && return 1 #probably chrooted
-	 mount -o remount,rw /boot &>/dev/null
-	 [ -w /boot ] || return 1 #weve done all we can
-}
-remote_sync_file() { # $0 '/local/path' 'md5sum464a702cf...' 'http://source'
-	 check_file ${1} ${2} && return
-	 [ "${1:0:6}" = /boot/ ] && ! can_work_with_boot && return 1
-	 mkdir -p $(dirname ${1})
-	 wget ${3} -qO ${1}
-	 check_file ${1} ${2} && {
-		  echo_red "Successfully retrieved $1"
-	 } || {
-		  rm -f ${1}
-		  echo_red "Problem downloading $1 - have to get it later"
-	 }
-	 [ "${1:0:6}" = /boot/ ] && mount -o remount,ro /boot &>/dev/null; :
-}
-integrity_net() {
-	 test_network_once 5 && {
-		  ! python-ntp && am_root && askyn "Sync kernel & hwclock with ntpdate?" && {
-				ntpdate pool.ntp.org
-				echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
-				hwclock --systohc --utc
-		  } || true
-	 } || {
-		  echo -n "No fast connectivity... Local system time: "
-		  echo_red $(date '+%l:%M:%S (%A %B %e, %Y)')
-		  return
+integrity_emacsd() {
+	 local F=~/.emacs.d
+	 [ -L ${F} ] || {
+		  [ -d ${F} ] && mv ${F} ${F}.$(uniq_token)
+		  [ -a ${F} ] && echo "weird ${F}!" || ln -s /etc/.emacs.d ~/
 	 }
 	 am_root && {
-		  grep -iq broadcast /etc/rc.d/network || {
-				mv -f /etc/rc.d/network{,.forget}
-				wget http://projects.archlinux.org/initscripts.git/plain/network -qO /etc/rc.d/network
-				chmod +x /etc/rc.d/network
-				askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
-		  }
-		  eval $(awk '/^:/ {
-				if ($2 == "sync") {
-					printf "remote_sync_file %s %s %s;\n", $3,$4,$5
-				}
-		  }' /etc/rc.conf)
+		  enforce_perms 444 /etc/.emacs.d/init.el
+		  enforce_perms 555 /etc/.emacs.d
 	 }
 }
+integrity_bashhistory() {
+	 # THIS IS A MESS
+	 shopt -s nullglob
+	 local RAW_F
+	 local IFS=$'\n'
+	 HISTFILE=${HISTFILE:-~/.bash_history}
+	 touch ${HISTFILE} &>/dev/null
+	 for RAW_F in $(ls -1 {/{root,home/*,media/green/*},~}/.bash_history "$HISTFILE" 2>/dev/null | sort -u); do
+		  local F=$RAW_F
+		  am_root || make_sure_its_mine "$F" || { # dont rearrange or might end up creating every file!
+					 HISTFILE=/tmp/.bash.history.$USER
+					 export XAUTHORITY=/tmp/.Xauthority.xuser
+					 touch $HISTFILE
+					 F=$HISTFILE
+		  } || continue
+		  echo -n HISTFILE: ${F}
+		  local ATTRSET=
+		  lsattr "$F" &>/dev/null && {
+				ATTRSET=$(lsattr "$F")
+				[ ${ATTRSET:5:1} = a ] && { echo ... A; continue; }
+		  }
+		  echo ... \  \  doing
+		  skel_file=/etc/skel.ppz/.bash_history
+		  ! [ -s "$F" ] && {
+				rm -f ${F}
+				cp -f ${skel_file} ${F}
+		  } || {
+				! cmp -s <(head -n 1 ${F}) <(head -n 1 ${skel_file}) \
+					 && askyn "$F ("$(du -sh ${F} | cut -f 1)") has no skel prefix. Join them?" && {
+					 
+					 backup_file=${F}.ppz.$(date +%s)
+					 mv ${F} ${backup_file}
+					 cp ${skel_file} ${F}
+					 cat ${backup_file} >> ${F}
+					 cmp -s <(cat ${skel_file} ${backup_file} | md5sum) <(cat ${F} | md5sum) \
+						  && rm ${backup_file} || echo_red "Delete ${backup_file} yourself, I wasn't sure..."
+				}
+		  }
+		  am_root && [ "${ATTRSET:5:1}" = - ] && say_and_do chattr +a "$F"
+	 done
+}
 integrity_sshd() {
-	 am_root || return
+	 am_root || return 0
 	 local OLDFILE=/etc/ssh/sshd_config
 	 local NEWFILE=${OLDFILE}.$(uniq_token)
 	 cat > ${NEWFILE} <<-EOF
@@ -525,9 +517,9 @@ integrity_sshd() {
 #echo PARENT PROC IS: $(ps --pid $(ps --pid $$ -o ppid=) -o args=)
 #pstree -phaun
 
-for F in rootpw emacsd bashhistory locales tz \
-	 simpleconf pacnew users encdevs \
-	 inittab hosts net sshd; do
+for F in rootpw locales tz simpleconf pacnew inittab hosts users \
+	 net encdevs bashhistory emacsd \
+	 sshd; do
 #	 echo doing ${F}
 	 integrity_${F} || echo "${F} failed..."
 done

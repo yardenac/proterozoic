@@ -112,7 +112,7 @@ start_process() {
 	 }
 	 fix_initcpio_ppz ${TARGET}
 	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
-		  install_grub_ppz ${TARGET} $(unhash targmntboot) ${HOSTNAME}
+		  install_grub_ppz ${TARGET} $(unhash targmntboot) $(unhash targmnt) ${HOSTNAME}
 		  echo_red "Grub finished."
 	 }
 	 echo "You might want to edit these files:"

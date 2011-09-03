@@ -43,9 +43,9 @@ install_grub_ppz() { #USAGE: install_grub /media/targay /dev/sda1 hostname_of_ta
 	 let BOOT_PARTNUMBR-- || echo "partition number was zero -- wtf??"
 	 local BIOS_HDNUM=$(awk '$2 == "'$BOOT_RAWDEVICE'" {gsub(/[()]/,"",$1);print $1}' ${DMAPF})
 	 local GRUB_DEV="(${BIOS_HDNUM},${BOOT_PARTNUMBR})"
-	 local ROOT_UUID=$(blkid -o value -s UUID ${BOOT_DEVICE_CN})
+	 local ROOT_UUID=$(blkid -o value -s UUID ${3})
 	 sed -i \
-		  -e s/%SET_HOSTNAME%/${3// 	}/ig \
+		  -e s/%SET_HOSTNAME%/${4// 	}/ig \
 		  -e s/%SET_BOOTPART%/${GRUB_DEV}/ig \
 		  -e 's/%SET_ROOT_DEVICE%/\/dev\/disk\/by-uuid\/'${ROOT_UUID//\//\\\/}/ig ${TARGET}/boot/grub/menu.lst
 	 while :; do

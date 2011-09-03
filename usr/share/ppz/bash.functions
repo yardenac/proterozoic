@@ -607,3 +607,12 @@ translate_encdev_path() { local u_mnpt u_home="$1"
 	 }
 	 echo "$u_home"
 }
+ribbit() {
+	 local num=1
+	 [[ "$1" =~ ^[0-9]+$ ]] && {
+		  num=$1
+		  shift
+	 }
+	 echo_red "$@"
+	 continue $num
+}
