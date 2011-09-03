@@ -11,17 +11,19 @@
 echo_red HOME: ~
 echo_red EUID: $EUID
 echo_red UID: $UID
-echo_red mtab:
-cat /etc/mtab
-echo_red mount:
-mount
-echo_red df:
-df -ah
-echo_red lo:
-losetup -a
-echo_red dm:
-dmsetup info
-echo_red ok.
+[ -s /etc/mtab ] || {
+	 echo_red mtab:
+	 cat /etc/mtab
+	 echo_red mount:
+	 mount
+	 echo_red df:
+	 df -ah
+	 echo_red lo:
+	 losetup -a
+	 echo_red dm:
+	 dmsetup info
+	 echo_red ok.
+}
 
 integrity_rootpw() {
 	 am_root && shell_is_interactive || return 0
@@ -155,9 +157,12 @@ integrity_users() {
 
 	 # "extra" users are declared in rc.conf. this makes sure they really exist.
 
-	 local user arr u_name u_nums u_home IFS=$'\n'
+	 local user v u_name u_nums u_home IFS=$'\n'
 	 for user in $(awk '/^:/ { if ($2 == "user") print }' /etc/rc.conf); do
-		  IFS=$'\n\r\t ' arr=($user)
+
+		  echo_red "DOING USER: $user"
+
+		  IFS=$'\n\r\t ' v=($user)
 		  u_name=${v[2]}
 		  u_nums=${v[3]}
 		  u_home=$(translate_encdev_path ${v[5]}) || continue
@@ -166,7 +171,7 @@ integrity_users() {
 		  # if user isn't in passwd, create it
 		  grep -qiE "^${u_name}:" /etc/passwd || {
 				echo_red "adding user ${u_name}!"
-				useradd -lMNd ${u_home} -u ${u_nums%%:*} -g ${u_nums##*:} -s ${arr[4]} ${u_name}
+				useradd -lMNd ${u_home} -u ${u_nums%%:*} -g ${u_nums##*:} -s ${v[4]} ${u_name}
 		  }
 	 done
 }
@@ -180,7 +185,7 @@ ribbit() {
 	 continue $num
 }
 integrity_encdev() {
-	 local size arg name type dev{,_canon,_intermediate} mountpoint mapname loop
+	 local size arg name type dev{,_canon,_intermediate} mountpoint mapname loop IFS=$'\n\r\t '
 
 	 # makes sure device exists and is luks
 	 # creates it with default key if necessary
@@ -188,9 +193,11 @@ integrity_encdev() {
 	 # if making it the FIRST time, we open it once to format it.
 	 # otherwise, we dont open it
 
+	 echo_red "DOING ENCDEV: $@"
+
 	 name=$3
 	 dev=$4
-	 size=128m
+	 size=32m
 	 mapname=$name
 	 mountpoint=/media/$name
 	 shift 4
@@ -203,6 +210,7 @@ integrity_encdev() {
 		  elif [[ $arg =~ ^[a-z0-9]+$ ]]; then		# its a mapper name
 				mapname=$arg
 		  else
+				ribbit 3 "What the hell is this? $arg"
 		  fi
 	 done
 
@@ -261,6 +269,7 @@ integrity_encdev() {
 				|| ribbit 3 "Can't open luks device we just made! Something is fucked."
 
 		  # format ext4
+		  . /usr/share/ppz/bash.functions.install
 		  format_ext4 automatic /dev/mapper/$mapname || ribbit 3 "Formatting ext4 failed"
 
 		  if type=$(blkid -o value -s TYPE /dev/mapper/$mapname) \
@@ -347,6 +356,7 @@ integrity_encdevs() { local devcond devline IFS=$'\n'
 	 for devline in $(awk '/^:/ {
 					if (($2 == "edev") && '"$devcond"') print
 				}' /etc/rc.conf); do
+		  IFS=$'\n\r\t '
 		  IFS=$'\n\r\t ' integrity_encdev $devline
 	 done
 }

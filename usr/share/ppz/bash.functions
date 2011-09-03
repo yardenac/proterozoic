@@ -216,7 +216,7 @@ ansi_colors=(black red green yellow blue magenta cyan white)
 c=${#ansi_colors[@]}
 while let c--; do
 	 eval echo_${ansi_colors[$c]}'()
-		{ echo -ne "\e[1;3'"$c"'m$@\e[m\n"; }'
+		{ echo -ne "\e[1;3'"$c"'m$@\e[m\n" >&2; }'
 done
 clear_input_buffer() {
     #example: clear_input_buffer "clearing input buffer..." "ok\n"
@@ -588,6 +588,10 @@ encdev_from_user() { local u=${1:-$(whoami)}
 	 } }' /etc/rc.conf	 
 }
 translate_encdev_path() { local u_mnpt u_home="$1"
+	 [ "$u_home" ] || {
+		  echo_red "no user was passed to translate!"
+		  return 1
+	 }
 	 # u_home might be a partial reference to encrypted device!
 	 [ ${u_home:0:1} = / ] || {
 		  # search for device in rc.conf and translate to mountpoint
