@@ -28,5 +28,5 @@ makepkg -cd \
 	 rm -f $PF
 }
 
-git diff HEAD --quiet -- bootstrap-this etc/pacman.d/mirrorlist.otown usr/share/ppz/default-{rc,pacman}.conf \
+git diff HEAD --quiet -- bootstrap-this etc/pacman.d/mirrorlist.otown usr/share/ppz/default/{rc,pacman}.conf \
 	 || echo_red "Bootstrap files have changed, you probably want to update git!"

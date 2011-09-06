@@ -1,7 +1,26 @@
 #!/bin/bash
 
-#sudo /usr/sbin/openmap
 /usr/bin/integrity.ppz
+
+[ "$USER" = ex ] \
+	 && [ "$(/usr/bin/tty)" = /dev/tty3 ] \
+	 && [ -x /usr/bin/xinit ] \
+	 && ! /usr/bin/pgrep -f xorg &>/dev/null && {
+
+	 . /usr/share/ppz/bash.functions
+
+	 # make sure xauthority file works
+	 set_proper_histfile
+
+	 # is xinitrc the right place for this?
+#	 xrdb -load /etc/X11/Xresources
+
+	 # we start x now
+	 # startx
+	 /usr/bin/xinit -- /usr/bin/X -nolisten tcp
+
+	 exit $? #this makes respawn work
+}
 
 cd ~
 

@@ -581,7 +581,7 @@ vars_in_series() { local prefix n var width
 kernel_supports_luks() {
 	 zgrep -iqE 'CONFIG_CRYPTO_XTS=[my]' /proc/config.gz
 }
-encdev_from_user() { local u=${1:-$(whoami)}
+encdev_from_user() { local u=${1:-$USER}
 	 awk '/^:/ { if (($2 == "user") && ($3 == "'"$u"'") && !($6 ~ /^\//)) {
 		sub(/\/.*$/,"",$6)
 		print $6
@@ -615,4 +615,19 @@ ribbit() {
 	 }
 	 echo_red "$@"
 	 continue $num
+}
+set_proper_histfile() {
+	 # this function sets the VARIABLE.
+	 HISTFILE=${HISTFILE:-$HOME/.bash_history}
+
+	 # either we have permission and it's been made/touched
+	 # or we have to use a /tmp file
+	 until make_sure_its_mine $HISTFILE; do
+		  # this is a security bug - will loop infinitely
+		  # if another user creates the file.
+		  # what we really need is to scan existing files first...
+		  HISTFILE=/tmp/.bash.history.$USER #.$(uniq_token)
+		  XAUTHORITY=/tmp/.Xauthority.xuser
+	 done
+	 export HISTFILE XAUTHORITY
 }

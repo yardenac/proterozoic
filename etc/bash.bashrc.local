@@ -1,7 +1,7 @@
 export SHELL=/bin/bash
-export HISTFILE
 [ -f /usr/share/ppz/bash.functions  ] && . /usr/share/ppz/bash.functions
 [ -a /usr/bin/Xorg ] && . /usr/share/ppz/bash.functions.xorg
+set_proper_histfile
 am_root && {
 	 /usr/bin/integrity.ppz
 	 [ -x /usr/bin/integrity.linode ] && /usr/bin/integrity.linode

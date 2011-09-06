@@ -35,7 +35,7 @@ install_grub_ppz() { #USAGE: install_grub /media/targay /dev/sda1 hostname_of_ta
 	 local TARGET=${1%%/}
 	 local BOOT_DEVICE_CN=${2}
 	 cp -af ${TARGET}/usr/lib/grub/i386-pc/* ${TARGET}/boot/grub/
-	 cp -f ${TARGET}{/usr/share/ppz/default-menu.lst,/boot/grub/menu.lst}
+	 cp -f ${TARGET}{/usr/share/ppz/default/menu.lst,/boot/grub/menu.lst}
 	 local DMAPF=/tmp/grub-device-map-ppz
 	 echo "quit" | ${TARGET}/sbin/grub --no-floppy --device-map ${DMAPF}
 	 local BOOT_RAWDEVICE=$(echo $BOOT_DEVICE_CN | sed 's/[0-9]*$//')

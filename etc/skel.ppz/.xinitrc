@@ -2,4 +2,6 @@ export XAUTHORITY=/tmp/.Xauthority.xuser
 xrdb -load /etc/X11/Xresources
 #xrdb -merge ~/.Xresources
 
-exec ck-launch-session fvwm >&2 2>> /tmp/fvwm.error.ordo
+eval "$(xrandr --current | xrandr-reformat)" #maximizes all screens
+
+exec ck-launch-session fvwm &>> /tmp/fvwm.error.$USER.$(date +%s)

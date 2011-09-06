@@ -12,13 +12,12 @@ PATH=/sbin:/bin:/usr/bin
 
 am_root || echo "must be root!"
 [ -s /etc/mtab ] || croak "Cannot run this in chroot!"
-echo_red UID IS: $UID
 [ "$1" ] || croak "Must pass a username as first arg"
 user="$1"
 dev=$(encdev_from_user "$user")
 [ "$dev" ] || croak "No device for user $1 exists."
-homedir=$(awk -F : "/^$user:/ { print \$6 }" /etc/passwd)
-[ "$homedir" ] || croak "Could not read user's homedir - maybe you didnt make it yet?"
+user_stats=($(awk -F : /^$user:/' { print $3 " " $4 " " $6 }' /etc/passwd))
+(( "${#user_stats}" )) || croak "Could not read user stats - maybe you didnt make it yet?"
 
 # we know the device. now we open it.
 
@@ -49,7 +48,7 @@ open_dev() { local name dev mountpoint mapname arg
 
 	 # if it's mounted already, leave it be
 	 grep -iqE ^/dev/mapper/$mapname /etc/mtab && {
-		  echo "/dev/mapper/$mapname is already mounted"
+#		  echo "/dev/mapper/$mapname is already mounted"
 		  return
 	 }
 	 # if we're still here, it's not mounted.
@@ -68,7 +67,11 @@ open_dev() { local name dev mountpoint mapname arg
 	 # now mount it
 	 mkdir -p $mountpoint
 	 mount -o rw,relatime,nodiratime /dev/mapper/$mapname $mountpoint || croak "mount failed"
-	 [ -a $homedir ] || cp -r /etc/skel.ppz $homedir
+	 [ -a ${user_stats[2]} ] || {
+		  cp -r /etc/skel.ppz ${user_stats[2]}
+		  chown -RPh ${user_stats[0]}:${user_stats[1]} $homedir
+		  chmod 700 $homedir
+	 }
 }
 
 # find the devline for this device, pass it as arguments

@@ -1,0 +1,31 @@
+#!/bin/gawk -f
+
+BEGIN {
+	 SCREEN=OUT=MODE=""
+	 NEWOUT=0
+
+	 if (doo == null) doo="max"
+}
+
+/^Screen/ {
+	 gsub(/:/,"",$2)
+	 SCREEN=$2
+	 next
+}
+
+$2 ~ /^connected$/ {
+	 OUT=$1
+
+	 NEWOUT=1
+	 next
+}
+
+$1 ~ /^[0-9]+x[0-9]+$/ {
+	 MODE=$1
+
+	 if ((NEWOUT) && (doo == "max"))
+		  print "xrandr --screen " SCREEN " --output " OUT " --mode " MODE
+
+	 NEWOUT=0
+	 next
+}

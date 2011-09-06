@@ -8,23 +8,6 @@
 #   before or after rc.multi scripts (they could be backgrounded!)
 #   inside a chroot (check /etc/mtab)
 
-echo_red HOME: ~
-echo_red EUID: $EUID
-echo_red UID: $UID
-[ -s /etc/mtab ] || {
-	 echo_red mtab:
-	 cat /etc/mtab
-	 echo_red mount:
-	 mount
-	 echo_red df:
-	 df -ah
-	 echo_red lo:
-	 losetup -a
-	 echo_red dm:
-	 dmsetup info
-	 echo_red ok.
-}
-
 integrity_rootpw() {
 	 am_root && shell_is_interactive || return 0
 
@@ -101,11 +84,21 @@ integrity_pacnew() {
 	 #also do ppznew
 }
 integrity_inittab() {
-	 return
-	 case $(hostname) in
-		  gabba) :;;#one fgetty in inittab
-		  *) :;;#2 or 3 of them?
+	 am_root || return 0
+
+	 # the one we want to be like
+	 local model=x
+	 case $SYSTEM_TYPE in
+		  linode) model=linode;;
+#		  desktop|laptop|*) :;;
 	 esac
+
+	 cmp -s /etc/inittab /usr/share/ppz/default/inittab.$model || {
+		  set +o noclobber
+		  echo_red "Fixing inittab to use the '$model' setup!"
+		  cat /usr/share/ppz/default/inittab.$model > /etc/inittab
+		  set -o noclobber
+	 }
 }
 integrity_hosts() {
 	 am_root || return 0
@@ -154,7 +147,7 @@ integrity_users() {
 	 local user v u_name u_nums u_home IFS=$'\n'
 	 for user in $(awk '/^:/ { if ($2 == "user") print }' /etc/rc.conf); do
 
-		  echo_red "DOING USER: $user"
+#		  echo_red "DOING USER: $user"
 
 		  IFS=$'\n\r\t ' v=($user)
 		  u_name=${v[2]}
@@ -227,7 +220,7 @@ integrity_encdev() {
 	 # if making it the FIRST time, we open it once to format it.
 	 # otherwise, we dont open it
 
-	 echo_red "DOING ENCDEV: $@"
+#	 echo_red "DOING ENCDEV: $@"
 
 	 name=$3
 	 dev=$4
@@ -271,7 +264,7 @@ integrity_encdev() {
 	 dev=$dev_canon
 	 
 	 # make sure it's luks formatted
-	 until type=$(blkid -o value -s TYPE "$dev") && [ "$type" = crypto_LUKS ]; do
+	 until type=$(/sbin/blkid -o value -s TYPE "$dev") && [ "$type" = crypto_LUKS ]; do
 		  echo_red "$dev is NOT luks formatted!"
 		  am_root || ribbit 2 "Non-root user cannot fix or create the LUKS device"
 		  kernel_supports_luks || ribbit 2 "no xts encryption, cannot fix or create"
@@ -306,7 +299,7 @@ integrity_encdev() {
 		  . /usr/share/ppz/bash.functions.install
 		  format_ext4 automatic /dev/mapper/$mapname || ribbit 2 "Formatting ext4 failed"
 
-		  if type=$(blkid -o value -s TYPE /dev/mapper/$mapname) \
+		  if type=$(/sbin/blkid -o value -s TYPE /dev/mapper/$mapname) \
 				&& [ "$type" = ext4 ]; then
 				echo "Formatting ext4 was successful"
 		  else
@@ -329,7 +322,7 @@ integrity_encdev() {
 		  if [ $sectors_wanting -lt 0 ]; then
 				ribbit "Must shrink loopback devices manually - good luck..."
 		  elif [ $sectors_wanting -eq 0 ]; then
-				echo "$dev is correct size: $size sectors"
+				: #echo "$dev is correct size: $size sectors"
 		  else
 				# this means we grow the size
 				am_root || ribbit "$dev is the wrong size - root must fix!"
@@ -384,14 +377,11 @@ integrity_encdevs() { local devcond devline IFS=$'\n'
 		  && devcond='(1)' \
 		  || devcond='($3 == "'$(encdev_from_user)'")'
 
-	 echo_red "encdevs we care about: $devcond"
-
 	 # for devices we care about, make sure they all work
 	 for devline in $(awk '/^:/ {
 					if (($2 == "edev") && '"$devcond"') print
 				}' /etc/rc.conf); do
-		  IFS=$'\n\r\t '
-		  IFS=$'\n\r\t ' integrity_encdev $devline
+		  IFS=$'\n\r\t '; integrity_encdev $devline
 	 done
 }
 integrity_emacsd() {
@@ -404,47 +394,46 @@ integrity_emacsd() {
 		  enforce_perms 444 /etc/.emacs.d/init.el
 		  enforce_perms 555 /etc/.emacs.d
 	 }
+	 return 0
 }
-integrity_bashhistory() {
-	 # THIS IS A MESS
-	 shopt -s nullglob
-	 local RAW_F
-	 local IFS=$'\n'
-	 HISTFILE=${HISTFILE:-~/.bash_history}
-	 touch ${HISTFILE} &>/dev/null
-	 for RAW_F in $(ls -1 {/{root,home/*,media/green/*},~}/.bash_history "$HISTFILE" 2>/dev/null | sort -u); do
-		  local F=$RAW_F
-		  am_root || make_sure_its_mine "$F" || { # dont rearrange or might end up creating every file!
-					 HISTFILE=/tmp/.bash.history.$USER
-					 export XAUTHORITY=/tmp/.Xauthority.xuser
-					 touch $HISTFILE
-					 F=$HISTFILE
-		  } || continue
-		  echo -n HISTFILE: ${F}
-		  local ATTRSET=
-		  lsattr "$F" &>/dev/null && {
-				ATTRSET=$(lsattr "$F")
-				[ ${ATTRSET:5:1} = a ] && { echo ... A; continue; }
-		  }
-		  echo ... \  \  doing
+integrity_bashhistory() { local hf hfs attrset skel_file backup_file
+	 set_proper_histfile
+
+	 # which files will we check and/or fix?
+	 am_root && hfs=($(awk -F : '{
+		  if ($6 ~ /\/(home|media|root)/) print $6 "/.bash_history"
+	 }' /etc/passwd)) || hfs=(${HISTFILE:-$HOME/.bash_history})
+
+	 for hf in "${hfs[@]}"; do
+
+		  # if the file is append-only, leave it be (and report)
+		  # for non-priv user, we couldnt do anything else if we tried!
+		  attrset=$(lsattr "$hf" 2>/dev/null) \
+				&& [ "${attrset:5:1}" = a ] && continue
+
+		  # now for the ridiculous logic of enforcing the skel prefix!
+		  # this could probably make more sense if i thought about it...
 		  skel_file=/etc/skel.ppz/.bash_history
-		  ! [ -s "$F" ] && {
-				rm -f ${F}
-				cp -f ${skel_file} ${F}
-		  } || {
-				! cmp -s <(head -n 1 ${F}) <(head -n 1 ${skel_file}) \
-					 && askyn "$F ("$(du -sh ${F} | cut -f 1)") has no skel prefix. Join them?" && {
-					 
-					 backup_file=${F}.ppz.$(date +%s)
-					 mv ${F} ${backup_file}
-					 cp ${skel_file} ${F}
-					 cat ${backup_file} >> ${F}
-					 cmp -s <(cat ${skel_file} ${backup_file} | md5sum) <(cat ${F} | md5sum) \
-						  && rm ${backup_file} || echo_red "Delete ${backup_file} yourself, I wasn't sure..."
-				}
-		  }
-		  am_root && [ "${ATTRSET:5:1}" = - ] && say_and_do chattr +a "$F"
-	 done
+		  if ! [ -s "$hf" ]; then
+				# file is empty, no-brainer. just fill with skel file.
+				echo_red "$hf is empty - filling it from skel"
+				cat ${skel_file} >> ${hf}
+		  elif cmp -s <(head -n 1 ${hf}) <(head -n 1 ${skel_file}); then
+				: #first lines match. peachy.
+		  elif askyn "$hf ("$(du -sh ${hf} | cut -f 1)") has no skel prefix. Join them?"; then
+				# user has consented to the replacement algorithm
+				backup_file=${hf}.ppz.$(date +%s)
+				mv ${hf} ${backup_file}
+				cp ${skel_file} ${hf}
+				cat ${backup_file} >> ${hf}
+				cmp -s <(cat ${skel_file} ${backup_file} | md5sum) <(cat ${hf} | md5sum) \
+					 && rm ${backup_file} \
+					 || echo_red "Delete ${backup_file} yourself, I wasn't sure..."
+		  fi
+
+		  echo_red "Marking $hf append-only."
+		  am_root && say_and_do chattr +a "$hf"
+	 done; :
 }
 integrity_sshd() {
 	 am_root || return 0
