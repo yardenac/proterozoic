@@ -31,8 +31,9 @@ sed -i \
 [ $arch = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 
 pacman --noprogressbar --noconfirm --needed -Sqy pacman
-pacman --noprogressbar --noconfirm --needed -Squ smartmontools base-devel proterozoic #aif
-#pacman --noprogressbar --noconfirm --needed -Sqcc
+pacman --noprogressbar --noconfirm --needed -Squ smartmontools base-devel  #aif
+pacman --noprogressbar --noconfirm --needed -Squ proterozoic
+pacman --noprogressbar --noconfirm --needed -Sqcc
 
 sed -i s/otown.tmp/otown/ig									/etc/pacman.conf
 rm -f /etc/pacman.d/mirrorlist.otown.tmp
