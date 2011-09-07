@@ -75,7 +75,6 @@ start_process() {
 		  sed -i \
 				-e s/%SET_TYPE%/${HOSTTYPE}/ig \
 				-e s/%SET_HOSTNAME%/${HOSTNAME}/ig ${TARGET}/etc/rc.conf
-		  until askyn "Did you figure out what's on the target so far?"; do :; done
 		  cat >  ${TARGET}/etc/fstab <<-EOF
 				devpts /dev/pts devpts defaults 0 0
 				/dev/mapper/enc /media/enc auto defaults,rw,relatime,nodiratime 0 0
@@ -101,7 +100,7 @@ start_process() {
 				eval askyn 'Install $A things? \(${pkgs_'$A'[@]}\)' && eval 'pkgs_go+=(${pkgs_'$A'[@]})'
 		  done
 		  pkgs_go+=(btrfs-progs-unstable proterozoic) # grub2-bios
-		  usetvar others "Type in any other packages you want to add: " 'nvidia aif' ''
+		  usetvar others "Type in any other packages you want to add: " 'xf86-video-ati nvidia aif' ''
 		  pkgs_go+=(${others//,/ })
 		  pacman_target -Sq ${pkgs_go[@]}
 		  cp -f ${TARGET}/{usr/share/ppz/default,etc}/pacman.conf

@@ -2,10 +2,10 @@
 dhcpcd eth0
 . <(wget http://snarkyurl.com/ppz-bootstrap -qLO -)
 aif -p enzymes/polymerase -d
-iptables -t filter -L -v -x --line-numbers
 iptables -t nat -L -v -x --line-numbers
 iptables -t raw -L -v -x --line-numbers
 iptables -t mangle -L -v -x --line-numbers
+iptables -t filter -L -v -x --line-numbers
 screen -x -R && exit
 shutdown -hP now && exit
 reboot && exit

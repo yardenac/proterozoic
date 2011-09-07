@@ -109,10 +109,28 @@ make_sure_its_mine() {
 	 }
 	 local IT=${1}
 	 [ -z "$IT" ] && return 1 # empty = def no
-	 [ -O "$IT" ] && return   # owned = def yes
+	 [ -O "$IT" ] && return 0 # owned = def yes
+	 [ "$IT" = /tmp ] && return 0
 	 [ -a "$IT" ] && return 1 # exists, not owned = def no
 	 make_sure_its_mine mkdir ${IT%/*} || return 1   # test parent
 	 $HOW $IT
+}
+set_proper_histfile() {
+	 # this function sets the VARIABLE.
+	 HISTFILE=${HISTFILE:-$HOME/.bash_history}
+
+	 # either we have permission and it's been made/touched
+	 # or we have to use a /tmp file
+	 until make_sure_its_mine $HISTFILE; do
+		  # this is a security bug - will loop infinitely
+		  # if another user creates the file.
+		  # what we really need is to scan existing files first...
+		  HISTFILE=/tmp/.bash.history.$USER #.$(uniq_token)
+		  XAUTHORITY=/tmp/.Xauthority.xuser
+		  echo -n .
+		  sleep 0.4
+	 done
+	 export HISTFILE XAUTHORITY
 }
 check_file() {
 	 [ -a "$1" ] || return 1
@@ -475,11 +493,12 @@ plyst() {
 		print $0	
 	}'
 }
-iptables-all() {
-	 iptables -t filter	-L -v -x --line-numbers
-	 iptables -t raw		-L -v -x --line-numbers
-	 iptables -t nat		-L -v -x --line-numbers
-	 iptables -t mangle	-L -v -x --line-numbers
+iptables-all() { local table
+	 for table in nat mangle raw filter; do
+		  echo_red $table:
+		  iptables -t $table -S
+		  #iptables -t filter	-L -v -x --line-numbers
+	 done
 }
 drome() {
 #	 create a new window in screen, open screen & switch to it
@@ -616,18 +635,6 @@ ribbit() {
 	 echo_red "$@"
 	 continue $num
 }
-set_proper_histfile() {
-	 # this function sets the VARIABLE.
-	 HISTFILE=${HISTFILE:-$HOME/.bash_history}
-
-	 # either we have permission and it's been made/touched
-	 # or we have to use a /tmp file
-	 until make_sure_its_mine $HISTFILE; do
-		  # this is a security bug - will loop infinitely
-		  # if another user creates the file.
-		  # what we really need is to scan existing files first...
-		  HISTFILE=/tmp/.bash.history.$USER #.$(uniq_token)
-		  XAUTHORITY=/tmp/.Xauthority.xuser
-	 done
-	 export HISTFILE XAUTHORITY
+chrooted() {
+	 ! [ -s /etc/mtab ] # not (exists & not empty)
 }

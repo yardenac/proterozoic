@@ -46,7 +46,7 @@ add_hook() { :; }
 . /etc/rc.conf
 . /etc/rc.d/functions.d/ppz
 . /usr/share/ppz/bash.functions.install
-custom_iptables_rules
+#custom_iptables_rules
 static_networking_from_runtime /
 grex /etc/resolv.conf > /etc/resolv.conf.override
 askyn "reboot now?"

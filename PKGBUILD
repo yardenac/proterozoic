@@ -5,6 +5,7 @@ pkgdesc="Configs and scripts overlaying Arch Linux"
 arch=(any)
 license=('GPL')
 install=proterozoic.install
+backup=(etc/iptables/iptables.rules)
 makedepends=(findutils coreutils net-tools)
 depends=(emacs-nox bash-completion iptables sudo ntp openssh sshfs htop jfsutils bc iproute2 fgetty git lsof pacman-mirrorlist ca-certificates screen-best net-tools python2 rsync ddrescue cryptsetup mingetty)
 # gptfdisk

@@ -11,6 +11,9 @@
 integrity_rootpw() {
 	 am_root && shell_is_interactive || return 0
 
+	 grep -iq ENCRYPT_METHOD /etc/login.defs || \
+		  echo "ENCRYPT_METHOD SHA512" >> /etc/login.defs
+
 	 # this is messy and needs attention
 	 # checking is not this easy - hash is seeded
 	 # write a program that simulates login to check?
@@ -162,6 +165,42 @@ integrity_users() {
 		  }
 	 done
 }
+integrity_iptables() {
+	 am_root || return 0
+
+	 # this only works on the FILE. it does not interact directly with the tables,
+	 # except to call rc restart. only use rc for that, much cleaner that way!
+	 local PROTOCOL PORT CUSTOM= \
+		  rules_file=/etc/iptables/iptables.rules \
+		  default_rules=/usr/share/ppz/default/iptables.rules \
+		  tmp_is=/tmp/iptables.is.$(uniq_token) \
+		  tmp_should=/tmp/iptables.should.$(uniq_token)
+
+	 # rules as they should be, WITH custom open ports from rc.conf
+	 for PORT in ${OPEN_PORTS[@]}; do
+		  PROTOCOL=tcp
+		  [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
+		  [ "$CUSTOM" ] || CUSTOM+='\n'
+		  CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT "
+	 done
+	 sed 's/^#LOCAL$/'"$CUSTOM"'/ig' $default_rules > $tmp_should
+
+	 # current rules with comments & empty lines removed, and counters zeroed
+	 touch $rules_file
+	 sed 's/^\(#.*\)\?$//ig;Tc;d;:c;s/\[[0-9]*:[0-9]*\]/[0:0]/ig' $rules_file > $tmp_is
+
+	 # if they're different, deal with that
+	 ! [ -s $tmp_is ] || diff $tmp_is $tmp_should || {
+		  if ! [ -s $tmp_is ] || askyn "Impose new iptables rules?"; then
+				set +o noclobber
+				cat $tmp_should > $rules_file
+				set -o noclobber
+				echo_red replaced iptables rules
+				chrooted && echo_red "Not resetting iptables" || /etc/rc.d/iptables restart
+		  fi
+	 }
+	 rm -rf $tmp_is $tmp_should
+}
 can_work_with_boot() {
 	 grep -iq /boot /etc/fstab \
 		  && ! [ -d /boot/grub ] \
@@ -252,7 +291,14 @@ integrity_encdev() {
 	 # make sure it exists
 	 until dev_canon=$(readlink -e "$dev"); do
 		  # apparently it doesn't. if it was supposed to be a device, screw that
-		  [ "${dev:0:4}" = /dev ] && ribbit 2 "edev '$dev' doesn't exist! Check hardware."
+		  [ "${dev:0:4}" = /dev ] && {
+				shell_is_interactive || ribbit 2 "edev '$dev' doesn't exist! Check hardware."
+
+				# we can comment it out so the message doesn't bother us again
+				askyn "$dev ($name) doesn't exist! Avoid checking in the future?" \
+					 && sed -i 's/^:\s*edev\s*.*\s*\('"${dev##*/}"'.*\)$/#\0/ig' /etc/rc.conf \
+					 || ribbit 2
+		  }
 		  # otherwise, we make it
 		  echo_red "Encrypted loopback file doesn't exist! Touching it..."
 		  am_root || ribbit 2 "Root must fix."
@@ -385,6 +431,8 @@ integrity_encdevs() { local devcond devline IFS=$'\n'
 	 done
 }
 integrity_emacsd() {
+	 [ -O $HOME ] || return 1
+
 	 local F=~/.emacs.d
 	 [ -L ${F} ] || {
 		  [ -d ${F} ] && mv ${F} ${F}.$(uniq_token)
@@ -405,6 +453,8 @@ integrity_bashhistory() { local hf hfs attrset skel_file backup_file
 	 }' /etc/passwd)) || hfs=(${HISTFILE:-$HOME/.bash_history})
 
 	 for hf in "${hfs[@]}"; do
+
+		  [ -d "${hfs%/*}" ] || continue
 
 		  # if the file is append-only, leave it be (and report)
 		  # for non-priv user, we couldnt do anything else if we tried!
@@ -507,7 +557,7 @@ integrity_sshd() {
 #pstree -phaun
 
 for F in rootpw locales tz simpleconf pacnew inittab hosts users \
-	 net encdevs bashhistory emacsd \
+	 iptables net encdevs bashhistory emacsd \
 	 sshd; do
 #	 echo doing ${F}
 	 integrity_${F} || echo "${F} failed..."

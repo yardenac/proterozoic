@@ -25,6 +25,7 @@ sed -i \
 	 -e 's/^IgnorePkg = /\0aif/ig' \
 	 -e s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
+	 -e s/%SET_TYPE%/desktop/ig \
 	 -e s/%SET_HOSTNAME%/archiso/ig \
 	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
 
@@ -38,7 +39,7 @@ pacman --noprogressbar --noconfirm --needed -Sqcc
 sed -i s/otown.tmp/otown/ig									/etc/pacman.conf
 rm -f /etc/pacman.d/mirrorlist.otown.tmp
 
-add_hook() { :; }
-. /etc/rc.conf
-. /etc/rc.d/functions.d/ppz
-custom_iptables_rules
+#add_hook() { :; }
+#. /etc/rc.conf
+#. /etc/rc.d/functions.d/ppz
+#custom_iptables_rules

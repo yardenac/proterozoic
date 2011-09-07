@@ -1,0 +1,41 @@
+*mangle
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+COMMIT
+*raw
+:PREROUTING ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+COMMIT
+*nat
+:PREROUTING ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+COMMIT
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+:evil - [0:0]
+:open - [0:0]
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -j evil
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -j open
+-A INPUT -p tcp -j REJECT --reject-with tcp-reset
+-A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
+-A evil -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m state --state NEW -j DROP
+-A evil -f -j DROP
+-A evil -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
+-A evil -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
+-A evil -p icmp -m icmp --icmp-type 8 -j DROP
+-A evil -p icmp -m icmp --icmp-type 5 -j DROP
+-A evil -p icmp -m icmp --icmp-type 9 -j DROP
+-A evil -p icmp -m icmp --icmp-type 10 -j DROP
+-A evil -p icmp -m icmp --icmp-type 17 -j DROP
+-A evil -p icmp -m icmp --icmp-type 18 -j DROP
+#LOCAL
+COMMIT
