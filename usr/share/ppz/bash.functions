@@ -173,7 +173,7 @@ conffile_checkup() { # conffile_checkup OLDFILE NEWFILE
 	 OLDFILE="${1}"; NEWFILE="${2}"
 	 cmp -s ${OLDFILE} ${NEWFILE} && {
 		  rm -f ${NEWFILE}
-		  return
+		  return 1
 	 }
 	 sameish ${OLDFILE} {$NEWFILE} || erases_nothing ${OLDFILE} ${NEWFILE} || {
 		  askyn "Edit ${OLDFILE} ... ${NEWFILE}?" && {

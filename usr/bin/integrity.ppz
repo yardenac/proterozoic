@@ -80,6 +80,9 @@ integrity_simpleconf() {
 	 enforce_perms 440 /etc/sudoers.d/wheel
 }
 integrity_pacnew() {
+	 am_root || return 0
+	 # check pacman.conf against the default file
+	 # check arch and comment out multilib if needed
 	 return
 	# TODO: check for pacnew files, do something with them
 	 # is it better to `find` the filesystem
@@ -162,6 +165,7 @@ integrity_users() {
 		  grep -qiE "^${u_name}:" /etc/passwd || {
 				echo_red "adding user ${u_name}!"
 				useradd -lMNd ${u_home} -u ${u_nums%%:*} -g ${u_nums##*:} -s ${v[4]} ${u_name}
+				echo $u_name:\' | chpasswd
 		  }
 	 done
 }
@@ -190,7 +194,7 @@ integrity_iptables() {
 	 sed 's/^\(#.*\)\?$//ig;Tc;d;:c;s/\[[0-9]*:[0-9]*\]/[0:0]/ig' $rules_file > $tmp_is
 
 	 # if they're different, deal with that
-	 ! [ -s $tmp_is ] || diff $tmp_is $tmp_should || {
+	 if ! [ -s $tmp_is ] || ! diff $tmp_is $tmp_should; then
 		  if ! [ -s $tmp_is ] || askyn "Impose new iptables rules?"; then
 				set +o noclobber
 				cat $tmp_should > $rules_file
@@ -198,7 +202,10 @@ integrity_iptables() {
 				echo_red replaced iptables rules
 				chrooted && echo_red "Not resetting iptables" || /etc/rc.d/iptables restart
 		  fi
-	 }
+	 fi
+
+#	 askyn "are you inspecting the iptables sitch?"
+
 	 rm -rf $tmp_is $tmp_should
 }
 can_work_with_boot() {
@@ -296,8 +303,8 @@ integrity_encdev() {
 
 				# we can comment it out so the message doesn't bother us again
 				askyn "$dev ($name) doesn't exist! Avoid checking in the future?" \
-					 && sed -i 's/^:\s*edev\s*.*\s*\('"${dev##*/}"'.*\)$/#\0/ig' /etc/rc.conf \
-					 || ribbit 2
+					 && sed -i 's/^:\s*edev\s*.*\s*\('"${dev##*/}"'.*\)$/#\0/ig' /etc/rc.conf
+				ribbit 2
 		  }
 		  # otherwise, we make it
 		  echo_red "Encrypted loopback file doesn't exist! Touching it..."
@@ -335,24 +342,25 @@ integrity_encdev() {
 		  [ -s /etc/mtab ] || {
 				echo_red "WE ARE DOING DEV MAPPINGS IN A CHROOT! LOOK FOR ERRORS!"
 		  }
+		  # as long as mapname is unique here, it should work ok ... i think
 
 		  # open it once, format ext4, then close it
 		  echo -n "loosest slots in town" | \
-				cryptsetup luksOpen "$dev" "$mapname" -d - \
+				cryptsetup luksOpen "$dev" ${mapname}tmp -d - \
 				|| ribbit 2 "Can't open luks device we just made! Something is fucked."
 
 		  # format ext4
 		  . /usr/share/ppz/bash.functions.install
-		  format_ext4 automatic /dev/mapper/$mapname || ribbit 2 "Formatting ext4 failed"
+		  format_ext4 automatic /dev/mapper/${mapname}tmp || ribbit 2 "Formatting ext4 failed"
 
-		  if type=$(/sbin/blkid -o value -s TYPE /dev/mapper/$mapname) \
+		  if type=$(/sbin/blkid -o value -s TYPE /dev/mapper/${mapname}tmp) \
 				&& [ "$type" = ext4 ]; then
 				echo "Formatting ext4 was successful"
 		  else
 				ribbit 2 "Formatting $dev ext4 returned 0 but did not seem to work."
 		  fi
 
-		  cryptsetup luksClose $mapname
+		  cryptsetup luksClose ${mapname}tmp
 	 done
 
 	 # make sure size is right
@@ -454,7 +462,7 @@ integrity_bashhistory() { local hf hfs attrset skel_file backup_file
 
 	 for hf in "${hfs[@]}"; do
 
-		  [ -d "${hfs%/*}" ] || continue
+		  [ -d "${hf%/*}" ] || continue
 
 		  # if the file is append-only, leave it be (and report)
 		  # for non-priv user, we couldnt do anything else if we tried!
@@ -534,6 +542,7 @@ integrity_sshd() {
 	 done
 	 conffile_checkup "${OLDFILE}" "${NEWFILE}" && {
 		  #file changed
+		  echo_red pkilling sshd
 		  pkill -HUP -f /usr/sbin/sshd; SSHD_ON=$?
 	 } || {
 		  #file didnt change

@@ -103,7 +103,7 @@ pre_install() {
 	 enforce_locales
 }
 post_install() {
-	 /etc/rc.d/iptables restart
+#	 /etc/rc.d/iptables restart
 	 pwn_files
 	 /usr/bin/integrity.ppz
 	 check_triggers
