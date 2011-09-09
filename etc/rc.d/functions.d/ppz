@@ -21,7 +21,7 @@ have_mount_point() {
 }
 tmp_bind() {
 	 umount /dev/shm &>/dev/null
-	 for P in /dev/shm /var/tmp /media/inmem; do
+	 for P in /dev/shm /var/tmp; do
 		  have_mount_point "$P" || continue
 		  mount --bind /tmp "$P"
 	 done

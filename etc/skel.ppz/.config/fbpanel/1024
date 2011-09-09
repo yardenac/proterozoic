@@ -3,8 +3,8 @@ Global {
 	edge = bottom
 	allign = left
 	margin = 0
-	widthtype = percent
-	width = 100
+	widthtype = pixel
+	width = 1024
 	height = 13
 	transparent = true
 	tintcolor = #ffffff

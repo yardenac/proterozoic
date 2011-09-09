@@ -17,7 +17,7 @@
 
 	 # we start x now
 	 # startx
-	 /usr/bin/xinit -- /usr/bin/X -nolisten tcp
+	 exec /usr/bin/xinit -- /usr/bin/X -nolisten tcp
 
 	 exit $? #this makes respawn work
 }

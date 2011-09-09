@@ -1,6 +1,7 @@
 #!/bin/bash
 
 PROG_TO_KILL=${1:-/usr/bin/fbpanel}
+FULL_COMMAND=${@:-/usr/bin/fbpanel}
 
 [ -x $PROG_TO_KILL ] || exit 1
 
@@ -29,5 +30,5 @@ mkdir ${LOCKDIR} 2>/dev/null && {
 		  done
 		  [ $c -gt 2000 ] && break || millisleep $c
 	 done
-	 nohup ${PROG_TO_KILL} &>/dev/null &
+	 nohup ${FULL_COMMAND} &>/dev/null &
 }

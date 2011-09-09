@@ -510,7 +510,7 @@ drome() {
 }
 run_in_temp_memdir() {
 	[ "$UID" -eq 0 ] && return
-	INMEM=/media/inmem
+	INMEM=/tmp
 	[ -d ${INMEM} ] || return
 	local DIR="$INMEM"/$( uniq_token )
 	mkdir ${DIR}

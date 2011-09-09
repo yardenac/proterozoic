@@ -69,7 +69,12 @@ open_dev() { local name dev mountpoint mapname arg
 	 mount -o rw,relatime,nodiratime /dev/mapper/$mapname $mountpoint || croak "mount failed"
 	 [ -a ${user_stats[2]} ] || {
 		  cp -r /etc/skel.ppz ${user_stats[2]}
+		  [ -d ${user_stats[2]} ] || croak "HOME NOT A DIR???"
 		  chown -RPh ${user_stats[0]}:${user_stats[1]} ${user_stats[2]}
+		  shopt -s nullglob
+		  # remove X-user stuff
+		  rm -rf ${user_stats[2]}/.{fontconfig,config/{fbpanel,Terminal,},fvwm,xinitrc}
+		  shopt -u nullglob
 		  chmod 700 ${user_stats[2]}
 	 }
 }

@@ -1,18 +1,17 @@
 DestroyFunc InitFunction
 AddToFunc InitFunction
-+ I exec xsetroot -mod 2 2 -fg rgb:55/40/55 -bg rgb:70/50/70
-+ I exec fvwm-root --retain-pixmap /usr/share/ppz/wallpaper.png
-+ I exec xscreensaver
-+ I exec xhost +local:eu
-#+ I exec urxvtd -q -f -o
+#+ I Exec exec killall -q xcompmgr
+#+ I Exec exec killall -q cairo-compmgr
++ I Exec exec xcompmgr
++ I Exec exec hsetroot -fill /usr/share/ppz/wallpaper.png
++ I Exec exec xscreensaver
++ I Exec exec xhost +local:eu
+#+ I Exec exec urxvtd -q -f -o
 
 DestroyFunc StartFunction
 AddToFunc StartFunction
 + I Module FvwmCommandS
-+ I exec /usr/bin/one-instance /usr/bin/fbpanel
-# at some point, make this conditional on the size of the screen.
-# so do fbpanel -p 1024, -p 1280, etc. easier to develop that
-# when deployed on more machines tho :)
++ I Exec exec /usr/bin/one-instance /usr/bin/fbpanel -p $[FBPP]
 
 DeskTopSize 1x1
 DesktopName 0 Krypton
@@ -28,9 +27,6 @@ MoveThreshold 3
 HideGeometryWindow
 OpaqueMoveSize unlimited
 
-#		  HilightFore black, HilightBack cornflowerblue, \
-#		  Font -adobe-times-bold-r-*-*-12-*-*-*-*-*-*-*, \
-#		  IconFont -adobe-times-bold-r-*-*-12-*-*-*-*-*-*-*, \
 #SloppyFocus, MouseFocusClickRaises, FocusFollowsMouse, NoUsePPosition, 
 FocusStyle * !EnterToFocus, !LeaveToUnfocus, !FocusByProgram, \
 			FocusByFunction, !FocusByFunctionWarpPointer, !Lenient, \
@@ -49,7 +45,6 @@ Style acroread PositionPlacement UnderMouse
 #Style Active
 
 MenuStyle * fvwm, Foreground white, Background cornflowerblue, Greyed grey40
-#MenuStyle * Font -adobe-times-bold-r-*-*-14-*-*-*-*-*-*-*
 
 ColormapFocus FollowsFocus
 
@@ -60,7 +55,6 @@ Key	Help			R		A			-
 Key	Escape		A		MC			EscapeFunc
 Key	Tab			A		M			WindowListMakeFunc
 Key	Tab			A		MS			WindowListMakeFunc
-# NoDeskSort
 Key	F1				R		A			-
 Key 	F4 			SFTW	M			Current Delete
 Key	F10			SFTW	M			Current Maximize
@@ -69,11 +63,13 @@ Key	Right			A		CMS		Current WinTo $[w.id] +1
 Key	Left			A		CM			GoToDeskBetter -1
 Key	Right			A		CM			GoToDeskBetter +1
 Key	space			A		M			Menu MenuFvwmWindowOps2 Window 0 0 Nop
-Key 	apostrophe	A		4			exec urxvt -e bash --init-file /dev/null --rcfile /dev/null --noprofile --norc -ic \
+Key 	apostrophe	A		4			Exec exec urxvt -e bash --init-file /dev/null --rcfile /dev/null --noprofile --norc -ic \
 												'su - eu -c "urxvtd -q -f -o && urxvtc -e screen -x -R && exit"'
-Key	b				A		4			exec urxvt -geometry 40x39 -pe -tabbedex -e /usr/bin/bc -lq /etc/bcrc
-Key	c				A		4			exec urxvt -geometry 67x36 -pe -tabbedex -e bash -c "cal -y && read"
-Key	m				A		4			exec urxvt -geometry 80x49 -pe -tabbedex -e bash -ic woman
+Key	b				A		4			Exec exec urxvt -geometry 40x39 -pe -tabbedex -e /usr/bin/bc -lq /etc/bcrc
+Key	c				A		4			Exec exec urxvt -geometry 67x36 -pe -tabbedex -e bash -c "cal -y && read"
+Key	m				A		4			Exec exec urxvt -geometry 80x49 -pe -tabbedex -e bash -ic woman
+Key	q				A		4			Exec exec transset-df -a --dec 0.04
+Key	w				A		4			Exec exec transset-df -a --inc 0.04
 Mouse 0				A 		A			-
 Mouse 1				R		A			-
 Mouse 1				SFTW	M			DragNMove
@@ -118,7 +114,7 @@ AddToFunc DragNMove
 
 DestroyFunc ResizeDynamicFromVars
 AddToFunc ResizeDynamicFromVars
-+ I PipeRead `echo "corner($[w.width],$[w.height],$[pointer.wx],$[pointer.wy]);" | bc /usr/share/ppz/bc-nw-script`
++ I PipeRead `echo "corner($[w.width],$[w.height],$[pointer.wx],$[pointer.wy]);" | bc-nw`
 #Current PipeRead
 
 DestroyFunc ResizeDynamic
@@ -130,11 +126,9 @@ AddToFunc ResizeDynamic
 ######################## Menus ###################
 DestroyMenu MenuFvwmRoot
 AddToMenu MenuFvwmRoot
-+ "&1. rxvt-unicode"             Exec exec urxvt -pe -tabbedex
-+  Console      Module FvwmConsole
-+ "&F. $[gt.Refresh Screen]"   Refresh
-+ "&C. $[gt.Recapture Screen]" Recapture
-+ "&R. $[gt.Restart]"          Restart
++ "rxvt-unicode"             Exec exec urxvt -pe -tabbedex
++ "$[gt.Restart]"          Restart
++ "Quit"          Quit
 + "Window Ops"         Popup MenuFvwmWindowOps2
 
 DestroyMenu MenuFvwmWindowOps2
@@ -150,14 +144,6 @@ AddToFunc ToggleOnTopFunc
 + I ThisWindow (Layer 6) Layer
 + I TestRc (NoMatch) Layer 0 6
 
-DestroyMenu MenuFvwmForms
-AddToMenu MenuFvwmForms
-+ "&C. Capture"       Module FvwmForm FvwmForm-Capture
-+ "&D. Form Defaults" Module FvwmForm FvwmForm-Form
-+ "&R. Rlogin"        Module FvwmForm FvwmForm-Rlogin
-+ "&P. RootCursor"    Module FvwmForm FvwmForm-RootCursor
-+ "&S. Setup"         Module FvwmForm FvwmForm-Setup
-+ "&T. Talk Form"     Module FvwmForm FvwmForm-Talk
-+ "&Q. QuitVerify"    Module FvwmForm FvwmForm-QuitVerify
-
-read ConfigFvwmTaskBar
+DestroyFunc RestartXCompMgr
+AddToFunc RestartXCompMgr
++ I PipeRead 'killall xcompmgr && exec xcompmgr -n & echo Restart'

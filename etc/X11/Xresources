@@ -1,3 +1,5 @@
+Xcursor.theme: whiteglass
+
 urxvt.borderLess: True
 urxvt.scrollBar: False
 urxvt.internalBorder: 0
@@ -5,14 +7,13 @@ urxvt.externalBorder: 0
 urxvt.cursorColor: green
 !urxvt.foreground: white
 urxvt.reverseVideo: true
-urxvt.transparent: true
-urxvt.shading: 50
 urxvt.scrollTtyOutput: false
-urxvt.font: xft:Mono-13:antialias=false:hinting=false
+urxvt.font: xft:Mono-10:antialias=true:hinting=false
 urxvt.letterSpace: -1
 urxvt.hold: false
 urxvt.perl-ext-common: default,tabbedex,url-select
 urxvt.tabbed.autohide: true
+urxvt.tabbed.title: true
 urxvt.urlLauncher: /usr/bin/seamonkey
 urxvt.matcher.button: 1
 urxvt.saveLines: 99999

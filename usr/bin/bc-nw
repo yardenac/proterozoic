@@ -1,3 +1,5 @@
+#!/usr/bin/bc
+
 define corner(w,h,x,y) {
 	print "ResizeDynamic "
 	if (x < (w/2)) west=1 else west=0

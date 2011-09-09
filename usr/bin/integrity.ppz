@@ -65,7 +65,6 @@ To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCAN
 }
 integrity_simpleconf() {
 	 am_root || return 0
-	 [ -e /media/inmem ] || mkdir /media/inmem
 	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
 	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow 2>/dev/null \
 		  || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
@@ -144,6 +143,7 @@ integrity_hosts() {
 		  mv ${NEWFILE} ${OLDFILE}
 		  hostname ${HOSTNAME}
 	 }
+	 rm -f ${NEWFILE}
 }
 integrity_users() {
 	 am_root || return 0
@@ -184,7 +184,7 @@ integrity_iptables() {
 	 for PORT in ${OPEN_PORTS[@]}; do
 		  PROTOCOL=tcp
 		  [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
-		  [ "$CUSTOM" ] || CUSTOM+='\n'
+		  [ "$CUSTOM" ] && CUSTOM+='\n'
 		  CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT "
 	 done
 	 sed 's/^#LOCAL$/'"$CUSTOM"'/ig' $default_rules > $tmp_should
