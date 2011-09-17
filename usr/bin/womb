@@ -1,25 +1,59 @@
 #!/bin/bash
 
+[ "x$EUID" = "x0" ] && {
+	 echo "Root should never run womb!"
+	 sleep 10
+	 exit 1
+}
+
 /usr/bin/integrity.ppz
 
-[ "$USER" = ex ] \
-	 && [ "$(/usr/bin/tty)" = /dev/tty3 ] \
-	 && [ -x /usr/bin/xinit ] \
-	 && ! /usr/bin/pgrep -f xorg &>/dev/null && {
+[ "$USER" = ex ] && {
 
-	 . /usr/share/ppz/bash.functions
+	 homedir_i_own() { local rv=0 c=1 try="$1" base="$1"
+		  # this echoes path to a homedir owned by $USER
+		  # returns 0 if homedir already existed
+		  # returns 1 if we had to create it
+		  # please FFS dont use homedirs with spaces :P
+		  until [ -d $try ] && [ -O $try ]; do
+				[ ${base:0:5} = /tmp/ ] || {
+					 echo "Cannot make homedir unless it's in /tmp!"
+					 sleep 10
+					 exit 1
+				}
+				[ -a $try ] || {
+					 cp -r /etc/skel.ppz $try
+					 chmod 700 $try
+					 break
+				}
+				# apparently it exists but not (dir + ours)
+				[ -O $try ] && {
+					 # ours but not a dir
+					 rm -rf --one-file-system $try
+				} || {
+					 # not ours, or rm failed
+					 export try=$base.$c
+					 let c++
+					 continue
+				}
+		  done
+		  echo $try
+	 }
+	 export HOME=$(homedir_i_own $HOME)
 
-	 # make sure xauthority file works
-	 set_proper_histfile
+	 [ "$(/usr/bin/tty)" = /dev/tty3 ] \
+		  && [ -x /usr/bin/xinit ] \
+		  && ! /usr/bin/pgrep -f xorg &>/dev/null && {
 
-	 # is xinitrc the right place for this?
-#	 xrdb -load /etc/X11/Xresources
+		  . /usr/share/ppz/bash.functions
+		  
+		  # make sure xauthority file works
+		  set_proper_histfile
 
-	 # we start x now
-	 # startx
-	 exec /usr/bin/xinit -- /usr/bin/X -nolisten tcp
+		  exec /usr/bin/xinit -- /usr/bin/X -nolisten tcp
 
-	 exit $? #this makes respawn work
+		  exit $? #this makes respawn work
+	 }
 }
 
 cd ~

@@ -489,8 +489,10 @@ integrity_bashhistory() { local hf hfs attrset skel_file backup_file
 					 || echo_red "Delete ${backup_file} yourself, I wasn't sure..."
 		  fi
 
-		  echo_red "Marking $hf append-only."
-		  am_root && say_and_do chattr +a "$hf"
+		  am_root && [ ${hf:0:5} != /tmp/ ] && {
+				echo_red "Marking $hf append-only."
+				say_and_do chattr +a "$hf"
+		  }
 	 done; :
 }
 integrity_sshd() {
