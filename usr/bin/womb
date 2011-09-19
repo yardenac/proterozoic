@@ -6,8 +6,6 @@
 	 exit 1
 }
 
-/usr/bin/integrity.ppz
-
 [ "$USER" = ex ] && {
 
 	 homedir_i_own() { local rv=0 c=1 try="$1" base="$1"
@@ -15,15 +13,17 @@
 		  # returns 0 if homedir already existed
 		  # returns 1 if we had to create it
 		  # please FFS dont use homedirs with spaces :P
-		  until [ -d $try ] && [ -O $try ]; do
+		  until [ -d $try ] && [ -O $try ] && [ -a $try/.xinitrc ]; do
 				[ ${base:0:5} = /tmp/ ] || {
 					 echo "Cannot make homedir unless it's in /tmp!"
 					 sleep 10
 					 exit 1
 				}
 				[ -a $try ] || {
-					 cp -r /etc/skel.ppz $try
+					 cp -PR --preserve=links,mode,timestamps /etc/skel.ppz $try
 					 chmod 700 $try
+#					 echo DID THE CP...
+#					 sleep 10
 					 break
 				}
 				# apparently it exists but not (dir + ours)
@@ -39,22 +39,32 @@
 		  done
 		  echo $try
 	 }
+	 case $HOME in
+		  /|/etc/skel.ppz) HOME=/tmp/ex
+	 esac
 	 export HOME=$(homedir_i_own $HOME)
+
+	 echo HOME: $HOME
+	 echo DISPLAY: $DISPLAY
 
 	 [ "$(/usr/bin/tty)" = /dev/tty3 ] \
 		  && [ -x /usr/bin/xinit ] \
 		  && ! /usr/bin/pgrep -f xorg &>/dev/null && {
+
+		  /usr/bin/integrity.ppz
 
 		  . /usr/share/ppz/bash.functions
 		  
 		  # make sure xauthority file works
 		  set_proper_histfile
 
-		  exec /usr/bin/xinit -- /usr/bin/X -nolisten tcp
+		  exec /usr/bin/xinit -- /usr/bin/X vt4 -f 0 -nolisten tcp -retro
 
 		  exit $? #this makes respawn work
 	 }
 }
+
+/usr/bin/integrity.ppz
 
 cd ~
 

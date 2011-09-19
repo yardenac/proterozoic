@@ -63,8 +63,8 @@ Key	Right			A		CMS		Current WinTo $[w.id] +1
 Key	Left			A		CM			GoToDeskBetter -1
 Key	Right			A		CM			GoToDeskBetter +1
 Key	space			A		M			Menu MenuFvwmWindowOps2 Window 0 0 Nop
-Key 	apostrophe	A		4			NiceBash 100x20 - 'su - eu -c "urxvtd -q -f -o && urxvtc -e screen -x -R"'
-Key	m				A		4			NiceBash 80x49  - '. /usr/share/ppz/bash.functions; woman'
+Key 	apostrophe	A		4			NiceBash 100x20 - 'su - eu -c \\"urxvtd -q -f -o && urxvtc -e screen -x -R\\"'
+Key	m				A		4			NiceBash 80x49  - '. /usr/share/ppz/bash.functions; . /usr/share/ppz/bash.functions.xorg; woman'
 Key	c				A		4			NiceBash 67x36  - 'cal -y && read'
 Key	b				A		4			NiceTerm 40x39  - /usr/bin/bc -lq /etc/bcrc
 Key	q				A		4			Exec exec transset-df -a --dec 0.04
@@ -78,14 +78,14 @@ Mouse 3				R     A			Menu MenuFvwmRoot Nop
 #NiceTerm WIDTHxHEIGHT -/"" COMMAND
 DestroyFunc NiceTerm
 AddToFunc NiceTerm
-+ I Exec exec urxvt -geometry $0 -pe $1tabbedex -e $2 $3 $4 $5 $6 $7 $8 $9
++ I Exec exec urxvt -geometry $0 -pe $1tabbedex -e $[2-]
 
 #NiceBash WIDTH HEIGHT -/"" i/"" QUOTED-COMMAND
 DestroyFunc NiceBash
 AddToFunc NiceBash
 + I Exec exec urxvt -geometry $0 -pe $1tabbedex -e \
   bash --init-file /dev/null --rcfile /dev/null --noprofile --norc \
-  -c $2 $3 $4 $5 $6 $7 $8 $9
+  -c "$2" $[3-]
 
 DestroyFunc WindowListMakeFunc
 AddToFunc WindowListMakeFunc

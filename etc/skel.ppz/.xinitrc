@@ -1,5 +1,7 @@
 #!/bin/bash
 
+time numlockx on
+
 export XAUTHORITY=/tmp/.Xauthority.xuser
 xrdb -load /etc/X11/Xresources
 #xrdb -merge ~/.Xresources
@@ -20,4 +22,4 @@ xrandr &>/dev/null && {
 exec ck-launch-session fvwm \
 	 -c "Read $HOME/.fvwm/config" \
 	 -c "SetEnv FBPP $fbpanel_profile" \
-	 &>> /tmp/fvwm.error.$USER #.$(date +%s)
+	 &>> ~/.fvwm/errorlog #.$(date +%s)

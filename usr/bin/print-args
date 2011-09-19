@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo --
+echo "0: $0"
+
+b=1
+for a; do
+	 echo "$b:    $a"
+	 let b++
+done
+
+echo --
