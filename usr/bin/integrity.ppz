@@ -69,10 +69,9 @@ integrity_simpleconf() {
 	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow 2>/dev/null \
 		  || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
 	 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
-	 case $(hostname) in #uncomment
-		  # needs a better test for linode-ness. probably check ip.
-		  gabba)	sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
-		  *)		sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
+	 case $SYSTEM_TYPE in
+		  linode)				sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
+		  desktop|laptop|*)	sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
 	 esac
 	 mkdir -p /media/{arch-cold-r{w,o},rodinia,green,encuser,enc}
 	 [ -L /snowball ] || ln -s /media/rodinia/pub /snowball
