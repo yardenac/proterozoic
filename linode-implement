@@ -96,7 +96,7 @@ delete_configs() {
 deploy() {
 	 local ssdate=.$(date +%F.%k-%M-%S)
 	 local udf_vars=$(sed 's_^#\s<UDF\s.*name="\([^"]*\)".*\s/>$_\1_ig;t;d;' ./stackscript-this)
-	 local nvp_str rootpass result
+	 local nvp_str result
 	 local IFS=$'\n'
 	 for v in $udf_vars; do
 		  [ "$1" ] && {
@@ -105,7 +105,7 @@ deploy() {
 		  } || usetvar this_val "Enter value for ${v^^}: " BLANK ''
 		  nvp_str+=\"${v}\":\"${this_val}\",
 	 done
-	 [ "$1" ] && rootpass="$1" || usetvar rootpass "Enter root password: " '' '' -s
+	 # $rootpass is set in .linoderc
 	 echo
 	 echo -n "Creating disk image & config"
 	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid=58&label=D'$ssdate'&size=4096&linodeid='$linodeid'&stackscriptid='$ss_id \
@@ -115,15 +115,16 @@ deploy() {
 #		  --data-urlencode rootpass="$rootpass") || return 1
 	 diskid=$(echo $result | jshon -e DATA -e DiskID)
 	 # 136 = 3.0.0-x86_64-linode20
-	 # 111 = Latest Paravirt (2.6.39.1-x86_64-linode19)
+	 # 111 = Latest 2.6 (2.6.39.1-x86_64-linode19)
 	 # 133 = 2.6.39.1-x86_64-linode19
+	 # 138 = Latest 3.0 (3.0.4-x86_64-linode21)
 	 result=$(do_or_report say 'linode.config.create&kernelid=95&helper_xen=false&helper_automount=false&helper_depmod=false&label=G'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pv-grub
 	 config_pvgrub=$(echo $result | jshon -e DATA -e ConfigID)
 	 result=$(do_or_report say 'linode.config.create&kernelid=61&label=F'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=25665,$diskid,,,,,,,25669) || return 1 #finnix rescue
 	 config_finnix=$(echo $result | jshon -e DATA -e ConfigID)
-	 result=$(do_or_report say 'linode.config.create&kernelid=111&label=C'$ssdate'&linodeid='$linodeid \
+	 result=$(do_or_report say 'linode.config.create&kernelid=138&label=C'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pre-linux-linode boot
 	 config_prebuilt=$(echo $result | jshon -e DATA -e ConfigID)
 	 block_for_job

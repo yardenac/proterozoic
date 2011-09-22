@@ -16,15 +16,14 @@ wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
 sed -i s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
 	 -e s/%SET_HOSTNAME%/${SS_HOSTNAME}/ig \
+	 -e s/%SET_TYPE%/linode/ig \
 	 -e s/=UTC/=xen/ig \
-	 -e 's`^[\t ]*/.*___[a-f0-9]*___.*\.\(png\|bin\.gz\)$``ig' \
-	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
+	 -e 's/^#*:[\t ]*sync.*$/#&/ig' \
+	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/rc.conf
 locale-gen
-sed -i 's/^SyncFirst/#\0/' /etc/pacman.conf
-this_pacman -Sqy pacman glibc
+this_pacman -Sqy pacman
 pacman-db-upgrade
-sed -i 's/^#\(SyncFirst\)/\1/' /etc/pacman.conf
-this_pacman -Squ
+this_pacman -Sqyu
 echo 'utmp:x::' >> /etc/gshadow
 mv -f /etc/bash.bashrc{.pacnew,}
 this_pacman -Sq mkinitcpio
@@ -38,16 +37,13 @@ this_pacman -Sq linux-linode
 
 rm -f \
 	 /etc/pacman.d/mirrorlist.otown.tmp \
-	 /etc/{gshadow,locale.gen,securetty,hosts,inittab,pacman.d/mirrorlist}.pacnew
+	 /etc/{gshadow,locale.gen,securetty,inittab,pacman.d/mirrorlist}.pacnew
 
 # how to get proper "kernel name" in install file?
 
-add_hook() { :; }
-. /etc/rc.conf
-. /etc/rc.d/functions.d/ppz
+. /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.install
-#custom_iptables_rules
 static_networking_from_runtime /
 grex /etc/resolv.conf > /etc/resolv.conf.override
-askyn "reboot now?"
-shutdown -hP now
+
+askyn "reboot now?" && shutdown -hP now

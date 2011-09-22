@@ -158,7 +158,7 @@ sameish() {
 	 cmp -s <(grex ${1}) <(grex ${2})
 }
 erases_nothing() {
-	 [ -a "${1}" -a -a "${2}" ] && return
+	 [ -a "${1}" -a -a "${2}" ] || return 1
 	 return $(comm -23 \
 		  <(grex ${1} | sort -u) \
 		  <(grex ${2} | sort -u) \
@@ -176,13 +176,15 @@ conffile_checkup() { # conffile_checkup OLDFILE NEWFILE
 		  return 1
 	 }
 	 sameish ${OLDFILE} {$NEWFILE} || erases_nothing ${OLDFILE} ${NEWFILE} || {
-		  askyn "Edit ${OLDFILE} ... ${NEWFILE}?" && {
-				e ${OLDFILE} ${NEWFILE}
-				askyn "Replace old w/new?" || {
-					 echo_red "keeping ${OLDFILE}, deleting temp one"
-					 rm -f ${NEWFILE}
-					 return 1
-				}
+		  echo_red HOW FILES DIFFER:
+		  diff ${OLDFILE} ${NEWFILE}
+		  askyn "Replace old w/new?" && {
+				mv -f $NEWFILE $OLDFILE
+				return 0
+		  } || {
+				echo_red "keeping ${OLDFILE}, deleting temp one"
+				rm -f ${NEWFILE}
+				return 1
 		  }
 	 } && {
 		  mv -f ${NEWFILE} ${OLDFILE}
