@@ -1,12 +1,5 @@
 #!/bin/bash
 
-PROG_TO_KILL=${1:-/usr/bin/fbpanel}
-FULL_COMMAND=${@:-/usr/bin/fbpanel}
-
-[ -x $PROG_TO_KILL ] || exit 1
-
-LOCKDIR=/tmp/lock.file.${PROG_TO_KILL//\/}
-
 millisleep() {
 	 local c=${1:-0}.
 	 local c=${1//[^0-9.]}.
@@ -17,18 +10,55 @@ millisleep() {
 	 done
 	 sleep ${bd:0: -3}.${bd: -3}${ad}
 }
-
-mkdir ${LOCKDIR} 2>/dev/null && {
-	 trap "rm -rf ${LOCKDIR}; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
-	 c=8
-	 while let c*=2 && pgrep -f ${PROG_TO_KILL} &>/dev/null; do
-		  for P in $(pgrep -f ${PROG_TO_KILL}); do
-				case $P in
-					 $$) ;;
-					 *) kill -SIGTERM $P
-				esac
-		  done
-		  [ $c -gt 2000 ] && break || millisleep $c
-	 done
-	 nohup ${FULL_COMMAND} &>/dev/null &
+list_running() {
+    local p c=0 ps=("$(pgrep $UTXT -f ${PROG_TO_KILL})")
+    for p in "${ps[@]}"; do
+        [ "$p" = "$$" -o "$p" = "$PPID" ] && continue
+        echo "$p"
+        let c++
+    done
+    [ $c -ne 0 ]
 }
+
+POLICY=passive
+UTXT=
+
+args=()
+while [ "$1" ]; do
+	 case "$1" in
+		  -a) POLICY=aggressive;;
+		  -s) POLICY=passive;;
+		  -p) shift; POLICY="$1";;
+		  -u) UTXT=" -u $EUID ";;
+		  /*) args+=("$@"); break;;
+		  *) args+=("$1");;
+	 esac
+	 shift
+done
+set -- "${args[@]}"
+
+PROG_TO_KILL=${1:-/usr/bin/fbpanel}
+FULL_COMMAND=${@:-/usr/bin/fbpanel}
+
+[ -x $PROG_TO_KILL ] || exit 1
+
+LOCKDIR=/tmp/lock.file.${PROG_TO_KILL//\/}
+
+if mkdir ${LOCKDIR} 2>/dev/null; then
+	 trap "rm -rf ${LOCKDIR}; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+	 case ${POLICY} in
+		  aggressive) c=8 # kills any existing, takes their place
+				while let c*=2 && list_running &>/dev/null; do
+					 for P in $(list_running); do
+						  case ${P} in
+								$$) ;;
+								*) kill -SIGTERM $P
+						  esac
+					 done
+					 [ $c -gt 2000 ] && break || millisleep $c
+				done;;
+		  passive|*) # if any already exist, defer to them
+				list_running &>/dev/null && exit;;
+	 esac
+	 nohup ${FULL_COMMAND} &>/dev/null &
+fi

@@ -1,10 +1,17 @@
 #!/usr/bin/python2
+#
+# This script checks the system time against an ntp pool.
+# If the network and system time are both peachy, then it 
+# exits promptly and quietly. If something needs fixing, 
+# it will speak up and possibly exit with an error.
+#
 import struct, sys, time, socket, math
 
 client = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
 data = '\x1b' + 47 * '\0'
 beforesend = time.time()
-client.sendto( data, ( "0.us.pool.ntp.org", 123 ))
+client.settimeout(4)
+client.sendto( data, ( "0.us.pool.ntp.org", 123 )) or sys.exit(4)
 data, address = client.recvfrom( 1024 )
 aftersend = time.time()
 if data:

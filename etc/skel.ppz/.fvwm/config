@@ -11,7 +11,7 @@ AddToFunc InitFunction
 DestroyFunc StartFunction
 AddToFunc StartFunction
 + I Module FvwmCommandS
-+ I Exec exec /usr/bin/one-instance /usr/bin/fbpanel -p $[FBPP]
++ I Exec exec /usr/bin/one-instance -a -u /usr/bin/fbpanel -p $[FBPP]
 
 DeskTopSize 1x1
 DesktopName 0 Krypton

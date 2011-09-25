@@ -73,7 +73,7 @@ integrity_simpleconf() {
 		  linode)				sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
 		  desktop|laptop|*)	sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
 	 esac
-	 mkdir -p /media/{arch-cold-r{w,o},rodinia,green,encuser,enc}
+	 mkdir -p /media/{arch-cold-r{w,o},rodinia,green}
 	 [ -L /snowball ] || ln -s /media/rodinia/pub /snowball
 	 [ -L /usr/share/terminfo/r/rxvt-unicode-256color ] || \
 		  ln -s /usr/share/terminfo/r/rxvt{,-unicode}-256color
@@ -163,6 +163,7 @@ integrity_users() {
 		  # if we're still here, u_home is now a real path :)
 		  # it's not the job of this function to CREATE the path
 		  # if user isn't in passwd, create it
+		  # this should use getent, not grep! TODO
 		  grep -qiE "^${u_name}:" /etc/passwd || {
 				echo_red "adding user ${u_name}!"
 				useradd -lMNd ${u_home} -u ${u_nums%%:*} -g ${u_nums##*:} -s ${v[4]} ${u_name}

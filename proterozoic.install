@@ -7,6 +7,8 @@ preowned_files=(
 	 etc/issue
 	 etc/ntp.conf
 	 etc/apcupsd/apcupsd.conf
+	 etc/bitlbee/bitlbee.conf
+	 etc/privoxy/config
 )
 ######### FUNCTIONS
 are_same() {
@@ -15,7 +17,7 @@ are_same() {
 }
 clobberella() {
 	 F="$1"
-	 [ -f "$F.ppz" ] || return
+	 [ -f "$F.ppz" ] || return 0
 	 [ -f "$F" ] && { #do a "nice clobber" - make a (unique) backup
 		  are_same ${F}{,.ppz} && return || \
 				for N in {001..999}; do
@@ -111,7 +113,7 @@ post_install() {
 
 pre_upgrade() {
 	 for F in ${preowned_files[@]}; do
-		  are_same ${F}{,.ppz} && rm -f "$F"
+		  are_same ${F}{,.ppz} && rm -f "$F" || :
 	 done
 }
 post_upgrade() {

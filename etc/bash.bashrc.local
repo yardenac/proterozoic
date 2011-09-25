@@ -57,4 +57,5 @@ shopt -s histappend
 shopt -s checkwinsize
 complete -f -X '!*.@(sqlite|db)' sqlite3
 complete -f emacs rsync mv cp rm mc scp diff ls sed mplayer tail find cmp
+complete -f scp mkdir sshfs
 [ "$BASH" ] && [ -f ~/.bashrc ] && . ~/.bashrc

@@ -18,6 +18,7 @@ sed -i \
 	 -e s/%SET_HOSTNAME%/${SS_HOSTNAME}/ig \
 	 -e s/%SET_TYPE%/linode/ig \
 	 -e s/=UTC/=xen/ig \
+	 -e 's/32m$/128m/ig' \
 	 -e 's/^#*:[\t ]*sync.*$/#&/ig' \
 	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/rc.conf
 locale-gen

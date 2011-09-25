@@ -16,8 +16,6 @@ do_or_report() {
 		  shift
 	 } || local say=0
 	 local result=$(curl -sS ${LINODEURL}"$@")
-#	 echo THIS IS WHAT WE DID
-#	 echo $result | jshon
 	 (( $(echo $result | jshon -e ERRORARRAY -l) )) && {
 		  echo "FAILED AT: $*"
 		  echo $result | jshon
@@ -105,18 +103,12 @@ deploy() {
 		  } || usetvar this_val "Enter value for ${v^^}: " BLANK ''
 		  nvp_str+=\"${v}\":\"${this_val}\",
 	 done
-	 # $rootpass is set in .linoderc
 	 echo
 	 echo -n "Creating disk image & config"
-	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid=58&label=D'$ssdate'&size=4096&linodeid='$linodeid'&stackscriptid='$ss_id \
+	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid=58&label=D'$ssdate'&size=16384&linodeid='$linodeid'&stackscriptid='$ss_id \
 		  --data-urlencode stackscriptudfresponses=\{"${nvp_str%,}"\} \
 		  --data-urlencode rootpass="$rootpass") || return 1
-#	 result=$(do_or_report say 'linode.disk.createfromdistribution&distributionid=58&label=D'$ssdate'&size=4096&linodeid='$linodeid \
-#		  --data-urlencode rootpass="$rootpass") || return 1
 	 diskid=$(echo $result | jshon -e DATA -e DiskID)
-	 # 136 = 3.0.0-x86_64-linode20
-	 # 111 = Latest 2.6 (2.6.39.1-x86_64-linode19)
-	 # 133 = 2.6.39.1-x86_64-linode19
 	 # 138 = Latest 3.0 (3.0.4-x86_64-linode21)
 	 result=$(do_or_report say 'linode.config.create&kernelid=95&helper_xen=false&helper_automount=false&helper_depmod=false&label=G'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pv-grub
@@ -131,7 +123,6 @@ deploy() {
 	 echo -n "Booting now"
 	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_prebuilt || return 1
 	 block_for_job
-#	 return
 	 block_for_shutdown
 	 echo -n "Booting the REAL one now!"
 	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_pvgrub || return 1
