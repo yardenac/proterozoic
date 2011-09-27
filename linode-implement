@@ -105,25 +105,31 @@ deploy() {
 	 done
 	 echo
 	 echo -n "Creating disk image & config"
-	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid=58&label=D'$ssdate'&size=16384&linodeid='$linodeid'&stackscriptid='$ss_id \
+	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid=58&label=D'$ssdate'&size=20480&linodeid='$linodeid'&stackscriptid='$ss_id \
 		  --data-urlencode stackscriptudfresponses=\{"${nvp_str%,}"\} \
 		  --data-urlencode rootpass="$rootpass") || return 1
 	 diskid=$(echo $result | jshon -e DATA -e DiskID)
 	 # 138 = Latest 3.0 (3.0.4-x86_64-linode21)
-	 result=$(do_or_report say 'linode.config.create&kernelid=95&helper_xen=false&helper_automount=false&helper_depmod=false&label=G'$ssdate'&linodeid='$linodeid \
+	 result=$(do_or_report say 'linode.config.create&kernelid=95&helper_xen=false&helper_automount=false&helper_depmod=false&label=NORMAL'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pv-grub
 	 config_pvgrub=$(echo $result | jshon -e DATA -e ConfigID)
-	 result=$(do_or_report say 'linode.config.create&kernelid=61&label=F'$ssdate'&linodeid='$linodeid \
+	 result=$(do_or_report say 'linode.config.create&kernelid=61&label=RESCUE'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=25665,$diskid,,,,,,,25669) || return 1 #finnix rescue
 	 config_finnix=$(echo $result | jshon -e DATA -e ConfigID)
-	 result=$(do_or_report say 'linode.config.create&kernelid=138&label=C'$ssdate'&linodeid='$linodeid \
+	 result=$(do_or_report say 'linode.config.create&kernelid=138&label=INITIAL'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pre-linux-linode boot
 	 config_prebuilt=$(echo $result | jshon -e DATA -e ConfigID)
 	 block_for_job
+
 	 echo -n "Booting now"
 	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_prebuilt || return 1
 	 block_for_job
 	 block_for_shutdown
+
+	 echo -n "Deleting the prebuilt-kernel config"
+	 do_or_report 'linode.config.delete&linodeid='$linodeid'&configid='$config_prebuild || return 1
+	 block_for_job
+
 	 echo -n "Booting the REAL one now!"
 	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_pvgrub || return 1
 	 block_for_job

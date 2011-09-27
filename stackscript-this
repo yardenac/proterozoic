@@ -27,7 +27,7 @@ pacman-db-upgrade
 this_pacman -Sqyu
 echo 'utmp:x::' >> /etc/gshadow
 mv -f /etc/bash.bashrc{.pacnew,}
-this_pacman -Sq mkinitcpio
+this_pacman -Sq mkinitcpio tor privoxy
 cat > /etc/mkinitcpio.conf <<-EOF
 	HOOKS="base udev autodetect ppz_tmp"
 EOF

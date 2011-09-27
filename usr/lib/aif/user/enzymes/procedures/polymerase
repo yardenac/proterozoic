@@ -99,7 +99,7 @@ start_process() {
 		  local A=; for A in ${pkgs_groups[@]}; do
 				eval askyn 'Install $A things? \(${pkgs_'$A'[@]}\)' && eval 'pkgs_go+=(${pkgs_'$A'[@]})'
 		  done
-		  pkgs_go+=(btrfs-progs-unstable proterozoic) # grub2-bios
+		  pkgs_go+=(btrfs-progs-unstable tor privoxy proterozoic) # grub2-bios
 		  usetvar others "Type in any other packages you want to add: " 'xf86-video-ati nvidia aif' ''
 		  pkgs_go+=(${others//,/ })
 		  pacman_target -Sq ${pkgs_go[@]}

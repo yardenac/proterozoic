@@ -159,7 +159,10 @@ integrity_users() {
 		  IFS=$'\n\r\t ' v=($user)
 		  u_name=${v[2]}
 		  u_nums=${v[3]}
-		  u_home=$(translate_encdev_path ${v[5]}) || continue
+		  u_home=$(edev-path ${v[5]}) || {
+				echo_red "homedir ${v[5]} on undeclared encrypted device!"
+				continue
+		  }
 		  # if we're still here, u_home is now a real path :)
 		  # it's not the job of this function to CREATE the path
 		  # if user isn't in passwd, create it
