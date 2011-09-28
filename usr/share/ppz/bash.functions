@@ -176,10 +176,12 @@ conffile_checkup() { # conffile_checkup OLDFILE NEWFILE
 		  return 1
 	 }
 	 sameish ${OLDFILE} {$NEWFILE} || erases_nothing ${OLDFILE} ${NEWFILE} || {
-		  case "$(md5sum ${OLDFILE})" in
-				a9fdfec8397db36c3a52ac4870d04cf1)
+		  case "$(md5sum ${OLDFILE} | awk '{print $1}')" in
+				a9fdfec8397db36c3a52ac4870d04cf1|387f21f67b7bb8cf1bdd6999006c1dd4)
+					 echo_red identified sshd_config as a stock config
 					 mv -f $NEWFILE $OLDFILE
 					 return 0;;
+				*) echo MD5 was: $(md5sum ${OLDFILE});;
 		  esac
 		  echo_red HOW FILES DIFFER:
 		  diff ${OLDFILE} ${NEWFILE}

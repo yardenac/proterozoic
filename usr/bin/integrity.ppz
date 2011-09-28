@@ -70,7 +70,8 @@ integrity_simpleconf() {
 		  || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
 	 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
 	 case $SYSTEM_TYPE in
-		  linode)				sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
+		  linode)				sed -i 's/MODULES="dm-crypt btrfs fuse"/MODULES=""/ig' /lib/initcpio/install/ppz_tmp
+									sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
 		  desktop|laptop|*)	sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
 	 esac
 	 mkdir -p /media/{arch-cold-r{w,o},rodinia,green}

@@ -1,7 +1,7 @@
 #!/bin/bash
 . usr/share/ppz/bash.functions
 . ~/.linoderc
-[ $API_KEY ] && [ $LINODEADDR ] || {
+[ $API_KEY ] && [ $LINODE_CONSOLE ] || {
 	 echo "You need to make a ~/.linoderc to initialize auth variables"
 	 return 1
 }
@@ -34,7 +34,7 @@ block_for_job() { #returns when no more jobs pending
 block_for_shutdown() { #returns when linode shuts itself down
 	 echo -n "Waiting for linode to shut down..."
 	 while :; do
-		  local status=$(ssh $LINODEADDR.linode.com status)
+		  local status=$(ssh $LINODE_CONSOLE.linode.com status)
 		  case $status in
 				'Powered Off')
 					 echo done!
@@ -46,17 +46,29 @@ block_for_shutdown() { #returns when linode shuts itself down
 		  esac
 	 done
 }
+block_for_ssh() { # returns when port 22 appears to be open on the machine
+	 echo -n "Waiting for SSH server to be up..."
+	 until nmap $LINODE_DOMAIN -p 22 -sV --version-all -oG - | grep -iq '22/open'; do
+		  echo -n .
+		  sleep 1
+	 done
+	 echo done!
+}
 
 destroy_running() {
-	 local status=$(ssh $LINODEADDR.linode.com status)
+	 local status=$(ssh $LINODE_CONSOLE.linode.com status)
 	 echo "Linode status is: $status"
 	 case $status in
 		  'Powered Off') :;;
 		  'Running')
 				echo "Going to destroy running instance..."
-				ssh $LINODEADDR.linode.com destroy;;
+				ssh $LINODE_CONSOLE.linode.com destroy;;
 		  *) echo "unrecognized status string: $status"
 	 esac
+	 echo "Removing previous linode from known_hosts"
+	 ssh-keygen -qR $LINODE_DOMAIN
+	 ssh-keygen -qR $LINODE_IP
+	 ssh-keygen -qR $LINODE_DOMAIN,$LINODE_IP
 }
 update_stackscript() { local SS_COMMIT_TXT
 	 cmp -s $ss_file <(curl -sS ${LINODEURL}'stackscript.list&stackscriptid='$ss_id | jshon -e DATA -e 1 -e SCRIPT -u) && {
@@ -127,14 +139,33 @@ deploy() {
 	 block_for_shutdown
 
 	 echo -n "Deleting the prebuilt-kernel config"
-	 do_or_report 'linode.config.delete&linodeid='$linodeid'&configid='$config_prebuild || return 1
+	 do_or_report 'linode.config.delete&linodeid='$linodeid'&configid='$config_prebuilt || return 1
 	 block_for_job
 
 	 echo -n "Booting the REAL one now!"
 	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_pvgrub || return 1
 	 block_for_job
+
+	 block_for_ssh
+
+	 echo "Scraping for valid SSH host credentials..."
+	 ssh-keyscan -H $LINODE_DOMAIN >> ~/.ssh/known_hosts
+	 ssh-keyscan -H $LINODE_IP >> ~/.ssh/known_hosts
+
+	 # do initial decryption while we change default password
+	 ssh -t $LINODE_USER@$LINODE_DOMAIN passwd
+
+	 [ -d "$LOCAL_GITDIR/.git" ] && askyn "push-ish git stuff?" && {
+
+		  cd "$LOCAL_GITDIR"
+		  echo "Sending git repo over tar/ssh..."
+		  tar -cJf - .git | ssh $LINODE_USER@$LINODE_DOMAIN bash-pure \
+				'cat <&0 | tar -xJf - -C ~; git checkout -f HEAD;'
+	 }
 }
 do_all() {
+	 echo
+	 echo -n "You probably want to detach any running ssh sessions, or they will hang."
 	 askyn "This script will DESTROY YOUR EXISTING LINODE. Do you want to cancel?" && exit
 	 for thing in \
 		  destroy_running \

@@ -3,9 +3,6 @@ sshd_config -- srsly, should not be this crazy
 
 use getent instead of grep /etc/passwd
 
-packages list for server:
-bitlbee weechat tor privoxy
-
 C program for easy inline CLI menu selection!
 
 rxvt mousewheel support
