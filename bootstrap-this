@@ -26,8 +26,7 @@ sed -i \
 	 -e s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
 	 -e s/%SET_TYPE%/desktop/ig \
-	 -e s/%SET_HOSTNAME%/archiso/ig \
-	 -e 's/^SSH_USERS.*$/SSH_USERS=(root)/ig'				/etc/rc.conf
+	 -e s/%SET_HOSTNAME%/archiso/ig							/etc/rc.conf
 
 [ $arch = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 

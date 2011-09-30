@@ -550,14 +550,17 @@ integrity_sshd() {
 	 done
 #	 ALL OF THIS is such a stinking mess! when fix???
 #	 askyn "did you inspect?"
-	 conffile_checkup "${OLDFILE}" "${NEWFILE}" && {
+	 if conffile_checkup "${OLDFILE}" "${NEWFILE}"; then
 		  #file changed
-		  echo_red pkilling sshd
-		  pkill -HUP -f /usr/sbin/sshd; SSHD_ON=$?
-	 } || {
+		  [ -s /etc/mtab ] && {
+				# not chrooted
+				echo_red pkilling sshd
+				pkill -HUP -f /usr/sbin/sshd; SSHD_ON=$?
+		  }
+	 else
 		  #file didnt change
 		  [ -n "$(pgrep -f /usr/sbin/sshd)" ]; SSHD_ON=$?
-	 }
+	 fi
 	 ifn $SSHD_ON || {
 		  askyn "sshd is not running. Start it?" && {
 				/etc/rc.d/sshd start

@@ -23,6 +23,7 @@ BEGIN {
 	 # if just a normal path
 	 if (path ~ /^\//) {
 		  print path
+		  RV = 0
 		  exit
 	 }
 

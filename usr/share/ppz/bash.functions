@@ -627,3 +627,19 @@ ribbit() {
 chrooted() {
 	 ! [ -s /etc/mtab ] # not (exists & not empty)
 }
+git_home_clone() {
+	 if [ -a ~/.git ] || ! shell_is_interactive; then
+		  echo_red "Hell no!"
+		  return
+	 fi
+	 askyn "Are you sure you want to overwrite ~/ with $1:\~/ ... ?" && {
+		  # git_home_clone user@host.com
+		  pushd ~
+		  git --work-tree ~ --git-dir ~/.git clone --bare "$1":\~/ ~/.git
+		  git --work-tree ~ --git-dir ~/.git config --local core.bare false
+		  git --work-tree ~ --git-dir ~/.git checkout -f
+		  chmod -R go-rx ~/.ssh
+		  git --work-tree ~ --git-dir ~/.git glog -n $(($(tput lines)/5)) | colrm $(tput cols)
+		  popd
+	 }
+}

@@ -1,9 +1,0 @@
-[user]
-	email = twomyn@gmail.com
-	name  = twomyn
-
-[alias]
-
-	glog	= log -30 --pretty='%p..%Cgreen%h%Creset %ad %s' --date=short
-	cdiff	= diff --color=auto
-	stiff	= diff --color=auto --cached
