@@ -1,0 +1,37 @@
+#!/bin/bash
+[ -f /usr/share/ppz/bash.functions ] && . /usr/share/ppz/bash.functions
+[ -f usr/share/ppz/bash.functions ] && . usr/share/ppz/bash.functions
+
+CFILE=$(full_path_strict "$1") || exit 1
+
+shift
+
+[ -f "$CFILE" -a -r "$CFILE" ] || {
+	echo_red "unreadable"
+	exit 1
+}
+
+file -bi c/cdtray.c | grep -qiE '^text/x-c;' || {
+	 echo_red "Not a C file: $1"
+	 exit 1
+}
+
+CFLAGS=''
+grep -qiE '^#include <(n?curses|.*affect).h>$'	${CFILE} && CFLAGS=$CFLAGS' -lncurses '
+grep -qiE '^#include <pthread.h>$'					${CFILE} && CFLAGS=$CFLAGS' -lpthread '
+
+DIR=~/.ct.$(uniq_token)
+
+if mkdir -p ${DIR}; then
+	 trap "popd &>/dev/null || cd ~; rm -rf ${DIR}; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+	 pushd ${DIR}
+	 if cc ${CFILE} -Wall -o ${DIR}/outfile.o $CFLAGS; then
+		  echo_red "compiled ok."
+		  ${DIR}/outfile.o "$@"
+		  echo_red "execution returned: $?"
+	 else
+		  echo_red "compile failed."
+	 fi
+else
+	 echo_red "Could not make dir."
+fi

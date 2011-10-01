@@ -22,6 +22,7 @@ _expand() { sleep 0; }
 alias bc='bc -lq /etc/bcrc' #BC_ENV_ARGS=/etc/bcrc
 alias cp='cp -i'
 alias feh='feh --no-screen-clip'
+alias glog='git glog -n $(($(tput lines)/5)) | colrm $(tput cols)'
 alias grep='grep -i --color=auto'
 alias grex='grep -iEvr '"'"'^[[:space:]]*(#|;|//|$)'"'"
 alias handbrake=HandBrakeCLI

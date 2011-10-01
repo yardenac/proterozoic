@@ -6,7 +6,7 @@ iptables -t nat -L -v -x --line-numbers
 iptables -t raw -L -v -x --line-numbers
 iptables -t mangle -L -v -x --line-numbers
 iptables -t filter -L -v -x --line-numbers
-screen -xR && exit
+exec screen -xR
 shutdown -hP now && exit
 reboot && exit
 cryptsetup luksOpen /dev/disk/by-uuid/0105eeab-2fc6-4dc7-8b89-4a70605e1483 green
@@ -20,10 +20,8 @@ ssh -t si@scaly screen -x -R && exit
 ssh -t compsognathus@majel.net screen -x -R && exit
 wget https://raw.github.com/twomen/proterozoic/master/usr/share/ppz/default/rc.conf -qO /tmp/rc.conf.ppz
 smartd -d -i 600
-shutdown -hP now && exit
 pacman -Syu
 pstree -Auchnap
 su - && exit
-htop && exit
-https_proxy=http://127.0.0.1:8118 wget -qO- https://check.torproject.org/ | grep -i congratulations # tests tor w/privoxy! :D
+exec htop
 #LAST_PPZ_COMMAND

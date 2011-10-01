@@ -74,21 +74,15 @@ integrity_simpleconf() {
 									sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
 		  desktop|laptop|*)	sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
 	 esac
+	 case "$(uname -m)" in
+		  i686)		sed -i 's/^\[multilib\]$/#&/ig'			/etc/pacman.conf;;
+		  x86_64)	sed -i 's/^##*\(\[multilib\]\)$/\1/ig'	/etc/pacman.conf;;
+	 esac
 	 mkdir -p /media/{arch-cold-r{w,o},rodinia,green}
 	 [ -L /snowball ] || ln -s /media/rodinia/pub /snowball
-	 [ -L /usr/share/terminfo/r/rxvt-unicode-256color ] || \
+	 [ -a /usr/share/terminfo/r/rxvt-unicode-256color ] || \
 		  ln -s /usr/share/terminfo/r/rxvt{,-unicode}-256color
 	 enforce_perms 440 /etc/sudoers.d/wheel
-}
-integrity_pacnew() {
-	 am_root || return 0
-	 # check pacman.conf against the default file
-	 # check arch and comment out multilib if needed
-	 return
-	# TODO: check for pacnew files, do something with them
-	 # is it better to `find` the filesystem
-	 # or search pacman db for backup files and check those?
-	 #also do ppznew
 }
 integrity_inittab() {
 	 am_root || return 0
@@ -343,7 +337,7 @@ integrity_encdev() {
 
 		  # now format luks, using default key
 		  echo -n "loosest slots in town" | \
-				cryptsetup -c aes-xts-plain64 -s 512 -h whirlpool -qv luksFormat "$dev" -i 9999 -d -
+				cryptsetup -qvi 9999 -S 1 -d - -s 512 -c aes-xts-plain64 -h whirlpool luksFormat "$dev"
 
 		  [ -s /etc/mtab ] || {
 				echo_red "WE ARE DOING DEV MAPPINGS IN A CHROOT! LOOK FOR ERRORS!"
@@ -368,6 +362,17 @@ integrity_encdev() {
 
 		  cryptsetup luksClose ${mapname}tmp
 	 done
+
+	 # make sure its not DEFAULT KEY
+	 am_root && cryptsetup luksDump "$dev" | grep -qiE '^Key Slot 7: DISABLED$' && {
+		  if askyn "Shall we set a new, secure key for $dev ... ?"; then
+				cryptsetup -yvi 9999 -S 7 -d <(echo -n "loosest slots in town") luksAddKey "$dev"
+				echo_red "Please enter the new password again, so we can kill the old one :)"
+				cryptsetup luksKillSlot "$dev" 1
+		  else
+				echo_red "Leaving insecure default key for $dev ..."
+		  fi
+	 }
 
 	 # make sure size is right
 	 [ -b "$dev" ] || { # we dont resize block devices
@@ -574,13 +579,8 @@ integrity_sshd() {
 #     bash.bashrc.local
 #      post_upgrade
 
-#echo INTERGRITY WAS CALLED AS: "$0 $@"
-#echo PARENT PROC IS: $(ps --pid $(ps --pid $$ -o ppid=) -o args=)
-#pstree -phaun
+for F in rootpw locales tz simpleconf inittab hosts users \
+	 iptables net encdevs bashhistory emacsd sshd; do
 
-for F in rootpw locales tz simpleconf pacnew inittab hosts users \
-	 iptables net encdevs bashhistory emacsd \
-	 sshd; do
-#	 echo doing ${F}
 	 integrity_${F} || echo "${F} failed..."
 done

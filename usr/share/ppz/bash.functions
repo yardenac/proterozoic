@@ -87,8 +87,7 @@ enforce_perms() {
 	 [ -a "$2" ] || return 1            #file exists
 	 STATS=$(stat -c %a "$2")
 	 [[ "$1" == "$STATS" ]] || {
-		  ls -FlAthr "$2"
-		  say_and_do chmod "$1" "$2" #chmod file if not set already
+		  chmod "$1" "$2" #chmod file if not set already
 	 }
 }
 remove_line_number() {
@@ -181,10 +180,10 @@ conffile_checkup() { # conffile_checkup OLDFILE NEWFILE
 					 echo_red identified sshd_config as a stock config
 					 mv -f $NEWFILE $OLDFILE
 					 return 0;;
-				*) echo MD5 was: $(md5sum ${OLDFILE});;
+				*)	 echo_red HOW FILES DIFFER:
+					 diff ${OLDFILE} ${NEWFILE}
+					 echo_red MD5 was: $(md5sum ${OLDFILE});;
 		  esac
-		  echo_red HOW FILES DIFFER:
-		  diff ${OLDFILE} ${NEWFILE}
 		  askyn "Replace old w/new?" && {
 				mv -f $NEWFILE $OLDFILE
 				return 0
@@ -517,7 +516,7 @@ drome() {
 	 screen -p - -X screen -t $TOKEN "$@"
 	 screen -x -R -p $TOKEN
 }
-run_in_temp_memdir() {
+run_in_temp_memdir() { #DELETE THIS?
 	[ "$UID" -eq 0 ] && return
 	INMEM=/tmp
 	[ -d ${INMEM} ] || return
@@ -538,10 +537,18 @@ in_2_but_not_in_1() {
 		  IFS=:
 	 done
 }
-test_network_once() { # test_network_once [TIMEOUT [TRIES]]
+fwget() { # fwget [TIMEOUT [TRIES [URL]]]
 	TIMEOUT=${1:-10}	#default: wait 10 seconds
 	TRIES=${2:-1}		#default: try once
-   /usr/bin/wget -q --tries=${TRIES} --timeout=${TIMEOUT} http://www.google.com/ -O - 2>/dev/null | grep -iq 'feeling lucky'
+	URL=${3:-http://www.google.com/}
+	/usr/bin/wget --tries=${TRIES} --timeout=${TIMEOUT} ${URL} -qO- 2>/dev/null
+}
+test_network_once() {
+	 fwget "$@" | grep -iq 'feeling lucky'
+}
+test_tor_once() {
+   https_proxy=http://127.0.0.1:8118 fwget ${1:-10} ${2:-1} \
+		 https://check.torproject.org/ | grep -iq congratulations
 }
 wait-for-network() {
 	 SLEEPINC=1.5
@@ -627,19 +634,37 @@ ribbit() {
 chrooted() {
 	 ! [ -s /etc/mtab ] # not (exists & not empty)
 }
+gith() {
+	 git --work-tree ~ --git-dir ~/.git "$@"
+}
 git_home_clone() {
 	 if [ -a ~/.git ] || ! shell_is_interactive; then
 		  echo_red "Hell no!"
 		  return
 	 fi
-	 askyn "Are you sure you want to overwrite ~/ with $1:\~/ ... ?" && {
-		  # git_home_clone user@host.com
-		  pushd ~
-		  git --work-tree ~ --git-dir ~/.git clone --bare "$1":\~/ ~/.git
-		  git --work-tree ~ --git-dir ~/.git config --local core.bare false
-		  git --work-tree ~ --git-dir ~/.git checkout -f
-		  chmod -R go-rx ~/.ssh
-		  git --work-tree ~ --git-dir ~/.git glog -n $(($(tput lines)/5)) | colrm $(tput cols)
-		  popd
+	 [ "$2" ] || [[ "$1" =~ ^[a-z]+@[a-z\.]+$ ]] || {
+		  echo_red "USAGE: git_home_clone user@host.com"
+		  return 1
 	 }
+	 askyn "Are you sure you want to overwrite ~/ with $1:\~/ ... ?" && {
+		  gith clone --bare "$1":\~/ ~/.git || return 1
+		  pushd ~ >/dev/null
+		  gith config --local core.bare false
+		  gith checkout -f
+		  chmod -R go-rx ~/.ssh
+		  gith glog -n $(($(tput lines)/5)) | colrm $(tput cols)
+		  popd >/dev/null
+	 }
+}
+ssh_amend_host_trust() {
+	 echo_red "Not implemented"
+	 return 1
+
+	 askyn "You're about to fuck w/known_hosts. Wanna cancel?" && return 1
+
+	 # check args
+	 # dig hostnames
+	 # ssh-keygen -R [each]
+	 # ssh-keygen -R [each],[each]
+	 # ssh-keyscan -H [each] >> ~/.ssh/known_hosts
 }

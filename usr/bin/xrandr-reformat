@@ -1,9 +1,13 @@
 #!/bin/gawk -f
+#
+# Used to maximize all screens, like this:
+# eval "$(xrandr --current | xrandr-reformat)"
 
 BEGIN {
 	 SCREEN=OUT=MODE=""
 	 NEWOUT=0
 
+	 # someday maybe you can pass doo=foo, to do other things...
 	 if (doo == null) doo="max"
 }
 

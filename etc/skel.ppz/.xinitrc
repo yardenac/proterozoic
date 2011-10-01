@@ -1,6 +1,6 @@
 #!/bin/bash
 
-time numlockx on
+numlockx on
 
 export XAUTHORITY=/tmp/.Xauthority.xuser
 xrdb -load /etc/X11/Xresources
