@@ -3,7 +3,7 @@ AddToFunc InitFunction
 #+ I Exec exec killall -q xcompmgr
 #+ I Exec exec killall -q cairo-compmgr
 + I Exec exec xcompmgr
-+ I Exec exec hsetroot -fill /usr/share/ppz/wallpaper.png
++ I Exec exec hsetroot -fill /usr/share/ppz/wallpaper
 + I Exec exec xscreensaver
 + I Exec exec xhost +local:eu
 #+ I Exec exec urxvtd -q -f -o
@@ -57,6 +57,7 @@ Key	Tab			A		M			WindowListMakeFunc
 Key	Tab			A		MS			WindowListMakeFunc
 Key	F1				R		A			-
 Key 	F4 			SFTW	M			Current Delete
+Key 	F9 			SFTW	M			Current Iconify
 Key	F10			SFTW	M			Current Maximize
 Key	Left			A		CMS		Current WinTo $[w.id] -1
 Key	Right			A		CMS		Current WinTo $[w.id] +1
