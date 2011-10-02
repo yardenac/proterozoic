@@ -42,3 +42,12 @@ rm -f /etc/pacman.d/mirrorlist.otown.tmp
 #. /etc/rc.conf
 #. /etc/rc.d/functions.d/ppz
 #custom_iptables_rules
+
+
+# how to start network on laptop:
+# modprobe -r pcspkr
+# modprobe iwl3945
+# ip link set wlan0 up
+## iwlist wlan0 scan | grep -i essid
+# iwconfig wlan0 essid hawtt
+# dhcpcd wlan0

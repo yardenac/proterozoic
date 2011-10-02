@@ -63,7 +63,7 @@ Key	Right			A		CMS		Current WinTo $[w.id] +1
 Key	Left			A		CM			GoToDeskBetter -1
 Key	Right			A		CM			GoToDeskBetter +1
 Key	space			A		M			Menu MenuFvwmWindowOps2 Window 0 0 Nop
-Key 	apostrophe	A		4			NiceBash 100x20 - 'su - eu -c \\"urxvtd -q -f -o && urxvtc -e screen -x -R\\"'
+Key 	apostrophe	A		4			NiceBash 100x20 - 'su - eu -c \\"urxvtd -q -f -o && urxvtc -e screen -xR\\"'
 Key	m				A		4			NiceBash 80x49  - '. /usr/share/ppz/bash.functions; . /usr/share/ppz/bash.functions.xorg; woman'
 Key	c				A		4			NiceBash 67x36  - 'cal -y && read'
 Key	b				A		4			NiceTerm 40x39  - /usr/bin/bc -lq /etc/bcrc

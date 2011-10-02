@@ -44,8 +44,8 @@
 	 esac
 	 export HOME=$(homedir_i_own $HOME)
 
-	 echo HOME: $HOME
-	 echo DISPLAY: $DISPLAY
+#	 echo HOME: $HOME
+#	 echo DISPLAY: $DISPLAY
 
 	 [ "$(/usr/bin/tty)" = /dev/tty3 ] \
 		  && [ -x /usr/bin/xinit ] \

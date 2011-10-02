@@ -43,3 +43,6 @@ syslog-ng graceful
 set up manually
 
 add custom_mounting to mkinitcpio.conf hooks and help it detect hostname
+
+apparently the magic number for SSD partitioning is 131072
+ - partitions should start on multiples of that many sectors :)
