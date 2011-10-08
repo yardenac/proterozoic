@@ -1,12 +1,9 @@
 DestroyFunc InitFunction
 AddToFunc InitFunction
-#+ I Exec exec killall -q xcompmgr
-#+ I Exec exec killall -q cairo-compmgr
 + I Exec exec xcompmgr
 + I Exec exec hsetroot -fill /usr/share/ppz/wallpaper
 + I Exec exec xscreensaver
 + I Exec exec xhost +local:eu
-#+ I Exec exec urxvtd -q -f -o
 
 DestroyFunc StartFunction
 AddToFunc StartFunction
@@ -27,7 +24,6 @@ MoveThreshold 3
 HideGeometryWindow
 OpaqueMoveSize unlimited
 
-#SloppyFocus, MouseFocusClickRaises, FocusFollowsMouse, NoUsePPosition, 
 FocusStyle * !EnterToFocus, !LeaveToUnfocus, !FocusByProgram, \
 			FocusByFunction, !FocusByFunctionWarpPointer, !Lenient, \
 			FocusClickButtons 1, PassFocusClick, AllowFocusClickFunction
@@ -39,11 +35,11 @@ Style * !Borders, !Handles, MWMFunctions, MWMDecor, HintOverride, \
 Style Fvwm*       NoTitle,  Sticky, WindowListSkip, \
 		BorderWidth 2, CirculateSkipIcon, CirculateSkip
 Style panel StaysOnTop
+Style MPlayer StaysOnTop
+Style plugin-container StaysOnTop
 Style urxvt ResizeHintOverride
 Style xscreensaver FPFocusByProgram
 Style acroread PositionPlacement UnderMouse
-#Style Active
-
 MenuStyle * fvwm, Foreground white, Background cornflowerblue, Greyed grey40
 
 ColormapFocus FollowsFocus
@@ -64,8 +60,8 @@ Key	Right			A		CMS		Current WinTo $[w.id] +1
 Key	Left			A		CM			GoToDeskBetter -1
 Key	Right			A		CM			GoToDeskBetter +1
 Key	space			A		M			Menu MenuFvwmWindowOps2 Window 0 0 Nop
-Key 	apostrophe	A		4			NiceBash 100x20 - 'su - eu -c \\"urxvtd -q -f -o && urxvtc -e screen -xR\\"'
-Key	m				A		4			NiceBash 80x49  - '. /usr/share/ppz/bash.functions; . /usr/share/ppz/bash.functions.xorg; woman'
+Key 	apostrophe	A		4			NiceBash 100x20 - 'su - eu -c \\"urxvtb -e screen -xUR\\"'
+Key	m				A		4			NiceBash 80x49  - 'cd; . /usr/share/ppz/bash.functions; . /usr/share/ppz/bash.functions.xorg; woman'
 Key	c				A		4			NiceBash 67x36  - 'cal -y && read'
 Key	b				A		4			NiceTerm 40x39  - /usr/bin/bc -lq /etc/bcrc
 Key	q				A		4			Exec exec transset-df -a --dec 0.04
@@ -75,6 +71,9 @@ Mouse 1				R		A			-
 Mouse 1				SFTW	M			DragNMove
 Mouse 3				SFTW	M			ResizeDynamicFromVars
 Mouse 3				R     A			Menu MenuFvwmRoot Nop
+Key	XF86AudioLowerVolume A N	Exec exec amixer set Master 1-
+Key	XF86AudioRaiseVolume A N	Exec exec amixer set Master 1+
+Key	XF86AudioMute			A N	Exec exec amixer set Master toggle
 
 #NiceTerm WIDTHxHEIGHT -/"" COMMAND
 DestroyFunc NiceTerm
@@ -135,13 +134,13 @@ AddToFunc ResizeDynamic
 + I Resize direction $0
 + I CursorStyle RESIZE
 
-######################## Menus ###################
 DestroyMenu MenuFvwmRoot
 AddToMenu MenuFvwmRoot
-+ "rxvt-unicode"             Exec exec urxvt -pe -tabbedex
-+ "$[gt.Restart]"          Restart
-+ "Quit"          Quit
-+ "Window Ops"         Popup MenuFvwmWindowOps2
++ "Terminal"	Exec exec urxvt -pe -tabbedex
++ "Reload WM"	Restart
++ "Restart WM"	Quit
++ "Reboot CPU"	Exec exec sudo /sbin/reboot
++ "Window Ops"	Popup MenuFvwmWindowOps2
 
 DestroyMenu MenuFvwmWindowOps2
 AddToMenu MenuFvwmWindowOps2

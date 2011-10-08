@@ -1,4 +1,5 @@
 %users ALL=(root) NOPASSWD: /usr/sbin/openmap
+ex ALL=(root) NOPASSWD: /sbin/reboot ""
 #%users ALL=(root) NOPASSWD: /usr/sbin/decrypt-script
 #%power ALL=(root) NOPASSWD: /sbin/reboot
 #%power ALL=(root) NOPASSWD: /sbin/shutdown

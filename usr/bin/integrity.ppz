@@ -95,10 +95,8 @@ integrity_inittab() {
 	 esac
 
 	 cmp -s /etc/inittab /usr/share/ppz/default/inittab.$model || {
-		  set +o noclobber
 		  echo_red "Fixing inittab to use the '$model' setup!"
-		  cat /usr/share/ppz/default/inittab.$model > /etc/inittab
-		  set -o noclobber
+		  cat /usr/share/ppz/default/inittab.$model >| /etc/inittab
 	 }
 }
 integrity_hosts() {
@@ -119,12 +117,12 @@ integrity_hosts() {
 			ASSIGN 192.168.1.226 fjm-wl
 			ASSIGN 192.168.1.227 fjm-eth
 			ASSIGN 192.168.1.228 dusty scaly
-			ASSIGN 192.168.1.229 lucky lucky-wf lucky-wifi edie-wl
+			ASSIGN 192.168.1.229 lucky lucky-wf lucky-wifi edie-wl iggy
 			ASSIGN 192.168.1.230 
 			ASSIGN 192.168.1.231 
 			ASSIGN 192.168.1.232
 			ASSIGN 192.168.1.233 #vonage 
-			ASSIGN 192.168.1.234 remorseful emo arch archean sarcopty
+			ASSIGN 192.168.1.234 remorseful emo arch archean sarcopty tuya
 			ASSIGN 192.168.3.200 #sonic.router
 			ASSIGN 192.168.3.233 
 			ASSIGN 69.162.252.119 #shop.pageturnereditions.com
@@ -137,7 +135,7 @@ integrity_hosts() {
 	 cmp -s ${OLDFILE} ${NEWFILE} || {
 		  mv ${OLDFILE}{,.orig.$(uniq_token)}
 		  mv ${NEWFILE} ${OLDFILE}
-		  hostname ${HOSTNAME}
+		  echo ${HOSTNAME} >| /proc/sys/kernel/hostname
 	 }
 	 rm -f ${NEWFILE}
 }
@@ -196,9 +194,7 @@ integrity_iptables() {
 	 # if they're different, deal with that
 	 if ! [ -s $tmp_is ] || ! diff $tmp_is $tmp_should; then
 		  if ! [ -s $tmp_is ] || askyn "Impose new iptables rules?"; then
-				set +o noclobber
-				cat $tmp_should > $rules_file
-				set -o noclobber
+				cat $tmp_should >| $rules_file
 				echo_red replaced iptables rules
 				chrooted && echo_red "Not resetting iptables" || /etc/rc.d/iptables restart
 		  fi

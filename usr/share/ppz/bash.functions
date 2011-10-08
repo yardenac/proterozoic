@@ -508,14 +508,6 @@ iptables-all() { local table
 		  #iptables -t filter	-L -v -x --line-numbers
 	 done
 }
-drome() {
-#	 create a new window in screen, open screen & switch to it
-#	 USAGE: drome [title [command [args]]]
-	 TOKEN=${1:-$(uniq_token)}
-	 shift
-	 screen -p - -X screen -t $TOKEN "$@"
-	 screen -x -R -p $TOKEN
-}
 run_in_temp_memdir() { #DELETE THIS?
 	[ "$UID" -eq 0 ] && return
 	INMEM=/tmp

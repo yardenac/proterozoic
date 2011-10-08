@@ -26,11 +26,17 @@ tmp_bind() {
 		  mount --bind /tmp "$P"
 	 done
 }
+set_hacks() {
+	 set +o noclobber
+	 echo 2000 > /sys/module/block/parameters/events_dfl_poll_msecs
+	 set -o noclobber
+}
 resolv_override() {
 	 [ -f /etc/resolv.conf.override ] \
 		  && rm -f /etc/resolv.conf \
 		  && cp -f /etc/resolv.conf{.override,}
 }
-add_hook sysinit_start		tmp_bind
-add_hook sysinit_premount	/usr/bin/integrity.ppz
-add_hook multi_start			resolv_override
+add_hook sysinit_start			tmp_bind
+add_hook sysinit_udevsettled	set_hacks
+add_hook sysinit_premount		/usr/bin/integrity.ppz
+add_hook multi_start				resolv_override

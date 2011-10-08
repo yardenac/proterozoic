@@ -8,7 +8,7 @@ urxvt.cursorColor: green
 !urxvt.foreground: white
 urxvt.reverseVideo: true
 urxvt.scrollTtyOutput: false
-urxvt.font: xft:Mono-10:antialias=true:hinting=false
+urxvt.font: xft:Mono-10:antialias=true:hinting=false,xft:Code2000
 urxvt.letterSpace: -1
 urxvt.hold: false
 urxvt.perl-ext-common: default,tabbedex,url-select
@@ -21,6 +21,8 @@ urxvt.visualBell: false
 urxvt.pointerColor: #000000
 urxvt.pointerColor2: #000000
 urxvt.buffered: true
+urxvt.iso14755: false
+urxvt.iso14755_52: false
 
 urxvt.keysym.M-u: perl:url-select:select_next
 urxvt.underlineURLs: false
