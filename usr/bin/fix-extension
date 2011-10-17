@@ -1,0 +1,103 @@
+#!/bin/bash
+
+. /usr/share/ppz/bash.functions
+
+[ "$1" ] && [ "$2" ] && \
+	 xpi=$(full_path_strict "$1") && \
+	 xpj=$(full_path_strict "$2") && \
+	 is zip "$xpi" && [ -d "$xpj" ] || \
+	 croak "USAGE: fix-extension original.xpi /dir/for/fixed/"
+
+# remove any trailing slash
+xpj=${xpj%/}
+
+# figure out the right namespace strings to pass to xmlstarlet
+ns="" #namespace strings
+rdfns="" # default namespace prefix in xpaths
+IFS=$'\n' # in case they have spaces *shudder*
+
+# for every xmlns declaration in the file
+for xmlns in $(unzip -qp "$xpi" install.rdf | grep -ioE 'xmlns(:[a-z0-9]+)?="[^"]*"' | sort -u); do
+
+	 # remove double-quotes
+	 xmlns=${xmlns//\"}
+
+	 if [ ${xmlns:5:1} = = ]; then
+		  # it starts like xmlns=http://...
+		  # so we set a "default namespace"
+		  rdfns=defns:
+		  xmlns=defns=${xmlns:6}
+	 else
+		  # it starts like xmlns:foo=http://...
+		  # so we remove 'xmlns:'
+		  xmlns=${xmlns:6}
+		  # if foo is rdf/RDF, make that the default prefix
+		  prefix=${xmlns%%=*}
+		  if [ ${prefix,,} = rdf ]; then
+				rdfns=$prefix:
+		  fi
+	 fi
+
+	 # add to namespace string
+	 ns=$ns" -N $xmlns"
+done
+IFS=$' \t\n'
+
+# get the unique id string and use it to create new file (xpj)
+idstr_xpath="//${rdfns}Description[@about='urn:mozilla:install-manifest']/em:id | //${rdfns}Description[@about='urn:mozilla:install-manifest']/@em:id | //${rdfns}Description[@${rdfns}about='urn:mozilla:install-manifest']/@em:id | //${rdfns}Description[@${rdfns}about='urn:mozilla:install-manifest']/em:id"
+unpak_xpath="//${rdfns}Description[@about='urn:mozilla:install-manifest']/em:unpack | //${rdfns}Description[@${rdfns}about='urn:mozilla:install-manifest']/@em:unpack | //${rdfns}Description[@${rdfns}about='urn:mozilla:install-manifest']/em:unpack"
+if idstr=$(unzip -qp "$xpi" install.rdf | xml sel $ns -t -v "$idstr_xpath"); then
+	 [[ "$idstr" =~ [a-zA-Z0-9\.{}@_-]{15,60} ]] || croak "This extension has a WEIRD id string."
+
+	 [ -a "$xpj/$idstr" ] || [ -a "$xpj/$idstr.xpi" ] && {
+		  echo "Already exists: $xpj"
+		  askyn "Overwrite it?" || croak "Failing, won't overwrite existing file."
+	 }
+
+	 # leave as zip or unpack?
+	 if unpak=$(unzip -qp "$xpi" install.rdf | xml sel $ns -t -v "$unpak_xpath") && [ "$unpak" = true ]; then
+		  export dtype=dir
+		  export xpj=$xpj/$idstr
+		  mkdir -p "$xpj"
+		  unzip -q "$xpi" -d "$xpj/"
+	 else
+		  export dtype=zip
+		  export xpj=$xpj/$idstr.xpi
+		  cp "$xpi" "$xpj"
+	 fi
+else
+	 croak "Could not find a valid ID string in the manifest. Something is wrong."
+fi
+
+# update internal path in new one, from pipe
+# (whether extracted or not)
+toxpj() {
+	 case $dtype in
+		  zip)	cat <&0 | rezip "$xpj" "$1";;
+		  dir)	cat <&0 >| "$xpj/$1";;
+	 esac
+}
+
+# check for seamonkey maxversion
+newst=2.7a1
+maxver_xpath="//*[@em:id='{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}']/@em:maxVersion | //*[em:id='{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}']/em:maxVersion"
+if verst=$(unzip -qp "$xpi" install.rdf | xml sel $ns -t -v "$maxver_xpath"); then
+	 # a seamonkey clause exists!
+	 case $verst in
+		  2.\*|2.4|2.4.\*|2.5a1|2.5a2|2.5|2.5.\*|2.6a1|2.6a2|2.6|2.6.\*|2.7a1) 
+#				echo_green "This plugin is already compatible with latest stable :)"
+				:;;
+		  1.0a|1.0|1.0.\*|1.1a|1.1b|1.1|1.1.\*|1.5a|2.0a|2.0a1pre|2.0a1|2.0a2pre|2.0a2|2.0a3pre|2.0a3|2.0b1pre|2.0b1|2.0b2pre|2.0b2|2.0pre|2.0|2.0.1|2.0.\*|2.1a1pre|2.1a1|2.1a2pre|2.1a2|2.1a3pre|2.1a3|2.1b1pre|2.1b1|2.1b2pre|2.1b2|2.1b3pre|2.1b3|2.1|2.1.\*|2.2a1pre|2.2|2.2.\*|2.3a2|2.3|2.3.\*|2.4a1|2.4a2)
+				echo_green "Bumping from $verst to $newst"
+				unzip -qp "$xpi" install.rdf \
+					 | xml ed -P -u "$maxver_xpath" -v $newst \
+					 | toxpj install.rdf
+				;;
+		  *) echo_red "Unrecognized version string: $verst";;
+	 esac
+else
+	 # no seamonkey clause exists - we add it
+	 echo_red "No Seamonkey section - must add [UNIMPLEMENTED]"
+fi
+
+# TODO: replace common seamonkey/firefox differences

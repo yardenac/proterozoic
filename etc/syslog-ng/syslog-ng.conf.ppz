@@ -1,7 +1,7 @@
-@version: 3.2
+@version: 3.3
 options {
   create_dirs (yes);
-  log_fifo_size (1024);
+  log_fifo_size (10240);
   group ("log");
   perm (0640);
   time_reopen (10);
@@ -11,7 +11,7 @@ options {
   ts_format (iso);
   mark_freq (3601);
   use_dns (no);
-  long_hostnames (off); 
+  chain_hostnames (off); 
   use_fqdn (no);
   keep_hostname (yes);
 };

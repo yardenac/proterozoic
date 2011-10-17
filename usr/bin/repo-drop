@@ -1,0 +1,58 @@
+#!/bin/bash
+# 
+# a little bit less tedious than remembering long file paths!
+
+. /usr/share/ppz/bash.functions
+
+shopt -s nullglob
+
+dbs=()
+pack=""
+for arg; do
+	 item=$(full_path_strict "$arg") || {
+		  echo_red "SKIPPING NON-EXISTENT ITEM: $arg"
+		  continue
+	 }
+	 if [ -d "$item" ]; then
+		  item=${item%/}
+		  for db in "$item"/*.db.tar.gz; do
+				is db "$db" && {
+					 dbs+=("$db")
+					 continue 2
+				}
+		  done
+		  echo_red "SKIPPING DIR W/O DB: $item"
+	 elif is pkg "$item"; then
+		  [ "$pack" ] \
+				&& echo_red "SKIPPING EXTRA PACKAGE: $item" \
+				|| pack=$item
+	 else
+		  echo_red "SKIPPING WEIRD ARG: $item"
+	 fi
+done
+
+(( ${#dbs[@]} )) && [ "$pack" ] || \
+	 croak "USAGE: repo-drop /path/to/repo/ to-add.pkg.tar.xz"
+
+pack_base=$(basename "$pack")
+
+to_del=()
+for db in "${dbs[@]}"; do
+	 repo=$(dirname "$db")
+	 [ -a "$repo/$pack_base" ] && {
+		  echo_red "NOT ADDING, ALREADY EXISTS: $repo/$pack_base"
+		  continue
+	 }
+	 to_del+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
+	 rsync --out-format='%t %o %f' --inplace -LPh "$pack" "$repo/$pack_base"
+	 repo-add "$db" "$repo/$pack_base"
+done
+
+(( ${#to_del[@]} )) && {
+
+	 ls -lF "${to_del[@]}"
+
+	 askyn "Delete older pkgs on server?" && rm -f "${to_del[@]}"
+}
+
+askyn "Delete original pkg?" && rm -f "$pack"

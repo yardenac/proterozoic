@@ -55,15 +55,9 @@ pacman_is_ancestor() {
 ############# FILE MANIP
 ############################
 ############################
-full_path() {
-   echo -n "$( readlink -f "$( dirname "$1" )" )/$( basename "$1" )"
-}
-full_path_lax() {
-   echo -n "$( readlink -m "$( dirname "$1" )" )/$( basename "$1" )"
-}
-full_path_strict() {
-   echo -n "$( readlink -e "$( dirname "$1" )" )/$( basename "$1" )"
-}
+full_path()			 { readlink -f "$(dirname "$1")/$(basename "$1")"; }
+full_path_lax()	 { readlink -m "$(dirname "$1")/$(basename "$1")"; }
+full_path_strict() {	readlink -e "$(dirname "$1")/$(basename "$1")"; }
 repermit() {
 	for TARGET; do
 		[ -e "$TARGET" ] || continue
@@ -243,6 +237,8 @@ c=${#ansi_colors[@]}
 while let c--; do
 	 eval echo_${ansi_colors[$c]}'()
 		{ echo -ne "\e[1;3'"$c"'m$@\e[m\n" >&2; }'
+	 eval echo_${ansi_colors[$c]}'_n()
+		{ echo -ne "\e[1;3'"$c"'m$@\e[m" >&2; }'
 done
 clear_input_buffer() {
     #example: clear_input_buffer "clearing input buffer..." "ok\n"
@@ -477,11 +473,24 @@ woman() {
 		--eval '(beginning-of-buffer)'\
 		--eval '(beginning-of-buffer)'
 }
+sep_by() {
+	 local SEP=$1
+	 shift
+	 echo -n "$1"
+	 shift
+	 for arg; do
+		  echo -n "$SEP$arg"
+	 done
+}
 wf() {
-	local IFS=:
+	local P REPLY IFS=:
 	pushd ~ >/dev/null
 	for P in $PATH; do
-		find "$P" 2>/dev/null | grep -i --color=auto ${@// }
+		find "$P" 2>/dev/null | {
+			 while read; do
+				  stat -c %N "$REPLY" | tr -d \'\`
+			 done
+		} | grep -i --color=auto -E $(sep_by \| "$@")
 	done
 	popd >/dev/null
 }
@@ -659,4 +668,26 @@ ssh_amend_host_trust() {
 	 # ssh-keygen -R [each]
 	 # ssh-keygen -R [each],[each]
 	 # ssh-keyscan -H [each] >> ~/.ssh/known_hosts
+}
+is() {
+	 [ -a "$2" ] || return 1
+	 local str arg
+	 case "$1" in
+		  '')		return 1;; # existential crisis...
+		  xz|xzip|pkg)
+					str='^application/x-xz;';;
+		  gz|gzip|db)
+					str='^application/x-gzip;';;
+		  c)		str='^text/x-c;';;
+		  zip)	str='^application/zip;';;
+		  *)		for arg; do
+						[ -a "$arg" ] || return 1
+					done
+					return 0;;
+	 esac
+	 shift
+	 for arg; do
+		  file -bi "$arg" | grep -qiE "$str" \
+				|| return 1
+	 done
 }
