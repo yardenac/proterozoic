@@ -26,12 +26,14 @@ OpaqueMoveSize unlimited
 
 FocusStyle * !EnterToFocus, !LeaveToUnfocus, !FocusByProgram, \
 			FocusByFunction, !FocusByFunctionWarpPointer, !Lenient, \
-			FocusClickButtons 1, PassFocusClick, AllowFocusClickFunction
+			FocusClickButtons 13, PassFocusClick, AllowFocusClickFunction, \
+			GrabFocus, GrabFocusTransient, ReleaseFocus, ReleaseFocusTransient, \
+			SortWindowlistByFocus, ClickToFocus
 Style * !Borders, !Handles, MWMFunctions, MWMDecor, HintOverride, \
-		  Icon unknown1.xpm, Color lightgrey/dimgrey, !Title, FPSortWindowlistByFocus, \
+		  Icon unknown1.xpm, Color lightgrey/dimgrey, !Title, \
 		  !UsePPosition, NoPPosition, NoIcon, \
 		  DecorateTransient, EdgeMoveResistance 50 50, \
-		  IconBox 0 -10 -280 -1, SnapAttraction 10, ClickToFocus, ResizeOpaque
+		  IconBox 0 -10 -280 -1, SnapAttraction 10, ResizeOpaque
 Style Fvwm*       NoTitle,  Sticky, WindowListSkip, \
 		BorderWidth 2, CirculateSkipIcon, CirculateSkip
 Style panel StaysOnTop
@@ -137,6 +139,7 @@ AddToFunc ResizeDynamic
 DestroyMenu MenuFvwmRoot
 AddToMenu MenuFvwmRoot
 + "Terminal"	Exec exec urxvt -pe -tabbedex
++ "Seamonkey"	Exec exec seamonkey
 + "Reload WM"	Restart
 + "Restart WM"	Quit
 + "Reboot CPU"	Exec exec sudo /sbin/reboot

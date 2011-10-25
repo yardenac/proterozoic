@@ -97,7 +97,7 @@ if verst=$(unzip -qp "$xpi" install.rdf | xml sel $ns -t -v "$maxver_xpath"); th
 		  *) echo_red "Unrecognized version string: $verst";;
 	 esac
 else
-	 echo_red "Adding Seamonkey compatibility (de jure)"
+	 echo_green "Adding Seamonkey to install.rdf"
 	 u=%$(uniq_token)%
 	 unzip -qp "$xpi" install.rdf \
 		  | xml ed $ns -s "$mainr_xpath" -t elem -n 'em:targetApplication' -v $u \
@@ -109,7 +109,18 @@ else
 					<em:maxVersion>'$newst'</em:maxVersion>\
 				</Description>\n'_ig \
 		  | toxpj install.rdf
-	 echo_red "Adding Seamonkey compatibility (DE FACTO) [UNIMPLEMENTED]"
-	 # TODO: search & replace stuff
+
+	 echo_green "Adding navigator overlay to chrome.manifest"
+	 unzip -qp "$xpi" chrome.manifest \
+		  | awk '
+				{print}
+				/^overlay/ {
+					if ($2 == "chrome://browser/content/browser.xul") {
+						$2 = "chrome://navigator/content/navigator.xul"
+						print
+					}
+				}' \
+			| uniq \
+			| toxpj chrome.manifest
 fi
 

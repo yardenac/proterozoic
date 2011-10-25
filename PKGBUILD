@@ -2,16 +2,21 @@ pkgname=proterozoic
 pkgver=0.$(date +%s)
 pkgrel=1
 pkgdesc="Configs and scripts overlaying Arch Linux"
-arch=(any)
+arch=(i686 x86_64)
 license=('GPL')
 install=proterozoic.install
-makedepends=(findutils coreutils net-tools)
+makedepends=(findutils coreutils net-tools gcc-multilib)
 depends=(emacs-nox bash-completion iptables sudo ntp openssh sshfs htop jfsutils bc iproute2 fgetty git lsof pacman-mirrorlist ca-certificates screen-best net-tools python2 rsync ddrescue cryptsetup unzip zip)
 # gptfdisk
 # fakeroot xz bzip2 lzop less gzip rankmirrors curl ca-certificates)
 
 package() {
 	 cp -a ${startdir}/{etc,lib,usr} ${pkgdir}/
+	 mkdir -p ${pkgdir}/etc/skel.ppz/.macromedia
+
+	 b=-m32; [ $CARCH = x86_64 ] && b=-m64
+	 /usr/bin/gcc $b $CFLAGS -Wall ${startdir}/c/cdtray.c -o ${pkgdir}/usr/bin/cdtray
+
 	 chmod 444 ${pkgdir}/etc/.emacs.d/init.el
 	 chmod 555 ${pkgdir}/etc/.emacs.d
 	 chmod 440 ${pkgdir}/etc/sudoers.d/ppz

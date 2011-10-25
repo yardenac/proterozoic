@@ -2,7 +2,15 @@
 # 
 # a little bit less tedious than remembering long file paths!
 
-. /usr/share/ppz/bash.functions
+# Needs the extra logic since we call from package-this
+if [ -s usr/share/ppz/bash.functions ]; then
+	 . usr/share/ppz/bash.functions
+elif [ -s /usr/share/ppz/bash.functions ]; then
+	 . /usr/share/ppz/bash.functions
+else
+	 echo "No functions file!"
+	 exit 1
+fi
 
 shopt -s nullglob
 
