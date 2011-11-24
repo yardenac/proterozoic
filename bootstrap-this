@@ -22,7 +22,9 @@ mv -f /etc/pacman.conf{,.original}
 wget $GITURL/usr/share/ppz/default/rc.conf		-qO	/etc/rc.conf
 wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
-sed -i s/otown/otown.tmp/ig									/etc/pacman.conf
+sed -i \
+	 -e 's/^IgnorePkg = /\0linux/ig' \
+	 -e s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
 	 -e s/%SET_TYPE%/desktop/ig \
 	 -e s/%SET_HOSTNAME%/archiso/ig							/etc/rc.conf
