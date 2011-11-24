@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# if called weirdly and relative bff exists, use that
+# otherwise use system bff
+! [ "$0" = kml-fix ] && {
+	 kfp="$(dirname "$0")"/kml-fix-python
+	 bff="$(dirname "$0")"/../share/ppz/bash.functions
+	 [ -a "$bff" ] && . "$bff"
+} || {
+	 kfp=kml-fix-python
+	 . /usr/share/ppz/bash.functions
+}
+
+[ "$1" ] || croak "USAGE: kml-fix XML-FILE"
+[ -a "$1" ] || croak "XML-FILE does not exist"
+is xml "$1"|| croak "XML-FILE is not XML..."
+good-xml "$1" || croak "XML-FILE is malformed!"
+
+file=/tmp/.$(uniq_token).kml
+trap "rm -rf ${file}; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+cp -f "$1" "$file"
+
+xmlns-args "$file"
+
+cat "$file" | "$kfp" | less
+
+#cat "$file" | xml sel $ns -t -c "count(/${defns}kml/${defns}Document/${defns}Style)"
+

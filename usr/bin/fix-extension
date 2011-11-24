@@ -12,41 +12,15 @@
 xpj=${xpj%/}
 
 # figure out the right namespace strings to pass to xmlstarlet
-ns="" #namespace strings
-rdfns="" # default namespace prefix in xpaths
-IFS=$'\n' # in case they have spaces *shudder*
-
-# for every xmlns declaration in the file
-for xmlns in $(unzip -qp "$xpi" install.rdf | grep -ioE 'xmlns(:[a-z0-9]+)?="[^"]*"' | sort -u); do
-
-	 # remove double-quotes
-	 xmlns=${xmlns//\"}
-
-	 if [ ${xmlns:5:1} = = ]; then
-		  # it starts like xmlns=http://...
-		  # so we set a "default namespace"
-		  rdfns=defns:
-		  xmlns=defns=${xmlns:6}
-	 else
-		  # it starts like xmlns:foo=http://...
-		  # so we remove 'xmlns:'
-		  xmlns=${xmlns:6}
-		  # if foo is rdf/RDF, make that the default prefix
-		  prefix=${xmlns%%=*}
-		  if [ ${prefix,,} = rdf ]; then
-				rdfns=$prefix:
-		  fi
-	 fi
-
-	 # add to namespace string
-	 ns=$ns" -N $xmlns"
-done
-IFS=$' \t\n'
+tmprdf=/tmp/.$(uniq_token).rdf
+trap "rm -rf ${tmprdf}; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+unzip -qp "$xpi" install.rdf > $tmprdf
+xmlns-args $tmprdf
 
 # get the unique id string and use it to create new file (xpj)
-mainr_xpath="//${rdfns}Description[@about='urn:mozilla:install-manifest'] | //${rdfns}Description[@${rdfns}about='urn:mozilla:install-manifest']"
-idstr_xpath="//${rdfns}Description[@about='urn:mozilla:install-manifest']/em:id | //${rdfns}Description[@about='urn:mozilla:install-manifest']/@em:id | //${rdfns}Description[@${rdfns}about='urn:mozilla:install-manifest']/@em:id | //${rdfns}Description[@${rdfns}about='urn:mozilla:install-manifest']/em:id"
-unpak_xpath="//${rdfns}Description[@about='urn:mozilla:install-manifest']/em:unpack | //${rdfns}Description[@${rdfns}about='urn:mozilla:install-manifest']/@em:unpack | //${rdfns}Description[@${rdfns}about='urn:mozilla:install-manifest']/em:unpack"
+mainr_xpath="//${defns}Description[@about='urn:mozilla:install-manifest'] | //${defns}Description[@${defns}about='urn:mozilla:install-manifest']"
+idstr_xpath="//${defns}Description[@about='urn:mozilla:install-manifest']/em:id | //${defns}Description[@about='urn:mozilla:install-manifest']/@em:id | //${defns}Description[@${defns}about='urn:mozilla:install-manifest']/@em:id | //${defns}Description[@${defns}about='urn:mozilla:install-manifest']/em:id"
+unpak_xpath="//${defns}Description[@about='urn:mozilla:install-manifest']/em:unpack | //${defns}Description[@${defns}about='urn:mozilla:install-manifest']/@em:unpack | //${defns}Description[@${defns}about='urn:mozilla:install-manifest']/em:unpack"
 if idstr=$(unzip -qp "$xpi" install.rdf | xml sel $ns -t -v "$idstr_xpath"); then
 	 [[ "$idstr" =~ [a-zA-Z0-9\.{}@_-]{15,60} ]] || croak "This extension has a WEIRD id string."
 
@@ -80,12 +54,12 @@ toxpj() {
 }
 
 # check for seamonkey maxversion
-newst=2.7a1
+newst=2.8a1
 maxver_xpath="//*[@em:id='{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}']/@em:maxVersion | //*[em:id='{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}']/em:maxVersion"
 if verst=$(unzip -qp "$xpi" install.rdf | xml sel $ns -t -v "$maxver_xpath"); then
 	 # a seamonkey clause exists!
 	 case $verst in
-		  2.\*|2.4|2.4.\*|2.5a1|2.5a2|2.5|2.5.\*|2.6a1|2.6a2|2.6|2.6.\*|2.7a1|3.0.\*) 
+		  2.\*|2.4|2.4.\*|2.5a1|2.5a2|2.5|2.5.\*|2.6a1|2.6a2|2.6|2.6.\*|2.7a1|2.7a2|2.7|2.7.\*|2.8a1|3.0.\*)
 #				echo_green "This plugin is already compatible with latest stable :)"
 				:;;
 		  1.0a|1.0|1.0.\*|1.1a|1.1b|1.1|1.1.\*|1.5a|2.0a|2.0a1pre|2.0a1|2.0a2pre|2.0a2|2.0a3pre|2.0a3|2.0b1pre|2.0b1|2.0b2pre|2.0b2|2.0pre|2.0|2.0.1|2.0.\*|2.1a1pre|2.1a1|2.1a2pre|2.1a2|2.1a3pre|2.1a3|2.1b1pre|2.1b1|2.1b2pre|2.1b2|2.1b3pre|2.1b3|2.1|2.1.\*|2.2a1pre|2.2|2.2.\*|2.3a2|2.3|2.3.\*|2.4a1|2.4a2)

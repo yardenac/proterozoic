@@ -30,8 +30,7 @@ done
 trap "rm -rf ${T}; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
 
 for arch in i686 x86_64; do
-	 sed -e 's/^CARCH=.*$/CARCH="'$arch'"/ig' \
-		  -e 's/-march=[^ ]*/-march='${arch//_/-}'/ig' /etc/makepkg.conf > $T/$arch
+	 cross-arch-makepkg-conf $arch > $T/$arch
 
 	 makepkg -c --config $T/$arch || continue
 	 PF=$(ls -1tr *.pkg.tar.xz | tail -n 1) || continue

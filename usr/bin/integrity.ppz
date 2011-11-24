@@ -227,17 +227,17 @@ remote_sync_file() { # $0 '/local/path' 'md5sum464a702cf...' 'http://source'
 	 [ "${1:0:6}" = /boot/ ] && mount -o remount,ro /boot &>/dev/null; :
 }
 integrity_net() {
-	 test_network_once 5 && {
+	 if test_network_once 5; then
 		  ! python-ntp && am_root && askyn "Sync kernel & hwclock with ntpdate?" && {
 				ntpdate pool.ntp.org
 				echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
 				hwclock --systohc --utc
-		  } || true
-	 } || {
+		  }
+	 else
 		  echo -n "No fast connectivity... Local system time: "
 		  echo_red $(date '+%l:%M:%S (%A %B %e, %Y)')
 		  return
-	 }
+	 fi
 	 am_root && {
 		  grep -iq broadcast /etc/rc.d/network || {
 				mv -f /etc/rc.d/network{,.forget}

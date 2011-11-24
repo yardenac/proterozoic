@@ -22,7 +22,7 @@ if data:
     prepos = " " + ("fast" if (us > them) else "slow")
     if (sigsecs > 1):
         prepos = "s" + prepos
-    if (sigsecs > 6):
+    if (sigsecs > 3):
         print "Clock is %d second%s!" % (sigsecs,prepos)
-    sys.exit(sigsecs > 13)
+    sys.exit(sigsecs > 5)
 sys.exit(3)

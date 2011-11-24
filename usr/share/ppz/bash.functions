@@ -679,6 +679,7 @@ is() {
 		  gz|gzip|db)
 					str='^application/x-gzip;';;
 		  c)		str='^text/x-c;';;
+		  xml)	str='^application/xml;';;
 		  zip)	str='^application/zip;';;
 		  *)		for arg; do
 						[ -a "$arg" ] || return 1
@@ -689,5 +690,70 @@ is() {
 	 for arg; do
 		  file -bi "$arg" | grep -qiE "$str" \
 				|| return 1
+	 done
+}
+cross-arch-makepkg-conf() {
+	 local a=i686 orig=/etc/makepkg.conf
+	 for arg; do
+		  case "$arg" in
+				x86_64|x86-64|64|amd64)
+									a=x86_64; continue;;
+				i686|i386|32)	a=i686;   continue;;
+		  esac
+		  [ -a "$arg" ] && orig=$arg
+	 done
+	 sed -e 's/^CARCH=.*$/CARCH="'${a//-/_}'"/ig' \
+		  -e 's/-march=[^ ]*/-march='${a//_/-}'/ig' "$orig"
+}
+good-xml() {
+	 is xml "$1" || return 1
+	 cat "$1" | xml val -w -q -e - || return 1
+}
+xml-nice() {
+	 [ -w "$1" ] && local file=$1 suff=$(uniq_token) || return 1
+	 good-xml "$file" || return 1
+	 cat "$file" | xml tr /usr/share/ppz/abc.xslt | xml fo -s 2 > "$file.$suff"
+	 diff \
+		  <(cat "$file.$suff" | xml el -v - | sort -u) \
+		  <(cat "$file" | xml el -v - | sort -u) \
+		  && {
+
+		  # switch em
+		  mv -f "$file" "$file.$suff.b"
+		  mv -f "$file.$suff" "$file"
+		  rm -f "$file.$suff.b"
+
+	 } || rm -f "$file.$suff"
+}
+xmlns-args() { local xmlns prefix file IFS=$'\n'
+	 ns="" #namespace strings (pass to xml as -N)
+	 defns="" # default namespace prefix in xpaths
+
+	 good-xml "$1" && file=$1 || return 1
+
+	 # for every xmlns declaration in the file
+	 for xmlns in $(cat "$file" | grep -ioE 'xmlns(:[a-z0-9]+)?="[^"]*"' | sort -u); do
+#		  echo "DOING: $xmlns"
+		  # remove double-quotes
+		  xmlns=${xmlns//\"}
+
+		  if [ ${xmlns:5:1} = = ]; then
+				# it starts like xmlns=http://...
+				# so we set a "default namespace"
+				defns=defns:
+				xmlns=defns=${xmlns:6}
+		  else
+				# it starts like xmlns:foo=http://...
+				# so we remove 'xmlns:'
+				xmlns=${xmlns:6}
+				# if foo is rdf/RDF, make that the default prefix
+				prefix=${xmlns%%=*}
+				if [ ${prefix,,} = rdf ]; then
+					 defns=$prefix:
+				fi
+		  fi
+
+		  # add to namespace string
+		  ns=$ns" -N $xmlns"
 	 done
 }
