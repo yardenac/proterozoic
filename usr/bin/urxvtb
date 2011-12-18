@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. /etc/profile
+
 urxvtc "$@"
 
 if [ $? -eq 2 ]; then

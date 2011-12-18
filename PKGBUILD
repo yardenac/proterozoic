@@ -14,7 +14,7 @@ package() {
 	 cp -a ${startdir}/{etc,lib,usr} ${pkgdir}/
 	 mkdir -p ${pkgdir}/etc/skel.ppz/.macromedia
 
-	 b=-m32; [ $CARCH = x86_64 ] && b=-m64
+	 b=-m64; [ $CARCH = i686 ] && b='-m32 -Wl,--dynamic-linker=/lib/ld-linux.so.2'
 	 /usr/bin/gcc $b $CFLAGS -Wall ${startdir}/c/cdtray.c -o ${pkgdir}/usr/bin/cdtray
 
 	 chmod 444 ${pkgdir}/etc/.emacs.d/init.el

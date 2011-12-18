@@ -22,7 +22,7 @@ fix_initcpio_ppz() {
 		  askyn "Add ppz_tmp to HOOKS?" \
 				&& sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' ${TARGET}/etc/mkinitcpio.conf
 	 }
-	 usetvar mmodules "Add any initrd modules (delete what you dont want): " 'radeon nvidia' ''
+	 usetvar mmodules "Add any initrd modules (delete what you dont want): " 'radeon nvidia intel_agp i915' ''
 	 sed -i 's/^\(MODULES="[^"]*\)"/\1 '"${mmodules[@]}"'"/ig' ${TARGET}/etc/mkinitcpio.conf
 	 grex ${TARGET}/etc/mkinitcpio.conf
 	 askyn "Above is ${TARGET}/etc/mkinitcpio.conf. You have a chance to edit

@@ -8,11 +8,17 @@ MNTPTS=( /boot ) # / is implied
 
 pacman_target() {
 	 # --config /usr/share/ppz/default/pacman.conf
-	 /usr/bin/pacman --root ${TARGET} \
+	 until /usr/bin/pacman --root ${TARGET} \
 		  --cachedir ${TARGET}/var/cache/pacman/pkg \
 		  --dbpath ${TARGET}/var/lib/pacman \
 		  --logfile ${TARGET}/var/log/pacman.log \
-		  --noprogressbar --noconfirm --needed "$@"
+		  --noprogressbar --noconfirm --needed "$@"; do
+		  askyn "Pacman did not succeed - try again?" || {
+				askyn "Abort?" \
+					 && exit \
+					 || break
+		  }
+	 done
 }
 unmount_all() {
 	 local RV=0
@@ -103,7 +109,7 @@ start_process() {
 				eval askyn 'Install $A things? \(${pkgs_'$A'[@]}\)' && eval 'pkgs_go+=(${pkgs_'$A'[@]})'
 		  done
 		  pkgs_go+=(btrfs-progs-unstable tor privoxy proterozoic) # grub2-bios
-		  usetvar others "Type in any other packages you want to add: " 'xf86-video-ati xf86-video-intel nvidia aif' ''
+		  usetvar others "Type in any other packages you want to add: " 'xf86-video-ati xf86-video-intel nvidia aif parted dnsutils b43-firmware' ''
 		  pkgs_go+=(${others//,/ })
 		  pacman_target -Sq ${pkgs_go[@]}
 		  cp -f ${TARGET}/{usr/share/ppz/default,etc}/pacman.conf
