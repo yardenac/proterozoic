@@ -11,7 +11,7 @@ PATH=/sbin:/bin:/usr/bin
 . /usr/share/ppz/bash.functions
 
 am_root || echo "must be root!"
-[ -s /etc/mtab ] || croak "Cannot run this in chroot!"
+chrooted && croak "Cannot run this in chroot!"
 [ "$1" ] || croak "Must pass a username as first arg"
 user="$1"
 dev=$(encdev_from_user "$user")
@@ -47,7 +47,7 @@ open_dev() { local name dev mountpoint mapname arg
 	 }
 
 	 # if it's mounted already, leave it be
-	 grep -iqE ^/dev/mapper/$mapname /etc/mtab && {
+	 findmnt -n /dev/mapper/$mapname >/dev/null && {
 #		  echo "/dev/mapper/$mapname is already mounted"
 		  return
 	 }

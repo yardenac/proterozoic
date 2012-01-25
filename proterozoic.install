@@ -81,8 +81,7 @@ check_triggers() {
 				return
 		  }
 		  [ -w /boot ] || {
-				grep -qiE '[[:space:]]/boot.*ro' /etc/mtab \
-					 && mount -o remount,rw /boot
+				findmnt -nO ro /boot >/dev/null && mount -o remount,rw /boot
 		  } || {
 				echo "couldn't figure out your /boot ... not building initrd!"
 				rm -f lib/initcpio/install/ppz_tmp.last

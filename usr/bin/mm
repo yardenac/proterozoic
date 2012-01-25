@@ -1,0 +1,20 @@
+#!/bin/bash
+# mplayer but a little easier
+
+. /usr/share/ppz/bash.functions
+
+do_unto_others
+
+holdss &
+trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
+
+y=250; [ "$1" = d ] && shift && y=-1000
+
+ionice -c 2 -n 0 nice -n -5 mplayer -geometry 1030:$y -fs -ao alsa \
+	 -stop-xscreensaver -msglevel all=1:statusline=9 -nolirc "$@"
+
+echo
+
+# leftover for pretty-printing statusline
+# -msglevel all=5:statusline=9 2>&1 | nice -n -28 tr "\r" "\n" | \
+# nice -n -28 awk -f ~/bin# /mawk -v qfilename="$MF" '

@@ -6,7 +6,7 @@
 #   with or without root privs
 #   interactively or with messed up input/output
 #   before or after rc.multi scripts (they could be backgrounded!)
-#   inside a chroot (check /etc/mtab)
+#   inside a chroot - use chrooted() from bash.functions
 
 integrity_rootpw() {
 	 am_root && shell_is_interactive || return 0
@@ -71,18 +71,22 @@ integrity_simpleconf() {
 	 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
 	 case $SYSTEM_TYPE in
 		  linode)				sed -i 's/MODULES="dm-crypt btrfs fuse"/MODULES=""/ig' /lib/initcpio/install/ppz_tmp
-									sed -i 's%^\#\(server time.fremont.cbane.org.*\)$%\1%ig' /etc/ntp.conf;;
-		  desktop|laptop|*)	sed -i 's%^\(server time.fremont.cbane.org.*\)$%\#\1%ig' /etc/ntp.conf;;
+									sed -i 's%^\#\(server clock.fmt.he.net.*\)$%\1%ig' /etc/ntp.conf;;
+		  desktop|laptop|*)	sed -i 's%^\(server clock.fmt.he.net.*\)$%\#\1%ig' /etc/ntp.conf;;
 	 esac
 	 case "$(uname -m)" in
 		  i686)		sed -i 's/^\[multilib\]$/#&/ig'			/etc/pacman.conf;;
 		  x86_64)	sed -i 's/^##*\(\[multilib\]\)$/\1/ig'	/etc/pacman.conf;;
 	 esac
 	 mkdir -p /media/{arch-cold-r{w,o},rodinia,green}
-	 [ -L /snowball ] || ln -s /media/rodinia/pub /snowball
+	 [ -L /snowball ] || ln -s media/rodinia/pub /snowball
 	 [ -a /usr/share/terminfo/r/rxvt-unicode-256color ] || \
 		  ln -s /usr/share/terminfo/r/rxvt{,-unicode}-256color
 	 enforce_perms 440 /etc/sudoers.d/wheel
+
+	 sed -i 's%^\(MIRRORLIST="/etc/pacman.d/mirrorlist"\)$%\#\1%ig' /etc/abs.conf
+	 grep -qiE '^MIRRORLIST="/etc/pacman.d/mirrorlist.otown"$' /etc/abs.conf || \
+		  echo 'MIRRORLIST="/etc/pacman.d/mirrorlist.otown"' >> /etc/abs.conf
 }
 integrity_inittab() {
 	 am_root || return 0
@@ -105,7 +109,7 @@ integrity_hosts() {
 	 local NEWFILE=/tmp/root.etchosts.$(uniq_token)
 	 {
 		  cat <<-EOF
-			THISVER 2011071201
+			THISVER 2012011101
 			ASSIGN 127.0.0.1		localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
 			ASSIGN ::1				localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
 			ASSIGN fe00::0			ip6-localnet
@@ -116,13 +120,13 @@ integrity_hosts() {
 			ASSIGN 192.168.1.200
 			ASSIGN 192.168.1.226 fjm-wl
 			ASSIGN 192.168.1.227 fjm-eth
-			ASSIGN 192.168.1.228 dusty scaly
-			ASSIGN 192.168.1.229 lucky lucky-wf lucky-wifi edie-wl iggy
+			ASSIGN 192.168.1.228 nudi
+			ASSIGN 192.168.1.229 iggy
 			ASSIGN 192.168.1.230 
 			ASSIGN 192.168.1.231 
 			ASSIGN 192.168.1.232
-			ASSIGN 192.168.1.233 #vonage 
-			ASSIGN 192.168.1.234 remorseful emo arch archean sarcopty tuya
+			ASSIGN 192.168.1.233
+			ASSIGN 192.168.1.234 tuya
 			ASSIGN 192.168.3.200 #sonic.router
 			ASSIGN 192.168.3.233 
 			ASSIGN 69.162.252.119 #shop.pageturnereditions.com
@@ -209,7 +213,7 @@ can_work_with_boot() {
 		  && ! [ -d /boot/grub ] \
 		  && return 1 #should be mounted but isnt
 	 [ -w /boot ] && return #can write to it - ok
-	 grep -iq /boot /etc/mtab && return 1 #probably chrooted
+	 findmnt -n /boot >/dev/null && return 1 #probably chrooted
 	 mount -o remount,rw /boot &>/dev/null
 	 [ -w /boot ] || return 1 #weve done all we can
 }
@@ -335,7 +339,7 @@ integrity_encdev() {
 		  echo -n "loosest slots in town" | \
 				cryptsetup -qvi 9999 -S 1 -d - -s 512 -c aes-xts-plain64 -h whirlpool luksFormat "$dev"
 
-		  [ -s /etc/mtab ] || {
+		  chrooted && {
 				echo_red "WE ARE DOING DEV MAPPINGS IN A CHROOT! LOOK FOR ERRORS!"
 		  }
 		  # as long as mapname is unique here, it should work ok ... i think
@@ -394,6 +398,9 @@ integrity_encdev() {
 				# for each loopback that might exist for $dev
 				# will this work in a chroot??
 				for loop in $(losetup -j $dev | sed 's%^\(/[^:]*\):.*$%\1%ig;t;d'); do
+
+					 echo_red "Resizing $dev at $loop - if in chroot, take note this worked :D"
+
 					 # make it read new size
 					 losetup -c $loop
 
@@ -411,7 +418,7 @@ integrity_encdev() {
 
 						  # resize filesystem inside mapping - online or offline
 						  # if we're running in a chroot, this will (should) also fail
-						  grep -iqE ^/dev/mapper/$mapname /etc/mtab \
+						  ! chrooted && findmnt -n /dev/mapper/$mapname >/dev/null \
 								&& mount -o remount,resize /dev/mapper/$mapname \
 								|| resize2fs /dev/mapper/$mapname
 					 }
@@ -553,7 +560,7 @@ integrity_sshd() {
 #	 askyn "did you inspect?"
 	 if conffile_checkup "${OLDFILE}" "${NEWFILE}"; then
 		  #file changed
-		  [ -s /etc/mtab ] && {
+		  chrooted || {
 				# not chrooted
 				echo_red pkilling sshd
 				pkill -HUP -f /usr/sbin/sshd; SSHD_ON=$?

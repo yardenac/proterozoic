@@ -21,4 +21,10 @@ pacman -Syu
 pstree -Auchnap
 su - && exit
 exec htop
+exec su -
+blkid | sort
+mount -o remount,ro /boot
+mount -o remount,rw /boot
+gpasswd -a eu optical
+gpasswd -a eu audio
 #LAST_PPZ_COMMAND

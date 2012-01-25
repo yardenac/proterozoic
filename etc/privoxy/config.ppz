@@ -19,5 +19,4 @@ allow-cgi-request-crunching 0
 split-large-forms 0
 keep-alive-timeout 5
 socket-timeout 300
-handle-as-empty-doc-returns-ok 1
 forward-socks4a / localhost:9050 .

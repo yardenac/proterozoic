@@ -1,3 +1,5 @@
+#!/bin/bash
+
 do_tmpfs() {
 	 mkdir -p /tmp
 	 mount -t tmpfs -o defaults,nodev,nosuid,noexec,mode=1777,size=$1,uid=0,gid=0,noauto,noatime,nodiratime shm /tmp

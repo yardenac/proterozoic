@@ -1,0 +1,38 @@
+#!/bin/bash
+
+. /usr/share/ppz/bash.functions
+
+am_root || croak "You must be root to run $0!"
+
+trap 'exit 46;' HUP QUIT INT TERM ABRT TSTP CONT
+
+mountpoint=/media/dvd
+
+[ -a $mountpoint ]			|| mkdir $mountpoint
+[ -d $mountpoint ]			|| croak "Not a directory! $mountpoint"
+
+mountpoint_empty() {
+	 ! mountpoint -q $mountpoint
+}
+
+for arg; do
+	 case "$arg" in
+		  --unmount)
+				mountpoint_empty || umount /media/dvd
+				exit
+				;;
+		  *)
+				file="$(full_path_strict "$arg")"						|| croak "Unknown option: $arg"
+				[ -f "$file" ]													|| croak "Not a file: $file"
+				is dvd "$file"													|| croak "Not a DVD image: $file"
+				[ "$(blkid -o value -s TYPE "$file")" = iso9660 ]	|| croak "Broken DVD image?: $file"
+				;;
+	 esac
+done
+
+echo_blue_n 'Waiting to mount `'"$file"'` to `'"$mountpoint"'` ...'
+findmnt -fnT $mountpoint -o SOURCE >/dev/null \
+	 && old=$(findmnt --poll=umount -fnT $mountpoint -o SOURCE)
+echo_blue " done! was $old"
+
+mount -t iso9660 -vio ro,loop "$file" "$mountpoint"

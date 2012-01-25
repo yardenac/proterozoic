@@ -28,7 +28,7 @@ FocusStyle * !EnterToFocus, !LeaveToUnfocus, !FocusByProgram, \
 			FocusByFunction, !FocusByFunctionWarpPointer, !Lenient, \
 			FocusClickButtons 13, PassFocusClick, AllowFocusClickFunction, \
 			GrabFocus, GrabFocusTransient, ReleaseFocus, ReleaseFocusTransient, \
-			SortWindowlistByFocus, ClickToFocus
+			SortWindowlistByFocus, ClickToFocus, ClickToFocusRaises
 Style * !Borders, !Handles, MWMFunctions, MWMDecor, HintOverride, \
 		  Icon unknown1.xpm, Color lightgrey/dimgrey, !Title, \
 		  !UsePPosition, NoPPosition, NoIcon, \
@@ -68,6 +68,7 @@ Key	c				A		4			NiceBash 67x36  - 'cal -y && read'
 Key	b				A		4			NiceTerm 40x39  - /usr/bin/bc -lq /etc/bcrc
 Key	q				A		4			Exec exec transset-df -a --dec 0.04
 Key	w				A		4			Exec exec transset-df -a --inc 0.04
+Key	v				A		4			xdotool click 2
 Mouse 0				A 		A			-
 Mouse 1				R		A			-
 Mouse 1				SFTW	M			DragNMove
@@ -140,6 +141,7 @@ DestroyMenu MenuFvwmRoot
 AddToMenu MenuFvwmRoot
 + "Terminal"	Exec exec urxvt -pe -tabbedex
 + "Seamonkey"	Exec exec seamonkey
++ "Firefox"		Exec exec firefox
 + "Broken LCD"	Exec exec xrdb -override - /usr/share/ppz/Xresources.broken-lcd
 + "Reload WM"	Restart
 + "Restart WM"	Quit

@@ -64,8 +64,18 @@
 	 }
 }
 
-/usr/bin/integrity.ppz
+case "${2%% *}" in
+	 rsync)	:;;
+	 *)		/usr/bin/integrity.ppz;;
+esac
 
 cd ~
 
+# AFAICT, ssh invokes shells like: /bin/shell -c 'command'
+# 'command' is passed as one string - further args to ssh
+# are concatenated with spaces. So be very careful to
+# escape filenames and such - anything with iffy spaced-ness
+# should be a single string treated like input to "eval", like:
+#
+# ssh user@host 'echo hello\ world > ~/my\ file.txt'
 exec -l /bin/bash "$@"

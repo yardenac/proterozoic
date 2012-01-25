@@ -12,7 +12,7 @@ weekletter()	{ ARR=(S m t w T f s S); echo ${ARR[$(date +%u)]}; }
 func_exists()	{ declare -f ${1} >/dev/null; }
 list_sorted()	{ for F; do echo "${F}"; done | sort -u; }
 print_jobs()	{ jobs | while read; do echo -n \*; done; }
-croak()			{ echo_red "ERROR: $@"; exit; }
+croak()			{ [ "$*" ] && echo_red "ERROR: $@"; exit 1; }
 giveup_prompt() { askyn "$@" && continue 2 || break 2; }
 y()				{ local v="$1"; shift; "$@"; eval $v=$?; }
 z()				{ (( ${!1} )) && false || :; }
@@ -551,15 +551,21 @@ test_tor_once() {
    https_proxy=http://127.0.0.1:8118 fwget ${1:-10} ${2:-1} \
 		 https://check.torproject.org/ | grep -iq congratulations
 }
-wait-for-network() {
-	 SLEEPINC=1.5
-	 echo -n $( date +%a\ %H:%M:%S ) Testing for internet.
-	 while test_network_once; do
+sleepinc() {
+	 local SLEEPINC=1.5
+	 echo_blue_n $( date +%a\ %H:%M:%S ) "$1"
+	 local end_msg=$2
+	 shift 2
+	 echo -n .
+	 until "$@"; do
 		  echo -n .
 		  sleep $SLEEPINC
-		  SLEEPINC=$(echo "scale=30; $SLEEPINC*1.2" | bc )
+		  SLEEPINC=$(echo "scale=30; $SLEEPINC*1.2" | bc)
 	 done
-	 echo \ yay, internet is up!
+	 echo_blue "$end_msg"
+}
+wait-for-network() {
+	 sleepinc "Testing for internet" " yay, internet is up!" test_network_once
 }
 ramsize() { #returns size of system's ram in megabytes
 	 awk '/MemTotal:/ { printf ("%0.0f\n",$2/1024); }' /proc/meminfo
@@ -633,7 +639,11 @@ ribbit() {
 	 continue $num
 }
 chrooted() {
-	 ! [ -s /etc/mtab ] # not (exists & not empty)
+	 # debugging echos, for now
+#	 echo "INIT SEES: $(stat -c %d:%i /proc/1/root/.)"
+#	 echo "WE SEE:    $(stat -c %d:%i /)"
+	 # why would we be chrooted and not root??
+	 am_root && [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]
 }
 gith() {
 	 git --work-tree ~ --git-dir ~/.git "$@"
@@ -681,6 +691,7 @@ is() {
 		  c)		str='^text/x-c;';;
 		  xml)	str='^application/xml;';;
 		  zip)	str='^application/zip;';;
+		  dvd)	srt='^application/x-iso9660-image;';;
 		  *)		for arg; do
 						[ -a "$arg" ] || return 1
 					done
@@ -756,4 +767,15 @@ xmlns-args() { local xmlns prefix file IFS=$'\n'
 		  # add to namespace string
 		  ns=$ns" -N $xmlns"
 	 done
+}
+hms-to-secs() {
+	 local multiplier=1 secs=0 string=$1 right
+	 while [[ "$string" =~ : ]]; do
+		  right="${string##*:}"
+		  string="${string%:*}"
+		  [[ "$right" =~ ^[0-9]+$ ]] || continue
+		  secs=$(( secs + (multiplier * right) ))
+		  multiplier=$(( multiplier * 60 ))
+	 done
+	 echo $secs
 }
