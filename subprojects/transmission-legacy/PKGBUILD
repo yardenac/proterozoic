@@ -1,0 +1,31 @@
+pkgname=transmission-legacy
+pkgver=0.$(date +%s)
+pkgrel=1
+pkgdesc="Legacy version of transmission-remote (better to parse)"
+arch=(i686 x86_64)
+license=('GPL2 + MIT')
+makedepends=(coreutils tar)
+depends=(transmission-gtk transmission-cli)
+source=(
+	 http://schlunix.org/archlinux/extra/os/$CARCH/transmission-cli-2.04-1-$CARCH.pkg.tar.xz
+	 http://schlunix.org/archlinux/core/os/$CARCH/libevent-1.4.14b-2-$CARCH.pkg.tar.xz
+)
+noextract=("${source[@]##*/}")
+md5sums=(
+	 edec81c06db9b12eda92bc633d20b9aa # x86_64 transmission
+	 2285460585df06f25e682d72bfe243c2 # x86_64 libevent
+)
+[ $CARCH = i686 ] && md5sums=(
+	 44cee9ddd5889e88c83beeebb9b7f7bf # i686 transmission
+	 831e312a522d6f13c73a8c68c70a03e0 # i686 libevent
+)
+
+package() {
+	 cp -a ${startdir}/usr ${pkgdir}/
+	 mkdir -p $pkgdir/usr/{bin,lib}
+	 tar -xOf libevent-1.4.14b-2-$CARCH.pkg.tar.xz usr/lib/libevent-1.4.so.2.2.0 \
+		  >| $pkgdir/usr/lib/libevent-1.4.so.2
+	 tar -xOf transmission-cli-2.04-1-$CARCH.pkg.tar.xz usr/bin/transmission-remote \
+		  >| $pkgdir/usr/bin/transmission-remote-2.04-1
+	 chmod -R +x $pkgdir/usr/*/*
+}
