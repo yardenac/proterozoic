@@ -11,7 +11,8 @@ trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
 y=250; [ "$1" = d ] && shift && y=-1000
 
 ionice -c 2 -n 0 nice -n -5 mplayer -geometry 1030:$y -fs -ao alsa \
-	 -stop-xscreensaver -msglevel all=1:statusline=9 -nolirc "$@"
+	 -stop-xscreensaver -msglevel all=1:statusline=9 -nolirc \
+	 -input nodefault-bindings:conf=/usr/share/ppz/mplayer.input.conf "$@"
 
 echo
 

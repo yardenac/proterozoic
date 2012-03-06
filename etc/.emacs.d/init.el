@@ -22,6 +22,9 @@
 
 (add-hook 'html-mode-hook 'my-html-mode-hook)
 
+(autoload 'php-mode "php-mode.el" "Php mode." t)
+(setq auto-mode-alist (append '(("/*.\.php[345]?$" . php-mode)) auto-mode-alist))
+
 (global-set-key (kbd "C-c C-e") 'auto-revert-mode)
 (global-set-key (kbd "C-c C-r") 'revert-buffer)
 (global-set-key (kbd "C-c C-p") 'shell-script-mode)
