@@ -19,10 +19,6 @@ xrandr &>/dev/null && {
 	fbpanel_profile=1024
 }
 
-lspci | grep -q 'Intel Corporation Mobile 945GM/GMS/GME, 943/940GML Express Integrated Graphics Controller (rev 03)' && xrdb -override - <<-EOF
-	xscreensaver.dpmsEnabled: False
-EOF
-
 xset +fp /usr/share/fonts/local
 xset fp rehash
 

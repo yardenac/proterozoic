@@ -142,6 +142,7 @@ AddToMenu MenuFvwmRoot
 + "Terminal"	Exec exec urxvt -pe -tabbedex
 + "Seamonkey"	Exec exec seamonkey
 + "Firefox"		Exec exec firefox
++ "Chromium"	Exec exec chromium
 + "Broken LCD"	Exec exec xrdb -override - /usr/share/ppz/Xresources.broken-lcd
 + "Reload WM"	Restart
 + "Restart WM"	Quit

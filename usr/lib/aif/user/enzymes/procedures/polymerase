@@ -97,8 +97,10 @@ start_process() {
 				numlockx consolekit fvwm perl-xml-parser fbpanel wmctrl mingetty hsetroot \
 				urxvt-url-select urxvt-tabbedex transset-df xcompmgr acpi ttf-code2000
 				xf86-video-ati xf86-video-intel nvidia)
-		  pkgs_web=(seamonkey flashplugin alsa-utils openjdk6 icedtea-web sext acroread)
-		  pkgs_multimedia=(gimp feh mplayer imagemagick gcolor2)
+		  pkgs_web=(seamonkey flashplugin alsa-utils openjdk6 icedtea-web sext acroread
+				chromium)
+		  pkgs_multimedia=(gimp feh mplayer mencoder imagemagick gcolor2)
+		  pkgs_gaming=(zsnes mupen64plus)
 		  pkgs_cd=(eject cdrkit)
 		  pkgs_wireless=(wireless_tools wpa_supplicant b43-firmware) #wpa_actiond ifplugd
 		  pkgs_laptop=(pcmciautils dhcpcd)
