@@ -452,6 +452,22 @@ integrity_encdevs() { local devcond devline IFS=$'\n'
 		  IFS=$'\n\r\t '; integrity_encdev $devline
 	 done
 }
+integrity_tmpdir() {
+	 am_root && return
+	 export mytmpdir=/tmp/.$EUID.$USER
+	 export mytmpln=~/.config/tmpdir
+	 [ -a $mytmpdir ] || mkdir $mytmpdir
+	 [ -O $mytmpdir ] || {
+		  echo_red "$mytmpdir WAS STOLEN??"
+		  return
+	 }
+	 enforce_perms 700 $mytmpdir
+	 [ -L $mytmpln ] || ln -s $mytmpdir $mytmpln
+	 [ "$(readlink -m $mytmpln)" == $mytmpdir ] || {
+		  rm -f $mytmpln
+		  ln -s $mytmpdir $mytmpln
+	 }
+}
 integrity_emacsd() {
 	 [ -O $HOME ] || return 1
 
@@ -583,7 +599,7 @@ integrity_sshd() {
 #      post_upgrade
 
 for F in rootpw locales tz simpleconf inittab hosts users \
-	 iptables net encdevs bashhistory emacsd sshd; do
+	 iptables net encdevs bashhistory emacsd tmpdir sshd; do
 
 	 integrity_${F} || echo "${F} failed..."
 done
