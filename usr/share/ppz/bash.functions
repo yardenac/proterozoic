@@ -779,3 +779,19 @@ hms-to-secs() {
 	 done
 	 echo $secs
 }
+print-args() {
+	 echo "@$0@"
+	 for arg; do
+		  echo "	@$arg@"
+	 done
+}
+input_bad() {
+	 local line c=0
+	 cat <&0 | awk '{print}' | {
+		  while read line; do
+				let c++
+				echo "$line"
+		  done
+		  return $c
+	 }
+}
