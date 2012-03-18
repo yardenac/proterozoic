@@ -5,10 +5,7 @@ static_networking_from_runtime() {
 	 ifconfig | awk -f <(cat <<-'EOF'
 		/^lo/ {exit}
 		$1 ~ /^inet$/ {
-			sub(/addr:/ ,"address=",$2)
-			sub(/Bcast:/,"broadcast=",$3)
-			sub(/Mask:/ ,"netmask=",$4)
-			print $2 "\n" $3 "\n" $4
+			print "address=" $2 "\nnetmask=" $4 "\nbroadcast=" $6
 		}
 		EOF
 	 ) >> ${TARGET}/etc/rc.conf
