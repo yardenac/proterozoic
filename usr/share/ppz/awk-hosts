@@ -1,18 +1,41 @@
 #!/bin/awk
 
+# stdin is a specially formatted "host control file"
+# followed by an existing hosts file
+
+# idea is to keep only lines whose ip address is
+# unmentioned in the control file.
+# The file either has rules which clobber, or empty
+# rule which means "delete me".
+
+# See integrity_hosts() in integrity.ppz for
+# primary usage in action
+
 BEGIN {
 	 true			= 1
 	 false		= 0
 	 verlyet		= false
 	 delete iparr
 	 delete end_strings
-} /^# .etc.hosts: static lookup table for host names$/ { next
+}
+
+# filter out stock host file, empty lines
+/^# .etc.hosts: static lookup table for host names$/ { next
 } /^#<ip-address>.*$/ { next
 } /^# End of file$/ { next
 } /^[\s#]*$/ { next
+
+# keep track of versioning - avoids weird edge case, i think?
 } /^THISVER.*/ { THISVER = $2; next
-} /^ASSIGN.*/ {
+} /^#HOSTSVER=[0-9]*$/ {
+	 if (substr($0,11) >= THISVER) exit
+	 verlyet = true
+}
+
+# assignments made in control file
+/^ASSIGN.*/ {
 	 if (NF < 2) next
+	 # add address to iparr
 	 iparr[length(iparr)] = $2
 	 t = ""
 	 for (f=3;f<=NF;f++)
@@ -20,17 +43,24 @@ BEGIN {
 				t = t " " $f
 	 if (t) end_strings[length(end_strings)] = $2 t
 	 next
-} /^#HOSTSVER=[0-9]*$/ {
-	 if (substr($0,11) >= THISVER) exit
-	 verlyet = true
-} $1 ~ /^#*([0-9]+[\.\s]|::1)+/ {
+}
+
+# if address is in iparr, skip line
+$1 ~ /^#*([0-9]+[\.\s]|[0-9a-f]*::[0-9])+/ {
 	 holder=$0
 	 gsub(/^#*/,"")
 	 for (ip in iparr)
 		  if ($1 ~ iparr[ip])
 				next
 	 $0 = holder
-} { print $0 } END {
+}
+
+# prints line unless "next" was already called...
+# this is where "uncontrolled" ip addresses fall through
+# others will end up in end_strings
+{ print $0 }
+
+END {
 	 if (!verlyet)
 		  print "#HOSTSVER=" THISVER
 	 for (i=0;i<length(end_strings);i++)
