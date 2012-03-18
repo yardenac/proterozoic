@@ -3,7 +3,7 @@ server 1.north-america.pool.ntp.org iburst
 server 2.north-america.pool.ntp.org iburst
 server 3.north-america.pool.ntp.org iburst
 #server clock.fmt.he.net iburst prefer
-restrict default nomodify nopeer
+restrict default noquery nopeer
 restrict 127.0.0.1
 restrict ::1
 driftfile /var/lib/ntp/ntp.drift

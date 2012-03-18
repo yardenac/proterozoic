@@ -1,1 +1,1 @@
-HOOKS="base udev autodetect sata filesystems ppz_tmp" # raid encrypt ide pata scsi
+HOOKS="base udev autodetect sata filesystems fsck ppz_tmp" # raid encrypt ide pata scsi

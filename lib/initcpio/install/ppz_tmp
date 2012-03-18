@@ -1,7 +1,7 @@
 # vim:set ft=sh:
 build () {
     MODULES="dm-crypt btrfs fuse"
-    BINARIES="/bin/bash /bin/date /sbin/fsck.jfs /usr/bin/pstree /bin/cat /usr/bin/head"
+    BINARIES="/bin/bash /bin/date /usr/bin/pstree /bin/cat /usr/bin/head"
     FILES="/etc/rc.conf"
     SCRIPT="ppz_tmp"
 }
