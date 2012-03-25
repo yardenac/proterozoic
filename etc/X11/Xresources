@@ -61,9 +61,9 @@ xscreensaver.lockTimeout:		0:00:00
 xscreensaver.passwdTimeout:	0:00:30
 xscreensaver.dpmsEnabled:		True
 xscreensaver.dpmsQuickOff:		False
-xscreensaver.dpmsStandby:		0:10:00
-xscreensaver.dpmsSuspend:		0:10:15
-xscreensaver.dpmsOff:			0:10:30
+xscreensaver.dpmsStandby:		0:1:15
+xscreensaver.dpmsSuspend:		0:1:30
+xscreensaver.dpmsOff:			0:1:45
 xscreensaver.splash:				False
 xscreensaver.fade:				False
 xscreensaver.unfade:				False

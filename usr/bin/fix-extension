@@ -57,12 +57,12 @@ toxpj() {
 }
 
 # check for seamonkey maxversion
-newst=2.10a1
+newst=2.11a1
 maxver_xpath="//*[@em:id='{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}']/@em:maxVersion | //*[em:id='{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}']/em:maxVersion"
 if verst=$(unzip -qp "$xpi" install.rdf | xml sel $ns -t -v "$maxver_xpath"); then
 	 # a seamonkey clause exists!
 	 case $verst in
-		  2.\*|2.8|2.8.\*|2.9a1|2.9a2|2.9|2.9.\*|2.10a1|3.0.\*)
+		  2.\*|2.8|2.8.\*|2.9a1|2.9a2|2.9|2.9.\*|2.10a1|2.10a2|2.10|2.10.\*|2.11a1|3.0.\*)
 #				echo_green "This plugin is already compatible with latest stable :)"
 				:;;
 		  1.0a|1.0|1.0.\*|1.1a|1.1b|1.1|1.1.\*|1.5a|2.0a|2.0a1pre|2.0a1|2.0a2pre) :;&
@@ -70,7 +70,7 @@ if verst=$(unzip -qp "$xpi" install.rdf | xml sel $ns -t -v "$maxver_xpath"); th
 		  2.0.\*|2.1a1pre|2.1a1|2.1a2pre|2.1a2|2.1a3pre|2.1a3|2.1b1pre|2.1b1) :;&
 		  2.1b2pre|2.1b2|2.1b3pre|2.1b3|2.1|2.1.\*|2.2a1pre|2.2|2.2.\*|2.3a2|2.3) :;&
 		  2.3.\*|2.4a1|2.4a2|2.4|2.4.\*|2.5a1|2.5a2|2.5|2.5.\*|2.6.\*|2.6a1|2.6a2|2.6) :;&
-		  2.6.1|2.7a1|2.7a2|2.7|2.7.\*|2.8a1|2.8a2)
+		  2.6.1|2.7a1|2.7a2|2.7|2.7.1|2.7.2|2.7.\*|2.8a1|2.8a2)
 				echo_green "Bumping from $verst to $newst"
 				unzip -qp "$xpi" install.rdf \
 					 | xml ed -P -u "$maxver_xpath" -v $newst \

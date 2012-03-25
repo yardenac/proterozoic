@@ -1,0 +1,2 @@
+mount_max = 20
+user_allow_other

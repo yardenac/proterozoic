@@ -9,6 +9,7 @@ preowned_files=(
 	 etc/apcupsd/apcupsd.conf
 	 etc/bitlbee/bitlbee.conf
 	 etc/privoxy/config
+	 etc/fuse.conf
 )
 ######### FUNCTIONS
 are_same() {

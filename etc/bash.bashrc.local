@@ -64,4 +64,5 @@ stty -ixon -ixoff
 complete -f -X '!*.@(sqlite|db)' sqlite3
 complete -f emacs rsync mv cp rm mc scp diff ls sed mplayer tail find cmp
 complete -f scp mkdir sshfs cat sqlite3 zip unzip useradd fusermount
+complete -f head md5sum
 [ "$BASH" ] && [ -f ~/.bashrc ] && . ~/.bashrc

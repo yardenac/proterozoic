@@ -61,7 +61,7 @@ done
 
 # mounting might happen now -- prepare cleanup
 trap "
-	rm -rf ${tmp_files[@]}
+	rm -rf ${tmp_files[*]}
 	sudo /usr/sbin/mountdvd --unmount
 	exit
 " EXIT HUP QUIT INT TERM ABRT TSTP CONT
