@@ -9,7 +9,7 @@ return_stdin()	{ read && return $REPLY; }
 isnt()			{ eval "$@"; [ $? -ne 0 ]; }
 wait_until()	{ while isnt "$@"; do sleep 0.5; done; }
 weekletter()	{ ARR=(S m t w T f s S); echo ${ARR[$(date +%u)]}; }
-func_exists()	{ declare -f ${1} >/dev/null; }
+func_exists()	{ declare -f -F "${1}" >/dev/null; }
 list_sorted()	{ for F; do echo "${F}"; done | sort -u; }
 print_jobs()	{ jobs | while read; do echo -n \*; done; }
 croak()			{ [ "$*" ] && echo_red "ERROR: $@"; exit 1; }
@@ -648,6 +648,7 @@ chrooted() {
 gith() {
 	 git --work-tree ~ --git-dir ~/.git "$@"
 }
+# move to script
 git_home_clone() {
 	 if [ -a ~/.git ] || ! shell_is_interactive; then
 		  echo_red "Hell no!"
@@ -794,4 +795,24 @@ input_bad() {
 		  done
 		  return $c
 	 }
+}
+ssh_host_resolv() {
+	 # if hostname has a ready alias, use that instead
+	 cat ~/.ssh/config | awk '
+		BEGIN {
+			host = ""
+			found = 0
+		}
+		$0 ~ /^Host '"$1"'$/ { print $2; found = 1; exit }
+		$1 ~ /^Host$/ {
+			host = $2
+		}
+		$0 ~ /^\s*HostName '"$1"'$/ { print host; found = 1; exit }
+		{ next }
+		END {
+			if (!found) {
+				print "'"$1"'"
+			}
+		}
+	'
 }

@@ -1,15 +1,12 @@
 #!/bin/bash
-# <UDF name="ss_hostname" label="hostname" />
-echo bootstrapping for the 2010.05 linode image...
-this_pacman() {
-	 pacman --config /etc/pacman.conf --noprogressbar --noconfirm "$@"
-}
-GITURL=https://raw.github.com/twomen/proterozoic/master
 
+# someday ... get this to set some ext3 vars and tune2fs
+
+GITURL=--no-check-certificate\ https://raw.github.com/twomen/proterozoic/master
+
+rm -f /etc/profile.d/locale.sh
 mv -f /etc/rc.conf{,.original}
-mv -f /etc/sudoers{,.original}
 mv -f /etc/pacman.conf{,.original}
-wget $GITURL/usr/share/ppz/default/locale.gen	-qO	/etc/locale.gen
 wget $GITURL/usr/share/ppz/default/rc.conf		-qO	/etc/rc.conf
 wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
@@ -21,24 +18,30 @@ sed -i \
 	 -e 's/32m$/128m/ig' \
 	 -e 's/^#*:[\t ]*sync.*$/#&/ig' \
 	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/rc.conf
-locale-gen
-this_pacman -Sqy pacman
-pacman-db-upgrade
-this_pacman -Sqyu
-echo 'utmp:x::' >> /etc/gshadow
-mv -f /etc/bash.bashrc{.pacnew,}
-this_pacman -Sq mkinitcpio tor privoxy bitlbee weechat
-cat > /etc/mkinitcpio.conf <<-EOF
-	HOOKS="base udev autodetect ppz_tmp"
+
+cat > /etc/fstab <<-EOF
+	/dev/xvda / ext3 noatime,nodiratime,barrier=1,commit=5,data=journal,journal=update,errors=remount-ro 0 1
 EOF
-mv -f /etc/hosts{.pacnew,}
-this_pacman -Sq proterozoic
+
+pacman --noprogressbar --noconfirm --needed -Sqy pacman
+
+echo "Forking md5sum for entropy..."
+md5sum /dev/xvda &>/dev/null &; md5sumpid=$!
+pacman-key --init
+kill -SIGTERM $md5sumpid
+
+pacman --noprogressbar --noconfirm --needed -Sqf filesystem
+pacman --noprogressbar --noconfirm --needed -Squ base-devel #tor privoxy bitlbee weechat
+cat > /etc/mkinitcpio.conf <<-EOF
+	HOOKS="base udev autodetect fsck ppz_tmp"
+EOF
+pacman --noprogressbar --noconfirm --needed -Sq proterozoic
 sed -i s/otown.tmp/otown/ig /etc/pacman.conf
-this_pacman -Sq linux-linode
+pacman --noprogressbar --noconfirm --needed -Sq linux-linode
 
 rm -f \
 	 /etc/pacman.d/mirrorlist.otown.tmp \
-	 /etc/{gshadow,locale.gen,securetty,inittab,pacman.d/mirrorlist}.pacnew
+	 /etc/{locale.gen,pacman.d/mirrorlist,pacman.conf,rc.conf}.pacnew
 
 # how to get proper "kernel name" in install file?
 

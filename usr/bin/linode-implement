@@ -1,14 +1,25 @@
 #!/bin/bash
-. usr/share/ppz/bash.functions
-. ~/.linoderc
-[ $API_KEY ] && [ $LINODE_CONSOLE ] || {
-	 echo "You need to make a ~/.linoderc to initialize auth variables"
-	 return 1
-}
+
+# USAGE: linode-implement nickname
+
+. /usr/share/ppz/bash.functions
+
+[ -f ~/.config/linoderc ] || croak "No linoderc"
+. ~/.config/linoderc
+[[ "$1" =~ ^[a-z0-9]+$ ]] || croak "Invalid linode nickname"
+func_exists linoderc_setvars_"$1" || croak "No such linode nickname"
+linoderc_setvars_"$1"
+
+latest_arch64=91
+stock_kernel=138 # "latest 3.0 x86"
+finnix_kernel=61
+pv_kernel=95
+
 LINODEURL='https://api.linode.com?api_key='$API_KEY'&api_action='
 linodeid=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 1 -e LINODEID)
-ss_id=2511 #preference i guess
-ss_file=$(readlink -e ./stackscript-this)
+ssh_host_use=${LINODE_CONSOLE%%@*}@$(ssh_host_resolv ${LINODE_CONSOLE##*@}.linode.com)
+
+echo "SSH HOST IS: $ssh_host_use"
 
 do_or_report() {
 	 [ "$1" == "say" ] && {
@@ -34,7 +45,7 @@ block_for_job() { #returns when no more jobs pending
 block_for_shutdown() { #returns when linode shuts itself down
 	 echo -n "Waiting for linode to shut down..."
 	 while :; do
-		  local status=$(ssh $LINODE_CONSOLE.linode.com status)
+		  local status=$(ssh $ssh_host_use status)
 		  case $status in
 				'Powered Off')
 					 echo done!
@@ -56,13 +67,13 @@ block_for_ssh() { # returns when port 22 appears to be open on the machine
 }
 
 destroy_running() {
-	 local status=$(ssh $LINODE_CONSOLE.linode.com status)
+	 local status=$(ssh $ssh_host_use status) || croak "No lish..."
 	 echo "Linode status is: $status"
 	 case $status in
 		  'Powered Off') :;;
 		  'Running')
 				echo "Going to destroy running instance..."
-				ssh $LINODE_CONSOLE.linode.com destroy;;
+				ssh $ssh_host_use destroy;;
 		  *) echo "unrecognized status string: $status"
 	 esac
 	 echo "Removing previous linode from known_hosts"
@@ -71,6 +82,18 @@ destroy_running() {
 	 ssh-keygen -qR $LINODE_DOMAIN,$LINODE_IP
 }
 update_stackscript() { local SS_COMMIT_TXT
+	 local num_sss=$(curl -sS ${LINODEURL}'stackscript.list' | jshon -e DATA -l);
+	 case $num_sss in
+		  0)	echo "Creating new stackscript..."
+				do_or_report 'stackscript.create&DistributionIDList='$latest_arch64'&label=AUTO&rev_note=first+commit' --data-urlencode script@$ss_file || return 1
+#				ss_id=$(echo $result | jshon -e DATA -e StackScriptID)
+				return
+				;;
+		  1)	ss_id=$(curl -sS ${LINODEURL}'stackscript.list' | jshon -e DATA -e 1 -e STACKSCRIPTID);;
+		  2|*) croak "More than one stackscript? clean that shit up!";;
+	 esac
+
+	 # if we made it this far, there is exactly 1 stackscript with id # $ss_id
 	 cmp -s $ss_file <(curl -sS ${LINODEURL}'stackscript.list&stackscriptid='$ss_id | jshon -e DATA -e 1 -e SCRIPT -u) && {
 		  echo "Stackscript does not need updating"
 		  return
@@ -104,32 +127,27 @@ delete_configs() {
 	 done
 }
 deploy() {
-	 local ssdate=.$(date +%F.%k-%M-%S)
-	 local udf_vars=$(sed 's_^#\s<UDF\s.*name="\([^"]*\)".*\s/>$_\1_ig;t;d;' ./stackscript-this)
-	 local nvp_str result
-	 local IFS=$'\n'
-	 for v in $udf_vars; do
-		  [ "$1" ] && {
-				this_val="$1"
-				shift
-		  } || usetvar this_val "Enter value for ${v^^}: " BLANK ''
-		  nvp_str+=\"${v}\":\"${this_val}\",
-	 done
-	 echo
+	 local result IFS=$'\n' ssdate=.$(date +%F.%k-%M-%S)
+	 echo -n "Getting disk size... "
+	 local totalhd=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 1 -e TOTALHD)
+	 echo "${totalhd} MB"
 	 echo -n "Creating disk image & config"
-	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid=58&label=D'$ssdate'&size=20480&linodeid='$linodeid'&stackscriptid='$ss_id \
-		  --data-urlencode stackscriptudfresponses=\{"${nvp_str%,}"\} \
+	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch64'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid'&stackscriptid='$ss_id \
+		  --data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'"}' \
 		  --data-urlencode rootpass="$rootpass") || return 1
+	 echo did 1
 	 diskid=$(echo $result | jshon -e DATA -e DiskID)
-	 # 138 = Latest 3.0 (3.0.4-x86_64-linode21)
-	 result=$(do_or_report say 'linode.config.create&kernelid=95&helper_xen=false&helper_automount=false&helper_depmod=false&label=NORMAL'$ssdate'&linodeid='$linodeid \
+	 result=$(do_or_report say 'linode.config.create&kernelid='$pv_kernel'&helper_xen=false&helper_automount=false&helper_depmod=false&label=NORMAL'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pv-grub
+	 echo did 2
 	 config_pvgrub=$(echo $result | jshon -e DATA -e ConfigID)
-	 result=$(do_or_report say 'linode.config.create&kernelid=61&label=RESCUE'$ssdate'&linodeid='$linodeid \
+	 result=$(do_or_report say 'linode.config.create&kernelid='$finnix_kernel'&label=RESCUE'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=25665,$diskid,,,,,,,25669) || return 1 #finnix rescue
+	 echo did 3
 	 config_finnix=$(echo $result | jshon -e DATA -e ConfigID)
-	 result=$(do_or_report say 'linode.config.create&kernelid=138&label=INITIAL'$ssdate'&linodeid='$linodeid \
+	 result=$(do_or_report say 'linode.config.create&kernelid='$stock_kernel'&label=INITIAL'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pre-linux-linode boot
+	 echo did 4
 	 config_prebuilt=$(echo $result | jshon -e DATA -e ConfigID)
 	 block_for_job
 
@@ -155,13 +173,10 @@ deploy() {
 	 # do initial decryption while we change default password
 	 ssh -t $LINODE_USER@$LINODE_DOMAIN passwd
 
-	 [ -d "$LOCAL_GITDIR/.git" ] && askyn "push-ish git stuff?" && {
-
-		  cd "$LOCAL_GITDIR"
-		  echo "Sending git repo over tar/ssh..."
-		  tar -cJf - .git | ssh $LINODE_USER@$LINODE_DOMAIN bash-pure \
-				'cat <&0 | tar -xJf - -C ~; git checkout -f HEAD;'
-	 }
+	 # instead of pushing git, do git_home_clone!
+#	 askyn "git home stuff?" && {
+#		  ssh $LINODE_USER@$LINODE_DOMAIN git_home_clone
+#	 }
 }
 do_all() {
 	 echo
