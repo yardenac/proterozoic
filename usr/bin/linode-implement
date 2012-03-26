@@ -135,19 +135,15 @@ deploy() {
 	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch64'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid'&stackscriptid='$ss_id \
 		  --data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'"}' \
 		  --data-urlencode rootpass="$rootpass") || return 1
-	 echo did 1
 	 diskid=$(echo $result | jshon -e DATA -e DiskID)
 	 result=$(do_or_report say 'linode.config.create&kernelid='$pv_kernel'&helper_xen=false&helper_automount=false&helper_depmod=false&label=NORMAL'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pv-grub
-	 echo did 2
 	 config_pvgrub=$(echo $result | jshon -e DATA -e ConfigID)
 	 result=$(do_or_report say 'linode.config.create&kernelid='$finnix_kernel'&label=RESCUE'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=25665,$diskid,,,,,,,25669) || return 1 #finnix rescue
-	 echo did 3
 	 config_finnix=$(echo $result | jshon -e DATA -e ConfigID)
 	 result=$(do_or_report say 'linode.config.create&kernelid='$stock_kernel'&label=INITIAL'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pre-linux-linode boot
-	 echo did 4
 	 config_prebuilt=$(echo $result | jshon -e DATA -e ConfigID)
 	 block_for_job
 

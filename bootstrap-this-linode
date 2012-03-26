@@ -20,7 +20,7 @@ sed -i \
 	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/rc.conf
 
 cat > /etc/fstab <<-EOF
-	/dev/xvda / ext3 noatime,nodiratime,barrier=1,commit=5,data=journal,journal=update,errors=remount-ro 0 1
+	/dev/xvda / ext3 rw,noatime,nodiratime,data=journal,barrier=1,commit=5,journal=update,errors=remount-ro 0 1
 EOF
 
 pacman --noprogressbar --noconfirm --needed -Sqy pacman
@@ -30,6 +30,9 @@ md5sum /dev/xvda &>/dev/null &
 md5sumpid=$!
 pacman-key --init
 kill -SIGTERM $md5sumpid
+echo -n pid left..
+ps --pid $md5sumpid -o pid=,args=
+echo ..there
 
 pacman --noprogressbar --noconfirm --needed -Sqf filesystem
 pacman --noprogressbar --noconfirm --needed -Squ base-devel #tor privoxy bitlbee weechat
