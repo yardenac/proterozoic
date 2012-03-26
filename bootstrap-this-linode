@@ -26,7 +26,8 @@ EOF
 pacman --noprogressbar --noconfirm --needed -Sqy pacman
 
 echo "Forking md5sum for entropy..."
-md5sum /dev/xvda &>/dev/null &; md5sumpid=$!
+md5sum /dev/xvda &>/dev/null &
+md5sumpid=$!
 pacman-key --init
 kill -SIGTERM $md5sumpid
 
