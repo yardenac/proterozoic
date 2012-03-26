@@ -20,7 +20,7 @@ sed -i \
 	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/rc.conf
 
 cat > /etc/fstab <<-EOF
-	/dev/xvda / ext3 rw,noatime,nodiratime,data=journal,barrier=1,commit=5,errors=remount-ro 0 1
+	/dev/xvda / ext3 rw,noatime,nodiratime,data=journal,barrier=0,commit=5,errors=remount-ro 0 1
 EOF
 
 pacman --noprogressbar --noconfirm --needed -Sqy pacman
