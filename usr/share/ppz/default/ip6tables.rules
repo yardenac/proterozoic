@@ -23,19 +23,17 @@ COMMIT
 -A INPUT -i lo -j ACCEPT
 -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -j evil
--A INPUT -p icmp -j ACCEPT
 -A INPUT -j open
 -A INPUT -p tcp -j REJECT --reject-with tcp-reset
--A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
+-A INPUT -p udp -j REJECT --reject-with icmp6-port-unreachable
 -A evil -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m state --state NEW -j DROP
--A evil -f -j DROP
+-A evil -m frag ! --fragfirst -j DROP
 -A evil -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
 -A evil -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
--A evil -p icmp -m icmp --icmp-type 5 -j DROP
--A evil -p icmp -m icmp --icmp-type 8 -j DROP
--A evil -p icmp -m icmp --icmp-type 9 -j DROP
--A evil -p icmp -m icmp --icmp-type 10 -j DROP
--A evil -p icmp -m icmp --icmp-type 17 -j DROP
--A evil -p icmp -m icmp --icmp-type 18 -j DROP
+-A evil -p icmpv6 -m icmp6 --icmpv6-type 1 -j ACCEPT
+-A evil -p icmpv6 -m icmp6 --icmpv6-type 2 -j ACCEPT
+-A evil -p icmpv6 -m icmp6 --icmpv6-type 3 -j ACCEPT
+-A evil -p icmpv6 -m icmp6 --icmpv6-type 4 -j ACCEPT
+-A evil -p icmpv6 -j DROP
 #LOCAL
 COMMIT
