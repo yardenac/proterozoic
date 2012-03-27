@@ -16,6 +16,7 @@ sed -i \
 	 -e s/%SET_TYPE%/linode/ig \
 	 -e s/=UTC/=xen/ig \
 	 -e 's/32m$/128m/ig' \
+	 -e 's/\(DAEMONS=([^)]*\))/\1 mysqld httpd)/i' \
 	 -e 's/^#*:[\t ]*sync.*$/#&/ig' \
 	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/rc.conf
 
@@ -35,7 +36,8 @@ ps --pid $md5sumpid -o pid=,args=
 echo ..there
 
 pacman --noprogressbar --noconfirm --needed -Sqf filesystem
-pacman --noprogressbar --noconfirm --needed -Squ base-devel #tor privoxy bitlbee weechat
+pacman --noprogressbar --noconfirm --needed -Squ base-devel tor privoxy \
+	 bitlbee weechat mysql php php-apache apache
 cat > /etc/mkinitcpio.conf <<-EOF
 	HOOKS="base udev autodetect fsck ppz_tmp"
 EOF
@@ -53,5 +55,9 @@ rm -f \
 . /usr/share/ppz/bash.functions.install
 static_networking_from_runtime /
 grex /etc/resolv.conf > /etc/resolv.conf.override
+
+rc.d start mysqld
+mysql_secure_installation # less interactive way?
+rc.d stop mysqld
 
 askyn "reboot now?" && shutdown -hP now

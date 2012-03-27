@@ -10,6 +10,8 @@ preowned_files=(
 	 etc/bitlbee/bitlbee.conf
 	 etc/privoxy/config
 	 etc/fuse.conf
+	 etc/httpd/conf/httpd.conf
+	 etc/php/php.ini
 )
 ######### FUNCTIONS
 are_same() {

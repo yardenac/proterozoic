@@ -127,7 +127,7 @@ delete_configs() {
 	 done
 }
 deploy() {
-	 local result IFS=$'\n' ssdate=.$(date +%F.%k-%M-%S)
+	 local result IFS=$'\n' ssdate=.$(date +%F.%H-%M-%S)
 	 echo -n "Getting disk size... "
 	 local totalhd=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 1 -e TOTALHD)
 	 echo "${totalhd} MB"
@@ -167,7 +167,7 @@ deploy() {
 	 ssh-keyscan -H $LINODE_IP >> ~/.ssh/known_hosts
 
 	 # do initial decryption while we change default password
-	 ssh -t $LINODE_USER@$LINODE_DOMAIN passwd
+	 askyn "Try to ssh now?" && ssh -t $LINODE_USER@$LINODE_DOMAIN passwd
 
 	 # instead of pushing git, do git_home_clone!
 #	 askyn "git home stuff?" && {

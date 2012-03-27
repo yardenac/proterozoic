@@ -1,0 +1,217 @@
+ServerRoot "/etc/httpd"
+Timeout 300
+KeepAlive On
+MaxKeepAliveRequests 100
+KeepAliveTimeout 15
+UseCanonicalName Off
+ServerTokens Prod
+ServerSignature Off
+HostnameLookups Off
+TraceEnable Off
+SSLRandomSeed startup builtin
+SSLRandomSeed startup file:/dev/urandom
+SSLRandomSeed connect builtin
+SSLRandomSeed connect file:/dev/urandom
+User http
+Group http
+ErrorLog "/var/log/httpd/error_log"
+LogLevel warn
+LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+LogFormat "%h %l %u %t \"%r\" %>s %b" common
+LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
+CustomLog "/var/log/httpd/access_log" common
+Listen 80
+NameVirtualHost: *:80
+DocumentRoot "/srv/http"
+UserDir disabled
+AccessFileName .htaccess
+DirectoryIndex index.html index.php index.phtml
+IndexOptions FancyIndexing HTMLTable VersionSort
+IndexIgnore .??* *~ *# RCS CVS *,v *,t
+DefaultType text/plain
+TypesConfig conf/mime.types
+MIMEMagicFile conf/magic
+AddHandler application/x-httpd-php .php .php5
+AddType application/x-httpd-php .php .php5
+AddType application/x-compress .Z
+AddType application/x-gzip .gz .tgz
+AddType image/x-icon .ico
+Alias /favicon.ico /srv/http/dummy/blank-favicon.ico
+AliasMatch ^/favicon.ico$ /srv/http/dummy/blank-favicon.ico
+<FilesMatch "\.php$">
+ SetHandler application/x-httpd-php
+</FilesMatch>
+<Directory />
+    Options FollowSymLinks
+    AllowOverride None
+    Order deny,allow
+    Deny from all
+</Directory>
+<Directory "/srv/http">
+    Options Indexes FollowSymLinks MultiViews
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+<FilesMatch "^\.ht">
+    Order allow,deny
+    Deny from all
+    Satisfy All
+</FilesMatch>
+<FilesMatch "~$">
+   Order allow,deny
+   Deny from all
+   Satisfy all
+</FilesMatch>
+Include /etc/httpd/conf/site-specific.conf
+<VirtualHost *:80>
+   DocumentRoot /srv/http/dummy
+   ServerName itllneverhappen
+   ServerAlias *
+   AliasMatch ^/robots.txt$ /srv/http/dummy/robots.txt
+   AliasMatch ^/(.*) /srv/http/dummy/blank-file
+</VirtualHost>
+
+LoadModule php5_module modules/libphp5.so
+LoadModule authn_file_module modules/mod_authn_file.so
+LoadModule authn_dbm_module modules/mod_authn_dbm.so
+LoadModule authn_anon_module modules/mod_authn_anon.so
+LoadModule authn_dbd_module modules/mod_authn_dbd.so
+LoadModule authn_default_module modules/mod_authn_default.so
+LoadModule authz_host_module modules/mod_authz_host.so
+LoadModule authz_groupfile_module modules/mod_authz_groupfile.so
+LoadModule authz_user_module modules/mod_authz_user.so
+LoadModule authz_dbm_module modules/mod_authz_dbm.so
+LoadModule authz_owner_module modules/mod_authz_owner.so
+LoadModule authnz_ldap_module modules/mod_authnz_ldap.so
+LoadModule authz_default_module modules/mod_authz_default.so
+LoadModule auth_basic_module modules/mod_auth_basic.so
+LoadModule auth_digest_module modules/mod_auth_digest.so
+LoadModule file_cache_module modules/mod_file_cache.so
+LoadModule cache_module modules/mod_cache.so
+LoadModule disk_cache_module modules/mod_disk_cache.so
+LoadModule mem_cache_module modules/mod_mem_cache.so
+LoadModule dbd_module modules/mod_dbd.so
+LoadModule dumpio_module modules/mod_dumpio.so
+LoadModule reqtimeout_module modules/mod_reqtimeout.so
+LoadModule ext_filter_module modules/mod_ext_filter.so
+LoadModule include_module modules/mod_include.so
+LoadModule filter_module modules/mod_filter.so
+LoadModule substitute_module modules/mod_substitute.so
+LoadModule deflate_module modules/mod_deflate.so
+LoadModule ldap_module modules/mod_ldap.so
+LoadModule log_config_module modules/mod_log_config.so
+LoadModule log_forensic_module modules/mod_log_forensic.so
+LoadModule logio_module modules/mod_logio.so
+LoadModule env_module modules/mod_env.so
+LoadModule mime_magic_module modules/mod_mime_magic.so
+LoadModule cern_meta_module modules/mod_cern_meta.so
+LoadModule expires_module modules/mod_expires.so
+LoadModule headers_module modules/mod_headers.so
+LoadModule ident_module modules/mod_ident.so
+LoadModule usertrack_module modules/mod_usertrack.so
+LoadModule unique_id_module modules/mod_unique_id.so
+LoadModule setenvif_module modules/mod_setenvif.so
+LoadModule version_module modules/mod_version.so
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_connect_module modules/mod_proxy_connect.so
+LoadModule proxy_ftp_module modules/mod_proxy_ftp.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule proxy_scgi_module modules/mod_proxy_scgi.so
+LoadModule proxy_ajp_module modules/mod_proxy_ajp.so
+LoadModule proxy_balancer_module modules/mod_proxy_balancer.so
+LoadModule ssl_module modules/mod_ssl.so
+LoadModule mime_module modules/mod_mime.so
+LoadModule dav_module modules/mod_dav.so
+LoadModule status_module modules/mod_status.so
+LoadModule autoindex_module modules/mod_autoindex.so
+LoadModule asis_module modules/mod_asis.so
+LoadModule info_module modules/mod_info.so
+LoadModule suexec_module modules/mod_suexec.so
+LoadModule cgi_module modules/mod_cgi.so
+LoadModule cgid_module modules/mod_cgid.so
+LoadModule dav_fs_module modules/mod_dav_fs.so
+LoadModule vhost_alias_module modules/mod_vhost_alias.so
+LoadModule negotiation_module modules/mod_negotiation.so
+LoadModule dir_module modules/mod_dir.so
+LoadModule imagemap_module modules/mod_imagemap.so
+LoadModule actions_module modules/mod_actions.so
+LoadModule speling_module modules/mod_speling.so
+LoadModule userdir_module modules/mod_userdir.so
+LoadModule alias_module modules/mod_alias.so
+LoadModule rewrite_module modules/mod_rewrite.so
+AddLanguage ca .ca
+AddLanguage cs .cz .cs
+AddLanguage da .dk
+AddLanguage de .de
+AddLanguage el .el
+AddLanguage en .en
+AddLanguage eo .eo
+AddLanguage es .es
+AddLanguage et .et
+AddLanguage fr .fr
+AddLanguage he .he
+AddLanguage hr .hr
+AddLanguage it .it
+AddLanguage ja .ja
+AddLanguage ko .ko
+AddLanguage ltz .ltz
+AddLanguage nl .nl
+AddLanguage nn .nn
+AddLanguage no .no
+AddLanguage pl .po
+AddLanguage pt .pt
+AddLanguage pt-BR .pt-br
+AddLanguage ru .ru
+AddLanguage sv .sv
+AddLanguage tr .tr
+AddLanguage zh-CN .zh-cn
+AddLanguage zh-TW .zh-tw
+LanguagePriority en ca cs da de el eo es et fr he hr it ja ko ltz nl nn no pl pt pt-BR ru sv tr zh-CN zh-TW
+ForceLanguagePriority Prefer Fallback
+AddCharset us-ascii.ascii .us-ascii
+AddCharset ISO-8859-1  .iso8859-1  .latin1
+AddCharset ISO-8859-2  .iso8859-2  .latin2 .cen
+AddCharset ISO-8859-3  .iso8859-3  .latin3
+AddCharset ISO-8859-4  .iso8859-4  .latin4
+AddCharset ISO-8859-5  .iso8859-5  .cyr .iso-ru
+AddCharset ISO-8859-6  .iso8859-6  .arb .arabic
+AddCharset ISO-8859-7  .iso8859-7  .grk .greek
+AddCharset ISO-8859-8  .iso8859-8  .heb .hebrew
+AddCharset ISO-8859-9  .iso8859-9  .latin5 .trk
+AddCharset ISO-8859-10  .iso8859-10  .latin6
+AddCharset ISO-8859-13  .iso8859-13
+AddCharset ISO-8859-14  .iso8859-14  .latin8
+AddCharset ISO-8859-15  .iso8859-15  .latin9
+AddCharset ISO-8859-16  .iso8859-16  .latin10
+AddCharset ISO-2022-JP .iso2022-jp .jis
+AddCharset ISO-2022-KR .iso2022-kr .kis
+AddCharset ISO-2022-CN .iso2022-cn .cis
+AddCharset Big5.Big5   .big5 .b5
+AddCharset cn-Big5 .cn-big5
+AddCharset WINDOWS-1251 .cp-1251   .win-1251
+AddCharset CP866   .cp866
+AddCharset KOI8  .koi8
+AddCharset KOI8-E  .koi8-e
+AddCharset KOI8-r  .koi8-r .koi8-ru
+AddCharset KOI8-U  .koi8-u
+AddCharset KOI8-ru .koi8-uk .ua
+AddCharset ISO-10646-UCS-2 .ucs2
+AddCharset ISO-10646-UCS-4 .ucs4
+AddCharset UTF-7   .utf7
+AddCharset UTF-8   .utf8
+AddCharset UTF-16  .utf16
+AddCharset UTF-16BE .utf16be
+AddCharset UTF-16LE .utf16le
+AddCharset UTF-32  .utf32
+AddCharset UTF-32BE .utf32be
+AddCharset UTF-32LE .utf32le
+AddCharset euc-cn  .euc-cn
+AddCharset euc-gb  .euc-gb
+AddCharset euc-jp  .euc-jp
+AddCharset euc-kr  .euc-kr
+AddCharset EUC-TW  .euc-tw
+AddCharset gb2312  .gb2312 .gb
+AddCharset iso-10646-ucs-2 .ucs-2 .iso-10646-ucs-2
+AddCharset iso-10646-ucs-4 .ucs-4 .iso-10646-ucs-4
+AddCharset shift_jis   .shift_jis .sjis
