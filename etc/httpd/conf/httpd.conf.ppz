@@ -9,9 +9,9 @@ ServerSignature Off
 HostnameLookups Off
 TraceEnable Off
 SSLRandomSeed startup builtin
-SSLRandomSeed startup file:/dev/urandom
+SSLRandomSeed startup file:/dev/urandom 8192
 SSLRandomSeed connect builtin
-SSLRandomSeed connect file:/dev/urandom
+SSLRandomSeed connect file:/dev/urandom 8192
 User http
 Group http
 ErrorLog "/var/log/httpd/error_log"

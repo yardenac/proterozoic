@@ -17,6 +17,7 @@ sed -i \
 	 -e s/=UTC/=xen/ig \
 	 -e 's/32m$/128m/ig' \
 	 -e 's/\(DAEMONS=([^)]*\))/\1 @mysqld @httpd)/i' \
+	 -e 's/\(OPEN_PORTS=([^)]*\))/\1 80)/i' \
 	 -e 's/^#*:[\t ]*sync.*$/#&/ig' \
 	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/rc.conf
 

@@ -816,3 +816,27 @@ ssh_host_resolv() {
 		}
 	'
 }
+ssh_key_from_host() {
+	 # returns 1 if none, 0 and outputs path if so
+	 cat ~/.ssh/config | awk '
+		BEGIN {
+			rv = 1
+			found = 0
+		}
+		$1 ~ /^Host$/ {
+			if (found) exit
+			if ($2 ~ /^'"$1"'$/) found = 1
+		}
+		$1 ~ /^IdentityFile$/ {
+			if (found) {
+				print $2
+				rv = 0
+				exit
+			}
+		}
+		{ next }
+		END {
+			exit rv
+		}
+	'
+}

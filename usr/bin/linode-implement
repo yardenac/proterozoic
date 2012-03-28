@@ -19,8 +19,6 @@ LINODEURL='https://api.linode.com?api_key='$API_KEY'&api_action='
 linodeid=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 1 -e LINODEID)
 ssh_host_use=${LINODE_CONSOLE%%@*}@$(ssh_host_resolv ${LINODE_CONSOLE##*@}.linode.com)
 
-echo "SSH HOST IS: $ssh_host_use"
-
 do_or_report() {
 	 [ "$1" == "say" ] && {
 		  local say=1
@@ -159,19 +157,38 @@ deploy() {
 	 echo -n "Booting the REAL one now!"
 	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_pvgrub || return 1
 	 block_for_job
-
+}
+negotiate() {
 	 block_for_ssh
+
+	 lido_use=$(ssh_host_resolv $LINODE_DOMAIN)
+
+	 ssh-keygen -qR $lido_use
+	 ssh-keygen -qR $LINODE_DOMAIN
+	 ssh-keygen -qR $LINODE_IP
+	 ssh-keygen -qR $LINODE_DOMAIN,$LINODE_IP
 
 	 echo "Scraping for valid SSH host credentials..."
 	 ssh-keyscan -H $LINODE_DOMAIN >> ~/.ssh/known_hosts
 	 ssh-keyscan -H $LINODE_IP >> ~/.ssh/known_hosts
 
 	 # do initial decryption while we change default password
-	 askyn "Try to ssh now?" && ssh -t $LINODE_USER@$LINODE_DOMAIN passwd
+	 askyn "Try to ssh now?" && ssh -t $LINODE_USER@$lido_use passwd
+
+	 # if there is a keyfile, use it!
+	 if keyfile=$(ssh_key_from_host $lido_use); then
+		  pubfile=${keyfile/\~/$HOME}.pub
+		  echo "copying over keyfile $pubfile ..."
+		  ssh $LINODE_USER@$lido_use mkdir \~/.ssh
+		  scp $pubfile $LINODE_USER@$lido_use:/media/enc/u/.ssh/authorized_keys
+		  ssh -t $LINODE_USER@$lido_use su -
+	 else
+		  echo "No keyfile to make ssh easier :("
+	 fi
 
 	 # instead of pushing git, do git_home_clone!
 #	 askyn "git home stuff?" && {
-#		  ssh $LINODE_USER@$LINODE_DOMAIN git_home_clone
+#		  ssh $LINODE_USER@$lido_use git_home_clone
 #	 }
 }
 do_all() {
@@ -183,11 +200,19 @@ do_all() {
 		  update_stackscript \
 		  delete_disks \
 		  delete_configs \
-		  deploy; do
+		  deploy \ 
+		  negotiate; do
 
-		  say_and_do $thing "$@" && continue
+		  say_and_do $thing && continue
 		  echo "$thing failed..."
 		  return 1
 	 done
 }
+for arg; do
+	 # so i can call just, for example: linode-implement nick doroutine-negotiate
+	 [[ "$arg" =~ ^doroutine- ]] && {
+		  ${arg#doroutine-}
+		  exit
+	 }
+done
 do_all "$@"

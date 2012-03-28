@@ -9,11 +9,6 @@ COMMIT
 :PREROUTING ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 COMMIT
-*nat
-:PREROUTING ACCEPT [0:0]
-:POSTROUTING ACCEPT [0:0]
-:OUTPUT ACCEPT [0:0]
-COMMIT
 *filter
 :INPUT DROP [0:0]
 :FORWARD DROP [0:0]
@@ -27,7 +22,6 @@ COMMIT
 -A INPUT -p tcp -j REJECT --reject-with tcp-reset
 -A INPUT -p udp -j REJECT --reject-with icmp6-port-unreachable
 -A evil -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m state --state NEW -j DROP
--A evil -m frag ! --fragfirst -j DROP
 -A evil -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
 -A evil -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
 -A evil -p icmpv6 -m icmp6 --icmpv6-type 1 -j ACCEPT
