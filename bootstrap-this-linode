@@ -16,24 +16,21 @@ sed -i \
 	 -e s/%SET_TYPE%/linode/ig \
 	 -e s/=UTC/=xen/ig \
 	 -e 's/32m$/128m/ig' \
-	 -e 's/\(DAEMONS=([^)]*\))/\1 mysqld httpd)/i' \
+	 -e 's/\(DAEMONS=([^)]*\))/\1 @mysqld @httpd)/i' \
 	 -e 's/^#*:[\t ]*sync.*$/#&/ig' \
 	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/rc.conf
 
 cat > /etc/fstab <<-EOF
-	/dev/xvda / ext3 rw,noatime,nodiratime,data=journal,barrier=0,commit=5,errors=remount-ro 0 1
+	/dev/xvda / ext3 rw,noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
 EOF
 
 pacman --noprogressbar --noconfirm --needed -Sqy pacman
 
 echo "Forking md5sum for entropy..."
-md5sum /dev/xvda &>/dev/null &
+ionice -c 3 nice -n 19 md5sum /dev/xvda &>/dev/null &
 md5sumpid=$!
 pacman-key --init
 kill -SIGTERM $md5sumpid
-echo -n pid left..
-ps --pid $md5sumpid -o pid=,args=
-echo ..there
 
 pacman --noprogressbar --noconfirm --needed -Sqf filesystem
 pacman --noprogressbar --noconfirm --needed -Squ base-devel tor privoxy \
@@ -59,5 +56,9 @@ grex /etc/resolv.conf > /etc/resolv.conf.override
 rc.d start mysqld
 mysql_secure_installation # less interactive way?
 rc.d stop mysqld
+
+myip=$(ifconfig | awk '/^lo/ {exit} $1 ~ /^inet$/ {print $2}')
+fqhn=$(dig -x $myip +short)
+sed -i 's/^\(ServerName \).*$/\1'$fqhn'/i'	/etc/httpd/conf/site-specific.conf
 
 askyn "reboot now?" && shutdown -hP now

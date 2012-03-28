@@ -73,7 +73,7 @@ open_dev() { local name dev mountpoint mapname arg
 		  chown -RPh ${user_stats[0]}:${user_stats[1]} ${user_stats[2]}
 		  shopt -s nullglob
 		  # remove X-user stuff
-		  rm -rf ${user_stats[2]}/.{fontconfig,config/{fbpanel,Terminal,},fvwm,xinitrc}
+		  rm -rf ${user_stats[2]}/.{fontconfig,config/{fbpanel,Terminal},fvwm,xinitrc}
 		  shopt -u nullglob
 		  chmod 700 ${user_stats[2]}
 	 }
