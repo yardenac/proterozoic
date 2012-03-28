@@ -133,7 +133,7 @@ deploy() {
 	 echo "${totalhd} MB"
 	 echo -n "Creating disk image & config"
 	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch64'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid'&stackscriptid='$ss_id \
-		  --data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'"}' \
+		  --data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'","ss_mysqlpass":"'$mysqlpass'"}' \
 		  --data-urlencode rootpass="$rootpass") || return 1
 	 diskid=$(echo $result | jshon -e DATA -e DiskID)
 	 result=$(do_or_report say 'linode.config.create&kernelid='$pv_kernel'&helper_xen=false&helper_automount=false&helper_depmod=false&label=NORMAL'$ssdate'&linodeid='$linodeid \

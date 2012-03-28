@@ -54,7 +54,7 @@ static_networking_from_runtime /
 grex /etc/resolv.conf > /etc/resolv.conf.override
 
 rc.d start mysqld
-mysql_secure_installation # less interactive way?
+echo $'\n\n'"$SS_MYSQLPASS"$'\n'"$SS_MYSQLPASS"$'\n\n\n\n\n' | mysql_secure_installation
 rc.d stop mysqld
 
 myip=$(ifconfig | awk '/^lo/ {exit} $1 ~ /^inet$/ {print $2}')

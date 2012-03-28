@@ -21,7 +21,7 @@ LogFormat "%h %l %u %t \"%r\" %>s %b" common
 LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
 CustomLog "/var/log/httpd/access_log" common
 Listen 80
-NameVirtualHost: *:80
+NameVirtualHost *:80
 DocumentRoot "/srv/http"
 UserDir disabled
 AccessFileName .htaccess
