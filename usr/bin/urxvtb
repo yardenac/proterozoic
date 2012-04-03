@@ -1,6 +1,8 @@
 #!/bin/bash
 
-. /etc/profile
+. /etc/profile.d/locale.sh
+
+eval $(awk '/^export RXVT_SOCKET/' /etc/bash.bashrc.local)
 
 urxvtc "$@"
 

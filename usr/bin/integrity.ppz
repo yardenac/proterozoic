@@ -87,6 +87,15 @@ integrity_simpleconf() {
 	 sed -i 's%^\(MIRRORLIST="/etc/pacman.d/mirrorlist"\)$%\#\1%ig' /etc/abs.conf
 	 grep -qiE '^MIRRORLIST="/etc/pacman.d/mirrorlist.otown"$' /etc/abs.conf || \
 		  echo 'MIRRORLIST="/etc/pacman.d/mirrorlist.otown"' >> /etc/abs.conf
+
+	 # php tmpdir
+	 if grep -q ^http: /etc/passwd && grep -q ^http: /etc/group; then
+		  [ -d /tmp/php ] && [ $(stat -c %U /tmp/php) = "http" ] || {
+				rm -rf /tmp/php
+				mkdir /tmp/php
+				chown -R http:http /tmp/php
+		  }
+	 fi
 }
 integrity_inittab() {
 	 am_root || return 0
@@ -169,6 +178,34 @@ integrity_users() {
 				useradd -lMNd ${u_home} -u ${u_nums%%:*} -g ${u_nums##*:} -s ${v[4]} ${u_name}
 				echo $u_name:\' | chpasswd
 		  }
+	 done
+
+	 # only works up to 10...
+	 local luser pw homefull uc=0 #user count
+	 for luser in "${SSH_USERS[@]}"; do
+		  if [ ${luser:0:1} = "@" ]; then
+				let uc++
+				luser=${luser#@}
+
+				# make user
+				grep -q ^$luser: /etc/passwd || {
+					 useradd -lMNd /home/$luser -u 5433$uc -u 100 -s /bin/false $luser
+					 pw=$(random_password)
+					 echo $luser:$pw | chpasswd
+					 echo "New password for $luser is: $pw"
+				}
+
+				# make dirs
+				homefull=/home/wall/$luser/home/$luser
+				mkdir -p $homefull/www
+				[ "$(readlink -e /home/$luser)" = $homefull ] || {
+					 rm -rf /home/$luser
+					 ln -s $homefull /home/$luser
+				}
+				chown $luser:users $homefull
+				chmod 755 $homefull
+				[ "$pw" ] && echo $pw >| $homefull/.pw
+		  fi
 	 done
 }
 integrity_iptables() {
@@ -549,7 +586,7 @@ integrity_sshd() {
 		IgnoreRhosts yes
 		HostBasedAuthentication no
 		PermitEmptyPasswords no
-		Subsystem	sftp	/usr/lib/ssh/sftp-server
+		Subsystem	sftp	internal-sftp
 
 		AllowUsers
 		EOF
@@ -566,10 +603,10 @@ integrity_sshd() {
 		  [ ${USER:0:1} = @ ] && cat >> ${NEWFILE} <<-EOF
 
 			Match User ${BAREUSER}
-			   ChrootDirectory $(home_actual ${BAREUSER})
+			   ChrootDirectory /home/wall/${BAREUSER}
 			   X11Forwarding no
 			   AllowTcpForwarding no
-			   ForceCommand cvs server
+			   ForceCommand internal-sftp
 			EOF
 	 done
 #	 ALL OF THIS is such a stinking mess! when fix???

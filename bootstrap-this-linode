@@ -35,7 +35,7 @@ kill -SIGTERM $md5sumpid
 
 pacman --noprogressbar --noconfirm --needed -Sqf filesystem
 pacman --noprogressbar --noconfirm --needed -Squ base-devel tor privoxy \
-	 bitlbee weechat mysql php php-apache apache
+	 bitlbee weechat mysql php php-apache php-ssh apache
 cat > /etc/mkinitcpio.conf <<-EOF
 	HOOKS="base udev autodetect fsck ppz_tmp"
 EOF
