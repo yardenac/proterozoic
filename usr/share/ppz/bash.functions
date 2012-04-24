@@ -488,7 +488,7 @@ wf() {
 	for P in $PATH; do
 		find "$P" 2>/dev/null | {
 			 while read; do
-				  stat -c %N "$REPLY" | tr -d \'\`
+				  stat -c %N "$REPLY" | tr -d \''`‘’'
 			 done
 		} | grep -i --color=auto -E $(sep_by \| "$@")
 	done

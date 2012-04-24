@@ -25,7 +25,7 @@ cat > /etc/fstab <<-EOF
 	/dev/xvda / ext3 rw,noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
 EOF
 
-pacman --noprogressbar --noconfirm --needed -Sqy pacman
+pacman --noprogressbar --noconfirm --needed -Sqyy pacman
 
 echo "Forking md5sum for entropy..."
 ionice -c 3 nice -n 19 md5sum /dev/xvda &>/dev/null &
@@ -36,7 +36,7 @@ kill -SIGTERM $md5sumpid
 pacman --noprogressbar --noconfirm --needed -Sqf filesystem
 pacman --noprogressbar --noconfirm --needed -Squ base-devel tor privoxy \
 	 bitlbee weechat mysql php php-apache php-ssh apache
-cat > /etc/mkinitcpio.conf <<-EOF
+cat >| /etc/mkinitcpio.conf <<-EOF
 	HOOKS="base udev autodetect fsck ppz_tmp"
 EOF
 pacman --noprogressbar --noconfirm --needed -Sq proterozoic

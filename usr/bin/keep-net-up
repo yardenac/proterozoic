@@ -1,0 +1,66 @@
+#!/bin/bash
+
+. /etc/rc.conf
+. /usr/share/ppz/bash.functions
+
+test_network_thrice() {
+	 fwget 10 3 | grep -iq "feeling lucky"
+}
+
+available_open_ssids() {
+	 # trusted only
+	 # spits them one per line ...
+	 # wpa_supplicant.conf must be pre-sorted!
+	 comm -12 \
+		  <(iwlist wlan0 scan | awk '/ESSID:"/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' | sort -u) \
+		  <(awk '/^#/ {print $2} /ssid="/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' "$WPA_SUPP_CONF")
+#		  <(awk '/^#/ {print $2}' "$WPA_SUPP_CONF")
+}
+
+am_root || groups | grep -qw network && {
+
+	 wpas_file=/tmp/.$(uniq_token)
+	 dhcp_file=/tmp/.$(uniq_token)
+	 knu_cleanup() { rm -rf "$wpas_file" "$dhcp_file"; }
+	 trap "knu_cleanup; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+
+	 while :; do
+		  # loop until network trouble
+		  while test_network_thrice; do sleep 45; done
+
+		  pkill -x -signal SIGTERM dhcpcd
+		  pkill -x -signal SIGTERM wpa_supplicant
+
+		  for if in $(awk '$1 ~ /^lo:$/ {next}
+			   $1 ~ /:$/ {sub(/:/,"",$1); print $1}' /proc/net/dev | sort -u); do
+
+				ip link set $if down
+				ip link set $if up
+				[ $(cat /sys/class/net/$if/operstate) = "up" ] || {
+					 ip link set $if down
+					 continue
+				}
+
+				# set essid
+				ssid=$(available_open_ssids | head -n 1)
+				[ "$ssid" || croak "No available networks!" ]
+
+				iwconfig $if essid "$ssid"
+
+				grep -q 'ssid=" '"$ssid"'"' "$WPA_SUPP_CONF" && {
+					 wpa_supplicant -d -i wlan0 -c "$WPA_SUPP_CONF" &>> $wpas_file &
+				}
+
+
+			   # iface is connectable
+
+				# look for this text:
+#				"State: ASSOCIATED -> 4WAY_HANDSHAKE"
+				# if we dont find it in 20 seconds, end it all, try next if
+
+
+				dhcpcd -Bt 30 $if &>> $dhcp_file &
+
+		  done
+	 done
+}

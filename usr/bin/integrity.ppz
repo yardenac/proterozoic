@@ -204,7 +204,7 @@ integrity_users() {
 				}
 				chown $luser:users $homefull
 				chmod 755 $homefull
-				[ "$pw" ] && echo $pw >| $homefull/.pw
+				[ "$pw" ] && echo $pw >| $homefull/.pw || :
 		  fi
 	 done
 }
