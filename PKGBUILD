@@ -9,9 +9,9 @@ backup=etc/httpd/conf/site-specific.conf
 makedepends=(findutils coreutils net-tools gcc-multilib)
 depends=(jfsutils lsof 'ddrescue>=1.15' cryptsetup
 	 emacs-nox emacs-php-mode bash-completion fgetty screen-best htop
-	 python2 python-formencode python-lxml expect s3fs
+	 python2 python-formencode python-lxml expect s3fs parallel
 	 lzop zip unzip xmlstarlet jshon sudo less bc busybox strace
-	 iptables iproute2 inetutils dnsutils net-tools nmap
+	 iptables iproute2 inetutils dnsutils net-tools nmap gnu-netcat
 	 openssh sshfs ntp rsync curl git abs) # gptfdisk
 
 package() {

@@ -2,8 +2,11 @@
 # mplayer but a little easier
 
 . /usr/share/ppz/bash.functions
+. /usr/share/ppz/bash.functions.xorg
 
 do_unto_others
+
+set_xtitle "[mm] $*"
 
 [ "$1" = m ] && shift || {
 	 holdss &

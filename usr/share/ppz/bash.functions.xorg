@@ -46,3 +46,10 @@ cb() { #cb from term | cb to remotehost | cb to term | ...
 		  $COMMAND -o | xclip -selection clipboard -i -l 2
 	 }
 }
+tweak_ss() {
+	 xrdb -override - /usr/share/ppz/xscreensaver-times/"$1"
+	 xscreensaver-command -restart &>/dev/null
+	 sleep "$2"
+	 xrdb -override - /usr/share/ppz/xscreensaver-times/"$3"
+	 xscreensaver-command -restart &>/dev/null
+}

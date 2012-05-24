@@ -42,7 +42,11 @@ done
 
 # rescue from disc
 [ $rescue = y ] && {
-	 wait_until cdtray $drive
+	 SLEEPINC=1.5
+	 until cdtray $drive; do
+		  sleep $SLEEPINC
+		  SLEEPINC=$(echo "scale=30; $SLEEPINC*1.2" | bc)
+	 done
 	 while :; do
 		  if ! ddrescue -r -1 -vb 2048 $drive "$file"{,.log}; then
 				askyn "ddrescue failed - run again?" && continue || croak
@@ -119,11 +123,13 @@ fi
 check_ssh_connectivity $dvdrip_host || croak "Cannot connect to $dvdrip_host via ssh!"
 rsync --inplace --chmod u+w --out-format="%t %o %f ... %n" -aPh \
 	 --bwlimit=$bwl $dvdrip_mountpoint/ $dvdrip_host:$dvdrip_rdest/$disc_name \
-	 || askyn "rsync failed - bail?" && croak
+	 || { askyn "rsync failed - bail?" && croak; }
 
 # reeeeally make sure the transfer worked 100%
-rsync --inplace --chmod u+w --out-format="%t %o %f ... %n" -anc \
-	 $dvdrip_mountpoint/ $dvdrip_host:$dvdrip_rdest/$disc_name &>| $rsync_out
+echo_blue DOUBLE CHECKING...
+set +o noclobber
+rsync --inplace --chmod u+w --out-format="%t %o %f ... %n" -aznc -e 'ssh -C' \
+	 $dvdrip_mountpoint/ $dvdrip_host:$dvdrip_rdest/$disc_name &> $rsync_out
 [ $? -ne 0 ] || [ -s $rsync_out ] && {
 	 echo_red --
 	 cat $rsync_out
@@ -132,8 +138,7 @@ rsync --inplace --chmod u+w --out-format="%t %o %f ... %n" -anc \
 }
 
 # cleanup - we're really sure now
-sudo /usr/sbin/mountdvd --unmount && {
-	 ddrescuelog -D "$file.log" \
-		  && rm -f "$file"{,.log} \
-		  || mv "$file.log" "$dvdrip_ddir"/logs/
-}
+sudo /usr/sbin/mountdvd --unmount || croak "unmount failed"
+ddrescuelog -D "$file.log" \
+	 && rm -f "$file"{,.log} \
+	 || mv "$file.log" "$dvdrip_ddir"/logs/
