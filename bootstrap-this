@@ -26,16 +26,24 @@ echo "Total memory: "$((mem/1024))"MB"
 	 # get an ext4 partition to use. keep asking until it's right.
 	 while :; do
 		  read -ei /dev/ -p 'Please enter a new /usr: ' usrdev
-		  [ "$(blkid $usrdev -s type -o value)" = "ext4" ] && break
+		  [ "$(blkid $usrdev -s TYPE -o value)" = "ext4" ] && break
 		  echo "... that is not ext4!"
 	 done
 	 mkdir /mnt/usr
 	 mount $usrdev /mnt/usr
-	 echo INITIAL RSYNC...
-	 # delete?
-	 rsync --inplace --partial -ac /usr/ /mnt/usr/
-	 echo DOUBLE CHECKING...
-	 rsync --inplace --out-format="%t %o %f ... %n" -aPhc /usr/ /mnt/usr/
+	 if [ -d /mnt/usr/pkgcache ] && [ -a /mnt/usr/bin/pacman ]; then
+		  # it's already populated
+		  echo ROLLBACK RSYNC...
+		  rsync --inplace --del --exclude=/pkgcache/ --partial -a /usr/ /mnt/usr/
+		  echo DOUBLE CHECKING...
+		  rsync --inplace --del --exclude=/pkgcache/ --out-format="%t %o %f ... %n" -aPhc /usr/ /mnt/usr/
+	 else
+		  # this is our first run
+		  echo INITIAL RYNC...
+		  rsync --inplace --partial -a /usr/ /mnt/usr/		  
+		  echo DOUBLE CHECKING...
+		  rsync --inplace --out-format="%t %o %f ... %n" -aPhc /usr/ /mnt/usr/		  
+	 fi
 	 mount -v --move /mnt/usr /usr
 	 pkgcache=/usr/pkgcache
 } || {
