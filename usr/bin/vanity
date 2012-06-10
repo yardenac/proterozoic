@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# take the stock mirrorlist and generate a better one!
+
+exit #stub

@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# not usable yet
+exit
+
+# ddrescue disc to iso file
+
+# get iso file info
+handbrake -i file.iso -t 0
+
+# for each title:
+mplayer -nolirc -dvd-device file.iso dvd://$num -dumpstream -dumpfile file.$num.vob
+
+# FOR EACH VOB...
+
+# get right aid
+mplayer -identify -ao null -vo null -frames 0 file.vob
+
+# RESOLUTION
+
+# get parameter for -vf crop=
+# run this command while browsing through video - should settle towards something!
+mplayer stb.1-1.vob -nolirc -vf cropdetect -msglevel all=1:vfilter=4 | uniq
+
+# -vf scale=
+#
+# STEP 1: FIND IDEAL RATIO
+# remember the height/width are often modified by aspect ratio
+# ID_VIDEO_ASPECT, ID_VIDEO_WIDTH, ID_VIDEO_HEIGHT
+# they might not be set right away! i.e., "-frames 0" or midentify will mislead
+# look for output like: VO: [vdpau] 720x480 => 854x480 Planar YV12
+#
+# calculate new ideal size for X & Y aspects
+#   Y in above is the same
+#   but X changes, so calculate, e.g.: 854*704/720 = 835.0222
+#   rounding, original res is: 835x480
+#   therefore ideal ratio is: 1.73958333
+#
+# STEP 2: SCALE DOWN
+#
+# turn this into smaller, codec-friendly 16-divisible dimensions
+#
+# check script here http://sandy.hirstory.com/sandy/res.php?x=704&y=480
+# script is old! needs cleaning up!
+# thoughts behind script:
+#  - ideal ratio = that of content sans black bars (often weird, nonstandard)
+#  - desired = multiples of 16, as close to standard A/R as practical
+# algorithm:
+#  - iterates every pair of 16-multiples, 16-3200
+#  - only shows pairs with <=0.05 deviation from either 4/3, 16/9, or the content ideal
+# output:
+#  - 4/3 & 16/9 are blue
+#  - shows count of total pixel footprint, bolded if inside ideal range (150~300k)
+#  - ratio bolded if result will produce either top+bottom bars, or VERY small sidebars
+#    (ratio smaller than ideal = shorter X, longer Y = bars on sides)
+#    (ratio larger than ideal = longer X, shorter Y = bars on top + bottom)
+#  - next to either the x or y, is the implied breakdown of content pixels vs bars
+#    for instance:
+#       (187.73)(4.27)192x128                -- will have 4.27 total columns of black
+#                     192x144(13.09)(130.91) -- will have 13.09 total rows of black
+#
+# finally you will end up with an ideal filter chain like:
+# -vf crop=704:480:8:0,scale=501:288,dsize=512:288
+

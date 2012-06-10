@@ -7,11 +7,49 @@
 # root 123m~$ aif -p enzymes/polymerase -d
 echo bootstrapping for the 2011.08.19 live cd...
 
-mkdir -p /tmp/pkgcache
+ionice -c 3 -p $$
+renice -n 19 $$
+modprobe -r pcspkr
+
+echo "Looking for swap..." && {
+	 for dev in $(blkid -t TYPE=swap -o device); do
+		  swapon -v $dev
+	 done
+}
+
+mem=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
+echo "Total memory: "$((mem/1024))"MB"
+
+[ "$mem" -lt 1048576 ] && {
+	 echo "Not enough memory for full upgrade! These are ext4s available:"
+	 blkid -t TYPE=ext4
+	 # get an ext4 partition to use. keep asking until it's right.
+	 while :; do
+		  read -ei /dev/ -p 'Please enter a new /usr: ' usrdev
+		  [ "$(blkid $usrdev -s type -o value)" = "ext4" ] && break
+		  echo "... that is not ext4!"
+	 done
+	 mkdir /mnt/usr
+	 mount $usrdev /mnt/usr
+	 echo INITIAL RSYNC...
+	 # delete?
+	 rsync --inplace --partial -ac /usr/ /mnt/usr/
+	 echo DOUBLE CHECKING...
+	 rsync --inplace --out-format="%t %o %f ... %n" -aPhc /usr/ /mnt/usr/
+	 mount -v --move /mnt/usr /usr
+	 pkgcache=/usr/pkgcache
+} || {
+	 echo "Enough memory for in-mem pkgcache"
+	 pkgcache=/tmp/pkgcache
+}
+
+mkdir -p $pkgcache
 [ -L /var/cache/pacman/pkg ] || {
 	 rm -rfv /var/cache/pacman/pkg
-	 ln -s /tmp/pkgcache /var/cache/pacman/pkg
+	 ln -s $pkgcache /var/cache/pacman/pkg
 }
+
+#	 mount -o remount,size=85% /tmp
 
 GITURL=https://raw.github.com/twomen/proterozoic/master
 
@@ -22,7 +60,8 @@ wget $GITURL/usr/share/ppz/default/rc.conf		-qO	/etc/rc.conf
 wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
 sed -i \
-	 -e 's/^IgnorePkg = /\0linux/ig' \
+	 -e 's/^IgnorePkg[ =]*/\0 linux /ig' \
+	 -e 's/^SyncFirst/#\0/ig' \
 	 -e s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
 	 -e s/%SET_TYPE%/desktop/ig \
@@ -30,11 +69,41 @@ sed -i \
 
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 
-pacman --noprogressbar --noconfirm --needed -Sqy pacman
+pacman --noprogressbar --noconfirm --needed -Sqy pacman tzdata curl
+sed -i 's/^#\(SyncFirst\)/\1/ig' /etc/pacman.conf
+
+echo "Forking md5sum for entropy..."
+blkid /dev/sr0 &>/dev/null
+disk=$(blkid -t TYPE=udf -o device)
+ionice -c 3 nice -n 19 md5sum $disk &>/dev/null &
+md5sumpid=$!
+pacman-key --init
+kill -SIGTERM $md5sumpid
+
+# do without interactive?
+pacman-key --populate archlinux
+
+# force filesystem
+shopt -s dotglob
+[ -L /var/run ] || {
+	 [ -L /var/run/daemons ] && rm -f /var/run/daemons
+	 mv -nv /var/run/* /run/
+	 rm -rf /var/run
+	 ln -s /run /var/run
+}
+[ -L /var/lock ] || {
+	 mv -n /var/lock/* /run/lock/ &>/dev/null
+	 rm -rf /var/lock
+	 ln -s /run/lock /var/lock
+}
 pacman --noprogressbar --noconfirm --needed -Sqf filesystem
+
+# full upgrades
 pacman --noprogressbar --noconfirm --needed -Squ smartmontools base-devel
 pacman --noprogressbar --noconfirm --needed -Squ proterozoic
-pacman --noprogressbar --noconfirm --needed -Sqcc
+
+[ "$(readlink /var/cache/pacman/pkg)" = /tmp/pkgcache ] && \
+	 pacman --noprogressbar --noconfirm --needed -Sqcc
 
 sed -i s/otown.tmp/otown/ig									/etc/pacman.conf
 rm -f /etc/pacman.d/mirrorlist.otown.tmp

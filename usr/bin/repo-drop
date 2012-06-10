@@ -2,6 +2,12 @@
 # 
 # a little bit less tedious than remembering long file paths!
 
+# make this check pkginfo and automatically figure out $arch
+# repo location should be in a .rc file
+# should find file with bash-completion!
+# should really handle rsync ssh lines, not need sshfs
+# with all that, it should be as easy as "repo-drop [tab] [enter]"
+
 # Needs the extra logic since we call from package-this
 if [ -s usr/share/ppz/bash.functions ]; then
 	 . usr/share/ppz/bash.functions
@@ -52,7 +58,7 @@ for db in "${dbs[@]}"; do
 		  continue
 	 }
 	 to_del+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
-	 rsync --out-format='%t %o %f' --inplace -LPh "$pack" "$repo/$pack_base"
+	 rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack" "$repo/$pack_base"
 	 repo-add "$db" "$repo/$pack_base"
 done
 
