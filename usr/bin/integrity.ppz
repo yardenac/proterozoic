@@ -295,7 +295,7 @@ integrity_net() {
 	 return 0
 }
 integrity_encdev() {
-	 local size arg name type dev{,_canon,_intermediate} mountpoint mapname loop IFS=$'\n\r\t '
+	 local size arg name type dev{,_canon,_intermediate} mountpoint mapname loop mem iters IFS=$'\n\r\t '
 
 	 # makes sure device exists and is luks
 	 # creates it with default key if necessary
@@ -352,7 +352,12 @@ integrity_encdev() {
 		  chmod 600 "$dev_intermediate"
 	 done
 	 dev=$dev_canon
-	 
+
+	 # fewer crypt iterations on low-mem cpus
+	 iters=9999
+	 mem=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
+	 [ "$mem" -lt 1048576 ] && iters=999
+
 	 # make sure it's luks formatted
 	 until type=$(/sbin/blkid -o value -s TYPE "$dev") && [ "$type" = crypto_LUKS ]; do
 		  echo_red "$dev is NOT luks formatted!"
@@ -374,7 +379,7 @@ integrity_encdev() {
 
 		  # now format luks, using default key
 		  echo -n "loosest slots in town" | \
-				cryptsetup -qvi 9999 -S 1 -d - -s 512 -c aes-xts-plain64 -h whirlpool luksFormat "$dev"
+				cryptsetup -qvi $iters -S 1 -d - -s 512 -c aes-xts-plain64 -h whirlpool luksFormat "$dev"
 
 		  chrooted && {
 				echo_red "WE ARE DOING DEV MAPPINGS IN A CHROOT! LOOK FOR ERRORS!"
@@ -403,7 +408,7 @@ integrity_encdev() {
 	 # make sure its not DEFAULT KEY
 	 am_root && cryptsetup luksDump "$dev" | grep -qiE '^Key Slot 7: DISABLED$' && {
 		  if askyn "Shall we set a new, secure key for $dev ... ?"; then
-				cryptsetup -yvi 9999 -S 7 -d <(echo -n "loosest slots in town") luksAddKey "$dev"
+				cryptsetup -yvi $iters -S 7 -d <(echo -n "loosest slots in town") luksAddKey "$dev"
 				echo_red "Please enter the new password again, so we can kill the old one :)"
 				cryptsetup luksKillSlot "$dev" 1
 		  else

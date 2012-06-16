@@ -13,9 +13,13 @@ set_xtitle "[mm] $*"
 	 trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
 }
 
-y=250; [ "$1" = d ] && shift && y=-1000
+x=1030; y=250
+case "$1" in
+	 d) shift; y=-1000;;
+	 e) shift; x=200;;
+esac
 
-ionice -c 2 -n 0 nice -n -5 mplayer -geometry 1030:$y -fs -ao alsa \
+ionice -c 2 -n 0 nice -n -5 mplayer -geometry $x:$y -fs -ao alsa \
 	 -stop-xscreensaver -msglevel all=1:statusline=9 -nolirc \
 	 -input nodefault-bindings:conf=/usr/share/ppz/mplayer.input.conf "$@"
 

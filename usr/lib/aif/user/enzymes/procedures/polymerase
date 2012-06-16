@@ -22,7 +22,7 @@ pacman_target() {
 }
 unmount_all() {
 	 local RV=0
-	 for MNTD_FS in /proc /sys /dev ${MNTPTS[@]} /; do
+	 for MNTD_FS in /proc /sys /run /dev ${MNTPTS[@]} /; do
 		  local FULLPATH=${TARGET}${MNTD_FS}
 		  findmnt -n ${FULLPATH%%\/} >/dev/null \
 				&& {
