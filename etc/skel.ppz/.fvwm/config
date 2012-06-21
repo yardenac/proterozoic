@@ -143,7 +143,6 @@ AddToMenu MenuFvwmRoot
 + "Seamonkey"	Exec exec seamonkey
 + "Firefox"		Exec exec firefox
 + "Chromium"	Exec exec chromium
-+ "Broken LCD"	Exec exec xrdb -override - /usr/share/ppz/Xresources.broken-lcd
 + "Reload WM"	Restart
 + "Restart WM"	Quit
 + "Reboot CPU"	Exec exec sudo /sbin/reboot
@@ -158,7 +157,7 @@ AddToMenu MenuFvwmWindowOps2
 + "$[gt.&Lower]"             Lower
 + "$[gt.(De)&Iconify]"       Iconify
 + "$[gt.(Un)&Stick]"         Stick
-+ "Toggle OnTop"				  ToggleOnTopFunc
++ "$[gt.Toggle_&OnTop]"		  ToggleOnTopFunc
 
 DestroyFunc ExecVDPHack
 AddFunc ExecVDPHack

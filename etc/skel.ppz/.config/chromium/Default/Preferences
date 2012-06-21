@@ -1,0 +1,26 @@
+{
+   "browser": {
+      "enabled_labs_experiments": [ "accelerated-filters" ]
+   },
+   "geolocation": {
+      "default_content_setting": 2
+   },
+   "download": {
+      "prompt_for_download": true
+   },
+   "homepage": "https://encrypted.google.com/webhp?as_qdr=all&gf=0&pws=0&safe=off&q=",
+   "homepage_is_newtabpage": false,
+   "profile": {
+      "default_content_settings": {
+         "geolocation": 2,
+         "mouselock": 2,
+         "notifications": 2
+      }
+   },
+   "session": {
+      "restore_on_startup": 1
+   },
+   "webintents": {
+      "enabled": false
+   }
+}

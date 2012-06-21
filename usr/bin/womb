@@ -49,7 +49,7 @@
 
 	 [ "$(/usr/bin/tty)" = /dev/tty3 ] \
 		  && [ -x /usr/bin/xinit ] \
-		  && ! /usr/bin/pgrep -f xorg &>/dev/null && {
+		  && ! /usr/bin/pgrep -x X &>/dev/null && {
 
 		  /usr/bin/integrity.ppz
 

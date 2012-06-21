@@ -1,0 +1,11 @@
+#!/usr/bin/gawk -f
+
+# print first line - if no lines, fail
+
+{
+	 l=$0
+}
+END {
+	 if (l == "") exit 1
+	 print $l
+}

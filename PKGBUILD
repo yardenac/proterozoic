@@ -24,10 +24,16 @@ package() {
 	 mpconf=usr/share/ppz/mplayer.input.conf
 	 cat ${startdir}/${mpconf} | awk '/^[^#]/ {print "CTRL-" $0}' >> ${pkgdir}/${mpconf}
 
+	 fbdir=${pkgdir}/etc/skel.ppz/.config/fbpanel
+	 for width in 1024; do
+		  sed -e 's/\(widthtype = \).*$/\1pixel/ig' \
+				-e 's/\(width = \)100$/\1'$width'/ig' ${fbdir}/default >| ${fbdir}/$width
+	 done
+
 	 chmod 444 ${pkgdir}/etc/.emacs.d/init.el
 	 chmod 555 ${pkgdir}/etc/.emacs.d
 	 chmod 440 ${pkgdir}/etc/sudoers.d/ppz
 	 chmod 750 ${pkgdir}/etc/sudoers.d
 	 chmod 770 ${pkgdir}/etc/privoxy
-	 chmod +x ${pkgdir}/usr/{s,}bin/*
+	 chmod +x ${pkgdir}/usr/{s,}bin/* ${pkgdir}/etc/rc.d/*
 }

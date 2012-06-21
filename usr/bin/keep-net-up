@@ -3,64 +3,87 @@
 . /etc/rc.conf
 . /usr/share/ppz/bash.functions
 
+am_root || groups | grep -qw network || exit
+
+args=()
+while [ "$1" ]; do
+	 case "$1" in
+		  -d) daemon=y;;
+		  *) args+=("$1");;
+	 esac
+	 shift
+done
+set -- "${args[@]}"
+
+[ "$daemon" = y ] && {
+	 echo daemon "$0" "$@"
+	 knu_file=/tmp/.keep-net-up
+	 [ -a "$knu_file" ] || touch "$knu_file"
+	 [ -O "$knu_file" ] || croak "KNU FILE HIJACKED"
+	 nohup "$0" "$@" &>> "$knu_file" &
+	 exit
+}
+
+loopinc=45
+wpas_file=/tmp/.$(uniq_token)
+dhcp_file=/tmp/.$(uniq_token)
+knu_cleanup() { rm -rf "$wpas_file" "$dhcp_file"; }
+trap "knu_cleanup; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+
+WPA_SC=$(edev-path "$WPA_SC")
+[ -a "$WPA_SC" ] || WPA_SC=/etc/wpa_supplicant.conf
+
 test_network_thrice() {
 	 fwget 10 3 | grep -iq "feeling lucky"
 }
-
-available_open_ssids() {
-	 # trusted only
-	 # spits them one per line ...
-	 # wpa_supplicant.conf must be pre-sorted!
+avail_known_ssid() {
 	 comm -12 \
 		  <(iwlist wlan0 scan | awk '/ESSID:"/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' | sort -u) \
-		  <(awk '/^#/ {print $2} /ssid="/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' "$WPA_SUPP_CONF")
-#		  <(awk '/^#/ {print $2}' "$WPA_SUPP_CONF")
+		  <(awk '/^#/ {FS=":";$0=$0;print $2} /ssid="/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' "$WPA_SC") \
+		  | first-or-fail
 }
 
-am_root || groups | grep -qw network && {
+while :; do
+	 stamp "Looping every $loopinc until network failure..."
+	 while test_network_thrice; do sleep $loopinc; done
+	 stamp "Network down!"
+	 pkill -x --signal SIGTERM dhcpcd
+	 pkill -x --signal SIGTERM wpa_supplicant
 
-	 wpas_file=/tmp/.$(uniq_token)
-	 dhcp_file=/tmp/.$(uniq_token)
-	 knu_cleanup() { rm -rf "$wpas_file" "$dhcp_file"; }
-	 trap "knu_cleanup; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
-
-	 while :; do
-		  # loop until network trouble
-		  while test_network_thrice; do sleep 45; done
-
-		  pkill -x -signal SIGTERM dhcpcd
-		  pkill -x -signal SIGTERM wpa_supplicant
-
-		  for if in $(awk '$1 ~ /^lo:$/ {next}
+	 for if in $(awk '$1 ~ /^lo:$/ {next}
 			   $1 ~ /:$/ {sub(/:/,"",$1); print $1}' /proc/net/dev | sort -u); do
 
-				ip link set $if down
-				ip link set $if up
-				[ $(cat /sys/class/net/$if/operstate) = "up" ] || {
-					 ip link set $if down
-					 continue
-				}
+		  ip link set $if down
+		  ip link set $if up
+		  sleep 2
+		  case $(cat /sys/class/net/$if/device/class) in
+				0x028000) # wireless
+					 ssid=$(avail_known_ssid) || croak "No available networks!"
+					 echo found ssid: $ssid
+					 wep_key=$(awk '/^#:'"$ssid"':/ {FS=":";$0=$0;print $3}' "$WPA_SC")
+					 echo wep: @$wep_key@
+					 [ "$wep_key" ] \
+						  && iwconfig $if essid "$ssid" key $wep_key \
+						  || iwconfig $if essid "$ssid"
+					 grep -iq 'ssid="'"$ssid"'"' "$WPA_SC" && {
+						  echo wpa_supp
+						  wpa_supplicant -d -i $if -c "$WPA_SC" &>> $wpas_file &
+						  tailtimed 20 $wpas_file 'State: ASSOCIATED -> 4WAY_HANDSHAKE' || croak 'no 4way'
+					 };;
+				0x020000) #wired
+					 [ $(cat /sys/class/net/$if/operstate) = "up" ] || {
+						  ip link set $if down
+						  echo "$if: failed to operate"
+						  continue
+					 };;
+				"") croak "$if: No loopbacks!";;
+				*) croak "$if: weird device";;
+		  esac
 
-				# set essid
-				ssid=$(available_open_ssids | head -n 1)
-				[ "$ssid" || croak "No available networks!" ]
-
-				iwconfig $if essid "$ssid"
-
-				grep -q 'ssid=" '"$ssid"'"' "$WPA_SUPP_CONF" && {
-					 wpa_supplicant -d -i wlan0 -c "$WPA_SUPP_CONF" &>> $wpas_file &
-				}
-
-
-			   # iface is connectable
-
-				# look for this text:
-#				"State: ASSOCIATED -> 4WAY_HANDSHAKE"
-				# if we dont find it in 20 seconds, end it all, try next if
-
-
-				dhcpcd -Bt 30 $if &>> $dhcp_file &
-
-		  done
+		  echo now dhcp...
+		  dhcpcd -Bt 30 $if &>> $dhcp_file &
+		  tailtimed 20 $dhcp_file leased || croak 'no lease'
+		  continue 2
 	 done
-}
+	 croak "all ifs failed"
+done

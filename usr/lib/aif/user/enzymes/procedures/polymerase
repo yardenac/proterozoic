@@ -100,7 +100,7 @@ start_process() {
 		  pkgs_web=(seamonkey flashplugin alsa-utils openjdk6 icedtea-web sext acroread \
 				chromium gecko-mediaplayer)
 		  pkgs_multimedia=(gimp feh mplayer mencoder imagemagick gcolor2 \
-				handbrake-cli mencoder midentify)
+				handbrake-cli mencoder midentify mjpegtools dvdauthor)
 		  pkgs_gaming=(zsnes mupen64plus)
 		  pkgs_cd=(eject cdrkit dvd+rw-tools handbrake-cli)
 		  pkgs_wireless=(wireless_tools wpa_supplicant b43-firmware iw) #wpa_actiond ifplugd

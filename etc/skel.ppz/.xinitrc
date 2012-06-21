@@ -1,6 +1,8 @@
 #!/bin/bash
 
-numlockx on
+. /etc/rc.conf
+
+[ "$SYSTEM_TYPE" = desktop ] && numlockx on
 
 export XAUTHORITY=/tmp/.Xauthority.xuser
 xrdb -load /etc/X11/Xresources

@@ -840,3 +840,7 @@ ssh_key_from_host() {
 		}
 	'
 }
+stamp() {
+	 echo_green_n $(date '+%Y %b %e %a %T [%Z %z]')
+	 echo : "$@"
+}

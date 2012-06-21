@@ -3,7 +3,7 @@
 
 Section "ServerLayout"
     Identifier     "Layout0"
-    Screen      0  "Screen0" 0 1076
+    Screen      0  "Screen0" 0 1106
     Screen      1  "Screen1" 1024 0
     Screen      2  "Screen2" 1024 768
     InputDevice    "Keyboard0" "CoreKeyboard"
@@ -38,9 +38,9 @@ Section "Monitor"
     # HorizSync source: edid, VertRefresh source: edid
     Identifier     "Monitor2"
     VendorName     "Unknown"
-    ModelName      "DELL 2005FPW"
-    HorizSync       30.0 - 83.0
-    VertRefresh     56.0 - 75.0
+    ModelName      "Acer G245HQ Ab"
+    HorizSync       28.0 - 33.0
+    VertRefresh     43.0 - 72.0
     Option         "DPMS"
 EndSection
 
