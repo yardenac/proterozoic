@@ -33,6 +33,7 @@ alias mv='mv -i'
 alias   pine='alpine -P /usr/local/lib/pine.conf -d0'
 alias alpine='alpine -P /usr/local/lib/pine.conf -d0'
 alias rm='rm --one-file-system -i'
+alias rs='rsync --inplace --out-format="%t %o %f ... %n" -Ph'
 alias rsync_root='rsync -aAXDxhP --stats --inplace'
 alias zgrep='zgrep -i --color=auto'
 bind '"\e[A"':history-search-backward

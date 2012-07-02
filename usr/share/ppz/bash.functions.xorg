@@ -53,3 +53,11 @@ tweak_ss() {
 	 xrdb -override - /usr/share/ppz/xscreensaver-times/"$3"
 	 xscreensaver-command -restart &>/dev/null
 }
+tratio() {
+	 [ -a /usr/bin/transmission-remote ] || return 1
+	 transmission-remote --session-stats \
+		  | tail -n 4 | awk '
+			   /^  Uploaded/ {printf $2*1024 " \\ "}
+			   /^  Downloaded/ {printf $2 " = "}
+			   /^  Ratio/ {print $2}'
+}

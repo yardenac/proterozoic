@@ -633,6 +633,19 @@ integrity_sshd() {
 		  } || echo_red "did not start sshd"
 	 }
 }
+integrity_sensors() {
+	 pacman -Qq lm_sensors &>/dev/null || return 0
+	 local sc=/etc/conf.d/lm_sensors
+	 [ -s $sc ] && return
+	 echo_red "Missing $sc"
+	 am_root || return 0
+	 askyn "Auto-generate $sc ?" || {
+		  echo_red ok, do it yourself
+		  return
+	 }
+	 yes "" | /usr/sbin/sensors-detect
+	 echo_blue "Remember, add DAEMONS=(sensors) or MODULES=(...)"
+}
 
 # this gets run in:
 #   post_install
@@ -641,7 +654,8 @@ integrity_sshd() {
 #      post_upgrade
 
 for F in rootpw locales tz simpleconf inittab hosts users \
-	 iptables net encdevs bashhistory emacsd tmpdir sshd; do
+	 iptables net encdevs bashhistory emacsd tmpdir sshd \
+	 sensors; do
 
 	 integrity_${F} || echo "${F} failed..."
 done

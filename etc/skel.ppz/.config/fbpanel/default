@@ -32,7 +32,7 @@ Plugin {
 	type = tray
 }
 Plugin {
-	type = genmon
+	type = inmon
 	expand = false
 	padding = 0
 	config {

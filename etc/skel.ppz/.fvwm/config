@@ -39,6 +39,7 @@ Style Fvwm*       NoTitle,  Sticky, WindowListSkip, \
 Style panel StaysOnTop
 Style MPlayer StaysOnTop
 Style plugin-container StaysOnTop
+Style exe StaysOnTop
 Style urxvt ResizeHintOverride
 Style xscreensaver FPFocusByProgram
 Style acroread PositionPlacement UnderMouse
@@ -148,9 +149,6 @@ AddToMenu MenuFvwmRoot
 + "Reboot CPU"	Exec exec sudo /sbin/reboot
 + "Window Ops"	Popup MenuFvwmWindowOps2
 
-#+ "Seamonkey"	ExecVDPHack seamonkey
-#+ "Firefox"		ExecVDPHack firefox
-
 DestroyMenu MenuFvwmWindowOps2
 AddToMenu MenuFvwmWindowOps2
 + "$[gt.R&aise]"             Raise
@@ -158,12 +156,6 @@ AddToMenu MenuFvwmWindowOps2
 + "$[gt.(De)&Iconify]"       Iconify
 + "$[gt.(Un)&Stick]"         Stick
 + "$[gt.Toggle_&OnTop]"		  ToggleOnTopFunc
-
-DestroyFunc ExecVDPHack
-AddFunc ExecVDPHack
-+ I SetEnv VDPAU_NVIDIA_NO_OVERLAY 1
-+ I Exec exec $*
-+ I UnsetEnv VDPAU_NVIDIA_NO_OVERLAY
 
 DestroyFunc ToggleOnTopFunc
 AddToFunc ToggleOnTopFunc

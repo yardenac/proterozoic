@@ -49,6 +49,7 @@ while :; do
 	 stamp "Network down!"
 	 pkill -x --signal SIGTERM dhcpcd
 	 pkill -x --signal SIGTERM wpa_supplicant
+	 knu_cleanup
 
 	 for if in $(awk '$1 ~ /^lo:$/ {next}
 			   $1 ~ /:$/ {sub(/:/,"",$1); print $1}' /proc/net/dev | sort -u); do
@@ -58,7 +59,10 @@ while :; do
 		  sleep 2
 		  case $(cat /sys/class/net/$if/device/class) in
 				0x028000) # wireless
-					 ssid=$(avail_known_ssid) || croak "No available networks!"
+					 until ssid=$(avail_known_ssid); do
+						  stamp "No available networks ... waiting 5"
+						  sleep 5
+					 done
 					 echo found ssid: $ssid
 					 wep_key=$(awk '/^#:'"$ssid"':/ {FS=":";$0=$0;print $3}' "$WPA_SC")
 					 echo wep: @$wep_key@
@@ -82,7 +86,7 @@ while :; do
 
 		  echo now dhcp...
 		  dhcpcd -Bt 30 $if &>> $dhcp_file &
-		  tailtimed 20 $dhcp_file leased || croak 'no lease'
+		  tailtimed 20 $dhcp_file leased || echo "no lease"
 		  continue 2
 	 done
 	 croak "all ifs failed"

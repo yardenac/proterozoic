@@ -1,6 +1,6 @@
 # vim:set ft=sh:
 build () {
-    MODULES="dm-crypt btrfs fuse"
+    MODULES="btrfs dm-crypt dm-mod dm-snapshot fuse"
     BINARIES="/bin/bash /bin/date /usr/bin/pstree /bin/cat /usr/bin/head"
     FILES="/etc/rc.conf"
     SCRIPT="ppz_tmp"

@@ -333,6 +333,8 @@ shell_is_interactive() {
 }
 askyn() {
 	 echo
+	 # defaults to NO in non-interactive!
+	 # if in a script, "no" MUST be a safe answer!!
 	 shell_is_interactive || return 1
 	 clear_input_buffer
 	 read -N 1 -p $'\e[1;34m'"${*//	/}"$' [*/n]):\e[m ' USERINPUT
