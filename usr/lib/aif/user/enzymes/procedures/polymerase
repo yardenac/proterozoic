@@ -115,7 +115,7 @@ start_process() {
 				eval askyn 'Install $A things? \(${pkgs_'$A'[@]}\)' && eval 'pkgs_go+=(${pkgs_'$A'[@]})'
 		  done
 		  pkgs_go+=(btrfs-progs-unstable tor privoxy proterozoic) # grub2-bios
-		  usetvar others "Type in any other packages you want to add: " 'aif parted dmidecode base-devel' ''
+		  usetvar others "Type in any other packages you want to add: " 'aif parted dmidecode base-devel amd-ucode intel-ucode' ''
 		  pkgs_go+=(${others//,/ })
 		  pacman_target -Sq ${pkgs_go[@]}
 		  cp -f ${TARGET}/{usr/share/ppz/default,etc}/pacman.conf

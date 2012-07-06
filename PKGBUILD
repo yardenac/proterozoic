@@ -15,7 +15,7 @@ depends=(jfsutils lsof 'ddrescue>=1.15' cryptsetup
 	 openssh sshfs ntp rsync curl git abs) # gptfdisk
 
 package() {
-	 cp -a ${startdir}/{etc,lib,usr,srv} ${pkgdir}/
+	 cp -a ${startdir}/{etc,usr,srv} ${pkgdir}/
 	 mkdir -p ${pkgdir}/etc/skel.ppz/.macromedia
 
 	 b=-m64; [ $CARCH = i686 ] && b='-m32 -Wl,--dynamic-linker=/lib/ld-linux.so.2'
