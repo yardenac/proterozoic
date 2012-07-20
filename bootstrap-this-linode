@@ -2,7 +2,7 @@
 
 # someday ... get this to set some ext3 vars and tune2fs
 
-GITURL=--no-check-certificate\ https://raw.github.com/twomen/proterozoic/master
+GITURL=--no-check-certificate\ https://raw.github.com/yardenac/proterozoic/master
 
 rm -f /etc/profile.d/locale.sh
 mv -f /etc/rc.conf{,.original}

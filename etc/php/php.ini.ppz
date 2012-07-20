@@ -66,7 +66,6 @@ include_path = ".:/usr/share/pear"
 extension_dir = "/usr/lib/php/modules/"
 extension=curl.so
 extension=gettext.so
-extension=json.so
 extension=ssh2.so
 
 extension=bcmath.so

@@ -8,11 +8,12 @@
 # should really handle rsync ssh lines, not need sshfs
 # with all that, it should be as easy as "repo-drop [tab] [enter]"
 
-# Needs the extra logic since we call from package-this
-if [ -s usr/share/ppz/bash.functions ]; then
-	 . usr/share/ppz/bash.functions
-elif [ -s /usr/share/ppz/bash.functions ]; then
-	 . /usr/share/ppz/bash.functions
+# Use local functions if possible (for `./package-this`)
+funcspath=usr/share/ppz/bash.functions
+if [ -s $funcspath ]; then
+	 . $funcspath
+elif [ -s /$funcspath ]; then
+	 . /$funcspath
 else
 	 echo "No functions file!"
 	 exit 1
@@ -23,10 +24,7 @@ shopt -s nullglob
 dbs=()
 pack=""
 for arg; do
-	 item=$(full_path_strict "$arg") || {
-		  echo_red "SKIPPING NON-EXISTENT ITEM: $arg"
-		  continue
-	 }
+	 item=$(full_path_strict "$arg") || ribbit "SKIPPING NON-EXISTENT ITEM: $arg"
 	 if [ -d "$item" ]; then
 		  item=${item%/}
 		  for db in "$item"/*.db.tar.gz; do

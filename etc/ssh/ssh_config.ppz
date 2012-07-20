@@ -6,3 +6,6 @@ GSSAPIDelegateCredentials no
 TCPKeepAlive no
 ServerAliveInterval 60
 ServerAliveCountMax 10
+ControlMaster auto
+ControlPersist no
+ControlPath ~/.ssh/master-%u-%r-%h-%p

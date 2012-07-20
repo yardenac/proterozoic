@@ -1,7 +1,7 @@
 #!/bin/bash
 # Meant to be run DIRECTLY from a fresh archiso live cd. Try typing, for example:
 # [root@archiso]$ dhcpcd eth0
-# [root@archiso]$ . <(wget https://raw.github.com/twomen/proterozoic/master/bootstrap-this -qLO-)
+# [root@archiso]$ . <(wget https://raw.github.com/yardenac/proterozoic/master/bootstrap-this -qLO-)
 
 # Then you probably want to run this:
 # root 123m~$ aif -p enzymes/polymerase -d
@@ -59,7 +59,7 @@ mkdir -p $pkgcache
 
 #	 mount -o remount,size=85% /tmp
 
-GITURL=https://raw.github.com/twomen/proterozoic/master
+GITURL=https://raw.github.com/yardenac/proterozoic/master
 
 rm -f /etc/profile.d/locale.sh
 mv -f /etc/rc.conf{,.original}
