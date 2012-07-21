@@ -1,3 +1,3 @@
 #!/bin/bash
 
-[ -r /etc/bash.bashrc.local ] && . /etc/bash.bashrc.local
+[ -r /usr/share/ppz/bash.rc ] && . /usr/share/ppz/bash.rc

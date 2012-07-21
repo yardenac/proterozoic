@@ -650,7 +650,7 @@ integrity_sensors() {
 # this gets run in:
 #   post_install
 #    functions.d
-#     bash.bashrc.local
+#     ppz/bash.rc
 #      post_upgrade
 
 for F in rootpw locales tz simpleconf inittab hosts users \
