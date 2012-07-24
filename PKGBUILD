@@ -12,7 +12,7 @@ depends=(jfsutils lsof 'ddrescue>=1.15' cryptsetup
 	 python2 python-formencode python-lxml expect s3fs parallel
 	 lzop zip unzip xmlstarlet jshon sudo less bc busybox strace
 	 iptables iproute2 inetutils dnsutils net-tools nmap gnu-netcat
-	 openssh sshfs ntp rsync curl git abs) # gptfdisk
+	 openssh sshfs ntp rsync curl git abs burp whois) # gptfdisk
 
 package() {
 	 cp -a ${startdir}/{etc,usr,srv} ${pkgdir}/

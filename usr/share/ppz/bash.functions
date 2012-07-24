@@ -846,3 +846,6 @@ stamp() {
 	 echo_green_n $(date '+%Y %b %e %a %T [%Z %z]')
 	 echo : "$@"
 }
+glog() {
+	 git glog -n $(($(tput lines)/5)) "$@" | colrm $(tput cols)
+}
