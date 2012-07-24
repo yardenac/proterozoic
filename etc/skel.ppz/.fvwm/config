@@ -67,6 +67,7 @@ Key 	apostrophe	A		4			NiceBash 100x20 - 'su - eu -c \\"urxvtb -e screen -xUR\\"
 Key	m				A		4			NiceBash 80x49  - 'cd; . /usr/share/ppz/bash.functions; . /usr/share/ppz/bash.functions.xorg; woman'
 Key	c				A		4			NiceBash 67x36  - 'cal -y && read'
 Key	b				A		4			NiceTerm 40x39  - /usr/bin/bc -lq /etc/bcrc
+Key	r				A		4			Refresh
 Key	q				A		4			Exec exec transset-df -a --dec 0.04
 Key	w				A		4			Exec exec transset-df -a --inc 0.04
 Key	v				A		4			xdotool click 2

@@ -1,4 +1,5 @@
 %mountdvd ALL=(root) NOPASSWD: /usr/sbin/mountdvd
 %users ALL=(root) NOPASSWD: /usr/sbin/openmap
 ex ALL=(root) NOPASSWD: /sbin/reboot ""
+eu ALL=(ex) NOPASSWD: /usr/bin/FvwmCommand
 #%power ALL=(root) NOPASSWD: /sbin/shutdown
