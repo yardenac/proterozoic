@@ -849,3 +849,18 @@ stamp() {
 glog() {
 	 git glog -n $(($(tput lines)/5)) "$@" | colrm $(tput cols)
 }
+nma() {
+	 local host=${1:-""}
+	 local event=${2:-""}
+	 local kf=~/.config/nma-api-key
+	 local resource=https://www.notifymyandroid.com/publicapi
+	 if read -t 0 -N 0; then
+		  cat <&0 | curl \
+				--data-urlencode "apikey@$kf" \
+				--data-urlencode "description@-" \
+				"${resource}/notify?event=${event}&application=${host}" &>/dev/null
+	 else
+		  curl --data-urlencode "apikey@$kf" \
+				"${resource}/notify?description=&event=${event}&application=${host}" &>/dev/null
+	 fi
+}
