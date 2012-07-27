@@ -27,6 +27,7 @@ alias grep='grep -i --color=auto'
 alias grex='grep -iEvr '"'"'^[[:space:]]*(#|;|//|$)'"'"
 alias handbrake=HandBrakeCLI
 alias hb=handbrake
+alias lf='ls -AF --color=auto'
 alias ls='ls -A --color=auto'
 alias mv='mv -i'
 alias   pine='alpine -P /usr/local/lib/pine.conf -d0'
