@@ -37,7 +37,7 @@ resolv_override() {
 		  && cp -f /etc/resolv.conf{.override,}
 }
 enc_teardown() {
-	 local enc mnt
+	 local enc mnt map
 	 for enc in $(awk '/^: edev/ {print $3}' /etc/rc.conf); do
 		  for mnt in $(findmnt -runRo TARGET /dev/mapper/$enc | sort -r); do
 				umount -r $mnt
