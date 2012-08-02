@@ -4,7 +4,7 @@ UPSCABLE usb
 UPSTYPE usb
 DEVICE /dev/usb/hid/hiddev[0-9]
 POLLTIME 60 #default
-LOCKFILE /var/lock
+LOCKFILE /etc/apcupsd
 SCRIPTDIR /etc/apcupsd
 PWRFAILDIR /etc/apcupsd
 ONBATTERYDELAY 6
