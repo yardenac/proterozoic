@@ -82,8 +82,8 @@ start_process() {
 				-e s/%SET_TYPE%/${HOSTTYPE}/ig \
 				-e s/%SET_HOSTNAME%/${HOSTNAME}/ig ${TARGET}/etc/rc.conf
 		  cat >  ${TARGET}/etc/fstab <<-EOF
-				/dev/mapper/enc /media/enc auto defaults,rw,relatime,nodiratime 0 0
-				UUID=4C93-65D0  /media/oxygen   vfat    defaults,user,noatime,nodiratime,fmask=177,dmask=077,check=s 0 0
+				/dev/mapper/enc /media/enc auto defaults,rw,relatime,nodiratime,noauto 0 0
+				UUID=4C93-65D0  /media/oxygen   vfat    defaults,user,noatime,nodiratime,fmask=177,dmask=077,check=s,noauto 0 0
 				EOF
 		  cat >> ${TARGET}/etc/fstab < /tmp/ppz-fstab
 		  rm -f /tmp/ppz-fstab
