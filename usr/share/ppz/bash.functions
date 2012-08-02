@@ -864,3 +864,6 @@ nma() {
 				"${resource}/notify?description=&event=${event}&application=${host}" &>/dev/null
 	 fi
 }
+dix() {
+	 diff <(grex "$1" | sort) <(grex "$2" | sort)
+}
