@@ -1,0 +1,42 @@
+#!/bin/bash
+
+. /usr/share/ppz/bash.functions
+
+# http://stackoverflow.com/questions/4023830/bash-how-compare-two-strings-in-version-format
+vergt () {
+    [[ "$1" == "$2" ]] && return 1
+	 local one=${1//-/.} two=${2//-/.}
+    local IFS=.
+	 local i ver1=($one) ver2=($two)
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
+        ver1[i]=0
+    done
+    for ((i=0; i<${#ver1[@]}; i++)); do
+        [[ -z ${ver2[i]} ]] && ver2[i]=0
+        ((36#${ver1[i]} > 36#${ver2[i]})) && return 0
+        ((36#${ver1[i]} < 36#${ver2[i]})) && return 1
+    done
+    return 1
+}
+
+find ./ -maxdepth 1 -type f | while read file; do
+	 file=$(readlink -e "$file") || continue
+	 type=$(file -ib "$file") || continue
+	 case "${type%%;*}" in
+		  application/x-xz|application/x-gzip) :;;
+		  *) continue
+	 esac
+	 pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || continue
+	 (( "${#pkgdeets[@]}" )) || continue
+	 name=${pkgdeets[0]}
+	 vers_here=${pkgdeets[1]}
+	 echo_blue_n "$name $vers_here "
+	 vers_there=$(cower --search --format="%v" "^${name}$")
+	 if [[ "$vers_here" == "$vers_there" ]]; then
+		  echo
+	 elif vergt "$vers_here" "$vers_there"; then
+		  echo_cyan "$vers_there"
+	 else
+		  echo_yellow "$vers_there"
+	 fi
+done
