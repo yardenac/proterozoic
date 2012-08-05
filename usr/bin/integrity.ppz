@@ -96,6 +96,11 @@ integrity_simpleconf() {
 				chown -R http:http /tmp/php
 		  }
 	 fi
+	 local wpaf=/etc/wpa_supplicant.conf
+	 [ "$WPA_SC" ] && [ -s $wpaf ] && [ -s "$WPA_SC" ] && ! diff $wpaf "$WPA_SC" && {
+		  echo_red "$wpaf is outdated"
+		  am_root && askyn "Update from $WPA_SC ... ?" && cp -f "$WPA_SC" "$wpaf"
+	 }
 }
 integrity_inittab() {
 	 am_root || return 0
