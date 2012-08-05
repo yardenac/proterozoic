@@ -1,31 +1,36 @@
 #!/bin/bash
 
-. /usr/share/ppz/bash.functions
+# Check an arch repository for AUR updates
 
 # http://stackoverflow.com/questions/4023830/bash-how-compare-two-strings-in-version-format
 vergt () {
-    [[ "$1" == "$2" ]] && return 1
+	 [[ "$1" == "$2" ]] && return 1
 	 local one=${1//-/.} two=${2//-/.}
-    local IFS=.
+	 local IFS=.
 	 local i ver1=($one) ver2=($two)
-    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
-        ver1[i]=0
-    done
-    for ((i=0; i<${#ver1[@]}; i++)); do
-        [[ -z ${ver2[i]} ]] && ver2[i]=0
-        ((36#${ver1[i]} > 36#${ver2[i]})) && return 0
-        ((36#${ver1[i]} < 36#${ver2[i]})) && return 1
-    done
-    return 1
+	 for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
+		  ver1[i]=0
+	 done
+	 for ((i=0; i<${#ver1[@]}; i++)); do
+		  [[ -z ${ver2[i]} ]] && ver2[i]=0
+		  ((36#${ver1[i]} > 36#${ver2[i]})) && return 0
+		  ((36#${ver1[i]} < 36#${ver2[i]})) && return 1
+	 done
+	 return 1
 }
-
-find ./ -maxdepth 1 -type f | while read file; do
-	 file=$(readlink -e "$file") || continue
-	 type=$(file -ib "$file") || continue
+is_pkg() {
+	 local type
+	 type=$(file -ib "$1") || return 1
 	 case "${type%%;*}" in
-		  application/x-xz|application/x-gzip) :;;
-		  *) continue
+		  application/x-xz|application/x-gzip) return 0;;
+		  *) return 1
 	 esac
+	 return 0
+}
+ck_pkg() {
+	 local file pkgdeets name vers_here vers_there
+	 file=$(readlink -e "$1") || continue
+	 is_pkg "$file" || continue
 	 pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || continue
 	 (( "${#pkgdeets[@]}" )) || continue
 	 name=${pkgdeets[0]}
@@ -39,4 +44,49 @@ find ./ -maxdepth 1 -type f | while read file; do
 	 else
 		  echo_yellow "$vers_there"
 	 fi
+}
+is_repo() {
+	 [ -d "$1" ] || return 1
+	 local item=${1%/}
+	 is db "$item"/*.db.tar.gz && return 0
+	 return 1
+}
+ck_repo() {
+	 local file
+	 find -P "$1" -xdev -maxdepth 1 -ignore_readdir_race -type f | sort | while read file; do
+		  ck_pkg "$file"
+	 done
+}
+
+. /usr/share/ppz/bash.functions
+
+shopt -s nullglob
+
+repos=() pkgs=()
+for arg; do
+	 if item=$(full_path_strict "$arg"); then
+		  if [ is_repo "$item"; then
+				repos+=("$item")
+		  elif is_pkg "$item"; then
+				pkgs+=("$item")
+		  else
+				echo_red "Not a repo: $item"
+		  fi
+	 else
+		  echo_red "Unknown option: $item"
+	 fi
+done
+
+(( ${#repos[@]} )) || {
+	 is_repo ./ && repos+=(./)
+}
+
+(( ${#repos[@]} + ${#pkgs[@]} )) || croak "USAGE: repock repo/ [repo/]"
+
+for repo in "${repos[@]}"; do
+	 ck_repo "$repo"
+done
+
+for pkg in "${pkgs[@]}"; do
+	 ck_pkg "$pkg"
 done
