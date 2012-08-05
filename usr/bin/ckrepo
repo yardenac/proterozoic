@@ -29,17 +29,19 @@ is_pkg() {
 }
 ck_pkg() {
 	 local file pkgdeets name vers_here vers_there
-	 file=$(readlink -e "$1") || continue
-	 is_pkg "$file" || continue
-	 pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || continue
-	 (( "${#pkgdeets[@]}" )) || continue
+	 file=$(readlink -e "$1") || return 1
+	 is_pkg "$file" || return 1
+	 pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || return 1
+	 (( "${#pkgdeets[@]}" )) || return 1
 	 name=${pkgdeets[0]}
 	 vers_here=${pkgdeets[1]}
+	 vers_there=$(cower --search --format="%v" "^${name}$") || return 1
+	 [[ "$vers_here" == "$vers_there" ]] && {
+		  [[ $verbose == y ]] && echo_blue "$name $vers_here "
+		  return
+	 }
 	 echo_blue_n "$name $vers_here "
-	 vers_there=$(cower --search --format="%v" "^${name}$")
-	 if [[ "$vers_here" == "$vers_there" ]]; then
-		  echo
-	 elif vergt "$vers_here" "$vers_there"; then
+	 if vergt "$vers_here" "$vers_there"; then
 		  echo_cyan "$vers_there"
 	 else
 		  echo_yellow "$vers_there"
@@ -63,14 +65,18 @@ ck_repo() {
 shopt -s nullglob
 
 repos=() pkgs=()
+verbose=''
 for arg; do
+	 case "$arg" in
+		  -v|--verbose) verbose=y; continue;;
+	 esac
 	 if item=$(full_path_strict "$arg"); then
-		  if [ is_repo "$item"; then
+		  if is_repo "$item"; then
 				repos+=("$item")
 		  elif is_pkg "$item"; then
 				pkgs+=("$item")
 		  else
-				echo_red "Not a repo: $item"
+				echo_red "Not a repo or pkg: $item"
 		  fi
 	 else
 		  echo_red "Unknown option: $item"
