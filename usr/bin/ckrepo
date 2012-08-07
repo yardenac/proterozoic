@@ -55,6 +55,7 @@ is_repo() {
 }
 ck_repo() {
 	 local file
+	 [ "$print_repos" ] && echo_green "$1"
 	 find -P "$1" -xdev -maxdepth 1 -ignore_readdir_race -type f | sort | while read file; do
 		  ck_pkg "$file"
 	 done
@@ -88,6 +89,9 @@ done
 }
 
 (( ${#repos[@]} + ${#pkgs[@]} )) || croak "USAGE: repock repo/ [repo/]"
+
+print_repos=''
+[ ${#repos[@]} -gt 1 ] || [ "$verbose" ] && print_repos=y
 
 for repo in "${repos[@]}"; do
 	 ck_repo "$repo"
