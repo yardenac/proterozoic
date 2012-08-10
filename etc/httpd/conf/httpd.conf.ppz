@@ -8,10 +8,15 @@ ServerTokens Prod
 ServerSignature Off
 HostnameLookups Off
 TraceEnable Off
+SSLProtocol all -SSLv2
+SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5
 SSLRandomSeed startup builtin
 SSLRandomSeed startup file:/dev/urandom 8192
 SSLRandomSeed connect builtin
 SSLRandomSeed connect file:/dev/urandom 8192
+SSLMutex "file:/var/run/httpd/ssl_mutex"
+SSLSessionCache "shmcb:/var/run/httpd/ssl_scache(512000)"
+BrowserMatch "MSIE [2-5]" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
 User http
 Group http
 ErrorLog "/var/log/httpd/error_log"
@@ -35,6 +40,8 @@ AddHandler application/x-httpd-php .php .php5
 AddType application/x-httpd-php .php .php5
 AddType application/x-compress .Z
 AddType application/x-gzip .gz .tgz
+AddType application/x-x509-ca-cert .crt
+AddType application/x-pkcs7-crl    .crl
 AddType image/x-icon .ico
 Alias /favicon.ico /srv/http/dummy/blank-favicon.ico
 AliasMatch ^/favicon.ico$ /srv/http/dummy/blank-favicon.ico
