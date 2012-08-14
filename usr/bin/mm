@@ -19,6 +19,16 @@ case "$1" in
 	 e) shift; x=200;;
 esac
 
+{
+	 c=10
+	 while sleep 0.3; do
+		  [ "$(ps --ppid $$ -o comm=)" == mm ] && break
+		  let c-- || break
+	 done
+	 sudo -u ex FvwmCommand Refresh
+} &>/dev/null &
+
+
 ionice -c 2 -n 0 nice -n -5 mplayer -geometry $x:$y -fs -ao alsa \
 	 -stop-xscreensaver -msglevel all=1:statusline=9 -nolirc \
 	 -input nodefault-bindings:conf=/usr/share/ppz/mplayer.input.conf "$@"
