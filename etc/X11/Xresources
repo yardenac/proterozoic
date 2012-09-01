@@ -15,6 +15,7 @@ urxvt.perl-ext-common: default,tabbedex,url-select
 urxvt.tabbed.autohide: true
 urxvt.tabbed.title: true
 urxvt.urlLauncher: /usr/bin/seamonkey
+urxvt.url-select.launcher: /usr/bin/seamonkey
 urxvt.matcher.button: 1
 urxvt.saveLines: 99999
 urxvt.visualBell: false
