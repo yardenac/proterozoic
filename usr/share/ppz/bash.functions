@@ -465,7 +465,7 @@ woman() {
 	set_xtitle "$COMMAND [woman]"
 	help "$COMMAND" 2>/dev/null && read || e\
 		--eval "(manual-entry \"$COMMAND\")"\
-		--eval '(kill-buffer-and-window)'\
+		--eval '(kill-buffer-and-window)'
 }
 sep_by() {
 	 local SEP=$1
