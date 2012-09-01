@@ -457,23 +457,15 @@ ups() {
 	apcaccess status | grep -Ei '^(status|linev|loadpct|bcharge|timeleft)'
 }
 woman() {
-	local IFS='
-';	[ "$1" ] && COMMAND="$@" || {
-		echo -n "Enter command to look up: "
-		read COMMAND
-		echo
+	local IFS=$'\n'
+	[ "$1" ] && COMMAND="$@" || {
+		read -ep $'\e[1;34mEnter command to look up:\e[m ' COMMAND
 	}
+	type set_xtitle &>/dev/null || . /usr/share/ppz/bash.functions.xorg
 	set_xtitle "$COMMAND [woman]"
 	help "$COMMAND" 2>/dev/null && read || e\
-		--eval '(fset '"'"'manpage "man '$COMMAND' | cat && exit\C-m")'\
-		--eval '(shell)'\
-		--eval '(execute-kbd-macro (symbol-function '"'"'manpage))'\
-		--eval '(beginning-of-buffer)'\
-		--eval '(beginning-of-buffer)'\
-		--eval '(beginning-of-buffer)'\
-		--eval '(beginning-of-buffer)'\
-		--eval '(beginning-of-buffer)'\
-		--eval '(beginning-of-buffer)'
+		--eval "(manual-entry \"$COMMAND\")"\
+		--eval '(kill-buffer-and-window)'\
 }
 sep_by() {
 	 local SEP=$1
