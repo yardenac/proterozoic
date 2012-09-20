@@ -25,17 +25,19 @@ cat > /etc/fstab <<-EOF
 	/dev/xvda / ext3 rw,noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
 EOF
 
-pacman --noprogressbar --noconfirm --needed -Sqyy pacman
-
 echo "Forking md5sum for entropy..."
 ionice -c 3 nice -n 19 md5sum /dev/xvda &>/dev/null &
 md5sumpid=$!
 pacman-key --init
-#pacman-key --populate archlinux
 kill -SIGTERM $md5sumpid
 
-pacman --noprogressbar --noconfirm --needed -Sqf filesystem
-pacman --noprogressbar --noconfirm --needed -Squ base-devel tor privoxy \
+wget https://www.archlinux.org/developers/	-qLO- | awk -F\" '(/pgp.mit.edu/) {sub(/.*search=0x/,"");print $1>>"/etc/pacman.d/trusted-keys"}'
+wget https://www.archlinux.org/trustedusers/	-qLO- | awk -F\" '(/pgp.mit.edu/) {sub(/.*search=0x/,"");print $1>>"/etc/pacman.d/trusted-keys"}'
+
+pacman-key --recv-keys $(cat /etc/pacman.d/trusted-keys)
+pacman-key --refresh-keys
+
+pacman --noprogressbar --noconfirm --needed -Sqyyu base-devel tor privoxy \
 	 bitlbee weechat mysql php php-apache php-ssh apache
 cat >| /etc/mkinitcpio.conf <<-EOF
 	HOOKS="base udev autodetect fsck ppz_tmp"
