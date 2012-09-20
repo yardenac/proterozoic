@@ -31,11 +31,7 @@ md5sumpid=$!
 pacman-key --init
 kill -SIGTERM $md5sumpid
 
-wget https://www.archlinux.org/developers/	-qLO- | awk -F\" '(/pgp.mit.edu/) {sub(/.*search=0x/,"");print $1>>"/etc/pacman.d/trusted-keys"}'
-wget https://www.archlinux.org/trustedusers/	-qLO- | awk -F\" '(/pgp.mit.edu/) {sub(/.*search=0x/,"");print $1>>"/etc/pacman.d/trusted-keys"}'
-
-pacman-key --recv-keys $(cat /etc/pacman.d/trusted-keys)
-pacman-key --refresh-keys
+pacman-key --populate archlinux
 
 pacman --noprogressbar --noconfirm --needed -Sqyyu base-devel tor privoxy \
 	 bitlbee weechat mysql php php-apache php-ssh apache
