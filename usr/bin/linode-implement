@@ -10,7 +10,7 @@
 func_exists linoderc_setvars_"$1" || croak "No such linode nickname"
 linoderc_setvars_"$1"
 
-latest_arch64=91
+latest_arch64=102
 stock_kernel=138 # "latest 3.0 x86"
 finnix_kernel=61
 pv_kernel=95
