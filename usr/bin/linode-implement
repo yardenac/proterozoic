@@ -200,7 +200,7 @@ do_all() {
 		  update_stackscript \
 		  delete_disks \
 		  delete_configs \
-		  deploy \ 
+		  deploy \
 		  negotiate; do
 
 		  say_and_do $thing && continue
