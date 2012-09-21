@@ -28,6 +28,7 @@ id_from_label() {
 
 LINODEURL='https://api.linode.com?api_key='$API_KEY'&api_action='
 linodeid=$(id_from_label "$LINODE_LABEL") || croak "Could not find the linode '$LINODE_LABEL'"
+[[ "$linodeid" == "$LINODE_ID" ]] || croak "Something was wrong with the Linode ID"
 ssh_host_use=${LINODE_CONSOLE%%@*}@$(ssh_host_resolv ${LINODE_CONSOLE##*@}.linode.com)
 
 do_or_report() {
