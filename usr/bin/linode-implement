@@ -108,7 +108,7 @@ update_stackscript() { local SS_COMMIT_TXT
 		  return
 	 }
 	 usetvar SS_COMMIT_TXT "Please write a stackscript commit entry: " 'unnamed revision' ''
-	 do_or_report 'stackscript.update&stackScriptID='$ss_id \
+	 do_or_report 'stackscript.update&DistributionIDList='$latest_arch64'&StackScriptID='$ss_id \
 		  --data-urlencode script@$ss_file --data-urlencode rev_note="$SS_COMMIT_TXT" || return 1
 }
 delete_disks() {
