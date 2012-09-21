@@ -15,8 +15,19 @@ stock_kernel=138 # "latest 3.0 x86"
 finnix_kernel=61
 pv_kernel=95
 
+id_from_label() {
+	 local n label
+	 for n in $(seq 1 $(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -l)); do
+		  label=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e $n -e LABEL -u)
+		  [[ "$label" == "$1" ]] || continue
+		  echo $(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e $n -e LINODEID -u)
+		  return
+	 done
+	 return 1
+}
+
 LINODEURL='https://api.linode.com?api_key='$API_KEY'&api_action='
-linodeid=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 1 -e LINODEID)
+linodeid=$(id_from_label "$LINODE_LABEL") || croak "Could not find the linode '$LINODE_LABEL'"
 ssh_host_use=${LINODE_CONSOLE%%@*}@$(ssh_host_resolv ${LINODE_CONSOLE##*@}.linode.com)
 
 do_or_report() {
@@ -84,7 +95,6 @@ update_stackscript() { local SS_COMMIT_TXT
 	 case $num_sss in
 		  0)	echo "Creating new stackscript..."
 				do_or_report 'stackscript.create&DistributionIDList='$latest_arch64'&label=AUTO&rev_note=first+commit' --data-urlencode script@$ss_file || return 1
-#				ss_id=$(echo $result | jshon -e DATA -e StackScriptID)
 				return
 				;;
 		  1)	ss_id=$(curl -sS ${LINODEURL}'stackscript.list' | jshon -e DATA -e 1 -e STACKSCRIPTID);;
@@ -193,6 +203,7 @@ negotiate() {
 }
 do_all() {
 	 echo
+	 echo "Found linode '$LINODE_LABEL' with id# $linodeid"
 	 echo -n "You probably want to detach any running ssh sessions, or they will hang."
 	 askyn "This script will DESTROY YOUR EXISTING LINODE. Do you want to cancel?" && exit
 	 for thing in \
