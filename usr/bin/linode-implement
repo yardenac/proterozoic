@@ -206,7 +206,7 @@ do_all() {
 	 echo
 	 echo "Found linode '$LINODE_LABEL' with id# $linodeid"
 	 echo -n "You probably want to detach any running ssh sessions, or they will hang."
-	 askyn "This script will DESTROY YOUR EXISTING LINODE. Do you want to cancel?" && exit
+	 askyn "This script will DESTROY $LINODE_LABEL/$linodeid. Do you want to cancel?" && exit
 	 for thing in \
 		  destroy_running \
 		  update_stackscript \
