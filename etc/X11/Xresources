@@ -11,10 +11,9 @@ urxvt.scrollTtyOutput: false
 urxvt.font: xft:Mono-10:antialias=true:hinting=false,xft:Code2000
 urxvt.letterSpace: -1
 urxvt.hold: false
-urxvt.perl-ext-common: default,tabbedex,url-select
+urxvt.perl-ext-common: default,tabbedex,url-select,-selection-popup,confirm-paste
 urxvt.tabbed.autohide: true
 urxvt.tabbed.title: true
-urxvt.urlLauncher: /usr/bin/seamonkey
 urxvt.url-select.launcher: /usr/bin/seamonkey
 urxvt.matcher.button: 1
 urxvt.saveLines: 99999
