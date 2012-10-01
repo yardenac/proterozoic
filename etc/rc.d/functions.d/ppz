@@ -36,6 +36,19 @@ resolv_override() {
 		  && rm -f /etc/resolv.conf \
 		  && cp -f /etc/resolv.conf{.override,}
 }
+stop_torrents() {
+	 local t=100 tm=/usr/bin/transmission-remote
+	 if [ -x $tm ] && pgrep -f transmission-daemon &>/dev/null; then
+		  echo_blue_n "Shutting down torrents..."
+		  su - eu -c "$tm --exit" &>/dev/null || { echo_red "failed!"; return 1; }
+		  while pgrep -f transmission-daemon &>/dev/null; do
+				let t-- || { echo_red "timed out!"; return 1; }
+				echo_blue_n .
+				sleep 3
+		  done
+		  echo_blue "done!"
+	 fi
+}
 enc_teardown() {
 	 local enc mnt map
 	 for enc in $(awk '/^: edev/ {print $3}' /etc/rc.conf); do
@@ -54,4 +67,5 @@ add_hook sysinit_start			tmp_bind
 add_hook sysinit_udevsettled	set_hacks
 add_hook sysinit_premount		/usr/bin/integrity.ppz
 add_hook multi_start				resolv_override
+add_hook shutdown_start			stop_torrents
 add_hook shutdown_preumount	enc_teardown
