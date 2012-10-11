@@ -17,6 +17,7 @@ x=1030; y=250
 case "$1" in
 	 d) shift; y=-1000;;
 	 e) shift; x=200;;
+	 f) shift; x=1290;;
 esac
 
 {
