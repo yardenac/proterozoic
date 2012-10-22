@@ -123,7 +123,7 @@ integrity_hosts() {
 	 local NEWFILE=/tmp/root.etchosts.$(uniq_token)
 	 {
 		  cat <<-EOF
-			THISVER 2012072201
+			THISVER 2012101901
 			ASSIGN 127.0.0.1		localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
 			ASSIGN ::1				localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
 			ASSIGN fe00::0			ip6-localnet
@@ -131,22 +131,12 @@ integrity_hosts() {
 			ASSIGN ff02::1			ip6-allnodes
 			ASSIGN ff02::2			ip6-allrouters
 			ASSIGN ff02::3			ip6-allhosts
-			ASSIGN 192.168.1.200
-			ASSIGN 192.168.1.226
-			ASSIGN 192.168.1.227
-			ASSIGN 192.168.1.228
-			ASSIGN 192.168.1.229
-			ASSIGN 192.168.1.230 
-			ASSIGN 192.168.1.231 
-			ASSIGN 192.168.1.232
-			ASSIGN 192.168.1.233
-			ASSIGN 192.168.1.234
 			ASSIGN 192.168.1.242 drog
 			ASSIGN 192.168.1.243 bro
 			ASSIGN 192.168.1.244 iggy
 			ASSIGN 192.168.1.245 tuya
 			ASSIGN 192.168.1.246 nudi
-			ASSIGN 208.111.39.115 g i w m k d db dm ih ihm bs s e se es he eh h lj ljm map me nz y b r v apa aur p yelp arch archp moz l n news o t grad gradd gadd music tv
+			ASSIGN 208.111.39.115 g w m k s se es he eh map y b r aur arch archp n news o
 			EOF
 		  cat ${OLDFILE}
 	 } | awk -f /usr/share/ppz/awk-hosts > ${NEWFILE}
