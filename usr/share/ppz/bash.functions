@@ -31,7 +31,7 @@ ppid_from_pid() {
 do_unto_others() { # usage: do_unto_others [niceness [ioniceness [pid [show]]]]
 	renice -n ${1:- 19}   ${3:- $$} >/dev/null
 	ionice -c ${2:- 3} -p ${3:- $$} >/dev/null
-	[ "$4" = "show" ] && ionice -p ${3:- $$} # display what it accomplished...
+	if [ "$4" = "show" ]; then ionice -p ${3:- $$}; fi # display what it accomplished...
 }
 niceify_tree() { # usage: niceify_tree [pid [niceness [ioniceness]]]
 	local INDENT=$INDENT"   "
