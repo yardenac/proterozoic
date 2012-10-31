@@ -29,7 +29,6 @@ filter		f_ignorable	{ facility(user, uucp, local2, news, lpr, cron, daemon)
 								  		or program(syslog-ng)
 								  		or program(dhcpcd)
 										or match('-- MARK --' value("MESSAGE"))
-										or match('error connecting to ConsoleKit' value("MESSAGE"))
 										or (facility(kern) and (
 												match('[a-zA-Z0-9-]+: module loaded' value("MESSAGE"))
 											or	match('No Caching mode page present' value("MESSAGE"))

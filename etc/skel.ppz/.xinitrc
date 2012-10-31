@@ -24,7 +24,7 @@ xrandr &>/dev/null && {
 xset +fp /usr/share/fonts/local
 xset fp rehash
 
-exec ck-launch-session fvwm \
+exec fvwm \
 	 -c "Read $HOME/.fvwm/config" \
 	 -c "SetEnv FBPP $fbpanel_profile" \
 	 &>> ~/.fvwm/errorlog #.$(date +%s)
