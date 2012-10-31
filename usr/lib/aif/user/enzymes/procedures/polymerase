@@ -78,9 +78,8 @@ start_process() {
 		  cp -f /usr/share/ppz/default/rc.conf ${TARGET}/etc/rc.conf
 		  usetvar HOSTNAME "Choose hostname! Take yr time ;) " new_machine_$(date +%Y_%m_%d)
 		  usetvar HOSTTYPE "Choose a host type! [ desktop | laptop | linode ]: " desktop
-		  sed -i \
-				-e s/%SET_TYPE%/${HOSTTYPE}/ig \
-				-e s/%SET_HOSTNAME%/${HOSTNAME}/ig ${TARGET}/etc/rc.conf
+		  sed -i s/%SET_TYPE%/${HOSTTYPE}/ig ${TARGET}/etc/rc.conf
+		  echo ${HOSTNAME} >| ${TARGET}/etc/hostname
 		  cat >  ${TARGET}/etc/fstab <<-EOF
 				/dev/mapper/enc /media/enc auto defaults,rw,relatime,nodiratime,noauto 0 0
 				UUID=4C93-65D0  /media/oxygen   vfat    defaults,user,noatime,nodiratime,fmask=177,dmask=077,check=s,noauto 0 0

@@ -1,7 +1,7 @@
 build () {
     MODULES="btrfs dm-crypt dm-mod dm-snapshot fuse"
     BINARIES="/bin/bash /bin/date /usr/bin/pstree /bin/cat /usr/bin/head"
-    FILES="/etc/rc.conf"
+    FILES="/etc/hostname"
     SCRIPT="ppz_tmp"
 }
 

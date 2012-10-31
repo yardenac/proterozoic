@@ -72,8 +72,9 @@ sed -i \
 	 -e 's/^SyncFirst/#\0/ig' \
 	 -e s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
-	 -e s/%SET_TYPE%/desktop/ig \
-	 -e s/%SET_HOSTNAME%/archiso/ig							/etc/rc.conf
+	 -e s/%SET_TYPE%/desktop/ig								/etc/rc.conf
+
+echo archiso >| /etc/hostname
 
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 

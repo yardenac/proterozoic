@@ -5,7 +5,7 @@ do_tmpfs() {
 	 mount -t tmpfs -o defaults,nodev,nosuid,noexec,mode=1777,size=$1,uid=0,gid=0,noauto,noatime,nodiratime shm /tmp
 }
 ppz_mount_handler() {
-	 eval $(awk '/^HOSTNAME=/' /etc/rc.conf)
+	 HOSTNAME=$(cat /etc/hostname)
 	 case $HOSTNAME in
 		  gabba)			do_tmpfs 5%;; #~12MB
 		  scaly)			do_tmpfs 40%;;

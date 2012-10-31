@@ -119,6 +119,23 @@ integrity_inittab() {
 }
 integrity_hosts() {
 	 am_root || return 0
+
+	 # /etc/hostname
+	 local HOSTNAME=$(cat /etc/hostname)
+	 [ "$HOSTNAME" ] || {
+		  eval $(awk '/^HOSTNAME=/' /etc/rc.conf)
+		  [ "$HOSTNAME" ] || usetvar HOSTNAME "Please set hostname:" "" ""
+		  if [ "$HOSTNAME" ]; then
+				echo_red "Setting hostname to $HOSTNAME"
+				echo "$HOSTNAME" >| /etc/hostname
+				sed -i '/^HOSTNAME=/I d' /etc/rc.conf
+		  else
+				echo_red "No hostname!"
+				return 1
+		  fi
+	 }
+
+	 # /etc/hosts
 	 local OLDFILE=/etc/hosts
 	 local NEWFILE=/tmp/root.etchosts.$(uniq_token)
 	 {
