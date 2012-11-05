@@ -88,7 +88,7 @@ done
 	 is_repo ./ && repos+=(./)
 }
 
-(( ${#repos[@]} + ${#pkgs[@]} )) || croak "USAGE: repock repo/ [repo/]"
+(( ${#repos[@]} + ${#pkgs[@]} )) || croak "USAGE: ckrepo repo/ [repo/]"
 
 print_repos=''
 [ ${#repos[@]} -gt 1 ] || [ "$verbose" ] && print_repos=y
