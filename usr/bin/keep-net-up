@@ -38,7 +38,7 @@ test_network_thrice() {
 }
 avail_known_ssid() {
 	 comm -12 \
-		  <(iwlist wlan0 scan | awk '/ESSID:"/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' | sort -u) \
+		  <(iwlist wlan0 scan | awk '/ESSID:"/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' | sed '/^[   ]*$/d' | sort -u) \
 		  <(awk '/^#/ {FS=":";$0=$0;print $2} /ssid="/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' "$WPA_SC") \
 		  | first-or-fail
 }
