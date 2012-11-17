@@ -13,7 +13,16 @@ for arg; do
 		  e) x=200;;
 		  f) x=1290;;
 		  m) holdss='';;
-		  *) args+=("$arg")
+		  *)
+				is_ssh_host "$arg" && {
+					 as=mm
+					 for a in "$@"; do
+						  [ "$a" = "$arg" ] || as="$as $(printf %q "$(printf %q "$a")")"
+					 done
+					 exec urxvtb -pe -tabbedex -geometry 80x6+720+694 -e bash -c \
+						  "exec ssh -t $arg exec $as"
+				}
+				args+=("$arg")
 	 esac
 done
 

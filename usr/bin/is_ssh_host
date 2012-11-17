@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# USAGE: is_ssh_host [name]
+#
+# returns 0 if name is an ssh host, otherwise 1
+
+file=~/.ssh/config
+
+[ -f "$file" ] || exit 1
+
+awk '
+   BEGIN {
+      rv = 1
+   }
+   ($1 ~ /Host(Name)?/) {
+      if ($2 == "'"${1//\"}"'") {
+         rv = 0
+         exit
+      }
+   }
+   END {
+      exit rv
+   }
+' "$file"
