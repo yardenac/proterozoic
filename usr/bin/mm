@@ -6,19 +6,23 @@
 
 do_unto_others
 
+args=(); x=1030; y=250; holdss=y
+for arg; do
+	 case "$arg" in
+		  d) y=-1000;;
+		  e) x=200;;
+		  f) x=1290;;
+		  m) holdss='';;
+		  *) args+=("$arg")
+	 esac
+done
+
 set_xtitle "[mm] $*"
 
-[ "$1" = m ] && shift || {
+[ "$holdss" ] && {
 	 holdss &
 	 trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
 }
-
-x=1030; y=250
-case "$1" in
-	 d) shift; y=-1000;;
-	 e) shift; x=200;;
-	 f) shift; x=1290;;
-esac
 
 {
 	 c=10
@@ -29,10 +33,9 @@ esac
 	 sudo -u ex FvwmCommand Refresh
 } &>/dev/null &
 
-
 ionice -c 2 -n 0 nice -n -5 mplayer -geometry $x:$y -fs -ao alsa \
 	 -stop-xscreensaver -msglevel all=1:statusline=9 -nolirc \
-	 -input nodefault-bindings:conf=/usr/share/ppz/mplayer.input.conf "$@"
+	 -input nodefault-bindings:conf=/usr/share/ppz/mplayer.input.conf "${args[@]}"
 
 echo
 
