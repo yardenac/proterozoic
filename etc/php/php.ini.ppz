@@ -50,6 +50,7 @@ request_order = "GP"
 include_path = ".:/usr/share/pear"
 extension_dir = "/usr/lib/php/modules/"
 extension=curl.so
+extension=gd.so
 extension=gettext.so
 extension=ssh2.so
 
