@@ -1,8 +1,16 @@
 build () {
-    MODULES="btrfs dm-crypt dm-mod dm-snapshot fuse"
-    BINARIES="/bin/bash /bin/date /usr/bin/pstree /bin/cat /usr/bin/head"
-    FILES="/etc/hostname"
-    SCRIPT="ppz_tmp"
+	 add_module btrfs
+	 add_module dm-crypt
+	 add_module dm-mod
+	 add_module dm-snapshot
+	 add_module fuse
+	 add_binary /bin/bash
+	 add_binary /bin/date
+	 add_binary /usr/bin/pstree
+	 add_binary /bin/cat
+	 add_binary /usr/bin/head
+	 add_file /etc/hostname
+	 add_runscript
 }
 
 help () {
