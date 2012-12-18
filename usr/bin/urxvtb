@@ -4,6 +4,8 @@
 
 eval $(awk '/^export RXVT_SOCKET/' /usr/share/ppz/bash.rc)
 
+export DISPLAY=${DISPLAY:-:0}
+
 urxvtc "$@"
 
 if [ $? -eq 2 ]; then
