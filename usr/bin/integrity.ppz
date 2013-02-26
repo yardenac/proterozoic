@@ -593,6 +593,7 @@ integrity_sshd() {
 		#MaxSessions 10
 		#PasswordAuthentication yes
 		ChallengeResponseAuthentication no
+		UsePrivilegeSeparation sandbox
 		UsePAM yes
 		X11Forwarding no
 		#X11DisplayOffset 10
