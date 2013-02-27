@@ -362,7 +362,7 @@ integrity_encdev() {
 		  local dev_intermediate=$(readlink -m "$dev")
 		  mkdir -p "$(dirname "$dev_intermediate")"
 		  touch "$dev_intermediate"
-		  chmod 600 "$dev_intermediate"
+		  chmod 644 "$dev_intermediate"
 	 done
 	 dev=$dev_canon
 
@@ -372,7 +372,7 @@ integrity_encdev() {
 	 [ "$mem" -lt 1048576 ] && iters=999
 
 	 # make sure it's luks formatted
-	 until type=$(/sbin/blkid -o value -s TYPE "$dev") && [ "$type" = crypto_LUKS ]; do
+	 until type=$(/sbin/blkid -po value -s TYPE "$dev") && [ "$type" = crypto_LUKS ]; do
 		  echo_red "$dev is NOT luks formatted!"
 		  am_root || ribbit 2 "Non-root user cannot fix or create the LUKS device"
 		  kernel_supports_luks || ribbit 2 "no xts encryption, cannot fix or create"
