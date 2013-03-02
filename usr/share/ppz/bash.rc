@@ -10,6 +10,7 @@ GOODPATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$(readlink
 for NEWDIR in $(in_2_but_not_in_1 "$GOODPATH" "$PATH"); do case $NEWDIR in
 	/opt/java/jre/bin|\
 	/opt/qt/bin|\
+	/usr/lib/qt4/bin|\
 	/usr/share/java/apache-ant/bin|\
 	/usr/bin/vendor_perl|\
 	/opt/opencascade/bin|\
