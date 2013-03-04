@@ -605,7 +605,7 @@ integrity_sshd() {
 		IgnoreRhosts yes
 		HostBasedAuthentication no
 		PermitEmptyPasswords no
-		AuthorizedKeysFile .ssh/authorized_keys
+		AuthorizedKeysFile /etc/ssh/keys/%u
 		Subsystem	sftp	internal-sftp
 
 		AllowUsers
