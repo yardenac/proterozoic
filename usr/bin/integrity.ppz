@@ -591,7 +591,8 @@ integrity_sshd() {
 		PermitRootLogin no
 		#MaxAuthTries 6
 		#MaxSessions 10
-		#PasswordAuthentication yes
+		PasswordAuthentication no
+		PubkeyAuthentication yes
 		ChallengeResponseAuthentication no
 		UsePrivilegeSeparation sandbox
 		UsePAM yes
