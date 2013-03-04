@@ -589,8 +589,8 @@ integrity_sshd() {
 		Protocol 2
 		LoginGraceTime 2m
 		PermitRootLogin no
-		#MaxAuthTries 6
-		#MaxSessions 10
+		MaxAuthTries 3
+		MaxSessions 15
 		PasswordAuthentication no
 		PubkeyAuthentication yes
 		ChallengeResponseAuthentication no
@@ -601,7 +601,7 @@ integrity_sshd() {
 		PrintMotd no
 		PrintLastLog no
 		#UseLogin no
-		#MaxStartups 10
+		MaxStartups 3
 		#PermitTunnel no
 		IgnoreRhosts yes
 		HostBasedAuthentication no
