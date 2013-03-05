@@ -28,7 +28,7 @@ is_pkg() {
 	 return 0
 }
 ck_pkg() {
-	 local file pkgdeets name vers_here vers_there
+	 local file pkgdeets name vers_here vers_there url date vers_github
 	 file=$(readlink -e "$1") || return 1
 	 is_pkg "$file" || return 1
 	 pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || return 1
@@ -40,10 +40,20 @@ ck_pkg() {
 		  [[ $verbose == y ]] && echo_blue "$name $vers_here "
 		  return
 	 }
-	 echo_blue_n "$name $vers_here "
 	 if vergt "$vers_here" "$vers_there"; then
-		  echo_cyan "$vers_there"
+		  url=$(cower --search --format="%u" "^${name}$" | sed 's_^https://github.com/_https://api.github.com/repos/_; t; d')
+		  [ "$url" ] || {
+				echo_blue_n "$name $vers_here "
+				echo_cyan "$vers_there"
+				return
+		  }
+		  date=$(curl -s "$url"/commits | jshon -e 0 -e commit -e author -e date | tr -d \")
+		  vers_github=$(date -d "$date" "+%Y%m%d-1")
+		  vergt "$vers_github" "$vers_here" || return
+		  echo_blue_n "$name $vers_here "
+		  echo_cyan "$vers_github"
 	 else
+		  echo_blue_n "$name $vers_here "
 		  echo_yellow "$vers_there"
 	 fi
 }
