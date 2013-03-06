@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# USAGE: linode-implement nickname
+# USAGE: linode-implement nickname [nostackscript] [doroutine-ROUTINE]
 
 . /usr/share/ppz/bash.functions
 
@@ -14,6 +14,7 @@ latest_arch=104
 stock_kernel=137 # "latest 3.0 i686"
 finnix_kernel=61
 pv_kernel=92
+use_stackscript=yes
 
 id_from_label() {
 	 local n label
@@ -141,9 +142,14 @@ deploy() {
 	 local totalhd=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 1 -e TOTALHD)
 	 echo "${totalhd} MB"
 	 echo -n "Creating disk image & config"
-	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid'&stackscriptid='$ss_id \
-		  --data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'","ss_mysqlpass":"'$mysqlpass'"}' \
-		  --data-urlencode rootpass="$rootpass") || return 1
+	 [ "$use_stackscript" ] && {
+		  result=$(do_or_report say 'linode.disk.createfromdistribution&distributionid='$latest_arch'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid \
+				--data-urlencode rootpass="$rootpass") || return 1
+	 } || {
+		  result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid'&stackscriptid='$ss_id \
+				--data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'","ss_mysqlpass":"'$mysqlpass'"}' \
+				--data-urlencode rootpass="$rootpass") || return 1
+	 }
 	 diskid=$(echo $result | jshon -e DATA -e DiskID)
 	 result=$(do_or_report say 'linode.config.create&kernelid='$pv_kernel'&helper_xen=false&helper_automount=false&helper_depmod=false&label=NORMAL'$ssdate'&linodeid='$linodeid \
 		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pv-grub
@@ -159,6 +165,7 @@ deploy() {
 	 echo -n "Booting now"
 	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_prebuilt || return 1
 	 block_for_job
+	 [ "$use_stackscript" ] || return
 	 block_for_shutdown
 
 	 echo -n "Deleting the prebuilt-kernel config"
@@ -170,6 +177,8 @@ deploy() {
 	 block_for_job
 }
 negotiate() {
+	 [ "$use_stackscript" ] || return
+
 	 block_for_ssh
 
 	 lido_use=$(ssh_host_resolv $LINODE_DOMAIN)
@@ -222,6 +231,7 @@ do_all() {
 }
 for arg; do
 	 # so i can call just, for example: linode-implement nick doroutine-negotiate
+	 [ "$arg" = "nostackscript" ] && use_stackscript=''
 	 [[ "$arg" =~ ^doroutine- ]] && {
 		  ${arg#doroutine-}
 		  exit
