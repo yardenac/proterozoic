@@ -10,10 +10,10 @@
 func_exists linoderc_setvars_"$1" || croak "No such linode nickname"
 linoderc_setvars_"$1"
 
-latest_arch64=102
-stock_kernel=138 # "latest 3.0 x86"
+latest_arch=104
+stock_kernel=137 # "latest 3.0 i686"
 finnix_kernel=61
-pv_kernel=95
+pv_kernel=92
 
 id_from_label() {
 	 local n label
@@ -95,7 +95,7 @@ update_stackscript() { local SS_COMMIT_TXT
 	 local num_sss=$(curl -sS ${LINODEURL}'stackscript.list' | jshon -e DATA -l);
 	 case $num_sss in
 		  0)	echo "Creating new stackscript..."
-				do_or_report 'stackscript.create&DistributionIDList='$latest_arch64'&label=AUTO&rev_note=first+commit' --data-urlencode script@$ss_file || return 1
+				do_or_report 'stackscript.create&DistributionIDList='$latest_arch'&label=AUTO&rev_note=first+commit' --data-urlencode script@$ss_file || return 1
 				return
 				;;
 		  1)	ss_id=$(curl -sS ${LINODEURL}'stackscript.list' | jshon -e DATA -e 1 -e STACKSCRIPTID);;
@@ -108,7 +108,7 @@ update_stackscript() { local SS_COMMIT_TXT
 		  return
 	 }
 	 usetvar SS_COMMIT_TXT "Please write a stackscript commit entry: " 'unnamed revision' ''
-	 do_or_report 'stackscript.update&DistributionIDList='$latest_arch64'&StackScriptID='$ss_id \
+	 do_or_report 'stackscript.update&DistributionIDList='$latest_arch'&StackScriptID='$ss_id \
 		  --data-urlencode script@$ss_file --data-urlencode rev_note="$SS_COMMIT_TXT" || return 1
 }
 delete_disks() {
@@ -141,7 +141,7 @@ deploy() {
 	 local totalhd=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 1 -e TOTALHD)
 	 echo "${totalhd} MB"
 	 echo -n "Creating disk image & config"
-	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch64'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid'&stackscriptid='$ss_id \
+	 result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid'&stackscriptid='$ss_id \
 		  --data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'","ss_mysqlpass":"'$mysqlpass'"}' \
 		  --data-urlencode rootpass="$rootpass") || return 1
 	 diskid=$(echo $result | jshon -e DATA -e DiskID)
