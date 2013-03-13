@@ -1,0 +1,31 @@
+#!/bin/bash
+
+. /usr/share/ppz/bash.functions
+
+[ "$USER" = ex ] || exit
+[ "$HOME" = /etc/skel.ppz ] && HOME=/tmp/ex
+[ "$HOME" = /tmp/ex ] || exit
+
+maddid=''
+for arg; do
+	 if [[ "$arg" =~ [0-9]{8} ]]; then
+		  maddid="$arg"
+	 else
+		  echo_red "Weird arg: $arg"
+	 fi
+done
+
+rm -rf ~/.{cache,config}/chromium
+cp -PR --preserve=links,mode,timestamps /etc/skel.ppz/.config/chromium ~/.config/chromium
+
+holdss &
+trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
+
+movetothetop(){
+	 sleep 3
+	 echo_green "Moving chromium window to the top..."
+	 wmctrl -r Chromium -e 0,1024,0,1024,768
+}
+movetothetop &
+
+chromium http://www.nbcnews.com/id/21134540/vp/$maddid
