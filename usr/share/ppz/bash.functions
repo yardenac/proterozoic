@@ -685,6 +685,7 @@ is() {
 					str='^application/x-gzip;';;
 		  c)		str='^text/x-c;';;
 		  xml)	str='^application/xml;';;
+		  jar)	str='^application/jar;';;
 		  zip)	str='^application/zip;';;
 		  dvd)	srt='^application/x-iso9660-image;';;
 		  *)		for arg; do
