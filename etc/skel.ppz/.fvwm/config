@@ -145,7 +145,8 @@ AddToMenu MenuFvwmRoot
 + "Terminal"	Exec exec urxvt -pe -tabbedex
 + "Seamonkey"	Exec exec seamonkey
 + "Firefox"		Exec exec firefox
-+ "Chromium"	Exec exec chromium
++ "Chromium"	Exec exec chromium "--proxy-server=socks5://localhost:55114"
++ "NoProxium"	Exec exec chromium
 + "Reload WM"	Restart
 + "Restart WM"	Quit
 + "Reboot CPU"	Exec exec sudo /sbin/reboot
