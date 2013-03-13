@@ -42,7 +42,7 @@ ck_pkg() {
 	 }
 	 if vergt "$vers_here" "$vers_there"; then
 		  url=$(cower --search --format="%u" "^${name}$")
-		  giturl=$(echo "$url" | sed 's_^https://github.com/_https://api.github.com/repos/_; t; d')
+		  giturl=$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')
 		  [ "$giturl" ] || {
 				echo_blue_n "$name $vers_here "
 				echo_cyan "$vers_there"
