@@ -106,7 +106,7 @@ start_process() {
 		  pkgs_wireless=(wireless_tools wpa_supplicant b43-firmware iw) #wpa_actiond ifplugd
 		  pkgs_laptop=(pcmciautils dhcpcd)
 		  pkgs_printer=(cups hplip a2ps)
-		  pkgs_server=(mysql php php-apache php-ssh apache mod_wsgi django \
+		  pkgs_server=(mysql php php-apache php-ssh apache mod_wsgi2 django \
 				python-south python2-imaging php-gd)
 		  pkgs_neverneed=(licenses logrotate lvm2 nano ppp reiserfsprogs xfsprogs)
 		  pkgs_go=($(comm -23 <(pacman -Sgq base | sort -u) \
