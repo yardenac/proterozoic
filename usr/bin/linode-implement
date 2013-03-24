@@ -46,6 +46,9 @@ do_or_report() {
 	 (( $say )) && echo "$result"
 	 return 0
 }
+filtered_ssh() {
+	 ssh $ssh_host_use "$@" | tr -d '\f\r\n'
+}
 block_for_job() { #returns when no more jobs pending
 	 while (( $(curl -sS ${LINODEURL}'linode.job.list&linodeid='$linodeid'&pendingonly=1' | jshon -e DATA -l) )); do
 		  echo -n .
@@ -56,8 +59,8 @@ block_for_job() { #returns when no more jobs pending
 block_for_shutdown() { #returns when linode shuts itself down
 	 echo -n "Waiting for linode to shut down..."
 	 while :; do
-		  local status=$(ssh $ssh_host_use status)
-		  case $status in
+		  local status=$(filtered_ssh status)
+		  case "$status" in
 				'Powered Off')
 					 echo done!
 					 return;;
@@ -78,9 +81,9 @@ block_for_ssh() { # returns when port 22 appears to be open on the machine
 }
 
 destroy_running() {
-	 local status=$(ssh $ssh_host_use status) || croak "No lish..."
+	 local status=$(filtered_ssh status) || croak "No lish..."
 	 echo "Linode status is: $status"
-	 case $status in
+	 case "$status" in
 		  'Powered Off') :;;
 		  'Running')
 				echo "Going to destroy running instance..."
