@@ -168,7 +168,7 @@ deploy() {
 	 echo -n "Booting now"
 	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_prebuilt || return 1
 	 block_for_job
-	 [ "$use_stackscript" ] || return
+	 [ "$use_stackscript" ] || return 0
 	 block_for_shutdown
 
 	 echo -n "Deleting the prebuilt-kernel config"
@@ -180,7 +180,7 @@ deploy() {
 	 block_for_job
 }
 negotiate() {
-	 [ "$use_stackscript" ] || return
+	 [ "$use_stackscript" ] || return 0
 
 	 block_for_ssh
 
