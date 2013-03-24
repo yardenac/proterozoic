@@ -142,7 +142,7 @@ delete_configs() {
 deploy() {
 	 local result IFS=$'\n' ssdate=.$(date +%F.%H-%M-%S)
 	 echo -n "Getting disk size... "
-	 local totalhd=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 0 -e TOTALHD)
+	 local totalhd=$(curl -sS ${LINODEURL}'linode.list&linodeid='$linodeid | jshon -e DATA -e 0 -e TOTALHD)
 	 echo "${totalhd} MB"
 	 echo -n "Creating disk image & config"
 	 [ "$use_stackscript" ] && {
