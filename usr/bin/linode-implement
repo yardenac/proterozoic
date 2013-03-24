@@ -102,12 +102,12 @@ update_stackscript() { local SS_COMMIT_TXT
 				do_or_report 'stackscript.create&DistributionIDList='$latest_arch'&label=AUTO&rev_note=first+commit' --data-urlencode script@$ss_file || return 1
 				return
 				;;
-		  1)	ss_id=$(curl -sS ${LINODEURL}'stackscript.list' | jshon -e DATA -e 1 -e STACKSCRIPTID);;
+		  1)	ss_id=$(curl -sS ${LINODEURL}'stackscript.list' | jshon -e DATA -e 0 -e STACKSCRIPTID);;
 		  2|*) croak "More than one stackscript? clean that shit up!";;
 	 esac
 
 	 # if we made it this far, there is exactly 1 stackscript with id # $ss_id
-	 cmp -s $ss_file <(curl -sS ${LINODEURL}'stackscript.list&stackscriptid='$ss_id | jshon -e DATA -e 1 -e SCRIPT -u) && {
+	 cmp -s $ss_file <(curl -sS ${LINODEURL}'stackscript.list&stackscriptid='$ss_id | jshon -e DATA -e 0 -e SCRIPT -u) && {
 		  echo "Stackscript does not need updating"
 		  return
 	 }
@@ -121,7 +121,7 @@ delete_disks() {
 		  local numdisks=$(echo $disklist | jshon -e DATA -l)
 		  echo "Disks left: $numdisks"
 		  (( $numdisks )) || break # while there are disks left
-		  local firstdiskid=$(echo $disklist | jshon -e DATA -e 1 -e DISKID)
+		  local firstdiskid=$(echo $disklist | jshon -e DATA -e 0 -e DISKID)
 		  echo -n "Deleting disk with id # $firstdiskid"
 		  do_or_report 'linode.disk.delete&linodeid='$linodeid'&diskid='$firstdiskid || return 1
 		  block_for_job
@@ -133,7 +133,7 @@ delete_configs() {
 		  local numconfigs=$(echo $configlist | jshon -e DATA -l)
 		  echo "Configs left: $numconfigs"
 		  (( $numconfigs )) || break #while configs left
-		  local firstconfig=$(echo $configlist | jshon -e DATA -e 1 -e ConfigID)
+		  local firstconfig=$(echo $configlist | jshon -e DATA -e 0 -e ConfigID)
 		  echo -n "Deleting config with id # $firstconfig"
 		  do_or_report 'linode.config.delete&linodeid='$linodeid'&configid='$firstconfig || return 1
 		  block_for_job
@@ -142,7 +142,7 @@ delete_configs() {
 deploy() {
 	 local result IFS=$'\n' ssdate=.$(date +%F.%H-%M-%S)
 	 echo -n "Getting disk size... "
-	 local totalhd=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 1 -e TOTALHD)
+	 local totalhd=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e 0 -e TOTALHD)
 	 echo "${totalhd} MB"
 	 echo -n "Creating disk image & config"
 	 [ "$use_stackscript" ] && {
