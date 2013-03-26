@@ -1,5 +1,5 @@
 #!/bin/bash
-. /etc/rc.conf
+. /etc/ppz.conf
 . /usr/share/ppz/bash.functions
 
 # functions should not assume anything. We might be running:
@@ -168,10 +168,10 @@ integrity_hosts() {
 integrity_users() {
 	 am_root || return 0
 
-	 # "extra" users are declared in rc.conf. this makes sure they really exist.
+	 # "extra" users are declared in ppz.conf. this makes sure they really exist.
 
 	 local user v u_name u_nums u_home IFS=$'\n'
-	 for user in $(awk '/^:/ { if ($2 == "user") print }' /etc/rc.conf); do
+	 for user in $(awk '/^:/ { if ($2 == "user") print }' /etc/ppz.conf); do
 
 #		  echo_red "DOING USER: $user"
 
@@ -232,7 +232,7 @@ integrity_iptables() {
 		  tmp_is=/tmp/iptables.is.$(uniq_token) \
 		  tmp_should=/tmp/iptables.should.$(uniq_token)
 
-	 # rules as they should be, WITH custom open ports from rc.conf
+	 # rules as they should be, WITH custom open ports from ppz.conf
 	 for PORT in ${OPEN_PORTS[@]}; do
 		  PROTOCOL=tcp
 		  [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
@@ -303,7 +303,7 @@ integrity_net() {
 				if ($2 == "sync") {
 					printf "remote_sync_file %s %s %s;\n", $3,$4,$5
 				}
-		  }' /etc/rc.conf)
+		  }' /etc/ppz.conf)
 	 }
 	 return 0
 }
@@ -353,7 +353,7 @@ integrity_encdev() {
 
 				# we can comment it out so the message doesn't bother us again
 				askyn "$dev ($name) doesn't exist! Avoid checking in the future?" \
-					 && sed -i 's/^:\s*edev\s*.*\s*\('"${dev##*/}"'.*\)$/#\0/ig' /etc/rc.conf
+					 && sed -i 's/^:\s*edev\s*.*\s*\('"${dev##*/}"'.*\)$/#\0/ig' /etc/ppz.conf
 				ribbit 2
 		  }
 		  # otherwise, we make it
@@ -503,7 +503,7 @@ integrity_encdevs() { local devcond devline IFS=$'\n'
 	 # for devices we care about, make sure they all work
 	 for devline in $(awk '/^:/ {
 					if (($2 == "edev") && '"$devcond"') print
-				}' /etc/rc.conf); do
+				}' /etc/ppz.conf); do
 		  IFS=$'\n\r\t '; integrity_encdev $devline
 	 done
 }

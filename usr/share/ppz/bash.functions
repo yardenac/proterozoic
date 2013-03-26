@@ -621,7 +621,7 @@ encdev_from_user() { local u=${1:-$USER}
 	 awk '/^:/ { if (($2 == "user") && ($3 == "'"$u"'") && !($6 ~ /^\//)) {
 		sub(/\/.*$/,"",$6)
 		print $6
-	 } }' /etc/rc.conf	 
+	 } }' /etc/ppz.conf
 }
 ribbit() {
 	 local num=1

@@ -62,9 +62,8 @@ mkdir -p $pkgcache
 GITURL=https://raw.github.com/yardenac/proterozoic/master
 
 rm -f /etc/profile.d/locale.sh
-mv -f /etc/rc.conf{,.original}
 mv -f /etc/pacman.conf{,.original}
-wget $GITURL/usr/share/ppz/default/rc.conf		-qO	/etc/rc.conf
+wget $GITURL/usr/share/ppz/default/ppz.conf		-qO	/etc/ppz.conf
 wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
 sed -i \
@@ -72,7 +71,7 @@ sed -i \
 	 -e 's/^SyncFirst/#\0/ig' \
 	 -e s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
-	 -e s/%SET_TYPE%/desktop/ig								/etc/rc.conf
+	 -e s/%SET_TYPE%/desktop/ig								/etc/ppz.conf
 
 echo archiso >| /etc/hostname
 

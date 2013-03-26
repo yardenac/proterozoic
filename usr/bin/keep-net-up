@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /etc/rc.conf
+. /etc/ppz.conf
 . /usr/share/ppz/bash.functions
 
 am_root || groups | grep -qw network || exit

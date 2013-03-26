@@ -69,6 +69,7 @@ start_process() {
 				esac
 		  }
 	 done
+	 # THIS SECTION SHOULD NOT USE RC.CONF!
 	 [ -a ${TARGET}/etc/rc.conf ] \
 		  && askyn "Base system already looks populated ... skip reinstalling that?" \
 		  || pacman_target -Syq initscripts
@@ -135,7 +136,6 @@ start_process() {
 	 }
 	 echo "You might want to edit these files:"
 	 echo "		/boot/grub/menu.lst"
-	 echo "		/etc/rc.conf"
 	 echo "		/etc/resolv.conf"
 	 echo "		/etc/profile.d/proxy.sh"
 	 until askyn "ready to quit? (stuff will be unmounted)"; do

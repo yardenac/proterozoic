@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /etc/rc.conf
+. /etc/ppz.conf
 
 [ "$SYSTEM_TYPE" = desktop ] && numlockx on
 

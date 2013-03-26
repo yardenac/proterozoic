@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# this needs to change or go away
 static_networking_from_runtime() {
 	 local TARGET=${1%%/}
 	 [ "${TARGET}" ] && cp -f {,${TARGET}}/etc/resolv.conf

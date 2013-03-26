@@ -7,7 +7,6 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 # do not use in AIF! pacman installation will call integrity scripts,
 # and that is enough.
 
-. /etc/rc.conf
 . /usr/share/ppz/bash.functions
 
 am_root || echo "must be root!"
@@ -80,4 +79,4 @@ open_dev() { local name dev mountpoint mapname arg
 }
 
 # find the devline for this device, pass it as arguments
-open_dev $(awk '/^:/ { if (($2 == "edev") && ($3 == "'$dev'")) print }' /etc/rc.conf)
+open_dev $(awk '/^:/ { if (($2 == "edev") && ($3 == "'$dev'")) print }' /etc/ppz.conf)

@@ -4,20 +4,17 @@
 
 GITURL=--no-check-certificate\ https://raw.github.com/yardenac/proterozoic/master
 
-mv -f /etc/rc.conf{,.original}
 mv -f /etc/pacman.conf{,.original}
-wget $GITURL/usr/share/ppz/default/rc.conf		-qO	/etc/rc.conf
+wget $GITURL/usr/share/ppz/default/ppz.conf		-qO	/etc/ppz.conf
 wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
 sed -i s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
 	 -e s/%SET_TYPE%/linode/ig \
-	 -e s/=UTC/=xen/ig \
 	 -e 's/32m$/128m/ig' \
-	 -e 's/\(DAEMONS=([^)]*\))/\1 @mysqld @httpd)/i' \
 	 -e 's/\(OPEN_PORTS=([^)]*\))/\1 80)/i' \
 	 -e 's/^#*:[\t ]*sync.*$/#&/ig' \
-	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/rc.conf
+	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/ppz.conf
 
 echo "${SS_HOSTNAME}" >| /etc/hostname
 
@@ -44,8 +41,7 @@ pacman --noprogressbar --noconfirm --needed -Sq linux-linode
 
 rm -f \
 	 /etc/mkinitcpio.conf.pacorig \
-	 /etc/pacman.d/mirrorlist.otown.tmp \
-	 /etc/{pacman.d/mirrorlist,rc.conf}.pacnew
+	 /etc/pacman.d/mirrorlist.{otown.tmp,pacnew}
 
 mv -f /etc/protocols{.pacnew,}
 mv -f /etc/services{.pacnew,}
