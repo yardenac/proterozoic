@@ -4,7 +4,6 @@
 
 GITURL=--no-check-certificate\ https://raw.github.com/yardenac/proterozoic/master
 
-rm -f /etc/profile.d/locale.sh
 mv -f /etc/rc.conf{,.original}
 mv -f /etc/pacman.conf{,.original}
 wget $GITURL/usr/share/ppz/default/rc.conf		-qO	/etc/rc.conf
