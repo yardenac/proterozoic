@@ -2,12 +2,12 @@
 
 # someday ... get this to set some ext3 vars and tune2fs
 
-GITURL=--no-check-certificate\ https://raw.github.com/yardenac/proterozoic/master
+GITURL=https://raw.github.com/yardenac/proterozoic/master
 
 mv -f /etc/pacman.conf{,.original}
-wget $GITURL/usr/share/ppz/default/ppz.conf		-qO	/etc/ppz.conf
-wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
-wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
+curl $GITURL/usr/share/ppz/default/ppz.conf		-so	/etc/ppz.conf
+curl $GITURL/etc/pacman.d/mirrorlist.otown		-so	/etc/pacman.d/mirrorlist.otown.tmp
+curl $GITURL/usr/share/ppz/default/pacman.conf	-so	/etc/pacman.conf
 sed -i s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
 	 -e s/%SET_TYPE%/linode/ig \
