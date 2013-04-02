@@ -22,7 +22,7 @@ fi
 shopt -s nullglob
 
 dbs=()
-pack=""
+packs=()
 for arg; do
 	 item=$(full_path_strict "$arg") || ribbit "SKIPPING NON-EXISTENT ITEM: $arg"
 	 if [ -d "$item" ]; then
@@ -35,36 +35,37 @@ for arg; do
 		  done
 		  echo_red "SKIPPING DIR W/O DB: $item"
 	 elif is pkg "$item"; then
-		  [ "$pack" ] \
-				&& echo_red "SKIPPING EXTRA PACKAGE: $item" \
-				|| pack=$item
+		  packs+=($item)
 	 else
 		  echo_red "SKIPPING WEIRD ARG: $item"
 	 fi
 done
 
-(( ${#dbs[@]} )) && [ "$pack" ] || \
+(( ${#dbs[@]} )) && (( ${#packs[@]} )) || \
 	 croak "USAGE: repo-drop /path/to/repo/ to-add.pkg.tar.xz"
 
-pack_base=$(basename "$pack")
+for pack in "${packs[@]}"; do
 
-to_del=()
-for db in "${dbs[@]}"; do
-	 repo=$(dirname "$db")
-	 [ -a "$repo/$pack_base" ] && {
-		  echo_red "NOT ADDING, ALREADY EXISTS: $repo/$pack_base"
-		  continue
+	 echo_green "DOING PACKAGE: $pack"
+	 pack_base=$(basename "$pack")
+	 to_del=()
+	 for db in "${dbs[@]}"; do
+		  repo=$(dirname "$db")
+		  [ -a "$repo/$pack_base" ] && {
+				echo_red "NOT ADDING, ALREADY EXISTS: $repo/$pack_base"
+				continue
+		  }
+		  to_del+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
+		  rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack" "$repo/$pack_base"
+		  repo-add "$db" "$repo/$pack_base"
+	 done
+
+	 (( ${#to_del[@]} )) && {
+
+		  ls -lF "${to_del[@]}"
+
+		  askyn "Delete older pkgs on server?" && rm -f "${to_del[@]}"
 	 }
-	 to_del+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
-	 rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack" "$repo/$pack_base"
-	 repo-add "$db" "$repo/$pack_base"
+
+	 askyn "Delete original pkg?" && rm -f "$pack"
 done
-
-(( ${#to_del[@]} )) && {
-
-	 ls -lF "${to_del[@]}"
-
-	 askyn "Delete older pkgs on server?" && rm -f "${to_del[@]}"
-}
-
-askyn "Delete original pkg?" && rm -f "$pack"
