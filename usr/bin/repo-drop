@@ -26,19 +26,12 @@ fi
 
 shopt -s nullglob
 
-dbs=()
+dirs=()
 packs=()
 for arg in "$@" "${rd_args[@]}"; do
 	 item=$(full_path_strict "$arg") || ribbit "SKIPPING NON-EXISTENT ITEM: $arg"
 	 if [ -d "$item" ]; then
-		  item=${item%/}
-		  for db in "$item"/*.db.tar.gz; do
-				is db "$db" && {
-					 dbs+=("$db")
-					 continue 2
-				}
-		  done
-		  echo_red "SKIPPING DIR W/O DB: $item"
+		  dirs+=("${item%/}")
 	 elif is pkg "$item"; then
 		  packs+=($item)
 	 else
@@ -46,7 +39,7 @@ for arg in "$@" "${rd_args[@]}"; do
 	 fi
 done
 
-(( ${#dbs[@]} )) && (( ${#packs[@]} )) || \
+(( ${#dirs[@]} )) && (( ${#packs[@]} )) || \
 	 croak "USAGE: repo-drop /path/to/repo/ to-add.pkg.tar.xz"
 
 for pack in "${packs[@]}"; do
@@ -55,21 +48,29 @@ for pack in "${packs[@]}"; do
 	 pack_base=$(basename "$pack")
 
 	 arch=$(tar -xOf "$pack" .PKGINFO | awk '/^arch =/ {print $3}')
-	 case $arch in
-		  'i686'|'x86_64'|'any') :;;
-		  *) echo_red "SKIPPING UNKNOWN ARCHITECTURE: $arch"; continue;;
-	 esac
 
 	 to_del=()
-	 for db in "${dbs[@]}"; do
-		  repo=$(dirname "$db")
-		  [ -a "$repo/$pack_base" ] && {
-				echo_red "NOT ADDING, ALREADY EXISTS: $repo/$pack_base"
-				continue
-		  }
-		  to_del+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
-		  rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack" "$repo/$pack_base"
-		  repo-add "$db" "$repo/$pack_base"
+	 for dir in "${dirs[@]}"; do
+
+		  case $arch in
+				'i686'|'x86_64') dbs=("$dir"{,/$arch}/*.db.tar.gz);;
+				'any') dbs=("$dir"{,/{i686,x86_64}}/*.db.tar.gz);;
+				*) echo_red "SKIPPING PKG WITH UNKNOWN ARCHITECTURE: $arch"; continue 2;;
+		  esac
+
+		  (( ${#dbs[@]} )) || echo_red "NO VALID DBs for $arch in $dir"
+
+		  for db in "${dbs[@]}"; do
+				is db "$db" || continue
+				repo=$(dirname "$db")
+				[ -a "$repo/$pack_base" ] && {
+					 echo_red "NOT ADDING, ALREADY EXISTS: $repo/$pack_base"
+					 continue
+				}
+				to_del+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
+				rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack" "$repo/$pack_base"
+				repo-add "$db" "$repo/$pack_base"
+		  done
 	 done
 
 	 (( ${#to_del[@]} )) && {
