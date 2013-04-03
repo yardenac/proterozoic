@@ -2,7 +2,6 @@
 # 
 # a little bit less tedious than remembering long file paths!
 
-# make this check pkginfo and automatically figure out $arch
 # should find file with bash-completion!
 # should really handle rsync ssh lines, not need sshfs
 # with all that, it should be as easy as "repo-drop [tab] [enter]"
