@@ -582,10 +582,14 @@ integrity_bashhistory() { local hf hfs attrset skel_file backup_file
 }
 integrity_sshd() {
 	 am_root || return 0
+	 local port PORT_TXT
+	 for port in "${SSH_PORTS[@]}"; do
+		  PORT_TXT+="Port $port"$'\n'
+	 done
 	 local OLDFILE=/etc/ssh/sshd_config
 	 local NEWFILE=${OLDFILE}.$(uniq_token)
 	 cat > ${NEWFILE} <<-EOF
-		ListenAddress 0.0.0.0
+		${PORT_TXT}ListenAddress 0.0.0.0
 		Protocol 2
 		LoginGraceTime 2m
 		PermitRootLogin no
