@@ -53,6 +53,13 @@ for pack in "${packs[@]}"; do
 
 	 echo_green "DOING PACKAGE: $pack"
 	 pack_base=$(basename "$pack")
+
+	 arch=$(tar -xOf "$pack" .PKGINFO | awk '/^arch =/ {print $3}')
+	 case $arch in
+		  'i686'|'x86_64'|'any') :;;
+		  *) echo_red "SKIPPING UNKNOWN ARCHITECTURE: $arch"; continue;;
+	 esac
+
 	 to_del=()
 	 for db in "${dbs[@]}"; do
 		  repo=$(dirname "$db")
@@ -66,11 +73,8 @@ for pack in "${packs[@]}"; do
 	 done
 
 	 (( ${#to_del[@]} )) && {
-
 		  ls -lF "${to_del[@]}"
-
 		  askyn "Delete older pkgs on server?" && rm -f "${to_del[@]}"
 	 }
-
 	 askyn "Delete original pkg?" && rm -f "$pack"
 done
