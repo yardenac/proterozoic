@@ -3,7 +3,6 @@
 # a little bit less tedious than remembering long file paths!
 
 # make this check pkginfo and automatically figure out $arch
-# repo location should be in a .rc file
 # should find file with bash-completion!
 # should really handle rsync ssh lines, not need sshfs
 # with all that, it should be as easy as "repo-drop [tab] [enter]"
@@ -19,11 +18,17 @@ else
 	 exit 1
 fi
 
+# config sets bash array $rd_args
+configfile=~/.config/repo-drop
+if [ -s $configfile ]; then
+	 . $configfile
+fi
+
 shopt -s nullglob
 
 dbs=()
 packs=()
-for arg; do
+for arg in "$@" "${rd_args[@]}"; do
 	 item=$(full_path_strict "$arg") || ribbit "SKIPPING NON-EXISTENT ITEM: $arg"
 	 if [ -d "$item" ]; then
 		  item=${item%/}
