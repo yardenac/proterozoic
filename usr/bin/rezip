@@ -8,8 +8,8 @@
 
 zipfile="$1"
 zpath="$2"
-is zip "$zipfile" || return 1
-[[ "$zpath" =~ \.\./ ]] && return 1
+is zip "$zipfile" || is jar "$zipfile" || exit 1
+[[ "$zpath" =~ \.\./ ]] && exit 1
 while :; do
 	 td=/tmp/$(uniq_token)
 	 mkdir -p $td && break
