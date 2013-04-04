@@ -46,7 +46,7 @@ for pack in "${packs[@]}"; do
 	 echo_green "DOING PACKAGE: $pack"
 	 pack_base=$(basename "$pack")
 
-	 arch=$(tar -xOf "$pack" .PKGINFO | awk '/^arch =/ {print $3}')
+	 arch=$(bsdtar -xOf "$pack" .PKGINFO | awk '/^arch =/ {print $3}')
 
 	 to_del=()
 	 for dir in "${dirs[@]}"; do
