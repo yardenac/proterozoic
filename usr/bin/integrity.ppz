@@ -1,4 +1,5 @@
 #!/bin/bash
+. /etc/rc.conf
 . /etc/ppz.conf
 . /usr/share/ppz/bash.functions
 
@@ -64,6 +65,11 @@ To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCAN
 	 done
 }
 integrity_simpleconf() {
+
+	 for d in "${DAEMONS[@]}"; do
+		  [ -a "/etc/rc.d/${d#@}" ] || echo_red "MISSING: /etc/rc.d/${d#@}"
+	 done
+
 	 am_root || return 0
 	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
 	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow 2>/dev/null \
