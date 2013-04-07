@@ -1,5 +1,5 @@
 pkgname=proterozoic
-pkgver=0.$(date +%s)
+pkgver=1.$(date '+%Y.%m.%d_%H.%M.%S')
 pkgrel=1
 pkgdesc="Configs and scripts overlaying Arch Linux"
 arch=(i686 x86_64)

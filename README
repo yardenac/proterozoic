@@ -24,7 +24,7 @@ experience encapsulated in about 12kb.
 
 One hack you may notice right away: in order to automate the 
 many incremental deployments I do, the version number is 
-actually the unix second in which i ran makepkg.
+actually the timestamp at which i ran makepkg.
 
 It's under heavy development. I'm trying my best to give it 
 "completeness" but there are still a lot of rough edges where 
