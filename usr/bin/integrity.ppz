@@ -1,5 +1,4 @@
 #!/bin/bash
-. /etc/rc.conf
 . /etc/ppz.conf
 . /usr/share/ppz/bash.functions
 
@@ -66,15 +65,18 @@ To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCAN
 }
 integrity_simpleconf() {
 
-	 for d in "${DAEMONS[@]}"; do
-		  [ -a "/etc/rc.d/${d#@}" ] || echo_red "MISSING: /etc/rc.d/${d#@}"
-	 done
+	 [ -a /etc/rc.conf ] && {
+		  . /etc/rc.conf
+		  for d in "${DAEMONS[@]}"; do
+				[ -a "/etc/rc.d/${d#@}" ] || echo_red "MISSING: /etc/rc.d/${d#@}"
+		  done
+	 }
 
 	 am_root || return 0
 	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
 	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow 2>/dev/null \
 		  || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
-	 sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
+	 [ -a /etc/rc.sysinit ] && sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
 	 case $SYSTEM_TYPE in
 		  linode)				sed -i 's/MODULES="btrfs dm-crypt dm-mod dm-snapshot fuse"/MODULES=""/ig' /usr/lib/initcpio/install/ppz_tmp
 									sed -i 's%^\#\(server clock.fmt.he.net.*\)$%\1%ig' /etc/ntp.conf;;
@@ -111,6 +113,7 @@ integrity_simpleconf() {
 }
 integrity_inittab() {
 	 am_root || return 0
+	 [ -a /etc/inittab ] || return 0
 
 	 # the one we want to be like
 	 local model=x
@@ -256,7 +259,13 @@ integrity_iptables() {
 		  if ! [ -s $tmp_is ] || askyn "Impose new iptables rules?"; then
 				cat $tmp_should >| $rules_file
 				echo_red replaced iptables rules
-				chrooted && echo_red "Not resetting iptables" || /etc/rc.d/iptables restart
+				chrooted && echo_red "Not resetting iptables" || {
+					 if [ -a /etc/rc.conf ]; then
+						  /etc/rc.d/iptables restart
+					 else
+						  systemctl restart iptables
+					 fi
+				}
 		  fi
 	 fi
 

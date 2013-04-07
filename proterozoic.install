@@ -74,7 +74,7 @@ kernel_name=${kernel_name[0]}
 check_triggers() {
 	 all_triggers_same etc/syslog-ng/syslog-ng.conf || {
 #		  echo reloading syslog-ng....
-		  /usr/sbin/rc.d reload syslog-ng
+		  [ -a /etc/rc.conf ] && /usr/sbin/rc.d reload syslog-ng
 	 }
 	 rm -f {usr/,}lib/initcpio/{hooks,install}/ppz_tmp.last
 	 rmdir --ignore-fail-on-non-empty -p lib/initcpio/{hooks,install} &>/dev/null; :
