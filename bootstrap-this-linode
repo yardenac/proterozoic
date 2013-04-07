@@ -31,7 +31,7 @@ pacman-key --populate archlinux
 pacman --noprogressbar --noconfirm --needed -Sqyyu
 
 cat >| /etc/mkinitcpio.conf <<-EOF
-	HOOKS="base udev autodetect fsck ppz_tmp"
+	HOOKS="base udev autodetect modconf block filesystems fsck ppz_tmp"
 EOF
 pacman --noprogressbar --noconfirm --needed -Sq proterozoic
 sed -i s/otown.tmp/otown/ig /etc/pacman.conf
