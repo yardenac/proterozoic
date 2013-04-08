@@ -2,9 +2,7 @@
 # 
 # a little bit less tedious than remembering long file paths!
 
-# should find file with bash-completion!
 # should really handle rsync ssh lines, not need sshfs
-# with all that, it should be as easy as "repo-drop [tab] [enter]"
 
 # Use local functions if possible (for `./package-this`)
 funcspath=usr/share/ppz/bash.functions
