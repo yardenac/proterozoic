@@ -1,6 +1,6 @@
 #!/bin/bash
 # 
-# a little bit less tedious than remembering long file paths!
+# make Arch repos easier & more versatile
 
 # should really handle rsync ssh lines, not need sshfs
 
