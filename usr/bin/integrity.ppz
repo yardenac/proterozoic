@@ -308,7 +308,7 @@ integrity_net() {
 		  return
 	 fi
 	 am_root && {
-		  grep -iq broadcast /etc/rc.d/network || {
+		  grep -iq broadcast /etc/rc.d/network || ! [ -a /etc/rc.d/network ] || {
 				mv -f /etc/rc.d/network{,.forget}
 				curl http://projects.archlinux.org/initscripts.git/plain/network -so /etc/rc.d/network
 				chmod +x /etc/rc.d/network
