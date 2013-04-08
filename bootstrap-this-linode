@@ -21,6 +21,11 @@ cat > /etc/fstab <<-EOF
 	/dev/xvda / ext3 rw,noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
 EOF
 
+case "$(uname -m)" in
+	 i686)  	sed -i 's/^\[multilib\]$/#&/ig'			/etc/pacman.conf;;
+	 x86_64)	sed -i 's/^##*\(\[multilib\]\)$/\1/ig'	/etc/pacman.conf;;
+esac
+
 echo "Forking md5sum for entropy..."
 haveged -w 1024
 pacman-key --init

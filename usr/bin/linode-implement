@@ -1,20 +1,49 @@
 #!/bin/bash
 
-# USAGE: linode-implement nickname [nostackscript] [doroutine-ROUTINE]
+# USAGE: linode-implement nickname [nostackscript] [doroutine-ROUTINE] [arch]
 
 . /usr/share/ppz/bash.functions
 
 [ -f ~/.config/linoderc ] || croak "No linoderc"
 . ~/.config/linoderc
-[[ "$1" =~ ^[a-z0-9]+$ ]] || croak "Invalid linode nickname"
-func_exists linoderc_setvars_"$1" || croak "No such linode nickname"
-linoderc_setvars_"$1"
 
-latest_arch=104
-stock_kernel=137 # "latest 3.0 i686"
+arch=32
 finnix_kernel=61
-pv_kernel=92
 use_stackscript=yes
+doroutines=()
+nickname=''
+
+for arg; do
+	 if [[ "$arg" =~ ^doroutine- ]]; then
+		  doroutines+=(${arg#doroutine-})
+	 else
+		  case "$arg" in
+				nostackscript) use_stackscript='';;
+				x86_64|64|i686|32) arch="$arg";;
+				*)
+					 [[ "$arg" =~ ^[a-z0-9]+$ ]] && [ -z "$nickname" ] && nickname=$arg && continue
+					 echo_red "WEIRD ARG: $arg";;
+		  esac
+	 fi
+done
+
+[ "$nickname" ] || croak "Need a linode nickname"
+func_exists linoderc_setvars_"$nickname" || croak "No linode named $nickname"
+linoderc_setvars_"$nickname"
+
+case "$arch" in
+	 i686|32)
+		  latest_arch=104
+		  stock_kernel=137 # "latest 3.0 i686"
+		  pv_kernel=92
+		  ;;
+	 x86_64|64)
+		  latest_arch=105
+		  stock_kernel=138 # "latest 3.0 x86_64"
+		  pv_kernel=95
+		  ;;
+	 *) croak "Weird architecture: $arch";;
+esac
 
 id_from_label() {
 	 local n label
@@ -232,12 +261,10 @@ do_all() {
 		  return 1
 	 done
 }
-for arg; do
-	 # so i can call just, for example: linode-implement nick doroutine-negotiate
-	 [ "$arg" = "nostackscript" ] && use_stackscript=''
-	 [[ "$arg" =~ ^doroutine- ]] && {
-		  ${arg#doroutine-}
-		  exit
-	 }
-done
-do_all "$@"
+if $(( ${#doroutines[@]} )); then
+	 for routine in "${doroutines[@]}"; do
+		  $routine
+	 done
+else
+	 do_all "$@"
+fi
