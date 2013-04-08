@@ -1,0 +1,41 @@
+#!/bin/bash
+
+. /usr/share/ppz/bash.functions
+
+output=''
+neginarow=0
+while :; do
+	 SECONDS=-1
+	 key=k1=k2=k3''
+	 read -sN1 key
+	 read -sN1 -t 0.0001 k1
+	 read -sN1 -t 0.0001 k2
+	 read -sN1 -t 0.0001 k3
+	 key+=${k1}${k2}${k3}
+	 if (( SECONDS < 0 )); then
+		  (( neginarow++ ))
+	 else
+		  neginarow=0
+	 fi
+	 (( neginarow >= 7 )) && diff=12 || diff=1
+	 case $key in
+		  'q') break;;
+		  $'\E[A'|$'\E0A') xdotool mousemove_relative  0 -$diff;;
+		  $'\E[B'|$'\E0B') xdotool mousemove_relative  0  $diff;;
+		  $'\E[C'|$'\E0C') xdotool mousemove_relative  $diff  0;;
+		  $'\E[D'|$'\E0D') xdotool mousemove_relative --polar 270 $diff;;
+		  '') xdotool click 1;;
+		  '1'|'2'|'3') xdotool click $key;;
+		  [a-z0-9]) xdotool key $key;;
+		  .) xdotool key period;;
+		  :) xdotool key colon;;
+		  /) xdotool key slash;;
+		  $'\b') xdotool key BackSpace;;
+		  $'\x1B') xdotool key Escape;;
+		  *)
+				output=y
+				echo_red_n ".";;
+	 esac
+done
+
+[ $output ] && echo || :
