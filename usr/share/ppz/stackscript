@@ -4,9 +4,7 @@
 
 echo "Downloading external stackscript..."
 
-wget --no-check-certificate \
-	 https://raw.github.com/yardenac/proterozoic/master/bootstrap-this-linode \
-	 -qLO /tmp/.btl
+curl https://raw.github.com/yardenac/proterozoic/master/bootstrap-this-linode -sLo /tmp/.btl
 
 echo "Sourcing it..."
 

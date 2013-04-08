@@ -533,10 +533,10 @@ in_2_but_not_in_1() {
 	 done
 }
 fwget() { # fwget [TIMEOUT [TRIES [URL]]]
-	TIMEOUT=${1:-10}	#default: wait 10 seconds
-	TRIES=${2:-1}		#default: try once
-	URL=${3:-http://www.google.com/}
-	/usr/bin/wget --tries=${TRIES} --timeout=${TIMEOUT} ${URL} -qO- 2>/dev/null
+	local TIMEOUT=${1:-10}	#default: wait 10 seconds
+	local RETRIES=${2:-0}		#default: try once
+	local URL=${3:-http://www.google.com/}
+	/usr/bin/curl --retry ${RETRIES} --max-time ${TIMEOUT} ${URL} -so- 2>/dev/null
 }
 test_network_once() {
 	 fwget "$@" | grep -iq 'feeling lucky'

@@ -286,7 +286,7 @@ remote_sync_file() { # $0 '/local/path' 'md5sum464a702cf...' 'http://source'
 	 check_file ${1} ${2} && return
 	 [ "${1:0:6}" = /boot/ ] && ! can_work_with_boot && return 1
 	 mkdir -p $(dirname ${1})
-	 wget ${3} -qO ${1}
+	 curl ${3} -so ${1}
 	 check_file ${1} ${2} && {
 		  echo_red "Successfully retrieved $1"
 	 } || {
@@ -310,7 +310,7 @@ integrity_net() {
 	 am_root && {
 		  grep -iq broadcast /etc/rc.d/network || {
 				mv -f /etc/rc.d/network{,.forget}
-				wget http://projects.archlinux.org/initscripts.git/plain/network -qO /etc/rc.d/network
+				curl http://projects.archlinux.org/initscripts.git/plain/network -so /etc/rc.d/network
 				chmod +x /etc/rc.d/network
 				askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
 		  }
