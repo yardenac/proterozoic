@@ -1,6 +1,7 @@
 #!/bin/bash
 # <UDF name="ss_hostname" label="hostname" />
 # <UDF name="ss_mysqlpass" label="mysqlpass" />
+# <UDF name="ss_pubkey" label="pubkey" />
 
 echo "Downloading external stackscript..."
 

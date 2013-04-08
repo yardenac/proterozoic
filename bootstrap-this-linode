@@ -48,6 +48,8 @@ rm -f \
 
 # how to get proper "kernel name" in install file?
 
+echo "${SS_PUBKEY}" >| /etc/ssh/keys/eu
+
 # TODO: static ip
 
 askyn "reboot now?" && systemctl poweroff

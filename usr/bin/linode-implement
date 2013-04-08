@@ -169,14 +169,15 @@ delete_configs() {
 	 done
 }
 deploy() {
-	 local result IFS=$'\n' ssdate=.$(date +%F.%H-%M-%S)
+	 local pubkey result IFS=$'\n' ssdate=.$(date +%F.%H-%M-%S)
 	 echo -n "Getting disk size... "
 	 local totalhd=$(curl -sS ${LINODEURL}'linode.list&linodeid='$linodeid | jshon -e DATA -e 0 -e TOTALHD)
 	 echo "${totalhd} MB"
 	 echo -n "Creating disk image & config"
 	 [ "$use_stackscript" ] && {
+		  [ -a "$prikey" ] && pubkey=$(ssh-keygen -yf "$prikey") || return 1
 		  result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid'&stackscriptid='$ss_id \
-				--data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'","ss_mysqlpass":"'$mysqlpass'"}' \
+				--data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'","ss_mysqlpass":"'$mysqlpass'","ss_pubkey":"'"${pubkey}"'"}' \
 				--data-urlencode rootpass="$rootpass") || return 1
 	 } || {
 		  result=$(do_or_report say 'linode.disk.createfromdistribution&distributionid='$latest_arch'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid \
