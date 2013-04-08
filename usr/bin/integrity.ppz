@@ -133,12 +133,12 @@ integrity_hosts() {
 	 # /etc/hostname
 	 local HOSTNAME=$(cat /etc/hostname 2>/dev/null)
 	 [ "$HOSTNAME" ] || {
-		  eval $(awk '/^HOSTNAME=/' /etc/rc.conf)
+		  [ -a /etc/rc.conf ] && eval $(awk '/^HOSTNAME=/' /etc/rc.conf)
 		  [ "$HOSTNAME" ] || usetvar HOSTNAME "Please set hostname:" "" ""
 		  if [ "$HOSTNAME" ]; then
 				echo_red "Setting hostname to $HOSTNAME"
 				echo "$HOSTNAME" >| /etc/hostname
-				sed -i '/^HOSTNAME=/I d' /etc/rc.conf
+				[ -a /etc/rc.conf ] && sed -i '/^HOSTNAME=/I d' /etc/rc.conf
 		  else
 				echo_red "No hostname!"
 				return 1
