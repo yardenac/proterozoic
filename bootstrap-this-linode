@@ -48,6 +48,7 @@ rm -f \
 
 # how to get proper "kernel name" in install file?
 
+mkdir /etc/ssh/keys
 echo "${SS_PUBKEY}" >| /etc/ssh/keys/eu
 
 # TODO: static ip
