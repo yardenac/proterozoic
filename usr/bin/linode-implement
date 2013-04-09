@@ -226,16 +226,8 @@ negotiate() {
 	 ssh-keyscan -H $LINODE_IP >> ~/.ssh/known_hosts
 
 	 # do initial decryption while we change default password
-	 askyn "Try to ssh now?" && ssh -t $LINODE_USER@$lido_use 'mkdir ~/.ssh && passwd'
+	 askyn "Try to ssh now?" && ssh -t $LINODE_USER@$lido_use 'passwd'
 
-	 # if there is a keyfile, use it!
-	 if keyfile=$(ssh_key_from_host $lido_use); then
-		  pubfile=${keyfile/\~/$HOME}.pub
-		  echo "copying over keyfile $pubfile ..."
-		  scp $pubfile $LINODE_USER@$lido_use:/media/enc/u/.ssh/authorized_keys
-	 else
-		  echo "No keyfile to make ssh easier :("
-	 fi
 	 echo "logging into root ..."
 	 ssh -t $LINODE_USER@$lido_use su -
 
