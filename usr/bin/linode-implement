@@ -228,6 +228,7 @@ negotiate() {
 	 # do initial decryption while we change default password
 	 askyn "Try to ssh now?" && ssh -t $LINODE_USER@$lido_use 'passwd'
 
+	 # this is important because it runs integrity.ppz
 	 echo "logging into root ..."
 	 ssh -t $LINODE_USER@$lido_use su -
 
@@ -240,7 +241,7 @@ do_all() {
 	 echo
 	 echo "Found linode '$LINODE_LABEL' with id# $linodeid"
 	 echo -n "You probably want to detach any running ssh sessions, or they will hang."
-	 askyn "This script will DESTROY $LINODE_LABEL/$linodeid. Do you want to cancel?" && exit
+	 askyn "This script will DESTROY $LINODE_LABEL/$linodeid. You want to cancel, right?" && exit
 	 for thing in \
 		  destroy_running \
 		  update_stackscript \
