@@ -23,17 +23,6 @@ stop_torrents() {
 		  echo_blue "done!"
 	 fi
 }
-enc_teardown() {
-	 local enc mnt map
-	 for enc in $(awk '/^: edev/ {print $3}' /etc/rc.conf); do
-		  for mnt in $(findmnt -runRo TARGET /dev/mapper/$enc | sort -r); do
-				umount -r $mnt
-		  done
-	 done
-	 for map in $(dmsetup ls --target crypt --tree -o ascii,compact --exec echo); do
-		  cryptsetup luksClose $map
-	 done
-}
 print_welcome() {
 	 : # echo_yellow BOOTING ARCH LINUX / PROTEROZOIC
 }
@@ -41,4 +30,3 @@ add_hook sysinit_udevsettled	set_hacks
 add_hook sysinit_premount		/usr/bin/integrity.ppz
 add_hook multi_start				resolv_override
 add_hook shutdown_start			stop_torrents
-add_hook shutdown_preumount	enc_teardown
