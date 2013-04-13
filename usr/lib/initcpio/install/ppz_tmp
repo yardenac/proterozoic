@@ -10,11 +10,10 @@ build () {
 	 add_binary /bin/cat
 	 add_binary /usr/bin/head
 	 add_file /etc/hostname
-	 add_runscript
 }
 
 help () {
 	 cat <<-EOF
-		This is my nifty universal fs-logic crap :D
+		This adds some extra things to initrd just in case
 		EOF
 }
