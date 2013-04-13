@@ -33,6 +33,8 @@ pkill haveged
 
 pacman-key --populate archlinux
 
+systemctl disable dbus.service
+
 pacman --noprogressbar --noconfirm --needed -Sqyyu
 
 cat >| /etc/mkinitcpio.conf <<-EOF
