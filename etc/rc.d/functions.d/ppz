@@ -1,31 +1,5 @@
 #!/bin/bash
 . /usr/share/ppz/bash.functions
-have_mount_point() {
-	 [ -a "$1" ] || mkdir "$1"
-	 [ -L "$1" ] && {
-		  rm -f "$1"
-		  mkdir "$1"
-	 }
-	 [ -d "$1" ] && {
-		  is_empty_dir "$1" || {
-				rsync -aAXD "$1/" /tmp
-				echo "EVERYTHING'S BEEN COPIED, DON'T WORRY..."
-				rm -ri "$1"
-				mkdir "$1"
-		  }
-	 }
-	 [ -d "$1" ] || {
-		  echo "$1 is not a link or a dir... weird"
-		  return 1
-	 }
-}
-tmp_bind() {
-	 umount /dev/shm &>/dev/null
-	 for P in /dev/shm /var/tmp; do
-		  have_mount_point "$P" || continue
-		  mount --bind /tmp "$P"
-	 done
-}
 set_hacks() {
 	 set +o noclobber
 	 echo 2000 > /sys/module/block/parameters/events_dfl_poll_msecs
@@ -63,7 +37,6 @@ enc_teardown() {
 print_welcome() {
 	 : # echo_yellow BOOTING ARCH LINUX / PROTEROZOIC
 }
-add_hook sysinit_start			tmp_bind
 add_hook sysinit_udevsettled	set_hacks
 add_hook sysinit_premount		/usr/bin/integrity.ppz
 add_hook multi_start				resolv_override
