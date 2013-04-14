@@ -2,6 +2,7 @@
 Description=Proterozoic Integrity
 Wants=network.target
 After=network.target
+Before=iptables.service ip6tables.service
 Before=sshd.service
 
 [Service]
