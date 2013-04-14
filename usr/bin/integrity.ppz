@@ -64,14 +64,6 @@ To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCAN
 	 done
 }
 integrity_simpleconf() {
-
-	 [ -a /etc/rc.conf ] && {
-		  . /etc/rc.conf
-		  for d in "${DAEMONS[@]}"; do
-				[ -a "/etc/rc.d/${d#@}" ] || echo_red "MISSING: /etc/rc.d/${d#@}"
-		  done
-	 }
-
 	 am_root || return 0
 	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
 	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow 2>/dev/null \
@@ -660,7 +652,7 @@ integrity_sshd() {
 	 fi
 	 ifn $SSHD_ON || {
 		  askyn "sshd is not running. Start it?" && {
-				/etc/rc.d/sshd start
+				systemctl start sshd.service
 		  } || echo_red "did not start sshd"
 	 }
 }
