@@ -29,16 +29,8 @@ clobberella() {
 	 }
 	 cp -n "$F.ppz" "$F"
 }
-file_empty() {
-	 grep -iqvE '^[[:space:]]*(#|;|//|$)' "$@"
-}
-file_contents() {
-	 grep -ivE  '^[[:space:]]*(#|;|//|$)' "$@"
-}
 enforce_locales() {
 	 FILE=etc/locale.gen
-#	 cp ${FILE}{,.backup.$(date +%s)}
-#	 ls -FlAthr ${FILE}*
 	 cat > ${FILE} <<-EOF
 		en_US.UTF-8 UTF-8
 		en_US ISO-8859-1
@@ -60,10 +52,6 @@ pwn_files() {
 }
 kernel_name=( $(pacman -Q | grep -i -e kernel -e linux-linode ) )
 kernel_name=${kernel_name[0]}
-check_triggers() {
-	 rm -f {usr/,}lib/initcpio/{hooks,install}/ppz_tmp.last
-	 rmdir --ignore-fail-on-non-empty -p lib/initcpio/{hooks,install} &>/dev/null; :
-}
 
 ########## HOOKS
 
@@ -71,10 +59,8 @@ pre_install() {
 	 enforce_locales
 }
 post_install() {
-#	 /etc/rc.d/iptables restart
 	 pwn_files
 	 /usr/bin/integrity.ppz
-	 check_triggers
 }
 
 pre_upgrade() {
@@ -85,5 +71,4 @@ pre_upgrade() {
 post_upgrade() {
 	 pwn_files
 	 /usr/bin/integrity.ppz
-	 check_triggers
 }
