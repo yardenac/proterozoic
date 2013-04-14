@@ -78,7 +78,7 @@ integrity_simpleconf() {
 		  || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
 	 [ -a /etc/rc.sysinit ] && sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
 	 case $SYSTEM_TYPE in
-		  linode)				sed -i 's/MODULES="btrfs dm-crypt dm-mod dm-snapshot fuse"/MODULES=""/ig' /usr/lib/initcpio/install/ppz_tmp
+		  linode)				sed -i '/add_module/ !b;d' /usr/lib/initcpio/install/ppz_tmp
 									sed -i 's%^\#\(server clock.fmt.he.net.*\)$%\1%ig' /etc/ntp.conf;;
 		  desktop|laptop|*)	sed -i 's%^\(server clock.fmt.he.net.*\)$%\#\1%ig' /etc/ntp.conf;;
 	 esac
@@ -675,7 +675,7 @@ integrity_sensors() {
 		  return
 	 }
 	 yes "" | /usr/sbin/sensors-detect
-	 echo_blue "Remember, add DAEMONS=(sensors) or MODULES=(...)"
+	 echo_blue "Remember, systemd enable lm_sensors (or something?)"
 }
 
 # this gets run in:

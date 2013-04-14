@@ -16,7 +16,7 @@ static_networking_from_runtime() {
 }
 
 fix_initcpio_ppz() {
-	 local TARGET=${1%%/}
+	 local mmodules TARGET=${1%%/}
 	 grep -iqE '^HOOKS="[^"]*ppz_tmp[^"]*"' ${TARGET}/etc/mkinitcpio.conf || {
 		  askyn "Add ppz_tmp to HOOKS?" \
 				&& sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' ${TARGET}/etc/mkinitcpio.conf
