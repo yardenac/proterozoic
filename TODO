@@ -41,8 +41,6 @@ jfs/ext tuning/optimizing
 
 /etc/hosts.d
 
-syslog-ng graceful
-
 set up manually
 
 add custom_mounting to mkinitcpio.conf hooks and help it detect hostname

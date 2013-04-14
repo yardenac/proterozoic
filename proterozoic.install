@@ -2,7 +2,6 @@
 preowned_files=(
 	 etc/default/useradd
 	 etc/ssh/ssh_config
-	 etc/syslog-ng/syslog-ng.conf
 	 etc/logrotate.conf
 	 etc/issue
 	 etc/ntp.conf
@@ -29,16 +28,6 @@ clobberella() {
 				done
 	 }
 	 cp -n "$F.ppz" "$F"
-}
-all_triggers_same() {
-	 let changes=0
-	 for F in "$@"; do
-		  are_same ${F}{,.last} || {
-				/bin/cp -f ${F}{,.last}
-				let changes++
-		  }
-	 done
-	 [ $changes -eq 0 ]
 }
 file_empty() {
 	 grep -iqvE '^[[:space:]]*(#|;|//|$)' "$@"
@@ -72,10 +61,6 @@ pwn_files() {
 kernel_name=( $(pacman -Q | grep -i -e kernel -e linux-linode ) )
 kernel_name=${kernel_name[0]}
 check_triggers() {
-	 all_triggers_same etc/syslog-ng/syslog-ng.conf || {
-#		  echo reloading syslog-ng....
-		  [ -a /etc/rc.conf ] && /usr/sbin/rc.d reload syslog-ng
-	 }
 	 rm -f {usr/,}lib/initcpio/{hooks,install}/ppz_tmp.last
 	 rmdir --ignore-fail-on-non-empty -p lib/initcpio/{hooks,install} &>/dev/null; :
 }

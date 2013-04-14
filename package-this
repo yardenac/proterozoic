@@ -8,15 +8,6 @@
 [ "$1" ] && REPO="$1" || croak USAGE: ./package-this [repo-directory]
 [ -d ${REPO} ] || croak ${REPO} not mounted!
 
-#no other way to suppress syslog non-root errors, even just doing --syntax-only!
-{ syslog-ng -svvf etc/syslog-ng/syslog-ng.conf.ppz; echo SIBBOLETH:$?; } 2>&1 | {
-	 while read LINE; do
-		  [[ ${LINE} =~ ^syslog-ng:\ Error\ setting\ (file\ number\ limit|capabilities) ]] && continue
-		  [[ ${LINE} =~ ^SIBBOLETH ]] && exit ${LINE#SIBBOLETH:}
-		  echo ${LINE}
-	 done
-} || croak BAD SYSLOG SYNTAX!
-
 git diff HEAD --quiet -- bootstrap-this etc/pacman.d/mirrorlist.otown usr/share/ppz/default/{rc,pacman}.conf \
 	 || echo_red "Bootstrap files have changed, you probably want to update git!"
 
