@@ -1,5 +1,0 @@
-#!/bin/bash
-. /usr/share/ppz/bash.functions
-print_welcome() {
-	 : # echo_yellow BOOTING ARCH LINUX / PROTEROZOIC
-}
