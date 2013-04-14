@@ -271,7 +271,7 @@ integrity_iptables() {
 
 #	 askyn "are you inspecting the iptables sitch?"
 
-	 rm -rf $tmp_is $tmp_should
+	 rm -f $tmp_is $tmp_should
 }
 can_work_with_boot() {
 	 grep -iq /boot /etc/fstab \
