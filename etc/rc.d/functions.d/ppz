@@ -3,4 +3,3 @@
 print_welcome() {
 	 : # echo_yellow BOOTING ARCH LINUX / PROTEROZOIC
 }
-add_hook sysinit_premount		/usr/bin/integrity.ppz
