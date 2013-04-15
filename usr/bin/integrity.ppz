@@ -294,14 +294,6 @@ integrity_net() {
 		  return
 	 fi
 	 am_root && {
-		  if [ -a /etc/rc.d/network ]; then
-				grep -iq broadcast /etc/rc.d/network || {
-					 mv -f /etc/rc.d/network{,.forget}
-					 curl http://projects.archlinux.org/initscripts.git/plain/network -so /etc/rc.d/network
-					 chmod +x /etc/rc.d/network
-					 askyn "Had to replace netscript from git! Did download work ok?" && rm -f /etc/rc.d/network.forget
-				}
-		  fi
 		  eval $(awk '/^:/ {
 				if ($2 == "sync") {
 					printf "remote_sync_file %s %s %s;\n", $3,$4,$5

@@ -1,18 +1,21 @@
 #!/bin/bash
 
-# this needs to change or go away
 static_networking_from_runtime() {
-	 local TARGET=${1%%/}
-	 [ "${TARGET}" ] && cp -f {,${TARGET}}/etc/resolv.conf
-	 ifconfig | awk -f <(cat <<-'EOF'
-		/^lo/ {exit}
+	 # prints an /etc/conf.d/network to stdout, based on current values (probably from dhcp)
+
+	 # dev = first non-lo network interface
+	 local dev=($(ip link | awk '/^[0-9]+:/ {sub(/:/,"",$2); if ($2 ~ "^(lo|dummy)[0-9]*$") next; print $2; exit}'))
+
+	 echo "inteface=$dev"
+	 ip addr show dev $dev | awk -f <(cat <<-'EOF'
 		$1 ~ /^inet$/ {
-			print "address=" $2 "\nnetmask=" $4 "\nbroadcast=" $6
+			gsub(/\//," ")
+			print "address=" $2 "\nnetmask=" $3 "\nbroadcast=" $5
 		}
 		EOF
-	 ) >> ${TARGET}/etc/rc.conf
-	 ip route show | awk '/^default via/ {print "gateway=" $3 "\ninterface=" $5}' \
-		  >> ${TARGET}/etc/rc.conf
+	 )
+	 ip route show | awk '/^default via/ {print "gateway=" $3}'
+	 echo 'resolv="'$(grex /etc/resolv.conf | { while read; do echo -n "$REPLY"'\\n'; done; })\"
 }
 
 fix_initcpio_ppz() {
