@@ -576,6 +576,7 @@ integrity_bashhistory() { local hf hfs attrset skel_file backup_file
 	 done; :
 }
 integrity_sshd() {
+	 [ "${SSH_PORTS[*]}" = '22' ] && echo_red "You should switch to a high SSH port!"
 	 am_root || return 0
 	 local port PORT_TXT
 	 for port in "${SSH_PORTS[@]}"; do
