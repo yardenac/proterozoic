@@ -533,6 +533,8 @@ integrity_emacsd() {
 	 return 0
 }
 integrity_bashhistory() { local hf hfs attrset skel_file backup_file
+	 [ "$USER" ] && [ "$HOME" ] || return 0
+
 	 set_proper_histfile
 
 	 # which files will we check and/or fix?
