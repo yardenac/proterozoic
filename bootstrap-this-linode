@@ -58,5 +58,6 @@ mkdir /etc/ssh/keys
 echo "${SS_PUBKEY}" >| /etc/ssh/keys/eu
 
 systemctl enable ip{,6}tables network
+systemctl disable getty@tty1.service
 
 askyn "reboot now?" && systemctl poweroff
