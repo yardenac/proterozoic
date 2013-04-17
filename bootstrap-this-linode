@@ -50,14 +50,14 @@ rm -f \
 
 # how to get proper "kernel name" in install file?
 
-. /usr/share/ppz/bash.functions
-. /usr/share/ppz/bash.functions.install
-static_networking_from_runtime >| /etc/conf.d/network
-
 mkdir /etc/ssh/keys
 echo "${SS_PUBKEY}" >| /etc/ssh/keys/eu
 
-systemctl enable ip{,6}tables network
+. /usr/share/ppz/bash.functions
+. /usr/share/ppz/bash.functions.install
+static_networking_from_runtime eth0
+
+systemctl enable ip{,6}tables network@eth0
 systemctl disable getty@tty1.service
 
 askyn "reboot now?" && systemctl poweroff
