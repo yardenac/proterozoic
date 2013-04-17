@@ -1,0 +1,31 @@
+#!/bin/bash
+# bring up IP aliases on device. assumes a typical /24 subnet
+
+dev='' ips=()
+for arg; do
+	 if [[ "$arg" =~ ^([0-9]+\.){3}[0-9]+$ ]]; then
+		  ips+=("$arg")
+	 elif /sbin/ip link show "$arg" &>/dev/null; then
+		  dev="$arg"
+	 else
+		  echo "weird arg to ip-add-alias: $arg"
+	 fi
+done
+
+(( ${#ips[@]} )) || exit 0 # not every system has them!
+
+[ "$dev" ] || {
+	 echo "USAGE: $0 dev ip [ip...]"
+	 exit 1
+}
+
+echo_txt=''
+[ "x$EUID" = "x0" ] || {
+	 echo "If I were root, I would do:"
+	 echo_txt=echo
+}
+
+ip='' c=0
+for ip in "${ips[@]}"; do
+	 "$echo_txt" /sbinb/ip addr add $ip/24 brd ${ip%.*}.255 dev $dev label $dev:$((c++))
+done

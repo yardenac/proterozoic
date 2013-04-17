@@ -14,6 +14,7 @@ EnvironmentFile=/etc/conf.d/network.%i
 ExecStart=/sbin/ip link set dev %i up
 ExecStart=/sbin/ip addr add ${address}/${netmask} broadcast ${broadcast} dev %i
 ExecStart=/sbin/ip route add default via ${gateway}
+ExecStart=/usr/bin/ip-alias %i $aliases
 ExecStart=/bin/bash -c "echo $'# Set by systemd network@%i.service\n${resolv}' >| /etc/resolv.conf"
 
 ExecStop=/bin/bash -c "echo '# %i went down' >| /etc/resolv.conf"
