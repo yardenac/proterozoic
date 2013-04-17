@@ -32,8 +32,14 @@ static_networking_from_runtime() {
 	 (( ${#devs[@]} )) || devs+=($(ip link | awk '/^[0-9]+:/ {sub(/:/,"",$2); if ($2 ~ "^(lo|dummy)[0-9]*$") next; print $2; exit}'))
 
 	 for dev in "${devs[@]}"; do
-		  static_per_nic "$dev" >| "$target/etc/conf.d/network.$dev" \
-				&& echo_blue "generated $target/etc/conf.d/network.$dev"
+		  if am_root; then
+				mkdir -p "$target/etc/conf.d"
+				static_per_nic "$dev" >| "$target/etc/conf.d/network.$dev" \
+					 && echo_blue "generated $target/etc/conf.d/network.$dev"
+		  else
+				echo_blue "If I were root, I'd write this to: $target/etc/conf.d/network.$dev"
+				static_per_nic "$dev"
+		  fi
 	 done
 }
 
