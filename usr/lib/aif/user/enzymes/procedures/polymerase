@@ -122,7 +122,7 @@ start_process() {
 		  cp -f ${TARGET}/{usr/share/ppz/default,etc}/pacman.conf
 	 }
 	 askyn "Use present net config as static on target?" && {
-		  static_networking_from_runtime >| ${TARGET}/etc/conf.d/network
+		  static_networking_from_runtime ${TARGET}
 	 }
 	 askyn "Set root password now?" && {
 		  while true; do
