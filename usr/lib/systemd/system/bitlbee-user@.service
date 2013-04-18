@@ -1,0 +1,14 @@
+[Unit]
+Description=BitlBee as user
+After=syslog.target
+After=bitlbee-user-setup@%i.service
+Requires=bitlbee-user-setup@%i.service
+
+[Service]
+User=%i
+ExecStartPre=/usr/bin/mkdir -p %h/.config/bitlbee
+ExecStartPre=/usr/bin/chmod 700 %h/.config/bitlbee
+ExecStart=/usr/sbin/bitlbee -F -n -c %h/.config/bitlbee/bitlbee.conf -d %h/.config/bitlbee
+
+[Install]
+WantedBy=multi-user.target
