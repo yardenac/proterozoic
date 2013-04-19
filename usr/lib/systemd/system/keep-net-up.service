@@ -1,0 +1,11 @@
+[Unit]
+Description=Keep-Net-Up
+Wants=network.target
+Before=network.target
+Conflicts=network@.service dhcpcd@.service
+
+[Service]
+ExecStart=/usr/bin/keep-net-up
+
+[Install]
+WantedBy=network.target

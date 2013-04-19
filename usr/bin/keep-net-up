@@ -5,28 +5,9 @@
 
 am_root || groups | grep -qw network || exit
 
-args=()
-while [ "$1" ]; do
-	 case "$1" in
-		  -d) daemon=y;;
-		  *) args+=("$1");;
-	 esac
-	 shift
-done
-set -- "${args[@]}"
-
-[ "$daemon" = y ] && {
-	 echo daemon "$0" "$@"
-	 knu_file=/tmp/.keep-net-up
-	 [ -a "$knu_file" ] || touch "$knu_file"
-	 [ -O "$knu_file" ] || croak "KNU FILE HIJACKED"
-	 nohup "$0" "$@" &>> "$knu_file" &
-	 exit
-}
-
 loopinc=45
-wpas_file=/tmp/.$(uniq_token)
-dhcp_file=/tmp/.$(uniq_token)
+wpas_file=/run/keep-net-up/log-wpa
+dhcp_file=/run/keep-net-up/log-dhcp
 knu_cleanup() { rm -rf "$wpas_file" "$dhcp_file"; }
 trap "knu_cleanup; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
 
