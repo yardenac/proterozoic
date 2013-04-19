@@ -103,22 +103,6 @@ integrity_simpleconf() {
 	 }
 	 mkdir -pm 777 /run/screens
 }
-integrity_inittab() {
-	 am_root || return 0
-	 [ -a /etc/inittab ] || return 0
-
-	 # the one we want to be like
-	 local model=x
-	 case $SYSTEM_TYPE in
-		  linode) model=linode;;
-#		  desktop|laptop|*) :;;
-	 esac
-
-	 cmp -s /etc/inittab /usr/share/ppz/default/inittab.$model || {
-		  echo_red "Fixing inittab to use the '$model' setup!"
-		  cat /usr/share/ppz/default/inittab.$model >| /etc/inittab
-	 }
-}
 integrity_hosts() {
 	 am_root || return 0
 
@@ -671,7 +655,7 @@ integrity_sensors() {
 #     ppz/bash.rc
 #      post_upgrade
 
-for F in rootpw locales tz simpleconf inittab hosts users \
+for F in rootpw locales tz simpleconf hosts users \
 	 iptables net encdevs bashhistory emacsd tmpdir sshd \
 	 sensors; do
 

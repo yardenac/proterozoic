@@ -1,0 +1,23 @@
+[Unit]
+Description=Fgetty on %I
+After=systemd-user-sessions.service plymouth-quit-wait.service
+Before=getty.target
+IgnoreOnIsolate=yes
+ConditionPathExists=/dev/tty0
+
+[Service]
+ExecStart=-/sbin/fgetty %I
+Restart=always
+RestartSec=0
+UtmpIdentifier=%I
+TTYPath=/dev/%I
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+KillMode=process
+KillSignal=SIGHUP
+IgnoreSIGPIPE=no
+Environment=LANG= LANGUAGE= LC_CTYPE= LC_NUMERIC= LC_TIME= LC_COLLATE= LC_MONETARY= LC_MESSAGES= LC_PAPER= LC_NAME= LC_ADDRESS= LC_TELEPHONE= LC_MEASUREMENT= LC_IDENTIFICATION=
+
+[Install]
+WantedBy=getty.target
