@@ -27,5 +27,9 @@ echo_txt=''
 
 ip='' c=0
 for ip in "${ips[@]}"; do
-	 "$echo_txt" /sbinb/ip addr add $ip/24 brd ${ip%.*}.255 dev $dev label $dev:$((c++))
+	 if [ "$echo_txt" ]; then
+		  echo /sbin/ip addr add $ip/24 brd ${ip%.*}.255 dev $dev label $dev:$((c++))
+	 else
+		  /sbin/ip addr add $ip/24 brd ${ip%.*}.255 dev $dev label $dev:$((c++))
+	 fi
 done
