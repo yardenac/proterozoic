@@ -35,7 +35,10 @@ ck_pkg() {
 	 (( "${#pkgdeets[@]}" )) || return 1
 	 name=${pkgdeets[0]}
 	 vers_here=${pkgdeets[1]}
-	 vers_there=$(cower --search --format="%v" "^${name}$") || return 1
+	 vers_there=$(cower --search --format="%v" "^${name}$") || {
+		  echo_red "package not in AUR: $name"
+		  return 1
+	 }
 	 [[ "$vers_here" == "$vers_there" ]] && {
 		  [[ $verbose == y ]] && echo_blue "$name $vers_here "
 		  return
