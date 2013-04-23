@@ -2,7 +2,6 @@
 %users ALL=(root) NOPASSWD: /usr/sbin/openmap
 ex ALL=(root) NOPASSWD: /sbin/reboot ""
 eu ALL=(ex) NOPASSWD: /usr/bin/FvwmCommand
-eu ALL=(ex) NOPASSWD: /usr/bin/rmadd
 #%power ALL=(root) NOPASSWD: /sbin/shutdown
 %wheel  ALL=(ALL) NOPASSWD: ALL
 eu ALL=(root) NOPASSWD: /bin/su -s /bin/bash - wp1
