@@ -82,7 +82,6 @@ integrity_simpleconf() {
 	 [ -L /snowball ] || ln -s media/rodinia/pub /snowball
 	 [ -a /usr/share/terminfo/r/rxvt-unicode-256color ] || \
 		  ln -s /usr/share/terminfo/r/rxvt{,-unicode}-256color
-	 enforce_perms 440 /etc/sudoers.d/wheel
 
 	 sed -i 's%^\(MIRRORLIST="/etc/pacman.d/mirrorlist"\)$%\#\1%ig' /etc/abs.conf
 	 grep -qiE '^MIRRORLIST="/etc/pacman.d/mirrorlist.otown"$' /etc/abs.conf || \
