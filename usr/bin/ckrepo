@@ -39,7 +39,8 @@ ck_pkg() {
 		  echo_red "package not in AUR: $name"
 		  return 1
 	 }
-	 [[ "$vers_here" == "$vers_there" ]] && {
+	 flagged=$(cower --search --format="%t" "^${name}$")
+	 [ "$flagged" = no ] && [ "$vers_here" = "$vers_there" ] && {
 		  [[ $verbose == y ]] && echo_blue "$name $vers_here "
 		  return
 	 }
@@ -57,9 +58,15 @@ ck_pkg() {
 		  echo_blue_n "$name $vers_here "
 		  echo_cyan_n "$vers_github"
 		  echo " $url/commits/master"
-	 else
+	 elif [ "$vers_here" != "$vers_there" ]; then
 		  echo_blue_n "$name $vers_here "
 		  echo_yellow "$vers_there"
+	 elif [ "$flagged" = yes ]; then
+		  echo_blue_n "$name $vers_here "
+		  echo_cyan_n "$vers_there "
+		  echo_yellow "FLAGGED"
+	 else
+		  echo_red "WEIRD THING HAPPENED"
 	 fi
 }
 is_repo() {
