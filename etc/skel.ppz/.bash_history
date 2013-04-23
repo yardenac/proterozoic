@@ -7,8 +7,6 @@ iptables -t raw -L -v -x --line-numbers
 iptables -t mangle -L -v -x --line-numbers
 iptables -t filter -L -v -x --line-numbers
 exec screen -xUR
-shutdown -hP now && exit
-reboot && exit
 cryptsetup luksOpen /dev/disk/by-uuid/0105eeab-2fc6-4dc7-8b89-4a70605e1483 green
 mount /dev/disk/by-uuid/913e0e86-9eb2-4dd5-9513-6b34f26f37cc /media/rodinia
 mount /dev/disk/by-uuid/45d0d831-d045-410c-b2ec-d525ef69e36c /media/arch-cold-rw
@@ -27,4 +25,7 @@ mount -o remount,ro /boot
 mount -o remount,rw /boot
 gpasswd -a eu optical
 gpasswd -a eu audio
+exec systemctl --no-block poweroff
+exec systemctl --no-block reboot
+exec systemctl --no-block suspend
 #LAST_PPZ_COMMAND

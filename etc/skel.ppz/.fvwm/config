@@ -149,7 +149,7 @@ AddToMenu MenuFvwmRoot
 + "NoProxium"	Exec exec chromium
 + "Reload WM"	Restart
 + "Restart WM"	Quit
-+ "Reboot CPU"	Exec exec sudo /sbin/reboot
++ "Reboot CPU"	Exec exec sudo /usr/bin/systemctl --no-block reboot
 + "Window Ops"	Popup MenuFvwmWindowOps2
 
 DestroyMenu MenuFvwmWindowOps2
