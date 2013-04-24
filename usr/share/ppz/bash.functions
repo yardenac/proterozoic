@@ -679,8 +679,10 @@ is() {
 	 local str arg
 	 case "$1" in
 		  '')		return 1;; # existential crisis...
-		  xz|xzip|pkg)
+		  xz|xzip)
 					str='^application/x-xz;';;
+		  pkg)
+				str='^application/x-(xz|tar);';;
 		  gz|gzip|db)
 					str='^application/x-gzip;';;
 		  c)		str='^text/x-c;';;
