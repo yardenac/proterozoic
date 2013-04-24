@@ -87,14 +87,6 @@ integrity_simpleconf() {
 	 grep -qiE '^MIRRORLIST="/etc/pacman.d/mirrorlist.otown"$' /etc/abs.conf || \
 		  echo 'MIRRORLIST="/etc/pacman.d/mirrorlist.otown"' >> /etc/abs.conf
 
-	 # php tmpdir
-	 if grep -q ^http: /etc/passwd && grep -q ^http: /etc/group; then
-		  [ -d /tmp/php ] && [ $(stat -c %U /tmp/php) = "http" ] || {
-				rm -rf /tmp/php
-				mkdir /tmp/php
-				chown -R http:http /tmp/php
-		  }
-	 fi
 	 local wpaf=/etc/wpa_supplicant.conf
 	 [ "$WPA_SC" ] && [ -s $wpaf ] && [ -s "$WPA_SC" ] && ! diff $wpaf "$WPA_SC" && {
 		  echo_red "$wpaf is outdated"

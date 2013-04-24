@@ -32,7 +32,6 @@ doc_root =
 user_dir =
 enable_dl = Off
 file_uploads = On
-upload_tmp_dir = /tmp/php
 upload_max_filesize = 6M
 max_file_uploads = 50
 allow_url_fopen = On
