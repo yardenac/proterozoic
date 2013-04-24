@@ -33,9 +33,9 @@ pkill haveged
 
 pacman-key --populate archlinux
 
-systemctl disable dbus.service
-
+systemctl stop dbus.service
 pacman --noprogressbar --noconfirm --needed -Sqyyu
+systemctl start dbus.service
 
 cat >| /etc/mkinitcpio.conf <<-EOF
 	HOOKS="base udev autodetect modconf block filesystems fsck ppz_tmp"
@@ -60,4 +60,4 @@ static_networking_from_runtime eth0
 systemctl enable ip{,6}tables network@eth0
 systemctl disable getty@tty1.service
 
-askyn "reboot now?" && systemctl poweroff
+askyn "reboot now?" && systemctl --no-block poweroff
