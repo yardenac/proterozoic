@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# clear input buffer & prompt to begin
+while read -t 0.0001 -n 32767; do :; done
+read -N 1 -p $'\e[1;34mPress any key to begin stackscript...\e[m'
+
 # someday ... get this to set some ext3 vars and tune2fs
 
 GITURL=https://raw.github.com/yardenac/proterozoic/master
