@@ -255,7 +255,7 @@ do_all() {
 		  return 1
 	 done
 }
-if $(( ${#doroutines[@]} )); then
+if (( ${#doroutines[@]} )); then
 	 for routine in "${doroutines[@]}"; do
 		  $routine
 	 done
