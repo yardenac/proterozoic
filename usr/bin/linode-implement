@@ -76,7 +76,7 @@ do_or_report() {
 	 return 0
 }
 filtered_ssh() {
-	 ssh $ssh_host_use "$@" | tr -d '\f\r\n'
+	 ssh $ssh_host_use "$@" 2>/dev/null | tr -d '\f\r\n'
 }
 block_for_job() { #returns when no more jobs pending
 	 while (( $(curl -sS ${LINODEURL}'linode.job.list&linodeid='$linodeid'&pendingonly=1' | jshon -e DATA -l) )); do
