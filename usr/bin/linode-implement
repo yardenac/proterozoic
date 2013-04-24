@@ -176,11 +176,11 @@ deploy() {
 	 echo -n "Creating disk image & config"
 	 [ "$use_stackscript" ] && {
 		  [ -a "$prikey" ] && pubkey=$(ssh-keygen -yf "$prikey") || return 1
-		  result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid'&stackscriptid='$ss_id \
+		  result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch'&label=D'$ssdate'&size=4096&linodeid='$linodeid'&stackscriptid='$ss_id \
 				--data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'","ss_mysqlpass":"'$mysqlpass'","ss_pubkey":"'"${pubkey}"'"}' \
 				--data-urlencode rootpass="$rootpass") || return 1
 	 } || {
-		  result=$(do_or_report say 'linode.disk.createfromdistribution&distributionid='$latest_arch'&label=D'$ssdate'&size='$totalhd'&linodeid='$linodeid \
+		  result=$(do_or_report say 'linode.disk.createfromdistribution&distributionid='$latest_arch'&label=D'$ssdate'&size=4096&linodeid='$linodeid \
 				--data-urlencode rootpass="$rootpass") || return 1
 	 }
 	 diskid=$(echo $result | jshon -e DATA -e DiskID)
