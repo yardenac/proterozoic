@@ -19,17 +19,13 @@ done
 	 exit 1
 }
 
-echo_txt=''
-[ "x$EUID" = "x0" ] || {
-	 echo "If I were root, I would do:"
-	 echo_txt=echo
-}
+[ "x$EUID" = "x0" ] || echo "If I were root, I would do:"
 
-ip='' c=0
+c=0
 for ip in "${ips[@]}"; do
-	 if [ "$echo_txt" ]; then
-		  echo /sbin/ip addr add $ip/24 brd ${ip%.*}.255 dev $dev label $dev:$((c++))
-	 else
+	 if [ "x$EUID" = "x0" ]; then
 		  /sbin/ip addr add $ip/24 brd ${ip%.*}.255 dev $dev label $dev:$((c++))
+	 else
+		  echo /sbin/ip addr add $ip/24 brd ${ip%.*}.255 dev $dev label $dev:$((c++))
 	 fi
 done
