@@ -468,7 +468,7 @@ integrity_encdevs() { local devcond devline IFS=$'\n'
 	 # which devices do we care about? all (if root) or just ours?
 	 am_root \
 		  && devcond='(1)' \
-		  || devcond='($3 == "'$(encdev_from_user)'")'
+		  || devcond='($3 == "'$(encdev_from_user $USER)'")'
 
 	 # for devices we care about, make sure they all work
 	 for devline in $(awk '/^:/ {

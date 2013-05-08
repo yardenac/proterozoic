@@ -617,7 +617,8 @@ vars_in_series() { local prefix n var width
 kernel_supports_luks() {
 	 zgrep -iqE 'CONFIG_CRYPTO_XTS=[my]' /proc/config.gz
 }
-encdev_from_user() { local u=${1:-$USER}
+encdev_from_user() { local u=$1
+	 [[ "$u" =~ ^[a-z0-9]+$ ]] || return 1
 	 awk '/^:/ { if (($2 == "user") && ($3 == "'"$u"'") && !($6 ~ /^\//)) {
 		sub(/\/.*$/,"",$6)
 		print $6
