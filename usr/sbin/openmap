@@ -12,6 +12,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 am_root || echo "must be root!"
 chrooted && croak "Cannot run this in chroot!"
 [ "$1" ] || croak "Must pass a username as first arg"
+[[ "$1" =~ ^[a-z0-9]+$ ]] || croak "Invalid username"
 user="$1"
 dev=$(encdev_from_user "$user")
 [ "$dev" ] || croak "No device for user $1 exists."
