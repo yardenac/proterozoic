@@ -66,6 +66,7 @@ To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCAN
 integrity_simpleconf() {
 	 am_root || return 0
 	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
+	 grep -iEq ^/usr/bin/bash$ /etc/shells || echo /usr/bin/bash >> /etc/shells
 	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow 2>/dev/null \
 		  || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
 	 [ -a /etc/rc.sysinit ] && sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
