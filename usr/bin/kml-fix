@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # if called weirdly and relative bff exists, use that
 # otherwise use system bff

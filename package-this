@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 [ -a ./package-this ] || {
 	 echo "You have to run this from the same directory!"
 	 exit 1

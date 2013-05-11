@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 # Meant to be run DIRECTLY from a fresh archiso live cd. Try typing, for example:
 # [root@archiso]$ dhcpcd eth0
 # [root@archiso]$ . <(wget https://raw.github.com/yardenac/proterozoic/master/bootstrap-this -qLO-)

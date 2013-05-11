@@ -4,7 +4,7 @@ build () {
 	 add_module dm-mod
 	 add_module dm-snapshot
 	 add_module fuse
-	 add_binary /bin/bash
+	 add_binary /usr/bin/bash
 	 add_binary /bin/date
 	 add_binary /usr/bin/pstree
 	 add_binary /bin/cat

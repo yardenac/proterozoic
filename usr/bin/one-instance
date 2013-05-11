@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 millisleep() {
 	 local c=${1:-0}.

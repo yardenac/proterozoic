@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 depend_procedure core base
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.install

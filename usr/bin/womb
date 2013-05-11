@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 [ "x$EUID" = "x0" ] && {
 	 echo "Root should never run womb!"
@@ -78,4 +78,4 @@ cd ~
 # should be a single string treated like input to "eval", like:
 #
 # ssh user@host 'echo hello\ world > ~/my\ file.txt'
-exec -l /bin/bash "$@"
+exec -l /usr/bin/bash "$@"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 while true; do
 	transmission-remote -t all -pi | grep -viE '^(Address|$)' | awk 'BEGIN {

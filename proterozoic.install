@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 preowned_files=(
 	 etc/default/useradd
 	 etc/ssh/ssh_config

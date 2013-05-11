@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 TMISS_BIN=transmission-remote-2.04-1
 ROWSINWINDOW=52
 let ROWSINWINDOW-=3

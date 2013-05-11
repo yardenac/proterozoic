@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 #
 # Summarize dirs' byte size in terms of units (defaults to DVD-R size)
 #

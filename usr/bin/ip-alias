@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 # bring up IP aliases on device. assumes a typical /24 subnet
 
 dev='' ips=()

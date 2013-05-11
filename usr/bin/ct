@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 [ -f /usr/share/ppz/bash.functions ] && . /usr/share/ppz/bash.functions
 [ -f usr/share/ppz/bash.functions ] && . usr/share/ppz/bash.functions
 

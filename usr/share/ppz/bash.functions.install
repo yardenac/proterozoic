@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 static_per_nic() {
 	 # prints network envfile to stdout, based on current values (probably from dhcp)

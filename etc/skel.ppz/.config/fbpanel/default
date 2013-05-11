@@ -36,7 +36,7 @@ Plugin {
 	expand = false
 	padding = 0
 	config {
-		Command = /bin/bash /usr/bin/genmon battery
+		Command = /usr/bin/bash /usr/bin/genmon battery
 		PollingTime = 6
 		TextFmt = <span color="#ffff00" font="Sans 15" style="oblique" weight="heavy" rise="-20989" letter_spacing="-2048" font_stretch="ultracondensed">%s</span>
 	}

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 
 # should not be run directly except from the integrity scripts.

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # clear input buffer & prompt to begin
 while read -t 0.0001 -n 32767; do :; done

@@ -3,6 +3,6 @@ Description=Setup for BitlBee as user
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'echo "D /run/bitlbee 0755 %i users - -" >| /usr/lib/tmpfiles.d/bitlbee.conf'
+ExecStart=/usr/bin/bash -c 'echo "D /run/bitlbee 0755 %i users - -" >| /usr/lib/tmpfiles.d/bitlbee.conf'
 ExecStart=/usr/bin/systemd-tmpfiles --create /usr/lib/tmpfiles.d/bitlbee.conf
 

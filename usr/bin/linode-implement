@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # USAGE: linode-implement nickname [nostackscript] [doroutine-ROUTINE] [arch]
 

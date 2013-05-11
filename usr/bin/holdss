@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 # keeps the screensaver at bay!
 
 . /usr/share/ppz/bash.functions

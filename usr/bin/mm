@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 # mplayer but a little easier
 
 . /usr/share/ppz/bash.functions

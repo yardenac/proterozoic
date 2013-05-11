@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 . /usr/share/ppz/bash.functions
 shopt -sq nocasematch nullglob dotglob
 do_unto_others

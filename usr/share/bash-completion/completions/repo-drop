@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 _repo-drop() {
 	 _get_comp_words_by_ref cur

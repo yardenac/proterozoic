@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # this is VERY inefficient, but tail -f can't do a timer!
 
