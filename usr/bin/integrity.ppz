@@ -566,6 +566,7 @@ integrity_sshd() {
 		${PORT_TXT}ListenAddress 0.0.0.0
 		Protocol 2
 		LoginGraceTime 2m
+		MACs hmac-md5-etm@openssh.com
 		PermitRootLogin no
 		MaxAuthTries 3
 		MaxSessions 15
