@@ -30,14 +30,12 @@ NameVirtualHost *:80
 DocumentRoot "/srv/http"
 UserDir disabled
 AccessFileName .htaccess
-DirectoryIndex index.html index.php index.phtml
+DirectoryIndex index.html
 IndexOptions FancyIndexing HTMLTable VersionSort
 IndexIgnore .??* *~ *# RCS CVS *,v *,t
 DefaultType text/plain
 TypesConfig conf/mime.types
 MIMEMagicFile conf/magic
-AddHandler application/x-httpd-php .php .php5
-AddType application/x-httpd-php .php .php5
 AddType application/x-compress .Z
 AddType application/x-gzip .gz .tgz
 AddType application/x-x509-ca-cert .crt
@@ -45,9 +43,6 @@ AddType application/x-pkcs7-crl    .crl
 AddType image/x-icon .ico
 Alias /favicon.ico /srv/http/dummy/blank-favicon.ico
 AliasMatch ^/favicon.ico$ /srv/http/dummy/blank-favicon.ico
-<FilesMatch "\.php$">
- SetHandler application/x-httpd-php
-</FilesMatch>
 <Directory />
     Options FollowSymLinks
     AllowOverride None
@@ -79,8 +74,6 @@ Include /etc/httpd/conf/site-specific.conf
    AliasMatch ^/(.*) /srv/http/dummy/blank-file
 </VirtualHost>
 
-LoadModule php5_module modules/libphp5.so
-LoadModule wsgi_module modules/mod_wsgi.so
 LoadModule authn_file_module modules/mod_authn_file.so
 LoadModule authn_dbm_module modules/mod_authn_dbm.so
 LoadModule authn_anon_module modules/mod_authn_anon.so
