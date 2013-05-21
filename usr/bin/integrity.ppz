@@ -616,11 +616,11 @@ integrity_sshd() {
 		  chrooted || {
 				# not chrooted
 				echo_red pkilling sshd
-				pkill -HUP -f /usr/sbin/sshd; SSHD_ON=$?
+				pkill -HUP -f /usr/bin/sshd; SSHD_ON=$?
 		  }
 	 else
 		  #file didnt change
-		  [ -n "$(pgrep -f /usr/sbin/sshd)" ]; SSHD_ON=$?
+		  [ -n "$(pgrep -f /usr/bin/sshd)" ]; SSHD_ON=$?
 	 fi
 	 ifn $SSHD_ON || {
 		  askyn "sshd is not running. Start it?" && {
