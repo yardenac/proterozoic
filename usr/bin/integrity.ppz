@@ -8,6 +8,25 @@
 #   before or after rc.multi scripts (they could be backgrounded!)
 #   inside a chroot - use chrooted() from bash.functions
 
+integrity_everyone() {
+
+	 # test for wheel
+	 local wheel found=0 wheels=$(awk -F: '/^wheel/ {print $4}' /etc/group)
+	 wheels=(${wheels//,/ })
+	 for wheel in "${wheels[@]}"; do
+		  [ "$wheel" = root ] && continue
+		  let found++
+	 done
+	 (( found )) || {
+		  if am_root; then
+				echo "Adding $LUSER to wheel..."
+				gpasswd -a $LUSER wheel
+		  else
+				echo_red "Nobody but root in wheel!"
+		  fi
+	 }
+
+}
 integrity_rootpw() {
 	 am_root && shell_is_interactive || return 0
 
@@ -650,7 +669,7 @@ integrity_sensors() {
 
 for F in rootpw locales tz simpleconf hosts users \
 	 iptables net encdevs bashhistory emacsd tmpdir sshd \
-	 sensors; do
+	 sensors everyone; do
 
 	 integrity_${F} || echo "${F} failed..."
 done

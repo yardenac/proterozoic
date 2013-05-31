@@ -1,4 +1,6 @@
+%wheel ALL=(ALL) ALL
+Defaults:%wheel timestamp_timeout=0
+%wheel ALL=(ex) NOPASSWD: /usr/bin/FvwmCommand
+%wheel ALL=(root) NOPASSWD: /bin/su -s /usr/bin/bash - wp1 ""
 %users ALL=(root) NOPASSWD: /usr/bin/bash /usr/sbin/openmap [a-z0-9]*[a-z0-9]
 ex ALL=(root) NOPASSWD: /usr/bin/systemctl --no-block reboot ""
-eu ALL=(ex) NOPASSWD: /usr/bin/FvwmCommand
-eu ALL=(root) NOPASSWD: /bin/su -s /usr/bin/bash - wp1
