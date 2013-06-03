@@ -35,5 +35,5 @@ package() {
 	 chmod 440 ${pkgdir}/etc/sudoers.d/ppz
 	 chmod 750 ${pkgdir}/etc/sudoers.d
 	 chmod 770 ${pkgdir}/etc/privoxy
-	 chmod +x ${pkgdir}/usr/{s,}bin/*
+	 chmod +x ${pkgdir}/usr/bin/*
 }

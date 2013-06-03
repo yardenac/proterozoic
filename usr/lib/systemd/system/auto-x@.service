@@ -6,7 +6,7 @@ IgnoreOnIsolate=yes
 ConditionPathExists=/dev/tty0
 
 [Service]
-ExecStart=-/sbin/mingetty --nice 5 --noclear --autologin ex %I
+ExecStart=-/usr/bin/mingetty --nice 5 --noclear --autologin ex %I
 Restart=always
 RestartSec=0
 UtmpIdentifier=%I

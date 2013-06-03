@@ -480,7 +480,7 @@ integrity_encdev() {
 	 # openmap gives us privilege to do that.
 
 	 # right now takes usename as argument - maybe $UID is enough? testing.
-	 sudo /usr/bin/bash /usr/sbin/openmap $(whoami)
+	 sudo /usr/bin/bash /usr/bin/openmap $(whoami)
 }
 integrity_encdevs() { local devcond devline IFS=$'\n'
 
