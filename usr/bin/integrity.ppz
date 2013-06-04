@@ -87,7 +87,7 @@ integrity_simpleconf() {
 	 grep -iEq ^/usr/bin/bash$ /etc/shells || echo /usr/bin/bash >> /etc/shells
 	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow 2>/dev/null \
 		  || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
-	 [ -a /etc/rc.sysinit ] && sed -i 's%^\(/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
+	 [ -a /etc/rc.sysinit ] && sed -i 's%^\(/usr/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
 	 case $SYSTEM_TYPE in
 		  linode)				sed -i '/add_module/ !b;d' /usr/lib/initcpio/install/ppz_tmp
 									sed -i 's%^\#\(server clock.fmt.he.net.*\)$%\1%ig' /etc/ntp.conf;;
@@ -197,7 +197,7 @@ integrity_users() {
 
 				# make user
 				grep -q ^$luser: /etc/passwd || {
-					 useradd -lMNd /home/$luser -u 5433$uc -u 100 -s /bin/false $luser
+					 useradd -lMNd /home/$luser -u 5433$uc -u 100 -s /usr/bin/false $luser
 					 pw=$(random_password)
 					 echo $luser:$pw | chpasswd
 					 echo "New password for $luser is: $pw"
@@ -361,7 +361,7 @@ integrity_encdev() {
 	 [ "$mem" -lt 1048576 ] && iters=999
 
 	 # make sure it's luks formatted
-	 until type=$(/sbin/blkid -po value -s TYPE "$dev") && [ "$type" = crypto_LUKS ]; do
+	 until type=$(/usr/bin/blkid -po value -s TYPE "$dev") && [ "$type" = crypto_LUKS ]; do
 		  echo_red "$dev is NOT luks formatted!"
 		  am_root || ribbit 2 "Non-root user cannot fix or create the LUKS device"
 		  kernel_supports_luks || ribbit 2 "no xts encryption, cannot fix or create"
@@ -397,7 +397,7 @@ integrity_encdev() {
 		  . /usr/share/ppz/bash.functions.install
 		  format_ext4 automatic /dev/mapper/${mapname}tmp || ribbit 2 "Formatting ext4 failed"
 
-		  if type=$(/sbin/blkid -o value -s TYPE /dev/mapper/${mapname}tmp) \
+		  if type=$(/usr/bin/blkid -o value -s TYPE /dev/mapper/${mapname}tmp) \
 				&& [ "$type" = ext4 ]; then
 				echo "Formatting ext4 was successful"
 		  else
@@ -656,7 +656,7 @@ integrity_sensors() {
 		  echo_red ok, do it yourself
 		  return
 	 }
-	 yes "" | /usr/sbin/sensors-detect
+	 yes "" | /usr/bin/sensors-detect
 	 echo_blue "Remember, systemd enable lm_sensors (or something?)"
 }
 

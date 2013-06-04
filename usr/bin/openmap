@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-PATH=/sbin:/usr/sbin:/bin:/usr/bin
+PATH=/usr/bin
 
 # should not be run directly except from the integrity scripts.
 # exists so that users with encrypted homedirs can set them up

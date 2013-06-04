@@ -1,4 +1,4 @@
-#!/bin/awk
+#!/usr/bin/awk
 
 # stdin is a specially formatted "host control file"
 # followed by an existing hosts file

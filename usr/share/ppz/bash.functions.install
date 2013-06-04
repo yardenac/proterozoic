@@ -54,7 +54,7 @@ fix_initcpio_ppz() {
 	 grex ${TARGET}/etc/mkinitcpio.conf
 	 askyn "Above is ${TARGET}/etc/mkinitcpio.conf. You have a chance to edit
 			in another tty, if you wish. YES here to rebuild." && {
-		  chroot ${TARGET} /sbin/mkinitcpio -p linux
+		  chroot ${TARGET} /usr/bin/mkinitcpio -p linux
 	 }
 }
 

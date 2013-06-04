@@ -10,7 +10,7 @@ check_ssh_connectivity() {
 	 [ "$?" = 234 ]											|| return 1 # didnt exec remote command!
 }
 do_mount() {
-	 sudo /usr/sbin/mountdvd "$file" || croak "Mount did not work!"
+	 sudo /usr/bin/mountdvd "$file" || croak "Mount did not work!"
 }
 
 # init vars
@@ -66,7 +66,7 @@ done
 # mounting might happen now -- prepare cleanup
 trap "
 	rm -rf ${tmp_files[*]}
-	sudo /usr/sbin/mountdvd --unmount
+	sudo /usr/bin/mountdvd --unmount
 	exit
 " EXIT HUP QUIT INT TERM ABRT TSTP CONT
 
@@ -85,7 +85,7 @@ md5diff() {
 	 do_mount
 	 find $dvdrip_mountpoint -type f -print0 | xargs -0 md5sum | tee $hashlist_after_5
 	 sort -u $hashlist_after_5 >| $sorted5
-	 sudo /usr/sbin/mountdvd --unmount
+	 sudo /usr/bin/mountdvd --unmount
 	 
 	 echo_blue "DOING J's PASS"
 	 echo -n J >| $file_J
@@ -93,7 +93,7 @@ md5diff() {
 	 do_mount
 	 find $dvdrip_mountpoint -type f -print0 | xargs -0 md5sum | tee $hashlist_after_J
 	 sort -u $hashlist_after_J >| $sortedJ
-	 sudo /usr/sbin/mountdvd --unmount
+	 sudo /usr/bin/mountdvd --unmount
 
 
 	 # show bad-files list to user
@@ -138,7 +138,7 @@ rsync --inplace --chmod u+w --out-format="%t %o %f ... %n" -aznc -e 'ssh -C' \
 }
 
 # cleanup - we're really sure now
-sudo /usr/sbin/mountdvd --unmount || croak "unmount failed"
+sudo /usr/bin/mountdvd --unmount || croak "unmount failed"
 ddrescuelog -D "$file.log" \
 	 && rm -f "$file"{,.log} \
 	 || mv "$file.log" "$dvdrip_ddir"/logs/

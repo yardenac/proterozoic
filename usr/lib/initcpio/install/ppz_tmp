@@ -5,9 +5,9 @@ build () {
 	 add_module dm-snapshot
 	 add_module fuse
 	 add_binary /usr/bin/bash
-	 add_binary /bin/date
+	 add_binary /usr/bin/date
 	 add_binary /usr/bin/pstree
-	 add_binary /bin/cat
+	 add_binary /usr/bin/cat
 	 add_binary /usr/bin/head
 	 add_file /etc/hostname
 }
