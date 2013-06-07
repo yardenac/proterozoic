@@ -687,6 +687,7 @@ is() {
 		  gz|gzip|db)
 					str='^application/x-gzip;';;
 		  c)		str='^text/x-c;';;
+		  plain)	str='^text/plain;';;
 		  xml)	str='^application/xml;';;
 		  jar)	str='^application/jar;';;
 		  zip)	str='^application/zip;';;
