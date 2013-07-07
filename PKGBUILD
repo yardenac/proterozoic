@@ -25,7 +25,7 @@ package() {
 	 cat ${startdir}/${mpconf} | awk '/^[^#]/ {print "CTRL-" $0}' >> ${pkgdir}/${mpconf}
 
 	 fbdir=${pkgdir}/etc/skel.ppz/.config/fbpanel
-	 for width in 1024; do
+	 for width in 1024 1280; do
 		  sed -e 's/\(widthtype = \).*$/\1pixel/ig' \
 				-e 's/\(width = \)100$/\1'$width'/ig' ${fbdir}/default >| ${fbdir}/$width
 	 done
