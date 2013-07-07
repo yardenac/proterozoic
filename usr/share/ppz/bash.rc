@@ -30,7 +30,7 @@ alias cp='cp -i'
 alias feh='feh --no-screen-clip'
 alias gi='git status && glog -n 3'
 alias grep='grep -i --color=auto'
-alias grex='grep -iEvr '"'"'^[[:space:]]*(#|;|//|$)'"'"
+alias grex='grep -iEvr '"'"'^[[:space:]]*(#|;[^,]|//|$)'"'"
 alias handbrake=HandBrakeCLI
 alias hb=handbrake
 alias ix.io="curl --url http://ix.io -F login=\\<$HOME/.config/ix.io/login -F token=\\<$HOME/.config/ix.io/token -F id:1=\\<$HOME/.config/ix.io/id -F f:1=\\<-"
