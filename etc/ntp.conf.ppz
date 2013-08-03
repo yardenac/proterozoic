@@ -7,4 +7,3 @@ restrict default noquery nopeer
 restrict 127.0.0.1
 restrict ::1
 driftfile /var/lib/ntp/ntp.drift
-l
