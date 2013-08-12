@@ -18,5 +18,6 @@ accept-intercepted-requests 0
 allow-cgi-request-crunching 0
 split-large-forms 0
 keep-alive-timeout 5
+tolerate-pipelining 1
 socket-timeout 300
 forward-socks4a / localhost:9050 .
