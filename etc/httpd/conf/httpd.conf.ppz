@@ -9,7 +9,9 @@ ServerSignature Off
 HostnameLookups Off
 TraceEnable Off
 SSLProtocol all -SSLv2
-SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5
+SSLHonorCipherOrder on
+SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-RC4-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES256-SHA:RC4-SHA;
+SSLCompression Off
 SSLRandomSeed startup builtin
 SSLRandomSeed startup file:/dev/urandom 8192
 SSLRandomSeed connect builtin
@@ -99,7 +101,6 @@ LoadModule ext_filter_module modules/mod_ext_filter.so
 LoadModule include_module modules/mod_include.so
 LoadModule filter_module modules/mod_filter.so
 LoadModule substitute_module modules/mod_substitute.so
-LoadModule deflate_module modules/mod_deflate.so
 LoadModule ldap_module modules/mod_ldap.so
 LoadModule log_config_module modules/mod_log_config.so
 LoadModule log_forensic_module modules/mod_log_forensic.so
