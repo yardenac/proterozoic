@@ -28,6 +28,7 @@ while :; do
 	 stamp "Looping every $loopinc until network failure..."
 	 while test_network_thrice; do sleep $loopinc; done
 	 stamp "Network down!"
+	 dhcpcd -k
 	 pkill -x --signal SIGTERM dhcpcd
 	 pkill -x --signal SIGTERM wpa_supplicant
 	 knu_cleanup
