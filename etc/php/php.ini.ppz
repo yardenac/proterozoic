@@ -52,6 +52,7 @@ extension_dir = "/usr/lib/php/modules/"
 extension=curl.so
 extension=gd.so
 extension=gettext.so
+extension=pdo_mysql.so
 extension=ssh2.so
 
 extension=bcmath.so
