@@ -20,7 +20,6 @@ wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.t
 wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
 sed -i \
 	 -e 's/^IgnorePkg[ =]*/\0 linux cryptsetup /ig' \
-	 -e 's/^SyncFirst/#\0/ig' \
 	 -e s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
 	 -e s/%SET_TYPE%/desktop/ig								/etc/ppz.conf
@@ -28,7 +27,6 @@ sed -i \
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 
 pacman --noprogressbar --noconfirm --needed -Sqy pacman tzdata curl
-sed -i 's/^#\(SyncFirst\)/\1/ig' /etc/pacman.conf
 
 echo "Forking md5sum for entropy..."
 blkid /dev/sr0 &>/dev/null
