@@ -25,8 +25,6 @@ sed -i \
 sed -i \
 	 -e s/%SET_TYPE%/desktop/ig								/etc/ppz.conf
 
-echo archiso >| /etc/hostname
-
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 
 pacman --noprogressbar --noconfirm --needed -Sqy pacman tzdata curl
