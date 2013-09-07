@@ -39,21 +39,6 @@ kill -SIGTERM $md5sumpid
 # do without interactive?
 pacman-key --populate archlinux
 
-# force filesystem
-shopt -s dotglob
-[ -L /var/run ] || {
-	 [ -L /var/run/daemons ] && rm -f /var/run/daemons
-	 mv -nv /var/run/* /run/
-	 rm -rf /var/run
-	 ln -s /run /var/run
-}
-[ -L /var/lock ] || {
-	 mv -n /var/lock/* /run/lock/ &>/dev/null
-	 rm -rf /var/lock
-	 ln -s /run/lock /var/lock
-}
-pacman --noprogressbar --noconfirm --needed -Sqf filesystem
-
 # full upgrades
 pacman --noprogressbar --noconfirm --needed -Squ smartmontools base-devel
 pacman --noprogressbar --noconfirm --needed -Squ proterozoic
