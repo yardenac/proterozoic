@@ -9,7 +9,6 @@ echo bootstrapping for the 2013.09.01 live cd...
 
 ionice -c 3 -p $$
 renice -n 19 $$
-modprobe -r pcspkr
 
 GITURL=https://raw.github.com/yardenac/proterozoic/master
 
@@ -25,8 +24,8 @@ sed -i \
 
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 
-pacman --noprogressbar --noconfirm --needed -Sqy proterozoic
-pacman --noprogressbar --noconfirm --needed -Sqcc
+pacman --noconfirm -Sy proterozoic
+pacman --noconfirm -Scc
 
 sed -i s/otown.tmp/otown/ig									/etc/pacman.conf
 rm -f /etc/pacman.d/mirrorlist.otown.tmp
