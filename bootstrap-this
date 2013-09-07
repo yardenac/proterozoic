@@ -13,36 +13,19 @@ modprobe -r pcspkr
 
 GITURL=https://raw.github.com/yardenac/proterozoic/master
 
-rm -f /etc/profile.d/locale.sh
 mv -f /etc/pacman.conf{,.original}
 wget $GITURL/usr/share/ppz/default/ppz.conf		-qO	/etc/ppz.conf
 wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
 wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
 sed -i \
-	 -e 's/^IgnorePkg[ =]*/\0 linux cryptsetup /ig' \
+	 -e 's/^IgnorePkg[ =]*/\0 linux /ig' \
 	 -e s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
 	 -e s/%SET_TYPE%/desktop/ig								/etc/ppz.conf
 
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 
-pacman --noprogressbar --noconfirm --needed -Sqy pacman tzdata curl
-
-echo "Forking md5sum for entropy..."
-blkid /dev/sr0 &>/dev/null
-disk=$(blkid -t TYPE=udf -o device)
-ionice -c 3 nice -n 19 md5sum $disk &>/dev/null &
-md5sumpid=$!
-pacman-key --init
-kill -SIGTERM $md5sumpid
-
-# do without interactive?
-pacman-key --populate archlinux
-
-# full upgrades
-pacman --noprogressbar --noconfirm --needed -Squ smartmontools base-devel
-pacman --noprogressbar --noconfirm --needed -Squ proterozoic
-
+pacman --noprogressbar --noconfirm --needed -Sqy proterozoic
 pacman --noprogressbar --noconfirm --needed -Sqcc
 
 sed -i s/otown.tmp/otown/ig									/etc/pacman.conf
