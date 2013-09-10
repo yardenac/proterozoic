@@ -1,9 +1,7 @@
 #!/usr/bin/bash
-# Meant to be run DIRECTLY from a fresh archiso live cd. Try typing, for example:
 # [root@archiso]$ dhcpcd eth0
 # [root@archiso]$ . <(wget https://raw.github.com/yardenac/proterozoic/master/bootstrap-this -qLO-)
-
-# Then you probably want to run this:
+# root 123m~$ /usr/bin/integrity.ppz
 # root 123m~$ aif -p enzymes/polymerase -d
 echo bootstrapping for the 2013.09.01 live cd...
 
@@ -20,6 +18,7 @@ sed -i \
 	 -e 's/^IgnorePkg[ =]*/\0 linux /ig' \
 	 -e s/otown/otown.tmp/ig									/etc/pacman.conf
 sed -i \
+	 -e s/^LUSER=.*$/LUSER=eu/ig
 	 -e s/%SET_TYPE%/desktop/ig								/etc/ppz.conf
 
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
