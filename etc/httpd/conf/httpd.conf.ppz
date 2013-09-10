@@ -28,7 +28,6 @@ LogFormat "%h %l %u %t \"%r\" %>s %b" common
 LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
 CustomLog "/var/log/httpd/access_log" common
 Listen 80
-NameVirtualHost *:80
 DocumentRoot "/srv/http"
 UserDir disabled
 AccessFileName .htaccess
@@ -68,13 +67,6 @@ AliasMatch ^/favicon.ico$ /srv/http/dummy/blank-favicon.ico
    Satisfy all
 </FilesMatch>
 Include /etc/httpd/conf/site-specific.conf
-<VirtualHost *:80>
-   DocumentRoot /srv/http/dummy
-   ServerName itllneverhappen
-   ServerAlias *
-   AliasMatch ^/robots.txt$ /srv/http/dummy/robots.txt
-   AliasMatch ^/(.*) /srv/http/dummy/blank-file
-</VirtualHost>
 
 LoadModule authn_file_module modules/mod_authn_file.so
 LoadModule authn_dbm_module modules/mod_authn_dbm.so
