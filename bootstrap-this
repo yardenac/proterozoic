@@ -12,11 +12,11 @@ GITURL=https://raw.github.com/yardenac/proterozoic/master
 
 mv -f /etc/pacman.conf{,.original}
 wget $GITURL/usr/share/ppz/default/ppz.conf		-qO	/etc/ppz.conf
-wget $GITURL/etc/pacman.d/mirrorlist.otown		-qO	/etc/pacman.d/mirrorlist.otown.tmp
+wget $GITURL/etc/pacman.d/mirrorlist.https-only	-qO	/etc/pacman.d/mirrorlist.https-only.tmp
 wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
 sed -i \
 	 -e 's/^IgnorePkg[ =]*/\0 linux /ig' \
-	 -e s/otown/otown.tmp/ig									/etc/pacman.conf
+	 -e s/https-only/https-only.tmp/ig 						/etc/pacman.conf
 sed -i \
 	 -e s/^LUSER=.*$/LUSER=eu/ig
 	 -e s/%SET_TYPE%/desktop/ig								/etc/ppz.conf
@@ -26,8 +26,8 @@ sed -i \
 pacman --noconfirm -Sy proterozoic
 pacman --noconfirm -Scc
 
-sed -i s/otown.tmp/otown/ig									/etc/pacman.conf
-rm -f /etc/pacman.d/mirrorlist.otown.tmp
+sed -i s/https-only.tmp/https-only/ig 						/etc/pacman.conf
+rm -f /etc/pacman.d/mirrorlist.https-only.tmp
 
 mkdir /etc/ssh/keys
 echo 'ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBACr529+8mpJaMbfeXKAYFba9nhnv6nTlDd7VwnTSQda2aJXuwOu/aRD8GImPhu789x/KZFCALi9wTboRUYEprEKAwBQzl1vhqs7ZRniieF0b8MeOJNt3mEw+dXokuApne93VM+3QO20Vu26MQy7YN43pUqELI7zyUdSPMRVpmmCwWo6aA==' \

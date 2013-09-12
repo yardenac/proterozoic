@@ -10,9 +10,9 @@ GITURL=https://raw.github.com/yardenac/proterozoic/master
 
 mv -vf /etc/pacman.conf{,.original}
 curl $GITURL/usr/share/ppz/default/ppz.conf		-so	/etc/ppz.conf
-curl $GITURL/etc/pacman.d/mirrorlist.otown		-so	/etc/pacman.d/mirrorlist.otown.tmp
+curl $GITURL/etc/pacman.d/mirrorlist.https-only	-so	/etc/pacman.d/mirrorlist.https-only.tmp
 curl $GITURL/usr/share/ppz/default/pacman.conf	-so	/etc/pacman.conf
-sed -i s/otown/otown.tmp/ig									/etc/pacman.conf
+sed -i s/https-only/https-only.tmp/ig 						/etc/pacman.conf
 sed -i \
 	 -e s/%SET_TYPE%/linode/ig \
 	 -e 's/32m$/128m/ig' \
@@ -45,12 +45,12 @@ cat >| /etc/mkinitcpio.conf <<-EOF
 	HOOKS="base udev autodetect modconf block filesystems fsck ppz_tmp"
 EOF
 pacman --noprogressbar --noconfirm --needed -Sq proterozoic
-sed -i s/otown.tmp/otown/ig /etc/pacman.conf
+sed -i s/https-only.tmp/https-only/ig /etc/pacman.conf
 pacman --noprogressbar --noconfirm --needed -Sq linux-linode
 
 rm -vf \
 	 /etc/{fstab,pacman.conf,locale.gen}.pacnew \
-	 /etc/pacman.d/mirrorlist.{otown.tmp,pacnew}
+	 /etc/pacman.d/mirrorlist.{https-only.tmp,pacnew}
 
 # how to get proper "kernel name" in install file?
 
