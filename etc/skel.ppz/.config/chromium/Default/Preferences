@@ -22,5 +22,13 @@
    },
    "webintents": {
       "enabled": false
-   }
+   },
+	"extensions": {
+		"settings": {
+			"ehfhghddhachdadpdnpcpigiipkagfoe": {
+				"incognito": true,
+				"newAllowFileAccess": false
+			}
+		}
+	}
 }
