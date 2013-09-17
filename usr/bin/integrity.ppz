@@ -585,6 +585,7 @@ integrity_sshd() {
 		Protocol 2
 		LoginGraceTime 2m
 		MACs hmac-md5-etm@openssh.com
+		RekeyLimit 200M 6H
 		PermitRootLogin no
 		MaxAuthTries 3
 		MaxSessions 15
