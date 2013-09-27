@@ -145,7 +145,7 @@ AddToMenu MenuFvwmRoot
 + "Terminal"	Exec exec urxvt -pe -tabbedex
 + "Seamonkey"	Exec exec seamonkey
 + "Firefox"		Exec exec firefox
-+ "Chromium"	Exec exec chromium '--incognito' '--proxy-server=socks5://localhost:55114' '--host-resolver-rules=MAP * 0.0.0.0' '--load-extension=/usr/share/https-everywhere-chrome' 'https://www.google.com/?pws=0&safe=off'
++ "Chromium"	Exec exec chromium '--incognito' '--proxy-server=socks5://localhost:55114' '--host-resolver-rules=MAP * 0.0.0.0' '--load-extension=/usr/share/https-everywhere-chrome' 'https://duckduckgo.com/?kp=-1&kf=-1'
 + "NoProxium"	Exec exec chromium '--incognito'
 + "Reload WM"	Restart
 + "Restart WM"	Quit

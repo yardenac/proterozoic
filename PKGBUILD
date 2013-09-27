@@ -6,7 +6,7 @@ arch=(i686 x86_64)
 license=('GPL')
 install=proterozoic.install
 backup=(etc/httpd/conf/site-specific.conf etc/locale.conf)
-makedepends=(findutils coreutils net-tools gcc-multilib)
+makedepends=(findutils coreutils net-tools gcc-multilib sqlite3)
 depends=(jfsutils lsof 'ddrescue>=1.15' cryptsetup
 	 emacs-nox emacs-php-mode bash-completion fgetty screen-best htop
 	 python2 python2-formencode python-lxml expect s3fs parallel
@@ -29,6 +29,9 @@ package() {
 		  sed -e 's/\(widthtype = \).*$/\1pixel/ig' \
 				-e 's/\(width = \)100$/\1'$width'/ig' ${fbdir}/default >| ${fbdir}/$width
 	 done
+
+	 cat ${pkgdir}/usr/share/ppz/chromium.web.data.sql \
+		  | sqlite3 ${pkgdir}/etc/skel.ppz/.config/chromium/Default/Web\ Data
 
 	 chmod 444 ${pkgdir}/etc/.emacs.d/init.el
 	 chmod 555 ${pkgdir}/etc/.emacs.d
