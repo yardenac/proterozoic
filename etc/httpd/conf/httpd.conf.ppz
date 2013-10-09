@@ -56,6 +56,9 @@ AliasMatch ^/favicon.ico$ /srv/http/dummy/blank-favicon.ico
 <FilesMatch "~$">
 	Require all denied
 </FilesMatch>
+<Location />
+	 AllowMethods GET POST OPTIONS
+</Location>
 Include /etc/httpd/conf/site-specific.conf
 
 LoadModule authn_file_module modules/mod_authn_file.so
@@ -64,6 +67,7 @@ LoadModule authz_host_module modules/mod_authz_host.so
 LoadModule authz_groupfile_module modules/mod_authz_groupfile.so
 LoadModule authz_user_module modules/mod_authz_user.so
 LoadModule authz_core_module modules/mod_authz_core.so
+LoadModule allowmethods_module modules/mod_allowmethods.so
 LoadModule socache_shmcb_module modules/mod_socache_shmcb.so
 LoadModule reqtimeout_module modules/mod_reqtimeout.so
 LoadModule include_module modules/mod_include.so
