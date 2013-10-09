@@ -5,3 +5,6 @@ Server = https://mirror.system.is/arch/$repo/os/$arch
 Server = https://ftp.lysator.liu.se/pub/archlinux/$repo/os/$arch
 Server = https://foss.aueb.gr/mirrors/linux/archlinux/$repo/os/$arch
 Server = https://mirrors.kernel.org/archlinux/$repo/os/$arch
+Server = https://archlinux.vi-di.fr/$repo/os/$arch
+Server = https://linux.rz.rub.de/archlinux/$repo/os/$arch
+Server = https://ftp.rnl.ist.utl.pt/pub/archlinux/$repo/os/$arch

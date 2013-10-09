@@ -102,9 +102,11 @@ integrity_simpleconf() {
 	 [ -a /usr/share/terminfo/r/rxvt-unicode-256color ] || \
 		  ln -s /usr/share/terminfo/r/rxvt{,-unicode}-256color
 
-	 sed -i 's%^\(MIRRORLIST="/etc/pacman.d/mirrorlist"\)$%\#\1%ig' /etc/abs.conf
-	 grep -qiE '^MIRRORLIST="/etc/pacman.d/mirrorlist.otown"$' /etc/abs.conf || \
-		  echo 'MIRRORLIST="/etc/pacman.d/mirrorlist.otown"' >> /etc/abs.conf
+	 sed -i 's%^\(MIRRORLIST="/etc/pacman.d/mirrorlist\(\.otown\)\?"\)$%\#\1%ig' /etc/abs.conf
+	 grep -qiE '^MIRRORLIST="/etc/pacman.d/mirrorlist.https-only.random"$' /etc/abs.conf || \
+		  echo 'MIRRORLIST="/etc/pacman.d/mirrorlist.https-only.random"' >> /etc/abs.conf
+
+	 sort -Ru /etc/pacman.d/mirrorlist.https-only -o /etc/pacman.d/mirrorlist.https-only.random
 
 	 local wpaf=/etc/wpa_supplicant.conf
 	 [ "$WPA_SC" ] && [ -s $wpaf ] && [ -s "$WPA_SC" ] && ! diff $wpaf "$WPA_SC" && {

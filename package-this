@@ -8,7 +8,7 @@
 [ "$1" ] && REPO="$1" || croak USAGE: ./package-this [repo-directory]
 [ -d ${REPO} ] || croak ${REPO} not mounted!
 
-git diff HEAD --quiet -- bootstrap-this etc/pacman.d/mirrorlist.otown usr/share/ppz/default/{rc,pacman}.conf \
+git diff HEAD --quiet -- bootstrap-this etc/pacman.d/mirrorlist.https-only usr/share/ppz/default/{rc,pacman}.conf \
 	 || echo_red "Bootstrap files have changed, you probably want to update git!"
 
 [ -s usr/bin/repo-drop ] || croak No repo drop!
