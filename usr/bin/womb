@@ -58,6 +58,12 @@
 		  # make sure xauthority file works
 		  set_proper_histfile
 
+		  # allow for more chromium instances
+		  for mode in tor proxy; do
+				[ -d ~/.config/chromium.$mode ] || \
+					 cp -PR --preserve=links,mode,timestamps /etc/skel.ppz/.config/chromium ~/.config/chromium.$mode
+		  done
+
 		  exec /usr/bin/xinit -- /usr/bin/X vt4 -f 0 -nolisten tcp -retro
 
 		  exit $? #this makes respawn work
