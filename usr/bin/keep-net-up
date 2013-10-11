@@ -15,7 +15,7 @@ WPA_SC=$(edev-path "$WPA_SC")
 [ -a "$WPA_SC" ] || WPA_SC=/etc/wpa_supplicant.conf
 
 test_network_thrice() {
-	 fwget 10 3 | grep -iq "feeling lucky"
+	 fwget 10 3 | grep -iq "anonymously"
 }
 avail_known_ssid() {
 	 comm -12 \
