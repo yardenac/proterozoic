@@ -64,6 +64,9 @@
 					 cp -PR --preserve=links,mode,timestamps /etc/skel.ppz/.config/chromium ~/.config/chromium.$mode
 		  done
 
+		  xdg-mime default zathura.desktop application/pdf
+		  xdg-mime default zathura.desktop application/x-pdf
+
 		  exec /usr/bin/xinit -- /usr/bin/X vt4 -f 0 -nolisten tcp -retro
 
 		  exit $? #this makes respawn work

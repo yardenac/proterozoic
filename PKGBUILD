@@ -16,7 +16,7 @@ depends=(jfsutils lsof 'ddrescue>=1.15' cryptsetup
 
 package() {
 	 cp -a ${startdir}/{etc,usr,srv} ${pkgdir}/
-	 mkdir -p ${pkgdir}/etc/skel.ppz/.macromedia
+	 mkdir -p ${pkgdir}/etc/skel.ppz/.{macromedia,local/share/applications}
 
 	 b=-m64; [ $CARCH = i686 ] && b='-m32 -Wl,--dynamic-linker=/lib/ld-linux.so.2'
 	 /usr/bin/gcc $b $CFLAGS -Wall ${startdir}/c/cdtray.c -o ${pkgdir}/usr/bin/cdtray
