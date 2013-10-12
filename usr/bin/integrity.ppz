@@ -108,7 +108,7 @@ integrity_simpleconf() {
 
 	 sort -Ru /etc/pacman.d/mirrorlist.https-only -o /etc/pacman.d/mirrorlist.https-only.random
 
-	 systemctl --quiet is-enabled tor &>/dev/null && sed -i 's/^#\(export http\)/\1/ig' /usr/share/ppz/bash.rc
+	 systemctl --quiet is-enabled tor &>/dev/null && sed -i 's/^#\(export [a-z]*_proxy\)/\1/ig' /usr/share/ppz/bash.rc
 
 	 local wpaf=/etc/wpa_supplicant.conf
 	 [ "$WPA_SC" ] && [ -s $wpaf ] && [ -s "$WPA_SC" ] && ! diff $wpaf "$WPA_SC" && {
