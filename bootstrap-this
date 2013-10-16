@@ -18,7 +18,7 @@ sed -i \
 	 -e 's/^IgnorePkg[ =]*/\0 linux /ig' \
 	 -e s/https-only/https-only.tmp/ig 						/etc/pacman.conf
 sed -i \
-	 -e s/^LUSER=.*$/LUSER=eu/ig
+	 -e 's/^LUSER=.*$/LUSER=eu/ig' \
 	 -e s/%SET_TYPE%/desktop/ig								/etc/ppz.conf
 
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
