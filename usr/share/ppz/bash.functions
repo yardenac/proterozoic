@@ -535,17 +535,13 @@ in_2_but_not_in_1() {
 fwget() { # fwget [TIMEOUT [TRIES [URL]]]
 	local TIMEOUT=${1:-10}	#default: wait 10 seconds
 	local RETRIES=${2:-0}		#default: try once
-	local URL=${3:-https://duckduckgo.com/}
+	local URL=${3:-http://3g2upl4pq6kufc4m.onion/}
 	https_proxy=http://127.0.0.1:8118 \
 	 http_proxy=http://127.0.0.1:8118 \
 	/usr/bin/curl --retry ${RETRIES} --max-time ${TIMEOUT} ${URL} -so- 2>/dev/null
 }
 test_network_once() {
-	 fwget "$@" | grep -iq 'anonymously'
-}
-test_tor_once() {
-   https_proxy=http://127.0.0.1:8118 fwget ${1:-10} ${2:-1} \
-		 https://check.torproject.org/ | grep -iq congratulations
+	 fwget "$@" | grep -iq anonymously
 }
 sleepinc() {
 	 local SLEEPINC=1.5
