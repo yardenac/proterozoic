@@ -16,7 +16,7 @@ urxvt.hold: false
 urxvt.perl-ext-common: default,tabbedex,url-select,-selection-popup,-matcher,confirm-paste
 urxvt.tabbed.autohide: true
 urxvt.tabbed.title: true
-urxvt.url-select.launcher: /usr/bin/seamonkey
+urxvt.url-select.launcher: /usr/bin/lurl
 urxvt.saveLines: 99999
 urxvt.visualBell: false
 urxvt.pointerColor: #000000
