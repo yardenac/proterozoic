@@ -7,12 +7,18 @@ license=('GPL')
 install=proterozoic.install
 backup=(etc/httpd/conf/site-specific.conf etc/locale.conf)
 makedepends=(findutils coreutils net-tools gcc-multilib sqlite3)
-depends=(jfsutils lsof 'ddrescue>=1.15' cryptsetup
+depends=(ddrescue cryptsetup
 	 emacs-nox emacs-php-mode bash-completion fgetty screen-best htop
-	 python2 python2-formencode python-lxml expect s3fs parallel
-	 lzop zip unzip xmlstarlet jshon sudo less bc busybox strace
-	 iptables iproute2 inetutils dnsutils net-tools nmap gnu-netcat
-	 openssh sshfs ntp rsync curl git abs burp whois) # gptfdisk
+	 python2-formencode python-lxml
+	 lzop zip unzip xmlstarlet jshon sudo bc
+	 iptables iproute2 inetutils dnsutils net-tools gnu-netcat
+	 openssh ntp)
+optdepends=(
+	 'less:		rip-dvd, kml-fix'
+	 'nmap:		waiting on server deploys in linode-implement'
+	 'rsync:		rip-dvd, repo-drop'
+	 abs burp busybox expect git gptfdisk jfsutils parallel lsof s3sf sshfs strace whois
+)
 
 package() {
 	 cp -a ${startdir}/{etc,usr,srv} ${pkgdir}/
