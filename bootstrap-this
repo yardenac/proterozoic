@@ -2,7 +2,6 @@
 # [root@archiso]$ dhcpcd eth0
 # [root@archiso]$ . <(wget https://raw.github.com/yardenac/proterozoic/master/bootstrap-this -qLO-)
 # root 123m~$ /usr/bin/integrity.ppz
-# root 123m~$ aif -p enzymes/polymerase -d
 echo bootstrapping for the 2013.09.01 live cd...
 
 ionice -c 3 -p $$

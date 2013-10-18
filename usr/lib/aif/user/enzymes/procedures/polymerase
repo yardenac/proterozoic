@@ -1,4 +1,9 @@
 #!/usr/bin/bash
+# cp /{,mnt/}etc/ppz.conf; pacstrap /mnt base proterozoic
+# things basically done by aif:
+#  import ppz.conf
+#  set fstab
+#  set timezone
 depend_procedure core base
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.install
