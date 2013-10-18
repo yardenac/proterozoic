@@ -661,18 +661,6 @@ git_home_clone() {
 		  popd >/dev/null
 	 }
 }
-ssh_amend_host_trust() {
-	 echo_red "Not implemented"
-	 return 1
-
-	 askyn "You're about to fuck w/known_hosts. Wanna cancel?" && return 1
-
-	 # check args
-	 # dig hostnames
-	 # ssh-keygen -R [each]
-	 # ssh-keygen -R [each],[each]
-	 # ssh-keyscan -H [each] >> ~/.ssh/known_hosts
-}
 is() {
 	 [ -a "$2" ] || return 1
 	 local str arg
