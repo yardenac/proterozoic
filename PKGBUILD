@@ -9,12 +9,11 @@ backup=(etc/httpd/conf/site-specific.conf etc/locale.conf)
 makedepends=(findutils coreutils net-tools gcc-multilib sqlite3)
 depends=(ddrescue cryptsetup
 	 emacs-nox emacs-php-mode bash-completion fgetty screen-best htop
-	 python2-formencode python-lxml
-	 lzop xmlstarlet jshon sudo bc
+	 lzop jshon sudo bc
 	 iptables iproute2 inetutils dnsutils net-tools gnu-netcat
 	 openssh ntp)
 optdepends=(
-	 'less:		rip-dvd, kml-fix'
+	 'less:		rip-dvd'
 	 'nmap:		waiting on server deploys in linode-implement'
 	 'rsync:		rip-dvd, repo-drop'
 	 abs burp busybox expect git gptfdisk jfsutils parallel lsof s3sf sshfs strace unzip whois zip
