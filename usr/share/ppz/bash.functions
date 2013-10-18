@@ -718,22 +718,6 @@ good-xml() {
 	 is xml "$1" || return 1
 	 cat "$1" | xml val -w -q -e - || return 1
 }
-xml-nice() {
-	 [ -w "$1" ] && local file=$1 suff=$(uniq_token) || return 1
-	 good-xml "$file" || return 1
-	 cat "$file" | xml tr /usr/share/ppz/abc.xslt | xml fo -s 2 > "$file.$suff"
-	 diff \
-		  <(cat "$file.$suff" | xml el -v - | sort -u) \
-		  <(cat "$file" | xml el -v - | sort -u) \
-		  && {
-
-		  # switch em
-		  mv -f "$file" "$file.$suff.b"
-		  mv -f "$file.$suff" "$file"
-		  rm -f "$file.$suff.b"
-
-	 } || rm -f "$file.$suff"
-}
 xmlns-args() { local xmlns prefix file IFS=$'\n'
 	 ns="" #namespace strings (pass to xml as -N)
 	 defns="" # default namespace prefix in xpaths
