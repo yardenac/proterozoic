@@ -15,7 +15,7 @@ optdepends=(
 	 'less:		rip-dvd'
 	 'nmap:		linode-implement'
 	 'rsync:		rip-dvd, repo-drop'
-	 abs burp dnsutils git parallel lsof s3sf sshfs unzip whois
+	 abs burp dnsutils git parallel lsof s3fs sshfs unzip whois
 )
 
 package() {
