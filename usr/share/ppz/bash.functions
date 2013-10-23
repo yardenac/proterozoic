@@ -535,9 +535,14 @@ in_2_but_not_in_1() {
 fwget() { # fwget [TIMEOUT [TRIES [URL]]]
 	local TIMEOUT=${1:-10}	#default: wait 10 seconds
 	local RETRIES=${2:-0}		#default: try once
-	local URL=${3:-http://3g2upl4pq6kufc4m.onion/}
-	https_proxy=http://127.0.0.1:8118 \
-	 http_proxy=http://127.0.0.1:8118 \
+	if systemctl --quiet is-enabled tor; then
+		 local URL=${3:-http://3g2upl4pq6kufc4m.onion/}
+		 local p=http://127.0.0.1:8118
+	else
+		 local URL=${3:-https://duckduckgo.com/}
+		 local p=''
+	fi
+	https_proxy=$p http_proxy=$p \
 	/usr/bin/curl --retry ${RETRIES} --max-time ${TIMEOUT} ${URL} -so- 2>/dev/null
 }
 test_network_once() {
