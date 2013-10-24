@@ -5,7 +5,7 @@ pkgdesc="Configs and scripts overlaying Arch Linux"
 arch=(i686 x86_64)
 license=('GPL')
 install=proterozoic.install
-backup=(etc/httpd/conf/site-specific.conf etc/locale.conf)
+backup=(etc/httpd/conf/{site-specific.conf,httpd.conf.ppz} etc/locale.conf)
 makedepends=(findutils coreutils net-tools gcc-multilib sqlite3)
 depends=(cryptsetup sudo bc iptables iproute2 openssh ntp
 	 emacs-nox emacs-php-mode bash-completion fgetty screen-best htop)
