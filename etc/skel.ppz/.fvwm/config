@@ -65,7 +65,7 @@ Key	Right			A		CM			GoToDeskBetter +1
 Key	space			A		M			Menu MenuFvwmWindowOps2 Window 0 0 Nop
 Key 	apostrophe	A		4			NiceBash 100x20 - 'su - eu -c \\"urxvtb -e screen -xUR\\"'
 Key	m				A		4			NiceBash 80x49  - 'cd; . /usr/share/ppz/bash.functions; . /usr/share/ppz/bash.functions.xorg; woman'
-Key	c				A		4			NiceBash 67x36  - 'cal -y && read'
+Key	c				A		4			NiceBash 69x34  - 'cal -y && read'
 Key	b				A		4			NiceTerm 40x39  - /usr/bin/bc -lq /etc/bcrc
 Key	l				A		4			Exec exec xscreensaver-command -lock
 Key	r				A		4			Refresh
