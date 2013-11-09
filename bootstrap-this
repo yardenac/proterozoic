@@ -2,7 +2,7 @@
 # [root@archiso]$ dhcpcd eth0
 # [root@archiso]$ . <(wget https://raw.github.com/yardenac/proterozoic/master/bootstrap-this -qLO-)
 # root 123m~$ /usr/bin/integrity.ppz
-echo bootstrapping for the 2013.09.01 live cd...
+echo bootstrapping for the 2013.11.01 live cd...
 
 ionice -c 3 -p $$
 renice -n 19 $$
@@ -22,10 +22,10 @@ sed -i \
 
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 
-pacman --noconfirm -Sy proterozoic
+pacman --noconfirm -Syu proterozoic python2
 pacman --noconfirm -Scc
 
-sed -i s/https-only.tmp/https-only/ig 						/etc/pacman.conf
+sed -i s/https-only.tmp/https-only.random/ig 						/etc/pacman.conf
 rm -f /etc/pacman.d/mirrorlist.https-only.tmp
 
 mkdir /etc/ssh/keys
