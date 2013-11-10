@@ -25,6 +25,11 @@ sed -i \
 pacman --noconfirm -Syu proterozoic python2
 pacman --noconfirm -Scc
 
+gpasswd -a eu wheel
+gpasswd -a eu systemd-journal
+
+timedatectl set-timezone America/Los_Angeles
+
 mkdir /etc/ssh/keys
 echo 'ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBACr529+8mpJaMbfeXKAYFba9nhnv6nTlDd7VwnTSQda2aJXuwOu/aRD8GImPhu789x/KZFCALi9wTboRUYEprEKAwBQzl1vhqs7ZRniieF0b8MeOJNt3mEw+dXokuApne93VM+3QO20Vu26MQy7YN43pUqELI7zyUdSPMRVpmmCwWo6aA==' \
 	 >| /etc/ssh/keys/eu
