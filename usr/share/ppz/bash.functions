@@ -533,7 +533,7 @@ in_2_but_not_in_1() {
 	 done
 }
 fwget() { # fwget [TIMEOUT [TRIES [URL]]]
-	local TIMEOUT=${1:-10}	#default: wait 10 seconds
+	local TIMEOUT=${1:-20}	#default: wait 20 seconds
 	local RETRIES=${2:-0}		#default: try once
 	if systemctl --quiet is-enabled tor &>/dev/null; then
 		 local URL=${3:-http://3g2upl4pq6kufc4m.onion/}
