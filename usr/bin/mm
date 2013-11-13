@@ -43,6 +43,7 @@ set_xtitle "[mm] $*"
 } &>/dev/null &
 
 ionice -c 2 -n 0 nice -n -5 mpv --geometry=${x}:${y} -fs --ao=alsa --no-lirc \
+	 --alang=en --slang=en \
 	 --stop-screensaver --msglevel=all=1:statusline=9:cache=5:network=5 \
 	 --cache-default=5120 --cache-min=1 --no-input-default-bindings \
 	 --input-conf=/usr/share/ppz/mplayer.input.conf "${args[@]}"
