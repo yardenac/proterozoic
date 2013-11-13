@@ -95,7 +95,7 @@ start_process() {
 		  cp -i {,${TARGET}}/etc/localtime
 		  set -o noclobber
 	 }
-	 [ -a ${TARGET}/usr/bin/mplayer ] && askyn "System looks FULLY installed! Spare the poor mirrors a repeat?" || {
+	 [ -a ${TARGET}/usr/bin/Xorg ] && askyn "System looks FULLY installed! Spare the poor mirrors a repeat?" || {
 		  pkgs_groups=(x web multimedia cd wireless laptop neverneed)
 		  pkgs_x=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo,xrandr} xdotool \
 				xf86-input-{keyboard,mouse} xscreensaver xclip libxft xcursor-themes \
@@ -104,7 +104,7 @@ start_process() {
 				xf86-video-ati xf86-video-intel nvidia mtpfs memtest86+ mprime mtester)
 		  pkgs_web=(seamonkey flashplugin alsa-utils openjdk6 icedtea-web sext acroread \
 				chromium gecko-mediaplayer)
-		  pkgs_multimedia=(gimp feh mplayer mencoder imagemagick gcolor2 \
+		  pkgs_multimedia=(gimp feh mpv mencoder imagemagick gcolor2 \
 				handbrake-cli mencoder midentify mjpegtools dvdauthor)
 		  pkgs_gaming=(zsnes mupen64plus)
 		  pkgs_cd=(eject cdrkit dvd+rw-tools handbrake-cli \

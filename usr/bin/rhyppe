@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
 # not usable yet
+# must be migrated to mpv
 exit
 
 # ddrescue disc to iso file

@@ -26,9 +26,6 @@ package() {
 	 b=-m64; [ $CARCH = i686 ] && b='-m32 -Wl,--dynamic-linker=/lib/ld-linux.so.2'
 	 /usr/bin/gcc $b $CFLAGS -Wall ${startdir}/c/cdtray.c -o ${pkgdir}/usr/bin/cdtray
 
-	 mpconf=usr/share/ppz/mplayer.input.conf
-	 cat ${startdir}/${mpconf} | awk '/^[^#]/ {print "CTRL-" $0}' >> ${pkgdir}/${mpconf}
-
 	 fbdir=${pkgdir}/etc/skel.ppz/.config/fbpanel
 	 for width in 1024 1280; do
 		  sed -e 's/\(widthtype = \).*$/\1pixel/ig' \

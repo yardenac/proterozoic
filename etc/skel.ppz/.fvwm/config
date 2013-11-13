@@ -37,7 +37,7 @@ Style * !Borders, !Handles, MWMFunctions, MWMDecor, HintOverride, \
 Style Fvwm*       NoTitle,  Sticky, WindowListSkip, \
 		BorderWidth 2, CirculateSkipIcon, CirculateSkip
 Style panel StaysOnTop
-Style MPlayer StaysOnTop
+Style mpv StaysOnTop
 Style plugin-container StaysOnTop
 Style exe StaysOnTop
 Style urxvt ResizeHintOverride

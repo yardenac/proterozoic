@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# mplayer but a little easier
+# mpv but a little easier
 
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.xorg
@@ -42,9 +42,9 @@ set_xtitle "[mm] $*"
 	 sudo -u ex FvwmCommand Refresh
 } &>/dev/null &
 
-ionice -c 2 -n 0 nice -n -5 mplayer -geometry $x:$y -fs -ao alsa \
-	 -stop-xscreensaver -msglevel all=1:statusline=9 -nolirc \
-	 -input nodefault-bindings:conf=/usr/share/ppz/mplayer.input.conf "${args[@]}"
+ionice -c 2 -n 0 nice -n -5 mpv --geometry=${x}:${y} -fs --ao=alsa \
+	 --stop-screensaver --msglevel=all=1:statusline=9 --no-lirc \
+	 --no-input-default-bindings --input-conf=/usr/share/ppz/mplayer.input.conf "${args[@]}"
 
 echo
 
