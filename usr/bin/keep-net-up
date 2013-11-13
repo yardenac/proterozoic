@@ -36,8 +36,8 @@ while :; do
 	 for if in $(awk '$1 ~ /^lo:$/ {next}
 			   $1 ~ /:$/ {sub(/:/,"",$1); print $1}' /proc/net/dev | sort -u); do
 
-		  ip link set $if down
-		  ip link set $if up
+		  ip link set dev $if down
+		  ip link set dev $if up
 		  sleep 2
 		  case $(cat /sys/class/net/$if/device/class) in
 				0x028000) # wireless
@@ -58,7 +58,7 @@ while :; do
 					 };;
 				0x020000) #wired
 					 [ $(cat /sys/class/net/$if/operstate) = "up" ] || {
-						  ip link set $if down
+						  ip link set dev $if down
 						  echo "$if: failed to operate"
 						  continue
 					 };;
