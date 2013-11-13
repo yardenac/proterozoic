@@ -42,9 +42,10 @@ set_xtitle "[mm] $*"
 	 sudo -u ex FvwmCommand Refresh
 } &>/dev/null &
 
-ionice -c 2 -n 0 nice -n -5 mpv --geometry=${x}:${y} -fs --ao=alsa \
-	 --stop-screensaver --msglevel=all=1:statusline=9 --no-lirc \
-	 --no-input-default-bindings --input-conf=/usr/share/ppz/mplayer.input.conf "${args[@]}"
+ionice -c 2 -n 0 nice -n -5 mpv --geometry=${x}:${y} -fs --ao=alsa --no-lirc \
+	 --stop-screensaver --msglevel=all=1:statusline=9:cache=5:network=5 \
+	 --cache-default=5120 --cache-min=1 --no-input-default-bindings \
+	 --input-conf=/usr/share/ppz/mplayer.input.conf "${args[@]}"
 
 echo
 
