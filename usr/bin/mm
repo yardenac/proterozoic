@@ -33,15 +33,6 @@ set_xtitle "[mm] $*"
 	 trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
 }
 
-{
-	 c=10
-	 while sleep 0.3; do
-		  [ "$(ps --ppid $$ -o comm=)" == mm ] && break
-		  let c-- || break
-	 done
-	 sudo -u ex FvwmCommand Refresh
-} &>/dev/null &
-
 ionice -c 2 -n 0 nice -n -5 mpv --geometry=${x}:${y} -fs --ao=alsa --no-lirc \
 	 --alang=en --slang=en \
 	 --stop-screensaver --msglevel=all=1:statusline=9:cache=5:network=5 \
