@@ -40,7 +40,3 @@ ionice -c 2 -n 0 nice -n -5 mpv --geometry=${x}:${y} -fs --ao=alsa --no-lirc \
 	 --input-conf=/usr/share/ppz/mplayer.input.conf "${args[@]}"
 
 echo
-
-# leftover for pretty-printing statusline
-# -msglevel all=5:statusline=9 2>&1 | nice -n -28 tr "\r" "\n" | \
-# nice -n -28 awk -f ~/bin# /mawk -v qfilename="$MF" '
