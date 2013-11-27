@@ -535,11 +535,10 @@ in_2_but_not_in_1() {
 fwget() { # fwget [TIMEOUT [TRIES [URL]]]
 	local TIMEOUT=${1:-20}	#default: wait 20 seconds
 	local RETRIES=${2:-0}		#default: try once
+	local URL=${3:-https://duckduckgo.com/}
 	if systemctl --quiet is-enabled tor &>/dev/null; then
-		 local URL=${3:-http://3g2upl4pq6kufc4m.onion/}
 		 local p=http://127.0.0.1:8118
 	else
-		 local URL=${3:-https://duckduckgo.com/}
 		 local p=''
 	fi
 	https_proxy=$p http_proxy=$p \
