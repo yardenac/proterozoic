@@ -40,7 +40,7 @@ alias mv='mv -i'
 alias   pine='alpine -P /usr/local/lib/pine.conf -d0'
 alias alpine='alpine -P /usr/local/lib/pine.conf -d0'
 alias rm='rm --one-file-system -i'
-alias rs='rsync --inplace --out-format="%t %o %f ... %n" -Phe "ssh -S none"'
+alias rs='rsync --inplace --out-format="%t %o %f ... %n" --info=flist0 -Phe "ssh -S none"'
 alias rsync_root='rsync -aAXDxhP --stats --inplace'
 alias wfm="find \$(manpath | tr : ' ') | grep"
 alias zgrep='zgrep -i --color=auto'
