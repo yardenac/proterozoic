@@ -41,10 +41,25 @@ done
 
 for pack in "${packs[@]}"; do
 
-	 echo_green "DOING PACKAGE: $pack"
+	 echo_green_n "DOING PACKAGE: $pack "
 	 pack_base=$(basename "$pack")
 
 	 arch=$(bsdtar -xOf "$pack" .PKGINFO | awk '/^arch =/ {print $3}')
+
+	 [ -f "$pack.sig" ] || {
+		  echo
+		  if askyn "$pack: No signature found. Sign it?"; then
+				gpg --detach-sign --use-agent "$pack"
+		  fi
+	 }
+	 if [ -f "$pack.sig" ]; then
+		  if gpg --verify "$pack.sig" </dev/null &>/dev/null; then
+				echo_green "[VALID SIGNATURE]"
+		  else
+				echo_red "[INVALID SIGNATURE - SKIPPING!]"
+				continue
+		  fi
+	 fi
 
 	 to_del=()
 	 for dir in "${dirs[@]}"; do

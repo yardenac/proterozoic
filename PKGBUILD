@@ -11,6 +11,7 @@ depends=(cryptsetup sudo bc iptables iproute2 openssh ntp
 	 emacs-nox emacs-php-mode bash-completion fgetty screen-best htop)
 optdepends=(
 	 'ddrescue:	rip-dvd, rhyppe'
+	 'gnupg:		repo-drop'
 	 'jshon:		ckrepo, linode-implement'
 	 'less:		rip-dvd'
 	 'nmap:		linode-implement'
