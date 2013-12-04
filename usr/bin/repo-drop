@@ -43,6 +43,7 @@ for pack in "${packs[@]}"; do
 
 	 echo_green_n "DOING PACKAGE: $pack "
 	 pack_base=$(basename "$pack")
+	 pack_dir=$(dirname "$pack")
 
 	 arch=$(bsdtar -xOf "$pack" .PKGINFO | awk '/^arch =/ {print $3}')
 
@@ -82,7 +83,17 @@ for pack in "${packs[@]}"; do
 					 }
 				fi
 				to_del+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
-				rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack" "$repo/$pack_base"
+
+				uplist=("$pack_base")
+				if [ -f "$pack_base.sig" ]; then
+					 uplist+=("$pack_base.sig")
+				else
+					 to_del+=("$repo/$pack_base.sig")
+				fi
+				for upfile in "${uplist[@]}"; do
+					 rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack_dir/$upfile" "$repo/$upfile"
+				done
+
 				repo-add "$db" "$repo/$pack_base"
 		  done
 	 done
@@ -91,5 +102,5 @@ for pack in "${packs[@]}"; do
 		  ls -lF "${to_del[@]}"
 		  askyn "Delete older pkgs on server?" && rm -f "${to_del[@]}"
 	 }
-	 askyn "Delete original pkg?" && rm -f "$pack"
+	 askyn "Delete original pkg?" && rm -vf "$pack"{,.sig}
 done
