@@ -28,7 +28,7 @@ random_mac() {
 }
 
 test_network_thrice() {
-	 fwget 10 3 | grep -iq anonymously
+	 fwget 10 2 | grep -iq anonymously
 }
 avail_known_ssid() {
 	 comm -12 \
