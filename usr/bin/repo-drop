@@ -75,10 +75,12 @@ for pack in "${packs[@]}"; do
 		  for db in "${dbs[@]}"; do
 				is db "$db" || continue
 				repo=$(dirname "$db")
-				[ -a "$repo/$pack_base" ] && {
-					 echo_red "NOT ADDING, ALREADY EXISTS: $repo/$pack_base"
-					 continue
-				}
+				if [ -a "$repo/$pack_base" ]; then
+					 askyn "$repo/$pack_base  <-- ALREADY EXISTS. REPLACE?" || {
+						  echo_red "NOT ADDING, ALREADY EXISTS: $repo/$pack_base"
+						  continue
+					 }
+				fi
 				to_del+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
 				rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack" "$repo/$pack_base"
 				repo-add "$db" "$repo/$pack_base"
