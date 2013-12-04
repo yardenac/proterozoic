@@ -62,7 +62,8 @@ for pack in "${packs[@]}"; do
 		  fi
 	 fi
 
-	 to_del=()
+	 oldfiles=()
+	 newfiles=()
 	 for dir in "${dirs[@]}"; do
 
 		  case $arch in
@@ -79,22 +80,30 @@ for pack in "${packs[@]}"; do
 				if [ -a "$repo/$pack_base" ]; then
 					 askyn "$repo/$pack_base  <-- ALREADY EXISTS. REPLACE?" || {
 						  echo_red "NOT ADDING, ALREADY EXISTS: $repo/$pack_base"
+						  newfiles+=("$repo/$pack_base")
 						  continue
 					 }
 				fi
-				to_del+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
+				oldfiles+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
 
 				uplist=("$pack_base")
 				if [ -f "$pack_base.sig" ]; then
 					 uplist+=("$pack_base.sig")
 				else
-					 to_del+=("$repo/$pack_base.sig")
+					 oldfiles+=("$repo/$pack_base.sig")
 				fi
 				for upfile in "${uplist[@]}"; do
 					 rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack_dir/$upfile" "$repo/$upfile"
 				done
 
 				repo-add "$db" "$repo/$pack_base"
+		  done
+	 done
+
+	 to_del=()
+	 for oldfile in "${oldfiles[@]}"; do
+		  for newfile in "${newfiles[@]}"; do
+				[ "$oldfile" = "$newfile" ] || to_del+=("$oldfile")
 		  done
 	 done
 
