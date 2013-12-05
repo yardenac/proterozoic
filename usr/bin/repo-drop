@@ -133,14 +133,15 @@ for pack in "${packs[@]}"; do
 
 	 to_del=()
 	 for oldfile in "${oldfiles[@]}"; do
+		  (( ${#newfiles[@]} )) || to_del+=("$oldfile"{,.sig})
 		  for newfile in "${newfiles[@]}"; do
-				[ "$oldfile" = "$newfile" ] || to_del+=("$oldfile")
+				[ "$oldfile" = "$newfile" ] || to_del+=("$oldfile"{,.sig})
 		  done
 	 done
 
 	 (( ${#to_del[@]} )) && {
 		  ls -lF "${to_del[@]}"
-		  askyn "Delete older pkgs on server?" && rm -f "${to_del[@]}"
+		  askyn "Delete older pkgs on server?" && rm -vf "${to_del[@]}"
 	 }
 	 askyn "Delete local pkg?" && rm -vf "$pack"{,.sig}
 done
