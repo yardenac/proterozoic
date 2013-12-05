@@ -39,29 +39,59 @@ done
 (( ${#dirs[@]} )) && (( ${#packs[@]} )) || \
 	 croak "USAGE: repo-drop /path/to/repo/ to-add.pkg.tar.xz"
 
+_gpg_verify() {
+	 if gpg --verify "${1}.sig" </dev/null &>/dev/null; then
+		  echo_green_n " [VALID SIGNATURE]"
+	 else
+		  case "$?" in
+				2) echo_red_n " [NO SIGNATURE]";;
+				*) echo_red_n " [INVALID SIGNATURE]";;
+		  esac
+		  return 1
+	 fi
+}
+
+_gpg_sign() {
+	 rm -f "$1.sig"
+	 if gpg --detach-sign --use-agent "$1"; then
+		  echo_green_n " [SIGNED]"
+	 else
+		  echo_red_n " [ERROR SIGNING]"
+		  return 1
+	 fi
+}
+
+_gpg_sign_verify() {
+	 local file files=()
+	 for arg; do
+		  if [ -f "$arg" ]; then
+				files+=("$arg")
+		  else
+				echo_red "WEIRD ARG TO _gpg_sign: $arg"
+		  fi
+	 done
+	 (( ${#files[@]} )) || echo_red "_gpg_sign: NO FILES GIVEN"
+	 errors=0
+	 for file in "${files[@]}"; do
+		  echo_green_n "SIGNING: $file"
+		  until _gpg_verify "$file"; do
+				_gpg_sign "$file" || {
+					 let errors++
+					 continue
+				}
+		  done
+		  echo
+	 done
+	 return $errors
+}
+
 for pack in "${packs[@]}"; do
 
-	 echo_green_n "DOING PACKAGE: $pack "
+	 _gpg_sign_verify "$pack" || continue
+
 	 pack_base=$(basename "$pack")
 	 pack_dir=$(dirname "$pack")
-
 	 arch=$(bsdtar -xOf "$pack" .PKGINFO | awk '/^arch =/ {print $3}')
-
-	 [ -f "$pack.sig" ] || {
-		  echo
-		  if askyn "$pack: No signature found. Sign it?"; then
-				gpg --detach-sign --use-agent "$pack"
-		  fi
-	 }
-	 if [ -f "$pack.sig" ]; then
-		  if gpg --verify "$pack.sig" </dev/null &>/dev/null; then
-				echo_green "[VALID SIGNATURE]"
-		  else
-				echo_red "[INVALID SIGNATURE - SKIPPING!]"
-				continue
-		  fi
-	 fi
-
 	 oldfiles=()
 	 newfiles=()
 	 for dir in "${dirs[@]}"; do
@@ -97,6 +127,7 @@ for pack in "${packs[@]}"; do
 				done
 
 				repo-add "$db" "$repo/$pack_base"
+				_gpg_sign_verify "$db"
 		  done
 	 done
 
