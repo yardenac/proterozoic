@@ -5,7 +5,6 @@
 
 am_root || groups | grep -qw network || exit
 
-loopinc=45
 wpas_file=/run/keep-net-up/log-wpa
 dhcp_file=/run/keep-net-up/log-dhcp
 knu_cleanup() { rm -rf "$wpas_file" "$dhcp_file"; }
@@ -26,10 +25,6 @@ random_mac() {
 		  (( c )) && echo -n : || echo
 	 done
 }
-
-test_network_thrice() {
-	 fwget 10 2 | grep -iq anonymously
-}
 avail_known_ssid() {
 	 comm -12 \
 		  <(iwlist wlan0 scan | awk '/ESSID:"/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' | sed '/^[   ]*$/d' | sort -u) \
@@ -38,8 +33,7 @@ avail_known_ssid() {
 }
 
 while :; do
-	 stamp "Looping every $loopinc until network failure..."
-	 while test_network_thrice; do sleep $loopinc; done
+	 test_network_continuously 45
 	 stamp "Network down!"
 	 dhcpcd -k
 	 pkill -x --signal SIGTERM dhcpcd
