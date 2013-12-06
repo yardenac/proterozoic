@@ -536,13 +536,12 @@ fwget() { # fwget [TIMEOUT [TRIES [URL [PROXY]]]]
 	local TIMEOUT=${1:-20}	#default: wait 20 seconds
 	local RETRIES=${2:-0}		#default: try once
 	local URL=${3:-https://duckduckgo.com/}
-	if systemctl --quiet is-enabled tor &>/dev/null; then
+	if systemctl --quiet is-active tor &>/dev/null; then
 		 local p=${4:-http://127.0.0.1:8118}
 	else
 		 local p=${4:-}
 	fi
-	https_proxy=$p http_proxy=$p \
-	/usr/bin/curl --retry ${RETRIES} --max-time ${TIMEOUT} ${URL} -so- 2>/dev/null
+	/usr/bin/curl --proxy "$4" --retry ${RETRIES} --max-time ${TIMEOUT} ${URL} -so- 2>/dev/null
 }
 test_network_once() {
 	 fwget "$@" | grep -iq anonymously
