@@ -150,12 +150,6 @@ integrity_hosts() {
 			ASSIGN ff02::1			ip6-allnodes
 			ASSIGN ff02::2			ip6-allrouters
 			ASSIGN ff02::3			ip6-allhosts
-			ASSIGN 192.168.1.242 drog
-			ASSIGN 192.168.1.243 bro
-			ASSIGN 192.168.1.244 iggy
-			ASSIGN 192.168.1.245 tuya
-			ASSIGN 192.168.1.246 nudi
-			ASSIGN 208.111.39.115 g w m k s se es he eh map y b r aur arch archp n news o
 			EOF
 		  cat ${OLDFILE}
 	 } | awk -f /usr/share/ppz/awk-hosts > ${NEWFILE}
