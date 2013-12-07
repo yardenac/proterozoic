@@ -565,6 +565,10 @@ test_network_continuously() {
 	 done
 	 stamp "Looping every $loopinc until network failure..."
 	 local gateway=$(ip route | awk '/^default via/ { print $3}')
+	 [ "$gateway" ] || {
+		  echo_red "NO GATEWAY"
+		  return 1
+	 }
 	 systemctl --quiet is-active tor &>/dev/null && tor=yes || echo_red "NO TOR - DISABLING TOR TEST"
 	 while :; do
 		  [ "$verbose" ] && echo -n .
