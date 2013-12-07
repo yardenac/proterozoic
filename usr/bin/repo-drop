@@ -108,9 +108,9 @@ for pack in "${packs[@]}"; do
 				is db "$db" || continue
 				repo=$(dirname "$db")
 				if [ -a "$repo/$pack_base" ]; then
+					 newfiles+=("$repo/$pack_base")
 					 askyn "$repo/$pack_base  <-- ALREADY EXISTS. REPLACE?" || {
 						  echo_red "NOT ADDING, ALREADY EXISTS: $repo/$pack_base"
-						  newfiles+=("$repo/$pack_base")
 						  continue
 					 }
 				fi
