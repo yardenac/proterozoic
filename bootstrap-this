@@ -2,7 +2,7 @@
 # [root@archiso]$ dhcpcd eth0
 # [root@archiso]$ . <(wget https://raw.github.com/yardenac/proterozoic/master/bootstrap-this -qLO-)
 # root 123m~$ /usr/bin/integrity.ppz
-echo bootstrapping for the 2013.11.01 live cd...
+echo bootstrapping for the 2014.01.05 live cd...
 
 ionice -c 3 -p $$
 renice -n 19 $$
@@ -22,6 +22,8 @@ sed -i \
 
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 
+pacman-key -r 3020A074 --keyserver pgp.mit.edu
+pacman-key --lsign-key 3020A074
 pacman --noconfirm -Syu proterozoic python2
 pacman --noconfirm -Scc
 
