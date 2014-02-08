@@ -21,6 +21,7 @@ sed -i \
 
 cat > /etc/fstab <<-EOF
 	/dev/sda  / ext4 noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
+	/dev/mapper/swap none swap defaults 0 0
 EOF
 
 case "$(uname -m)" in
@@ -55,5 +56,10 @@ rm -vf \
 mkdir /etc/ssh/keys
 echo "${3} ${4}" >| /etc/ssh/keys/${1}
 
+echo creating swap...
+dd if=/dev/urandom of=/swap bs=1M count=1024
+echo 'swap /swap /dev/urandom swap,cipher=aes-cbc-essiv:sha256,size=256' >> /etc/crypttab
+
+systemctl --system daemon-reexec
 systemctl enable ip{,6}tables
-systemctl restart sshdgenkeys.service
+systemctl restart ip{,6}tables sshdgenkeys.service cryptsetup.target swap.target
