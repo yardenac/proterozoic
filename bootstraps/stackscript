@@ -5,7 +5,7 @@
 
 echo "Downloading external stackscript..."
 
-curl https://raw.github.com/yardenac/proterozoic/master/bootstrap-this-linode -sLo /tmp/.btl
+curl https://raw.github.com/yardenac/proterozoic/master/bootstraps/linode -sLo /tmp/.btl
 
 echo "Sourcing it..."
 
