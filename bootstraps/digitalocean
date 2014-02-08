@@ -3,6 +3,7 @@
 
 GITURL=https://raw.github.com/yardenac/proterozoic/master
 
+rm -f /usr/share/terminfo/r/rxvt-unicode-256color
 mv -vf /etc/pacman.conf{,.original}
 curl $GITURL/usr/share/ppz/default/ppz.conf		-so	/etc/ppz.conf
 curl $GITURL/etc/pacman.d/mirrorlist.https-only	-so	/etc/pacman.d/mirrorlist.https-only.random
@@ -42,7 +43,7 @@ cat >| /etc/mkinitcpio.conf <<-EOF
 	HOOKS="base systemd filesystems fsck ppz_tmp"
 EOF
 
-pacman --noprogressbar --noconfirm -Sq python{,2} fakeroot git
+pacman --noprogressbar --noconfirm -Sq python{,2} fakeroot git rxvt-unicode-terminfo
 pacman --noprogressbar --noconfirm -Sq proterozoic #linux-linode
 
 mv -vf /etc/sysctl.conf.pacsave /etc/sysctl.d/99-sysctl.conf
