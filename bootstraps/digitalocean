@@ -1,0 +1,58 @@
+#!/usr/bin/bash
+# $0 username sshport pubkeytype pubkeystring
+
+GITURL=https://raw.github.com/yardenac/proterozoic/master
+
+mv -vf /etc/pacman.conf{,.original}
+curl $GITURL/usr/share/ppz/default/ppz.conf		-so	/etc/ppz.conf
+curl $GITURL/etc/pacman.d/mirrorlist.https-only	-so	/etc/pacman.d/mirrorlist.https-only.random
+curl $GITURL/usr/share/ppz/default/pacman.conf	-so	/etc/pacman.conf
+sed -i \
+	 -e 's/^IgnorePkg[ =]*/\0 linux /ig' \
+	 -e s/https-only/https-only.random/ig 					/etc/pacman.conf
+sed -i \
+	 -e s/%SET_TYPE%/digo/ig \
+	 -e "s/somename/${1}/ig" \
+	 -e "s/\(SSH_PORTS=(\)22)/\1${2})/ig" \
+	 -e 's/32m$/128m/ig' \
+	 -e 's/^#*:[\t ]*sync.*$/#&/ig' \
+	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/ppz.conf
+
+cat > /etc/fstab <<-EOF
+	/dev/sda  / ext4 noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
+EOF
+
+case "$(uname -m)" in
+	 i686)  	sed -i 's/^\[multilib\]$/#&/ig'			/etc/pacman.conf;;
+	 x86_64)	sed -i 's/^##*\(\[multilib\]\)$/\1/ig'	/etc/pacman.conf;;
+esac
+
+pacman-key --init
+pacman-key --populate archlinux
+pacman-key -r 3020A074 --keyserver pgp.mit.edu
+pacman-key --lsign-key 3020A074
+
+chmod 2755 /var/log/journal
+
+pacman --noprogressbar --noconfirm -Sqyyu --ignore filesystem,bash
+pacman --noprogressbar --noconfirm -Sq bash
+pacman --noprogressbar --noconfirm -Squ
+
+cat >| /etc/mkinitcpio.conf <<-EOF
+	HOOKS="base systemd filesystems fsck ppz_tmp"
+EOF
+
+pacman --noprogressbar --noconfirm -Sq python{,2} fakeroot git
+pacman --noprogressbar --noconfirm -Sq proterozoic #linux-linode
+
+mv -vf /etc/sysctl.conf.pacsave /etc/sysctl.d/99-sysctl.conf
+rm -vf \
+	 /etc/{ppp/ip-{down,up}.d/00-dns.sh}.pacnew \
+	 /etc/pacman.d/mirrorlist.pacnew \
+	 /boot/syslinux/syslinux.cfg.pacnew
+
+mkdir /etc/ssh/keys
+echo "${3} ${4}" >| /etc/ssh/keys/${1}
+
+systemctl enable ip{,6}tables
+systemctl restart sshdgenkeys.service
