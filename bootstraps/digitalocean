@@ -1,6 +1,8 @@
 #!/usr/bin/bash
 # $0 username sshport pubkeytype pubkeystring
 
+timedatectl set-timezone America/Los_Angeles
+
 GITURL=https://raw.github.com/yardenac/proterozoic/master
 
 rm -f /usr/share/terminfo/r/rxvt-unicode-256color
