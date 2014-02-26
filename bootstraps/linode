@@ -15,6 +15,7 @@ curl $GITURL/usr/share/ppz/default/pacman.conf	-so	/etc/pacman.conf
 sed -i s/https-only/https-only.tmp/ig 						/etc/pacman.conf
 sed -i \
 	 -e s/%SET_TYPE%/linode/ig \
+	 -e "s/somename/eu/ig" \
 	 -e 's/32m$/128m/ig' \
 	 -e 's/^#*:[\t ]*sync.*$/#&/ig' \
 	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/ppz.conf
