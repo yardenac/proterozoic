@@ -10,6 +10,7 @@ preowned_files=(
 	 etc/fuse.conf
 	 etc/httpd/conf/httpd.conf
 	 etc/php/php.ini
+	 etc/php/php-fpm.conf
 )
 ######### FUNCTIONS
 are_same() {
