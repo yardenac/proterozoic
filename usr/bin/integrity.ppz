@@ -526,7 +526,7 @@ integrity_emacsd() {
 	 }
 	 return 0
 }
-integrity_bashhistory() { local hf hfs attrset skel_file backup_file
+integrity_bashhistory() { local hf hfs attrset skel_file backup_file lo_text
 	 [ "$USER" ] && [ "$HOME" ] || return 0
 
 	 set_proper_histfile
@@ -569,7 +569,16 @@ integrity_bashhistory() { local hf hfs attrset skel_file backup_file
 				echo_red "Marking $hf append-only."
 				say_and_do chattr +a "$hf"
 		  }
-	 done; :
+	 done;
+
+	 am_root && return
+
+	 # force global custom bash_logout
+	 [ -a ~/.bash_logout ] && {
+		  read -d '' lo_text <~/.bash_logout || return 1
+		  [ "$lo_text" = '. /usr/share/ppz/bash.logout' ] && return
+	 }
+	 echo '. /usr/share/ppz/bash.logout' >| ~/.bash_logout
 }
 integrity_sshd() {
 	 [ "${SSH_PORTS[*]}" = '22' ] && echo_red "You should switch to a high SSH port!"
