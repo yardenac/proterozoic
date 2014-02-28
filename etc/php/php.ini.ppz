@@ -39,7 +39,7 @@ allow_url_include = Off
 default_socket_timeout = 60
 memory_limit = 8M
 asp_tags = Off
-open_basedir = /srv/http ;/usr/share/pear
+open_basedir = /srv/http:/usr/bin ;/usr/share/pear
 disable_classes =
 zend.enable_gc = On
 SMTP = localhost
@@ -54,6 +54,8 @@ extension=gd.so
 extension=gettext.so
 extension=pdo_mysql.so
 extension=ssh2.so
+extension=phar.so
+extension=openssl.so
 
 extension=bcmath.so
 bcmath.scale = 0
