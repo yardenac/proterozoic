@@ -57,8 +57,8 @@ urxvt.color15: #ffffff
 
 xscreensaver.timeout:			0:01:00
 xscreensaver.cycle:				0:00:00
-xscreensaver.lock:				False
-xscreensaver.lockTimeout:		0:00:00
+xscreensaver.lock:				True
+xscreensaver.lockTimeout:		0:01:30
 xscreensaver.passwdTimeout:	0:00:30
 xscreensaver.dpmsEnabled:		True
 xscreensaver.dpmsQuickOff:		False
