@@ -51,7 +51,7 @@ AliasMatch ^/favicon.ico$ /srv/http/dummy/blank-favicon.ico
     AllowOverride None
 	 Require all granted
 </Directory>
-<FilesMatch ".ht*">
+<FilesMatch "^\.ht(access|passwd)$">
     Require all denied
 </FilesMatch>
 <FilesMatch "~$">
