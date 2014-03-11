@@ -59,7 +59,7 @@ mkdir /etc/ssh/keys
 echo "${3} ${4}" >| /etc/ssh/keys/${1}
 
 echo creating swap...
-dd if=/dev/urandom of=/swap bs=1M count=1024
+dd if=/dev/urandom of=/swap bs=1M count=2048
 echo 'swap /swap /dev/urandom swap,cipher=aes-cbc-essiv:sha256,size=256' >> /etc/crypttab
 
 systemctl --system daemon-reexec
