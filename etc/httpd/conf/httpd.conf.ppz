@@ -21,7 +21,7 @@ Mutex "file:/run/httpd"
 BrowserMatch "MSIE [2-5]" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
 User http
 Group http
-ErrorLog "/var/log/httpd/error_log"
+ErrorLog syslog
 LogLevel warn
 LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
 LogFormat "%h %l %u %t \"%r\" %>s %b" common
