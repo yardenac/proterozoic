@@ -575,7 +575,7 @@ integrity_bashhistory() { local hf hfs attrset skel_file backup_file lo_text
 
 	 # force global custom bash_logout
 	 [ -a ~/.bash_logout ] && {
-		  read -d '' lo_text <~/.bash_logout || return 1
+		  read lo_text <~/.bash_logout || return 1
 		  [ "$lo_text" = '. /usr/share/ppz/bash.logout' ] && return
 	 }
 	 echo '. /usr/share/ppz/bash.logout' >| ~/.bash_logout
