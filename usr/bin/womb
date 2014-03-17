@@ -74,7 +74,7 @@
 }
 
 case "${2%% *}" in
-	 rsync)	:;;
+	 rsync|git)	:;;
 	 *)		/usr/bin/integrity.ppz;;
 esac
 
