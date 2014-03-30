@@ -65,6 +65,12 @@ UserDir disabled
 </Location>
 Include /etc/httpd/conf/site-specific.conf
 
+<IfDefine CSP>
+	Header always set Content-Security-Policy   ${CSP}
+	Header always set X-Content-Security-Policy ${CSP}
+	Header always set X-Webkit-CSP              ${CSP}
+</IfDefine>
+
 LoadModule authn_file_module modules/mod_authn_file.so
 LoadModule authn_core_module modules/mod_authn_core.so
 LoadModule authz_host_module modules/mod_authz_host.so
