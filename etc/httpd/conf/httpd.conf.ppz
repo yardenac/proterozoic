@@ -23,10 +23,8 @@ User http
 Group http
 ErrorLog syslog
 LogLevel warn
-LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
-LogFormat "%h %l %u %t \"%r\" %>s %b" common
-LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
-CustomLog "/var/log/httpd/access_log" common
+LogFormat "%{%Y-%m-%d %H:%M:%S}t %h\t%v\t\"%r\" %>s" better
+CustomLog "/var/log/httpd/better_log" better
 Listen 80
 DocumentRoot "/srv/http"
 AccessFileName .htaccess
