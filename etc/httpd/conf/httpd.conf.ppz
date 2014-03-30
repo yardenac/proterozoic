@@ -42,6 +42,9 @@ AddType application/x-pkcs7-crl    .crl
 AddType image/x-icon .ico
 Alias /favicon.ico /srv/http/dummy/blank-favicon.ico
 AliasMatch ^/favicon.ico$ /srv/http/dummy/blank-favicon.ico
+UserDir public_html
+UserDir disabled root
+UserDir disabled
 <Directory />
     AllowOverride None
 	 Require all denied
@@ -90,6 +93,7 @@ LoadModule suexec_module modules/mod_suexec.so
 LoadModule cgid_module modules/mod_cgid.so
 LoadModule negotiation_module modules/mod_negotiation.so
 LoadModule dir_module modules/mod_dir.so
+LoadModule userdir_module modules/mod_userdir.so
 LoadModule alias_module modules/mod_alias.so
 LoadModule rewrite_module modules/mod_rewrite.so
 AddLanguage ca .ca
