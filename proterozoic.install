@@ -11,6 +11,7 @@ preowned_files=(
 	 etc/httpd/conf/httpd.conf
 	 etc/php/php.ini
 	 etc/php/php-fpm.conf
+	 etc/screenrc
 )
 ######### FUNCTIONS
 are_same() {

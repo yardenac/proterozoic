@@ -113,11 +113,10 @@ integrity_simpleconf() {
 	 systemctl --quiet is-enabled tor &>/dev/null && sed -i 's/^#\(export [a-z]*_proxy\)/\1/ig' /usr/share/ppz/bash.rc
 
 	 local wpaf=/etc/wpa_supplicant.conf
-	 [ "$WPA_SC" ] && [ -s $wpaf ] && [ -s "$WPA_SC" ] && ! diff $wpaf "$WPA_SC" && {
+	 if [ "$WPA_SC" ] && [ -s $wpaf ] && [ -s "$WPA_SC" ] && ! diff $wpaf "$WPA_SC"; then
 		  echo_red "$wpaf is outdated"
 		  am_root && askyn "Update from $WPA_SC ... ?" && cp -f "$WPA_SC" "$wpaf"
-	 }
-	 mkdir -pm 777 /run/screens
+	 fi
 }
 integrity_hosts() {
 	 am_root || return 0
