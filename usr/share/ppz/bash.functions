@@ -549,7 +549,7 @@ test_network_once() {
 test_tor() {
 	fwget 10 1 http://duskgytldkxiuqc6.onion/ http://127.0.0.1:8118 | grep -iq rendezvous || \
 	fwget 10 1 http://kpvz7ki2v5agwt35.onion/ http://127.0.0.1:8118 | grep -iq hidden\ wiki || \
-	fwget 10 1 http://jgdevcded4x6dl37.onion/ http://127.0.0.1:8118 | grep -iq securedrop || \
+	fwget 10 1 http://pubdrop4dw6rk3aq.onion/ http://127.0.0.1:8118 | grep -iq securedrop || \
 	fwget 10 1 http://3g2upl4pq6kufc4m.onion/ http://127.0.0.1:8118 | grep -iq anonymously
 }
 test_network_continuously() {
