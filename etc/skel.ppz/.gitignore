@@ -1,0 +1,7 @@
+.bash_history
+cache/
+.config/pulse/cookie
+.config/tmpdir
+.dbus/session-bus/
+.fvwm/errorlog
+.parallel/tmp/
