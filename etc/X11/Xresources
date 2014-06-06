@@ -10,7 +10,7 @@ urxvt.reverseVideo: true
 urxvt.scrollTtyOutput: false
 urxvt.scrollWithBuffer: true
 urxvt.scrollTtyKeypress: true
-urxvt.font: xft:Mono-10:antialias=true:hinting=false,xft:Code2000
+urxvt.font: xft:Mono-12:antialias=true:hinting=false,xft:Code2001:antialias=true
 urxvt.letterSpace: -1
 urxvt.hold: false
 urxvt.perl-ext-common: default,tabbedex,url-select,-selection-popup,-matcher,confirm-paste
