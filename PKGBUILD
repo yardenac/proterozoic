@@ -15,6 +15,7 @@ optdepends=(
 	 'jshon:		ckrepo, linode-implement'
 	 'less:		rip-dvd'
 	 'nmap:		linode-implement'
+	 'perl-term-readkey: random_password'
 	 'python:	myip'
 	 'rsync:		rip-dvd, repo-drop'
 	 abs burp dnsutils git parallel lsof s3fs sshfs unzip whois
