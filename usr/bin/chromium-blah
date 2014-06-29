@@ -1,0 +1,11 @@
+#!/usr/bin/bash
+
+. /usr/share/ppz/bash.functions
+
+uniqdir="$HOME/.config/chromium.$(uniq_token)"
+
+cp -r /etc/skel.ppz/.config/chromium "$uniqdir"
+
+chromium --incognito --load-extension=/usr/share/https-everywhere-chrome-git --user-data-dir="$uniqdir" --proxy-server=localhost:8118 '--host-resolver-rules=MAP * 0.0.0.0' 'http://3g2upl4pq6kufc4m.onion/?kp=-1&kf=w&kk=-1&k1=-1&ko=s'
+
+rm -rf "$uniqdir"
