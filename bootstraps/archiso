@@ -27,7 +27,7 @@ sed -i \
 
 pacman-key -r 3020A074 --keyserver pgp.mit.edu
 pacman-key --lsign-key 3020A074
-pacman --noconfirm -Syu proterozoic python2
+pacman --noconfirm -Syu proterozoic python2 mprime biosdisk-git
 pacman --noconfirm -Scc
 
 gpasswd -a eu wheel
