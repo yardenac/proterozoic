@@ -2,7 +2,9 @@
 # [root@archiso]$ systemctl start dhcpcd@*.service || wifi-menu
 # [root@archiso]$ . <(wget https://raw.github.com/yardenac/proterozoic/master/bootstraps/archiso -qLO-)
 # root 123m~$ /usr/bin/integrity.ppz
-echo bootstrapping for the 2014.07.03 live cd...
+
+sshport=$(( RANDOM + 32767 ))
+echo bootstrapping for the 2014.07.03 live cd... ssh port will be $sshport
 
 ionice -c 3 -p $$
 renice -n 19 $$
@@ -18,6 +20,7 @@ sed -i \
 	 -e s/https-only/https-only.random/ig 					/etc/pacman.conf
 sed -i \
 	 -e "s/somename/eu/ig" \
+	 -e "s/=(22)/=($sshport)/" \
 	 -e s/%SET_TYPE%/desktop/ig								/etc/ppz.conf
 
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
@@ -36,3 +39,5 @@ systemctl start ip{,6}tables
 mkdir /etc/ssh/keys
 echo 'ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBACr529+8mpJaMbfeXKAYFba9nhnv6nTlDd7VwnTSQda2aJXuwOu/aRD8GImPhu789x/KZFCALi9wTboRUYEprEKAwBQzl1vhqs7ZRniieF0b8MeOJNt3mEw+dXokuApne93VM+3QO20Vu26MQy7YN43pUqELI7zyUdSPMRVpmmCwWo6aA==' \
 	 >| /etc/ssh/keys/eu
+
+echo REMINDER: ssh port is $sshport
