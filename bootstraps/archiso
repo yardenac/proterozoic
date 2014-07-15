@@ -1,8 +1,8 @@
 #!/usr/bin/bash
-# [root@archiso]$ dhcpcd eth0
+# [root@archiso]$ systemctl start dhcpcd@*.service || wifi-menu
 # [root@archiso]$ . <(wget https://raw.github.com/yardenac/proterozoic/master/bootstraps/archiso -qLO-)
 # root 123m~$ /usr/bin/integrity.ppz
-echo bootstrapping for the 2014.02.01 live cd...
+echo bootstrapping for the 2014.07.03 live cd...
 
 ionice -c 3 -p $$
 renice -n 19 $$
