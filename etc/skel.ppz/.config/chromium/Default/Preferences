@@ -2,6 +2,18 @@
    "browser": {
       "enabled_labs_experiments": [ "accelerated-filters" ]
    },
+   "default_search_provider": {
+      "synced_guid": "330CC093-DDD7-3906-E3BE-1D600B4ACE3D"
+   },
+   "default_search_provider_data": {
+      "template_url_data": {
+         "id": "2",
+         "keyword": "ddg.gg",
+         "short_name": "DuckDuckGo",
+         "synced_guid": "330CC093-DDD7-3906-E3BE-1D600B4ACE3D",
+         "url": "http://3g2upl4pq6kufc4m.onion/?kp=-1&kf=w&kk=-1&k1=-1&ko=s&q={searchTerms}"
+      }
+   },
    "geolocation": {
       "default_content_setting": 2
    },
