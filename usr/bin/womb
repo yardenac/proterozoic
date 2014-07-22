@@ -51,10 +51,17 @@
 		  && [ -x /usr/bin/xinit ] \
 		  && ! /usr/bin/pgrep -x X &>/dev/null && {
 
+		  cd "$HOME"
+		  git init
+		  git add --all .
+		  git config --global user.email ex@invalid.invalid
+		  git config --global user.name ex
+		  git commit -m init
+
 		  /usr/bin/integrity.ppz
 
 		  . /usr/share/ppz/bash.functions
-		  
+
 		  # make sure xauthority file works
 		  set_proper_histfile
 
@@ -66,6 +73,9 @@
 
 		  xdg-mime default zathura-fullscreen.desktop application/pdf
 		  xdg-mime default zathura-fullscreen.desktop application/x-pdf
+
+		  git add --all .
+		  git commit -m setup
 
 		  exec /usr/bin/xinit -- /usr/bin/X vt4 -f 0 -nolisten tcp -retro
 
