@@ -145,9 +145,9 @@ AddToMenu MenuFvwmRoot
 + "Terminal"	Exec exec urxvt -pe -tabbedex
 + "Seamonkey"	Exec exec seamonkey
 + "Firefox"		Exec exec firefox
-+ "Chromium"	Exec exec chromium '--incognito' '--load-extension=/usr/share/https-everywhere-chrome-git' '--user-data-dir=$[HOME]/.config/chromium.tor'   '--proxy-server=localhost:8118'           '--host-resolver-rules=MAP * 0.0.0.0' 'http://3g2upl4pq6kufc4m.onion/?kp=-1&kf=w&kk=-1&k1=-1&ko=s'
-+ "Notorium"	Exec exec chromium '--incognito' '--load-extension=/usr/share/https-everywhere-chrome-git' '--user-data-dir=$[HOME]/.config/chromium.proxy' '--proxy-server=socks5://localhost:55114' '--host-resolver-rules=MAP * 0.0.0.0'
-+ "NoProxium"	Exec exec chromium '--incognito' '--load-extension=/usr/share/https-everywhere-chrome-git'
++ "Chromium"	Exec exec chromium-blah
++ "Notorium"	Exec exec chromium-blah 55114
++ "NoProxium"	Exec exec chromium-blah noproxy
 + "Reload WM"	Restart
 + "Restart WM"	Quit
 + "Reboot CPU"	Exec exec sudo /usr/bin/systemctl --no-block reboot

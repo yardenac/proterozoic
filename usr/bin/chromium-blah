@@ -1,5 +1,22 @@
 #!/usr/bin/bash
 
+proxy=--proxy-server=localhost:8118
+resolv='--host-resolver-rules=MAP * 0.0.0.0'
+urls=()
+for arg; do
+	 [[ "$arg" =~ ^[0-9]+$ ]] && {
+		  proxy=--proxy-server=socks5://localhost:"$arg"
+		  continue
+	 }
+	 case "$arg" in
+		  tor)     :;;
+		  noproxy) proxy=''; resolv='';;
+		  *)       urls+=("$arg");;
+	 esac
+done
+
+(( "${#urls[@]}" )) || urls=('http://3g2upl4pq6kufc4m.onion/?kp=-1&kf=w&kk=-1&k1=-1&ko=s')
+
 . /usr/share/ppz/bash.functions
 
 uniqtok=$(uniq_token)
@@ -8,6 +25,6 @@ uniqdir="$HOME/.config/chromium.$uniqtok"
 
 cp -r /etc/skel.ppz/.config/chromium "$uniqdir"
 
-chromium --incognito --load-extension=/usr/share/https-everywhere-chrome-git --user-data-dir="$uniqdir" --proxy-server=localhost:8118 '--host-resolver-rules=MAP * 0.0.0.0' 'http://3g2upl4pq6kufc4m.onion/?kp=-1&kf=w&kk=-1&k1=-1&ko=s'
+chromium --incognito --load-extension=/usr/share/https-everywhere-chrome-git --user-data-dir="$uniqdir" "$proxy" "$resolv" "${urls[@]}"
 
 rm -rf "$uniqdir" "$HOME/.cache/chromium.$uniqtok"
