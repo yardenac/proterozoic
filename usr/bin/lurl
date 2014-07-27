@@ -13,4 +13,4 @@ run_as_ex() {
 	 fi
 }
 
-run_as_ex FvwmCommand "Exec exec chromium '--incognito' '--user-data-dir=\$[HOME]/.config/chromium.tor'   '--proxy-server=localhost:8118'           '--host-resolver-rules=MAP * 0.0.0.0' '--load-extension=/usr/share/https-everywhere-chrome' '$url'"
+run_as_ex FvwmCommand "Exec exec chromium-blah '$url'"
