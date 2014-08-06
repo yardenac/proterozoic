@@ -2,18 +2,14 @@
 # cp /{,mnt/}etc/ppz.conf; pacstrap /mnt base proterozoic
 # things basically done by aif:
 #  import ppz.conf
-#  set fstab
+#  set fstab [unnecessary w/systemd?]
 #  set timezone
 # not done:
 #   /boot/grub/menu.lst
 #   /etc/resolv.conf
 #   /etc/profile.d/proxy.sh
-depend_procedure core base
-. /usr/share/ppz/bash.functions
-. /usr/share/ppz/bash.functions.install
 
 TARGET=/media/targay
-MNTPTS=( /boot ) # / is implied
 
 pacman_target() {
 	 # --config /usr/share/ppz/default/pacman.conf
@@ -29,55 +25,8 @@ pacman_target() {
 		  }
 	 done
 }
-unmount_all() {
-	 local RV=0
-	 for MNTD_FS in /proc /sys /run /dev ${MNTPTS[@]} /; do
-		  local FULLPATH=${TARGET}${MNTD_FS}
-		  findmnt -n ${FULLPATH%%\/} >/dev/null \
-				&& {
-				umount ${FULLPATH%%\/} || RV=1
-		  }
-	 done
-	 return $RV
-}
 
 start_process() {
-	 pushtrap 'poptrap; unmount_all; exit $?;' HUP QUIT EXIT INT ABRT TERM
-	 #execute worker configure #just does i/o stuff i dont use
-	 execute worker sysprep #remounts / rw
-	 usetvar TARGET 'Choose a temporary mount point: '
-	 unmount_all || {
-		  mount
-		  until askyn "Unmounting all failed. You'll have to deal with that first. Whenever you're ready... :)"; do :; done
-	 }
-	 echo_red "YOU SHOULD HAVE ALREADY PARTITIONED - A LIST TO HELP YOU ;)"
-	 blkid | grep -ivE 'raid|crypto_LUKS|squashfs' | sort -u
-	 rm -f /tmp/ppz-fstab
-	 for MNTPT in / ${MNTPTS[@]}; do
-		  local DEV=
-		  until [ -b "${DEV}" ]; do
-				[ "$DEV" ] && partprobe 2>&1 | grep -iv /dev/sr0
-				usetvar DEV "CHOOSE A PARTITION FOR $MNTPT (^c to partprobe): " /dev/
-				DEV=$(readlink -e ${DEV})
-		  done
-		  format_ext4 interactive "$DEV"
-		  mkdir -p ${TARGET}${MNTPT}
-		  mount ${DEV} ${TARGET}${MNTPT}
-		  cat >> /tmp/ppz-fstab <<-EOF
-				UUID="$(blkid -s UUID -o value ${DEV})" ${MNTPT}	ext4 defaults,noatime,nodiratime,barrier=1,commit=30,ro 0 1
-				EOF
-		  enhash targmnt${MNTPT//\/} ${DEV}
-	 done
-	 mkdir -pm 755 ${TARGET}/{dev,proc,sys,var/{cache/pacman/pkg,lib/pacman,log}}
-	 for SPECIAL_FS in proc sys dev; do
-		  findmnt -n ${TARGET}/${SPECIAL_FS} >/dev/null || {
-				case $SPECIAL_FS in
-					 proc)	mount -t proc	none	${TARGET}/proc;;
-					 sys)	mount -t sysfs	none	${TARGET}/sys;;
-					 dev)	mount -o bind	/dev	${TARGET}/dev;;
-				esac
-		  }
-	 done
 	 # THIS SECTION SHOULD NOT USE RC.CONF!
 	 [ -a ${TARGET}/etc/rc.conf ] \
 		  && askyn "Base system already looks populated ... skip reinstalling that?" \
@@ -90,12 +39,6 @@ start_process() {
 		  usetvar HOSTTYPE "Choose a host type! [ desktop | laptop | linode ]: " desktop
 		  sed -i s/%SET_TYPE%/${HOSTTYPE}/ig ${TARGET}/etc/rc.conf
 		  echo ${HOSTNAME} >| ${TARGET}/etc/hostname
-		  cat >  ${TARGET}/etc/fstab <<-EOF
-				/dev/mapper/enc /media/enc auto defaults,rw,relatime,nodiratime,noauto 0 0
-				UUID=4C93-65D0  /media/oxygen   vfat    defaults,user,noatime,nodiratime,fmask=177,dmask=077,check=s,noauto 0 0
-				EOF
-		  cat >> ${TARGET}/etc/fstab < /tmp/ppz-fstab
-		  rm -f /tmp/ppz-fstab
 		  cp -i {,${TARGET}}/etc/localtime
 		  set -o noclobber
 	 }
@@ -143,9 +86,4 @@ start_process() {
 		  install_grub_ppz ${TARGET} $(unhash targmntboot) $(unhash targmnt) ${HOSTNAME}
 		  echo_red "Grub finished."
 	 }
-	 until askyn "ready to quit? (stuff will be unmounted)"; do
-		  ll ${TARGET}/
-	 done
-	 unmount_all
-	 poptrap
 }
