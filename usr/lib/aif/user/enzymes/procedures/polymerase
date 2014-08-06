@@ -4,6 +4,10 @@
 #  import ppz.conf
 #  set fstab
 #  set timezone
+# not done:
+#   /boot/grub/menu.lst
+#   /etc/resolv.conf
+#   /etc/profile.d/proxy.sh
 depend_procedure core base
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.install
@@ -139,10 +143,6 @@ start_process() {
 		  install_grub_ppz ${TARGET} $(unhash targmntboot) $(unhash targmnt) ${HOSTNAME}
 		  echo_red "Grub finished."
 	 }
-	 echo "You might want to edit these files:"
-	 echo "		/boot/grub/menu.lst"
-	 echo "		/etc/resolv.conf"
-	 echo "		/etc/profile.d/proxy.sh"
 	 until askyn "ready to quit? (stuff will be unmounted)"; do
 		  ll ${TARGET}/
 	 done
