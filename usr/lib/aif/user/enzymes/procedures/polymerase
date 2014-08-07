@@ -9,6 +9,7 @@
 #  timezone
 #  pacman.conf
 #  pacstrap /mnt base proterozoic
+#  networking
 # never done:
 #   /boot/grub/menu.lst
 #   /etc/resolv.conf
@@ -37,9 +38,6 @@ start_process() {
 				python-south python2-imaging php-gd)
 		  pkgs_neverneed=(licenses logrotate lvm2 nano ppp reiserfsprogs xfsprogs)
 		  pkgs_other=(aif parted dmidecode base-devel amd-ucode intel-ucode)
-	 }
-	 askyn "Use present net config as static on target?" && {
-		  static_networking_from_runtime ${TARGET}
 	 }
 	 fix_initcpio_ppz ${TARGET}
 	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
