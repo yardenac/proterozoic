@@ -3,9 +3,10 @@
 # things basically done by aif:
 #  import ppz.conf
 # this it did
-#  set fstab [unnecessary w/systemd?]
-#  set hostname
-#  set timezone
+#  fstab [unnecessary w/systemd?]
+#  hostname
+#  timezone
+#  root pw
 # never done:
 #   /boot/grub/menu.lst
 #   /etc/resolv.conf
@@ -74,11 +75,6 @@ start_process() {
 	 }
 	 askyn "Use present net config as static on target?" && {
 		  static_networking_from_runtime ${TARGET}
-	 }
-	 askyn "Set root password now?" && {
-		  while true; do
-				chroot ${TARGET} passwd root && break
-		  done
 	 }
 	 fix_initcpio_ppz ${TARGET}
 	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
