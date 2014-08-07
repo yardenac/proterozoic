@@ -2,9 +2,11 @@
 # cp /{,mnt/}etc/ppz.conf; pacstrap /mnt base proterozoic
 # things basically done by aif:
 #  import ppz.conf
-#  set fstab [unnecessary w/systemd?]
 #  set timezone
-# not done:
+# this it did
+#  set fstab [unnecessary w/systemd?]
+#  set hostname
+# never done:
 #   /boot/grub/menu.lst
 #   /etc/resolv.conf
 #   /etc/profile.d/proxy.sh
@@ -35,10 +37,8 @@ start_process() {
 		  && askyn "Looks like we already did some basic configging ... skip that?" || {
 		  set +o noclobber
 		  cp -f /usr/share/ppz/default/rc.conf ${TARGET}/etc/rc.conf
-		  usetvar HOSTNAME "Choose hostname! Take yr time ;) " new_machine_$(date +%Y_%m_%d)
 		  usetvar HOSTTYPE "Choose a host type! [ desktop | laptop | linode ]: " desktop
 		  sed -i s/%SET_TYPE%/${HOSTTYPE}/ig ${TARGET}/etc/rc.conf
-		  echo ${HOSTNAME} >| ${TARGET}/etc/hostname
 		  cp -i {,${TARGET}}/etc/localtime
 		  set -o noclobber
 	 }
