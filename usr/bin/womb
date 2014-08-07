@@ -68,6 +68,11 @@
 		  xdg-mime default zathura-fullscreen.desktop application/pdf
 		  xdg-mime default zathura-fullscreen.desktop application/x-pdf
 
+		  . /etc/ppz.conf
+		  if [ "$WALLPAPER" ]; then
+				sed -e "s%/usr/share/ppz/wallpaper%$WALLPAPER%" ~/.fvwm/config
+		  fi
+
 		  git add --all .
 		  git commit -m setup
 

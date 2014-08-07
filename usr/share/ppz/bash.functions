@@ -125,11 +125,6 @@ set_proper_histfile() {
 	 done
 	 export HISTFILE XAUTHORITY
 }
-check_file() {
-	 [ -a "$1" ] || return 1
-	 local LMD5=$(md5sum "$1" 2>/dev/null)
-	 [ "${LMD5%% *}" = "${2:-NEVERMATCH}" ]
-}
 first_to_exist() {
 	 return 1
 	 #this is fucked up

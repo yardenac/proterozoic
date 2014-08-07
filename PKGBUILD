@@ -14,10 +14,12 @@ optdepends=(
 	 'gnupg:		repo-drop'
 	 'jshon:		ckrepo, linode-implement'
 	 'less:		rip-dvd'
+	 'memtest86+: testing memory at bootup'
 	 'nmap:		linode-implement'
 	 'perl-term-readkey: random_password'
 	 'python:	myip'
 	 'rsync:		rip-dvd, repo-drop'
+	 'yart:		wallpaper, icons, etc'
 	 abs burp dnsutils git parallel lsof s3fs sshfs unzip whois
 )
 

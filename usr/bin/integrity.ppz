@@ -252,28 +252,6 @@ integrity_iptables() {
 
 	 rm -f $tmp_is $tmp_should
 }
-can_work_with_boot() {
-	 grep -iq /boot /etc/fstab \
-		  && ! [ -d /boot/grub ] \
-		  && return 1 #should be mounted but isnt
-	 [ -w /boot ] && return #can write to it - ok
-	 findmnt -n /boot >/dev/null && return 1 #probably chrooted
-	 mount -o remount,rw /boot &>/dev/null
-	 [ -w /boot ] || return 1 #weve done all we can
-}
-remote_sync_file() { # $0 '/local/path' 'md5sum464a702cf...' 'http://source'
-	 check_file ${1} ${2} && return
-	 [ "${1:0:6}" = /boot/ ] && ! can_work_with_boot && return 1
-	 mkdir -p $(dirname ${1})
-	 curl ${3} -so ${1}
-	 check_file ${1} ${2} && {
-		  echo_red "Successfully retrieved $1"
-	 } || {
-		  rm -f ${1}
-		  echo_red "Problem downloading $1 - have to get it later"
-	 }
-	 [ "${1:0:6}" = /boot/ ] && mount -o remount,ro /boot &>/dev/null; :
-}
 integrity_net() {
 	 if test_network_once 5; then
 		  ! python-ntp && am_root && askyn "Sync kernel & hwclock with ntpdate?" && {
@@ -286,13 +264,6 @@ integrity_net() {
 		  echo_red $(date '+%l:%M:%S (%A %B %e, %Y)')
 		  return
 	 fi
-	 am_root && {
-		  eval $(awk '/^:/ {
-				if ($2 == "sync") {
-					printf "remote_sync_file %s %s %s;\n", $3,$4,$5
-				}
-		  }' /etc/ppz.conf)
-	 }
 	 return 0
 }
 integrity_encdev() {
