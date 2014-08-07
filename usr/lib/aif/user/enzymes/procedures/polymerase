@@ -2,10 +2,10 @@
 # cp /{,mnt/}etc/ppz.conf; pacstrap /mnt base proterozoic
 # things basically done by aif:
 #  import ppz.conf
-#  set timezone
 # this it did
 #  set fstab [unnecessary w/systemd?]
 #  set hostname
+#  set timezone
 # never done:
 #   /boot/grub/menu.lst
 #   /etc/resolv.conf
@@ -39,7 +39,6 @@ start_process() {
 		  cp -f /usr/share/ppz/default/rc.conf ${TARGET}/etc/rc.conf
 		  usetvar HOSTTYPE "Choose a host type! [ desktop | laptop | linode ]: " desktop
 		  sed -i s/%SET_TYPE%/${HOSTTYPE}/ig ${TARGET}/etc/rc.conf
-		  cp -i {,${TARGET}}/etc/localtime
 		  set -o noclobber
 	 }
 	 [ -a ${TARGET}/usr/bin/Xorg ] && askyn "System looks FULLY installed! Spare the poor mirrors a repeat?" || {
