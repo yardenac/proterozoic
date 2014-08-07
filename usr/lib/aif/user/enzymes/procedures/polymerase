@@ -1,13 +1,14 @@
 #!/usr/bin/bash
-# cp /{,mnt/}etc/ppz.conf; pacstrap /mnt base proterozoic
-# things basically done by aif:
-#  import ppz.conf
-# this it did
+# things it did
 #  fstab [unnecessary w/systemd?]
+#  root pw [done by integrity now?]
+#  ppz.conf
+#     cp /{,mnt/}etc/ppz.conf
+#     hosttype
 #  hostname
 #  timezone
-#  root pw
-#  pacman.conf + pacstrap
+#  pacman.conf
+#  pacstrap /mnt base proterozoic
 # never done:
 #   /boot/grub/menu.lst
 #   /etc/resolv.conf
@@ -16,14 +17,6 @@
 TARGET=/media/targay
 
 start_process() {
-	 grep -iq oxygen ${TARGET}/etc/fstab &>/dev/null \
-		  && askyn "Looks like we already did some basic configging ... skip that?" || {
-		  set +o noclobber
-		  cp -f /usr/share/ppz/default/rc.conf ${TARGET}/etc/rc.conf
-		  usetvar HOSTTYPE "Choose a host type! [ desktop | laptop | linode ]: " desktop
-		  sed -i s/%SET_TYPE%/${HOSTTYPE}/ig ${TARGET}/etc/rc.conf
-		  set -o noclobber
-	 }
 		  pkgs_always=(btrfs-progs-unstable tor privoxy proterozoic) # grub2-bios
 		  pkgs_x=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo,xrandr} xdotool \
 				xf86-input-{keyboard,mouse} xscreensaver xclip libxft xcursor-themes \
