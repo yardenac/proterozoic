@@ -10,6 +10,11 @@
 #  pacman.conf
 #  pacstrap /mnt base proterozoic
 #  networking
+#  mkinitcpio.conf
+#     add ppz_tmp to HOOKS
+#     add modules like: radeon nvidia intel_agp i915
+#  arch-chroot /mnt
+#     mkinitcpio -p linux
 # never done:
 #   /boot/grub/menu.lst
 #   /etc/resolv.conf
@@ -39,7 +44,6 @@ start_process() {
 		  pkgs_neverneed=(licenses logrotate lvm2 nano ppp reiserfsprogs xfsprogs)
 		  pkgs_other=(aif parted dmidecode base-devel amd-ucode intel-ucode)
 	 }
-	 fix_initcpio_ppz ${TARGET}
 	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
 		  install_grub_ppz ${TARGET} $(unhash targmntboot) $(unhash targmnt) ${HOSTNAME}
 		  echo_red "Grub finished."

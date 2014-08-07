@@ -43,21 +43,6 @@ static_networking_from_runtime() {
 	 done
 }
 
-fix_initcpio_ppz() {
-	 local mmodules TARGET=${1%%/}
-	 grep -iqE '^HOOKS="[^"]*ppz_tmp[^"]*"' ${TARGET}/etc/mkinitcpio.conf || {
-		  askyn "Add ppz_tmp to HOOKS?" \
-				&& sed -i 's/^\(HOOKS="[^"]*\)"/\1 ppz_tmp"/ig' ${TARGET}/etc/mkinitcpio.conf
-	 }
-	 usetvar mmodules "Add any initrd modules (delete what you dont want): " 'radeon nvidia intel_agp i915' ''
-	 sed -i 's/^\(MODULES="[^"]*\)"/\1 '"${mmodules[@]}"'"/ig' ${TARGET}/etc/mkinitcpio.conf
-	 grex ${TARGET}/etc/mkinitcpio.conf
-	 askyn "Above is ${TARGET}/etc/mkinitcpio.conf. You have a chance to edit
-			in another tty, if you wish. YES here to rebuild." && {
-		  chroot ${TARGET} /usr/bin/mkinitcpio -p linux
-	 }
-}
-
 install_grub_ppz() { #USAGE: install_grub /media/targay /dev/sda1 hostname_of_target
 	 local TARGET=${1%%/}
 	 local BOOT_DEVICE_CN=${2}
