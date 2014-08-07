@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/false
 # things it did
 #  fstab [unnecessary w/systemd?]
 #  root pw [done by integrity now?]
@@ -20,9 +20,6 @@
 #   /etc/resolv.conf
 #   /etc/profile.d/proxy.sh
 
-TARGET=/media/targay
-
-start_process() {
 		  pkgs_always=(btrfs-progs-unstable tor privoxy proterozoic) # grub2-bios
 		  pkgs_x=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo,xrandr} xdotool \
 				xf86-input-{keyboard,mouse} xscreensaver xclip libxft xcursor-themes \
@@ -43,9 +40,5 @@ start_process() {
 				python-south python2-imaging php-gd)
 		  pkgs_neverneed=(licenses logrotate lvm2 nano ppp reiserfsprogs xfsprogs)
 		  pkgs_other=(aif parted dmidecode base-devel amd-ucode intel-ucode)
-	 }
-	 askyn "Install grub? (un/freeze XFS if you have to...)" && {
+
 		  install_grub_ppz ${TARGET} $(unhash targmntboot) $(unhash targmnt) ${HOSTNAME}
-		  echo_red "Grub finished."
-	 }
-}
