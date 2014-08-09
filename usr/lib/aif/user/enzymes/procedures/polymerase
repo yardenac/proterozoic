@@ -16,15 +16,13 @@ genfstab -U -p /mnt | sudo tee -a /mnt/etc/fstab
 # add modules to mkinitcpio.conf like: radeon nvidia intel_agp i915
 
 arch-chroot /mnt
+	pacman -Syu "${pkgs[@]}"
 	pacman -Syu proterozoic
 	mkinitcpio -p linux
 
-#    root pw [done by integrity now?]
 #    networking
 # things it never did
 #    /boot/grub/menu.lst
-#    /etc/resolv.conf
-#    /etc/profile.d/proxy.sh
 
 pkgs_always=(tor privoxy proterozoic)
 pkgs_x=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo,xrandr} xdotool \
