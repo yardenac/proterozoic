@@ -26,21 +26,17 @@ arch-chroot /mnt
 #    /etc/resolv.conf
 #    /etc/profile.d/proxy.sh
 
-pkgs_always=(btrfs-progs-unstable tor privoxy proterozoic) # grub2-bios
+pkgs_always=(tor privoxy proterozoic)
 pkgs_x=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo,xrandr} xdotool \
         xf86-input-{keyboard,mouse} xscreensaver xclip libxft xcursor-themes \
         numlockx fvwm perl-xml-parser fbpanel wmctrl mingetty hsetroot \
         urxvt-url-select urxvt-tabbedex transset-df xcompmgr acpi ttf-code2000
         xf86-video-ati xf86-video-intel nvidia mtpfs memtest86+ mprime mtester)
-pkgs_web=(seamonkey flashplugin alsa-utils openjdk6 icedtea-web sext acroread chromium gecko-mediaplayer)
-pkgs_multimedia=(gimp feh mpv mencoder imagemagick gcolor2 handbrake-cli mencoder midentify mjpegtools dvdauthor)
-pkgs_gaming=(zsnes mupen64plus)
+pkgs_web=(alsa-utils sext chromium)
 pkgs_cd=(eject cdrkit dvd+rw-tools handbrake-cli libisoburn squashfs-tools archiso-git)
 pkgs_wireless=(wireless_tools wpa_supplicant b43-firmware iw) #wpa_actiond ifplugd
-pkgs_laptop=(pcmciautils dhcpcd)
+pkgs_laptop=(dhcpcd)
 pkgs_printer=(cups hplip a2ps)
-pkgs_server=(mysql php php-apache php-ssh apache mod_wsgi2 django python-south python2-imaging php-gd)
-pkgs_neverneed=(licenses logrotate lvm2 nano ppp reiserfsprogs xfsprogs)
-pkgs_other=(aif parted dmidecode base-devel amd-ucode intel-ucode)
+pkgs_other=(parted dmidecode base-devel amd-ucode intel-ucode)
 
 install_grub_ppz ${TARGET} $(unhash targmntboot) $(unhash targmnt) ${HOSTNAME}
