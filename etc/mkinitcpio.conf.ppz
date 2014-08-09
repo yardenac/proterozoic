@@ -1,1 +1,2 @@
-HOOKS="base udev autodetect block filesystems fsck ppz_tmp" # raid encrypt ide pata scsi
+HOOKS="systemd autodetect modconf block filesystems fsck ppz_tmp" # raid encrypt ide pata scsi
+MODULES="fuse"

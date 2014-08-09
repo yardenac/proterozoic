@@ -8,10 +8,10 @@ exit
 pacstrap /mnt base
 sudo bash -c 'echo $hostname > /mnt/etc/hostname'
 sudo cp /etc/ppz.conf /mnt/etc/ppz.conf
+sudo mv -i /etc/mkinitcpio.conf{,.orig}
+sudo cp /etc/mkinitcpio.conf.ppz /mnt/etc/mkinitcpio.conf
 
-#    mkinitcpio.conf
-#       add ppz_tmp to HOOKS
-#       add modules like: radeon nvidia intel_agp i915
+# add modules to mkinitcpio.conf like: radeon nvidia intel_agp i915
 #    timezone
 
 arch-chroot /mnt
