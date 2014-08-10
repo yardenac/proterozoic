@@ -9,7 +9,7 @@ sed -e 's/^IgnorePkg[ =]*/\0 linux-linode /ig' \
     sudo tee /mnt/etc/pacman.conf
 sudo cp /etc/pacman.d/mirrorlist.https-only.random /mnt/etc/pacman.d/
 
-pacstrap /mnt base
+pacstrap /mnt base grub
 sudo bash -c 'echo $hostname > /mnt/etc/hostname'
 sudo cp /etc/ppz.conf /mnt/etc/ppz.conf
 sudo ln -s /usr/share/zoneinfo/America/Los_Angeles /mnt/etc/localtime
@@ -23,10 +23,9 @@ arch-chroot /mnt
 	pacman -Syu "${pkgs[@]}"
 	pacman -Syu proterozoic
 	mkinitcpio -p linux
-
-#    networking
-# things it never did
-#    /boot/grub/menu.lst
+	grub-install --target=i386-pc --recheck --debug /dev/sda
+	grub-mkconfig -o /boot/grub/grub.cfg
+#  networking
 
 pkgs_always=(tor privoxy proterozoic)
 pkgs_x=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo,xrandr} xdotool \
@@ -40,5 +39,3 @@ pkgs_wireless=(wireless_tools wpa_supplicant b43-firmware iw) #wpa_actiond ifplu
 pkgs_laptop=(dhcpcd)
 pkgs_printer=(cups hplip a2ps)
 pkgs_other=(parted dmidecode base-devel amd-ucode intel-ucode)
-
-install_grub_ppz ${TARGET} $(unhash targmntboot) $(unhash targmnt) ${HOSTNAME}

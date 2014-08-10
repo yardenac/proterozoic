@@ -43,53 +43,6 @@ static_networking_from_runtime() {
 	 done
 }
 
-install_grub_ppz() { #USAGE: install_grub /media/targay /dev/sda1 hostname_of_target
-	 local TARGET=${1%%/}
-	 local BOOT_DEVICE_CN=${2}
-	 cp -af ${TARGET}/usr/lib/grub/i386-pc/* ${TARGET}/boot/grub/
-	 cp -f ${TARGET}{/usr/share/ppz/default/menu.lst,/boot/grub/menu.lst}
-	 local DMAPF=/tmp/grub-device-map-ppz
-	 echo "quit" | ${TARGET}/sbin/grub --no-floppy --device-map ${DMAPF}
-	 local BOOT_RAWDEVICE=$(echo $BOOT_DEVICE_CN | sed 's/[0-9]*$//')
-	 local BOOT_PARTNUMBR=$(echo $BOOT_DEVICE_CN | sed 's/^[^0-9]*//')
-	 let BOOT_PARTNUMBR-- || echo "partition number was zero -- wtf??"
-	 local BIOS_HDNUM=$(awk '$2 == "'$BOOT_RAWDEVICE'" {gsub(/[()]/,"",$1);print $1}' ${DMAPF})
-	 local GRUB_DEV="(${BIOS_HDNUM},${BOOT_PARTNUMBR})"
-	 local ROOT_UUID=$(blkid -o value -s UUID ${3})
-	 sed -i \
-		  -e s/%SET_HOSTNAME%/${4// 	}/ig \
-		  -e s/%SET_BOOTPART%/${GRUB_DEV}/ig \
-		  -e 's/%SET_ROOT_DEVICE%/\/dev\/disk\/by-uuid\/'${ROOT_UUID//\//\\\/}/ig ${TARGET}/boot/grub/menu.lst
-	 while :; do
-		 usetvar confirm GRUBPW "Enter a (raw) grub password, if you like: " '' '' -s # unset so doesnt need to be local
-		 [ "$GRUBPW" ] || break
-		 local GHASH=$(echo -e "md5crypt\n${GRUBPW}\nquit" | ${TARGET}/sbin/grub --no-floppy \
-			  --batch --device-map ${DMAPF} | sed 's/^Encrypted: //ig;t;d') #sed commands: only print if matched
-		 [ "$GHASH" ] && [ "$GHASH" = "${GHASH// }" ] \
-			  && sed -i 's/%SET_PASSWORD%/'${GHASH//\//\\\/}'/ig' ${TARGET}/boot/grub/menu.lst \
-			  || echo_red "Setting grub password failed somehow..."
-		 break
-	 done
-	 unset GHASH GRUBPW GRUBPWDUB
-	 sed -i 's/\(^.*%SET_PASSWORD%\)/#\1/ig' ${TARGET}/boot/grub/menu.lst
-	 sed 's/^/#/ig' ${DMAPF} >> ${TARGET}/boot/grub/menu.lst
-	 blkid | sed 's/^/#/ig' >> ${TARGET}/boot/grub/menu.lst
-	 grep -iqE '^[^#].*%SET_' ${TARGET}/boot/grub/menu.lst && askyn "Something is still wrong with
-					${TARGET}/boot/grub/menu.lst. You should really check it..."
-	 read -d W GRUBCOMMANDS <<-EOF
-
-		device ($BIOS_HDNUM) $BOOT_RAWDEVICE
-		geometry ($BIOS_HDNUM)
-		root ($BIOS_HDNUM,$BOOT_PARTNUMBR)
-		setup ($BIOS_HDNUM)
-		EOF
-	 askyn "ENTER to Install grub in MBR of ${BOOT_RAWDEVICE} aka ($BIOS_HDNUM),
-					pointing to ${BOOT_DEVICE_CN} aka ($BIOS_HDNUM,$BOOT_PARTNUMBR),
-					as follows: ${GRUBCOMMANDS}" && {
-		  echo "$GRUBCOMMANDS" | ${TARGET}/sbin/grub --no-floppy --batch --device-map ${DMAPF}
-	 }
-#		  rm -f ${DMAPF}
-}
 format_ext4() { local BBOPT=q
 	 case "$1" in
 		  automatic|auto) shift;;
