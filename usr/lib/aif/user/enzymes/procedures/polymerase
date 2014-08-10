@@ -16,14 +16,14 @@ sudo mv -i /etc/mkinitcpio.conf{,.orig}
 sudo cp /etc/mkinitcpio.conf.ppz /mnt/etc/mkinitcpio.conf # add modules: radeon nvidia intel_agp i915
 genfstab -U -p /mnt | sudo tee -a /mnt/etc/fstab
 
-# for flashing bios
+# for flashing bios - remember to undo afterwards!
 curl -o biosimg.exe $url
 sudo biosdisk mkimage -i /mnt/boot/flashbios.img biosimg.exe
 sudo cp /usr/lib/syslinux/bios/memdisk /mnt/boot/
-cat >> /mnt/etc/grub.d/40_custom <<EOF
+sudo tee -a /mnt/etc/grub.d/40_custom <<EOF
    menuentry "Flash BIOS" {
-      linux16 /boot/memdisk
-      initrd16 /boot/flashbios.img
+      linux16 /memdisk
+      initrd16 /flashbios.img
    }
 EOF
 
