@@ -19,6 +19,17 @@ genfstab -U -p /mnt | sudo tee -a /mnt/etc/fstab
 
 # add modules to mkinitcpio.conf like: radeon nvidia intel_agp i915
 
+# for flashing bios
+curl -o biosimg.exe $url
+sudo biosdisk mkimage -i /mnt/boot/flashbios.img biosimg.exe
+sudo cp /usr/lib/syslinux/bios/memdisk /mnt/boot/
+cat >> /mnt/etc/grub.d/40_custom <<EOF
+   menuentry "Flash BIOS" {
+      linux16 /boot/memdisk
+      initrd16 /boot/flashbios.img
+   }
+EOF
+
 arch-chroot /mnt
 	pacman -Syu "${pkgs[@]}"
 	pacman -Syu proterozoic
