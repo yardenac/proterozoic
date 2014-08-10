@@ -703,15 +703,12 @@ is() {
 		  xz|xzip)
 					str='^application/x-xz;';;
 		  pkg)
-				str='^application/x-(xz|tar);';;
+				str='^application/x-(xz|tar);';; # repo-drop
 		  gz|gzip|db)
-					str='^application/x-gzip;';;
-		  c)		str='^text/x-c;';;
-		  plain)	str='^text/plain;';;
-		  xml)	str='^application/xml;';;
-		  jar)	str='^application/jar;';;
-		  zip)	str='^application/zip;';;
-		  dvd)	srt='^application/x-iso9660-image;';;
+					str='^application/x-gzip;';; # ckrepo repo-drop
+		  c)		str='^text/x-c;';; # ct
+		  plain)	str='^text/plain;';; # fit
+		  dvd)	srt='^application/x-iso9660-image;';; # mountdvd
 		  *)		for arg; do
 						[ -a "$arg" ] || return 1
 					done
