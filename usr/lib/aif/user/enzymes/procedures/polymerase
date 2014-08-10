@@ -2,8 +2,12 @@
 
 exit
 
-# things it did
-#    pacman.conf
+mkdir -p /mnt/base/etc/pacman.d
+sed -e 's/^IgnorePkg[ =]*/\0 linux-linode /ig' \
+    -e s/https-only/https-only.random/ig \
+    /usr/share/ppz/default/pacman.conf | \
+    sudo tee /mnt/etc/pacman.conf
+sudo cp /etc/pacman.d/mirrorlist.https-only.random /mnt/etc/pacman.d/
 
 pacstrap /mnt base
 sudo bash -c 'echo $hostname > /mnt/etc/hostname'
