@@ -1,2 +1,2 @@
-HOOKS="systemd autodetect modconf block filesystems fsck ppz_tmp" # raid encrypt_ppz ide pata scsi
+HOOKS="systemd autodetect modconf block filesystems fsck ppz_tmp" # raid lvm2 encrypt_ppz ide pata scsi
 MODULES="fuse"
