@@ -49,6 +49,21 @@ EOF
         echo "Use 'cryptdevice=${root}:root root=/dev/mapper/root' instead."
     }
 
+    local hdMount=false headerDir=/boot
+    if [ -n "${headerdev}" ]; then
+       until [ -b "${headerdev}" ]; do
+          read -n 1 -p "Cannot find ${headerdev}. Try again? [*/n] " userkey
+          [ "${userkey}" = n ] && break
+       done
+       hdtype=$(blkid -s TYPE -o value "${headerdev}")
+       if [ "${hdtype}" = ext4 ]; then
+          hdMount=true
+          headerDir=/hd
+          mkdir -p $headerDir
+          mount "${headerdev}" $headerDir
+       fi
+    fi
+
     local headerFlag=false
     for cryptopt in ${cryptoptions//,/ }; do
         case ${cryptopt} in
@@ -56,7 +71,7 @@ EOF
                 cryptargs="${cryptargs} --allow-discards"
                 ;;
             header)
-                cryptargs="${cryptargs} --header /boot/header.img"
+                cryptargs="${cryptargs} --header $headerDir/header.img"
                 headerFlag=true
                 ;;
             *)
@@ -150,6 +165,10 @@ EOF
         fi
     fi
     rm -f ${ckeyfile}
+
+    if $hdMount; then
+       umount /hd
+    fi
 }
 
 # vim: set ft=sh ts=4 sw=4 et:
