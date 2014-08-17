@@ -83,8 +83,19 @@ EOF
                 echo "A password is required to access the ${cryptname} volume:"
 
                 #loop until we get a real password
-                while ! eval cryptsetup open --type luks ${resolved} ${cryptname} ${cryptargs} ${CSQUIET}; do
-                    sleep 2;
+                local csnum=5
+                while true; do
+                   if cryptsetup open --type luks ${resolved} ${cryptname} ${cryptargs} --verbose; then
+                      break
+                   else
+                      let csnum--
+                      if [ $csnum -gt 0 ]; then
+                         sleep 2
+                         continue
+                      fi
+                      PS1='[rootfs \W]\$ ' sh -i 0</dev/console 1>/dev/console 2>/dev/console
+                      return
+                   fi
                 done
             fi
             if [ -e "/dev/mapper/${cryptname}" ]; then
