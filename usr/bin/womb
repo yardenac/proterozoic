@@ -76,7 +76,7 @@
 		  git add --all .
 		  git commit -m setup
 
-		  exec /usr/bin/xinit -- /usr/bin/X vt4 -f 0 -nolisten tcp -retro
+		  exec /usr/bin/xinit -- /usr/bin/X vt3 -f 0 -nolisten tcp -retro
 
 		  exit $? #this makes respawn work
 	 }
