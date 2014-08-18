@@ -70,7 +70,7 @@
 
 		  . /etc/ppz.conf
 		  if [ "$WALLPAPER" ]; then
-				sed -e "s%/usr/share/ppz/wallpaper%$WALLPAPER%" ~/.fvwm/config
+				sed -i "s%/usr/share/ppz/wallpaper%$WALLPAPER%" ~/.fvwm/config
 		  fi
 
 		  git add --all .
