@@ -27,7 +27,7 @@ random_mac() {
 }
 avail_known_ssid() {
 	 comm -12 \
-		  <(iwlist wlan0 scan | awk '/ESSID:"/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' | sed '/^[   ]*$/d' | sort -u) \
+		  <(iwlist $1 scan | awk '/ESSID:"/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' | sed '/^[   ]*$/d' | sort -u) \
 		  <(awk '/^#/ {FS=":";$0=$0;print $2} /ssid="/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' "$WPA_SC") \
 		  | first-or-fail
 }
@@ -49,7 +49,7 @@ while :; do
 		  sleep 2
 		  case $(cat /sys/class/net/$if/device/class) in
 				0x028000) # wireless
-					 until ssid=$(avail_known_ssid); do
+					 until ssid=$(avail_known_ssid $if); do
 						  stamp "No available networks ... waiting 5"
 						  sleep 5
 					 done
