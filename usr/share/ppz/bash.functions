@@ -575,22 +575,6 @@ test_network() {
 		  return 1
 	 done
 }
-sleepinc() {
-	 local SLEEPINC=1.5
-	 echo_blue_n $( date +%a\ %H:%M:%S ) "$1"
-	 local end_msg=$2
-	 shift 2
-	 echo -n .
-	 until "$@"; do
-		  echo -n .
-		  sleep $SLEEPINC
-		  SLEEPINC=$(echo "scale=30; $SLEEPINC*1.2" | bc)
-	 done
-	 echo_blue "$end_msg"
-}
-wait-for-network() {
-	 sleepinc "Testing for internet" " yay, internet is up!" test_network_once
-}
 ramsize() { #returns size of system's ram in megabytes
 	 awk '/MemTotal:/ { printf ("%0.0f\n",$2/1024); }' /proc/meminfo
 }
