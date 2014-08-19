@@ -49,11 +49,15 @@ EOF
         echo "Use 'cryptdevice=${root}:root root=/dev/mapper/root' instead."
     }
 
-    local hdMount=false headerDir=/boot
+    local hdMount=false headerDir=/boot c=10
     if [ -n "${headerdev}" ]; then
        until [ -b "${headerdev}" ]; do
-          read -n 1 -p "Cannot find ${headerdev}. Try again? [*/n] " userkey
-          [ "${userkey}" = n ] && break
+          if [ $c -le 0 ]; then
+             read -n 1 -p "Cannot find ${headerdev}. Try again? [*/n] " userkey
+             [ "${userkey}" = n ] && break
+          fi
+          let c--
+          sleep 0.5
        done
        hdtype=$(blkid -s TYPE -o value "${headerdev}")
        if [ "${hdtype}" = ext4 ]; then
