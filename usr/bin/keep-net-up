@@ -33,7 +33,7 @@ avail_known_ssid() {
 }
 
 while :; do
-	 test_network_continuously 45
+	 test_network -n0 -t10 -w45
 	 stamp "Network down!"
 	 dhcpcd -k
 	 pkill -x --signal SIGTERM dhcpcd

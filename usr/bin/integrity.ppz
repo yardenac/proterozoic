@@ -253,7 +253,7 @@ integrity_iptables() {
 	 rm -f $tmp_is $tmp_should
 }
 integrity_net() {
-	 if test_network_once 5; then
+	 if test_network -t5; then
 		  ! python-ntp && am_root && askyn "Sync kernel & hwclock with ntpdate?" && {
 				ntpdate pool.ntp.org
 				echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
