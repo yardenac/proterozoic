@@ -1,0 +1,11 @@
+[Unit]
+Description=ssh -R as user
+After=network.target
+
+[Service]
+User=%i
+ExecStart=/usr/bin/sshr
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

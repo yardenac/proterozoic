@@ -1,0 +1,46 @@
+#!/usr/bin/bash
+
+. /etc/ppz.conf
+. /usr/share/ppz/bash.functions
+
+# wait for homedir - rapidly for a bit, then every minute
+c=61
+until [ -d "$HOME" ] && [ -O "$HOME" ]; do
+	 sleep=$(( 61 / $c ))
+	 echo_red "$c) No homedir - waiting another $sleep seconds for $HOME"
+	 sleep $sleep
+	 [ $(( $c - 5 )) -gt 0 ] && let c-=5 || continue
+done
+
+# use this host's first ssh port, or a random one
+if (( ${#SSH_PORTS} )); then
+	 port="${SSH_PORTS[0]}"
+else
+	 port=$(( RANDOM + 32767 ))
+fi
+
+# figure out remote host
+rhostfile=$HOME/.ssh/remote-bind-host
+[ -s $rhostfile ] && rhost=$(cat $rhostfile)
+
+# parse args
+verbose=false
+for arg; do
+	[[ "$arg" =~ ^[0-9]+$ ]] && port=$arg && continue
+	case "$arg" in
+		 -h|--help) echo "USAGE: sshr [remotehost] [port]" && exit;;
+		 -v|--verbose) verbose=true;;
+		 *) rhost=$arg;;
+	esac
+done
+
+# verify remote host is configured for autoconnect
+grep -qE "^Host $rhost\$" $HOME/.ssh/config || {
+	 echo_red "Host [$rhost] is not in $HOME/.ssh/config" >2
+	 exit 1
+}
+
+$verbose && echo "about to test network"
+test_network -t10 || exit 1
+
+say_and_do ssh -NR $port:localhost:$port -S ~/.ssh/master-sshr-%u-%r-%h-%p $rhost #read -N 1 -p CONNECTED... # -t
