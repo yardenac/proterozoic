@@ -252,20 +252,6 @@ integrity_iptables() {
 
 	 rm -f $tmp_is $tmp_should
 }
-integrity_net() {
-	 if test_network -t5; then
-		  ! python-ntp && am_root && askyn "Sync kernel & hwclock with ntpdate?" && {
-				ntpdate pool.ntp.org
-				echo "0.0 0 0.0" > /var/lib/hwclock/adjtime
-				hwclock --systohc --utc
-		  }
-	 else
-		  echo -n "No fast connectivity... Local system time: "
-		  echo_red $(date '+%l:%M:%S (%A %B %e, %Y)')
-		  return
-	 fi
-	 return 0
-}
 integrity_encdev() {
 	 local size arg name type dev{,_canon,_intermediate} mountpoint mapname loop mem iters IFS=$'\n\r\t '
 
@@ -647,7 +633,7 @@ integrity_sensors() {
 #      post_upgrade
 
 for F in rootpw locales tz simpleconf hosts users \
-	 iptables net encdevs bashhistory emacsd tmpdir sshd \
+	 iptables encdevs bashhistory emacsd tmpdir sshd \
 	 sensors everyone; do
 
 	 integrity_${F} || echo "${F} failed..."
