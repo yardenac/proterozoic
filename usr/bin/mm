@@ -33,10 +33,10 @@ set_xtitle "[mm] $*"
 	 trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
 }
 
-ionice -c 2 -n 0 nice -n -5 mpv --geometry=${x}:${y} -fs --ao=alsa --no-lirc \
+ionice -c 2 -n 0 nice -n -5 mpv --geometry=${x}:${y} -fs --ao=alsa --no-input-lirc \
 	 --alang=en --slang=en \
-	 --stop-screensaver --msglevel=all=no:statusline=status:cache=info:network=info \
-	 --cache-default=20480 --cache-min=1 --no-input-default-bindings \
+	 --stop-screensaver --msg-level=all=no:statusline=status:cache=info:network=info \
+	 --cache-initial=1024 --no-input-default-bindings \
 	 --input-conf=/usr/share/ppz/mplayer.input.conf "${args[@]}"
 
 echo
