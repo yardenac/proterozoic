@@ -43,4 +43,4 @@ grep -qE "^Host $rhost\$" $HOME/.ssh/config || {
 $verbose && echo "about to test network"
 test_network -t10 || exit 1
 
-say_and_do ssh -NR $port:localhost:$port $rhost #read -N 1 -p CONNECTED... # -t
+say_and_do exec ssh -NR $port:localhost:$port $rhost #read -N 1 -p CONNECTED... # -t
