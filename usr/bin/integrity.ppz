@@ -556,7 +556,6 @@ integrity_sshd() {
 		PasswordAuthentication no
 		PubkeyAuthentication yes
 		ChallengeResponseAuthentication no
-		PreferredAuthentications publickey
 		UsePrivilegeSeparation sandbox
 		UsePAM yes
 		X11Forwarding no
