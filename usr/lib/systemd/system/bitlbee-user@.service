@@ -6,6 +6,9 @@ Requires=bitlbee-user-setup@%i.service
 
 [Service]
 User=%i
+ProtectSystem=full
+PrivateTmp=true
+NoNewPrivileges=true
 ExecStartPre=/usr/bin/mkdir -p %h/.config/bitlbee
 ExecStartPre=/usr/bin/chmod 700 %h/.config/bitlbee
 ExecStart=/usr/sbin/bitlbee -F -n -c %h/.config/bitlbee/bitlbee.conf -d %h/.config/bitlbee

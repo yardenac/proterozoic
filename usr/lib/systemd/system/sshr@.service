@@ -4,6 +4,9 @@ After=network.target
 
 [Service]
 User=%i
+ProtectSystem=full
+PrivateTmp=true
+NoNewPrivileges=true
 ExecStart=/usr/bin/sshr
 Restart=always
 RestartSec=10

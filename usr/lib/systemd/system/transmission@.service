@@ -5,6 +5,9 @@ Description=Transmission-Daemon as user
 [Service]
 User=%i
 Nice=19
+ProtectSystem=full
+PrivateTmp=true
+NoNewPrivileges=true
 IOSchedulingClass=idle
 Environment=TRANSMISSION_HOME=%h
 ExecStart=/usr/bin/transmission-daemon -g %h/.config/transmission-daemon -f

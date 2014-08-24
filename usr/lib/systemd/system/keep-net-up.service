@@ -5,6 +5,10 @@ Before=network.target
 Conflicts=network@.service dhcpcd@.service
 
 [Service]
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
 ExecStart=/usr/bin/keep-net-up
 
 [Install]
