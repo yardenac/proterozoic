@@ -13,7 +13,15 @@ notifempty
 #delaycompress
 
 /var/log/wtmp {
-	 size 1M
-    create 0664 root root
+	 monthly
+	 minsize 1M
+    create 0664 root utmp
+	 rotate 1
+}
+
+/var/log/btmp {
+	 monthly
+    create 0600 root utmp
+	 rotate 1
 }
 
