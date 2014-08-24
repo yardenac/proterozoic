@@ -549,7 +549,6 @@ integrity_sshd() {
 		${PORT_TXT}ListenAddress 0.0.0.0
 		Protocol 2
 		LoginGraceTime 2m
-		MACs hmac-sha2-512-etm@openssh.com
 		RekeyLimit 200M 6H
 		PermitRootLogin no
 		MaxAuthTries 3
@@ -557,15 +556,13 @@ integrity_sshd() {
 		PasswordAuthentication no
 		PubkeyAuthentication yes
 		ChallengeResponseAuthentication no
+		PreferredAuthentications publickey
 		UsePrivilegeSeparation sandbox
 		UsePAM yes
 		X11Forwarding no
-		#X11DisplayOffset 10
 		PrintMotd no
 		PrintLastLog no
-		#UseLogin no
 		MaxStartups 3
-		#PermitTunnel no
 		IgnoreRhosts yes
 		HostBasedAuthentication no
 		PermitEmptyPasswords no

@@ -1,8 +1,9 @@
 Host *
-HashKnownHosts yes
+HashKnownHosts no
 StrictHostKeyChecking ask
 GSSAPIAuthentication yes
 GSSAPIDelegateCredentials no
+Protocol 2
 TCPKeepAlive no
 ServerAliveInterval 60
 ServerAliveCountMax 10
