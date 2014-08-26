@@ -1,21 +1,29 @@
 #!/usr/bin/bash
 
+tor=true
 proxy=--proxy-server=localhost:8118
 resolv='--host-resolver-rules=MAP * 0.0.0.0'
 urls=()
 for arg; do
 	 [[ "$arg" =~ ^[0-9]+$ ]] && {
 		  proxy=--proxy-server=socks5://localhost:"$arg"
+		  tor=false
 		  continue
 	 }
 	 case "$arg" in
 		  tor)     :;;
-		  noproxy) proxy=''; resolv='';;
+		  noproxy) proxy=''; resolv=''; tor=false;;
 		  *)       urls+=("$arg");;
 	 esac
 done
 
-(( "${#urls[@]}" )) || urls=('http://3g2upl4pq6kufc4m.onion/?kp=-1&kf=w&kk=-1&k1=-1&ko=s')
+(( "${#urls[@]}" )) || {
+	 if $tor; then
+		  urls=('http://3g2upl4pq6kufc4m.onion/?kp=-1&kf=w&kk=-1&k1=-1&ko=s')
+	 else
+		  urls=('chrome://version')
+	 fi
+}
 
 . /usr/share/ppz/bash.functions
 
