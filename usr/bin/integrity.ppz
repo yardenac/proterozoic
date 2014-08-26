@@ -135,29 +135,7 @@ integrity_hosts() {
 				return 1
 		  fi
 	 }
-
-	 # /etc/hosts
-	 local OLDFILE=/etc/hosts
-	 local NEWFILE=/tmp/root.etchosts.$(uniq_token)
-	 {
-		  cat <<-EOF
-			THISVER 2012101901
-			ASSIGN 127.0.0.1		localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
-			ASSIGN ::1				localhost.localdomain   localhost ${HOSTNAME} ${HOSTNAME_ALIASES}
-			ASSIGN fe00::0			ip6-localnet
-			ASSIGN ff00::0			ip6-mcastprefix
-			ASSIGN ff02::1			ip6-allnodes
-			ASSIGN ff02::2			ip6-allrouters
-			ASSIGN ff02::3			ip6-allhosts
-			EOF
-		  cat ${OLDFILE}
-	 } | awk -f /usr/share/ppz/awk-hosts > ${NEWFILE}
-	 cmp -s ${OLDFILE} ${NEWFILE} || {
-		  mv ${OLDFILE}{,.orig.$(uniq_token)}
-		  mv ${NEWFILE} ${OLDFILE}
-		  echo ${HOSTNAME} >| /proc/sys/kernel/hostname
-	 }
-	 rm -f ${NEWFILE}
+#		  echo ${HOSTNAME} >| /proc/sys/kernel/hostname
 }
 integrity_users() {
 	 am_root || return 0
