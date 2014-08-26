@@ -179,8 +179,7 @@ integrity_users() {
 		  # if we're still here, u_home is now a real path :)
 		  # it's not the job of this function to CREATE the path
 		  # if user isn't in passwd, create it
-		  # this should use getent, not grep! TODO
-		  grep -qiE "^${u_name}:" /etc/passwd || {
+		  getent passwd "${u_name}" >/dev/null || {
 				echo_red "adding user ${u_name}!"
 				useradd -lMNd ${u_home} -u ${u_nums%%:*} -g ${u_nums##*:} -s ${v[4]} ${u_name}
 				echo $u_name:\' | chpasswd
@@ -195,7 +194,7 @@ integrity_users() {
 				luser=${luser#@}
 
 				# make user
-				grep -q ^$luser: /etc/passwd || {
+				getent passwd $luser >/dev/null || {
 					 useradd -lMNd /home/$luser -u 5433$uc -u 100 -s /usr/bin/false $luser
 					 pw=$(random_password)
 					 echo $luser:$pw | chpasswd
