@@ -4,7 +4,6 @@ StrictHostKeyChecking ask
 GSSAPIAuthentication yes
 GSSAPIDelegateCredentials no
 Protocol 2
-PreferredAuthentications publickey
 TCPKeepAlive no
 ServerAliveInterval 60
 ServerAliveCountMax 10
