@@ -10,6 +10,8 @@ ProtectHome=true
 PrivateTmp=true
 NoNewPrivileges=true
 ExecStart=/usr/bin/keep-net-up
+ExecStop=/usr/bin/dhcpcd -k
+ExecStopPost=/usr/bin/ip route flush default
 
 [Install]
 WantedBy=network.target
