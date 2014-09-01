@@ -4,5 +4,5 @@ CREATE TABLE keywords (id INTEGER PRIMARY KEY,short_name VARCHAR NOT NULL,keywor
 INSERT INTO "keywords" VALUES(2,'DuckDuckGo','ddg.gg','','http://3g2upl4pq6kufc4m.onion/?kp=-1&kf=w&kk=-1&k1=-1&ko=s&q={searchTerms}',0,'',0,0,'',1,'',0,0,'',0,'330CC093-DDD7-3906-E3BE-1D600B4ACE3D','[]','','','','','','','');
 CREATE TABLE meta(key LONGVARCHAR NOT NULL UNIQUE PRIMARY KEY, value LONGVARCHAR);
 INSERT INTO "meta" VALUES('Default Search Provider ID','2');
-INSERT INTO "meta" VALUES('version','56');
+INSERT INTO "meta" VALUES('version','57');
 COMMIT;
