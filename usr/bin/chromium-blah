@@ -3,6 +3,7 @@
 tor=true
 proxy=--proxy-server=localhost:8118
 resolv='--host-resolver-rules=MAP * 0.0.0.0'
+configdir=/etc/skel.ppz/.config/chromium
 urls=()
 for arg; do
 	 [[ "$arg" =~ ^[0-9]+$ ]] && {
@@ -13,6 +14,7 @@ for arg; do
 	 case "$arg" in
 		  tor)     :;;
 		  noproxy) proxy=''; resolv=''; tor=false;;
+		  mine)    configdir="${HOME}/.config/chromium";;
 		  *)       urls+=("$arg");;
 	 esac
 done
@@ -31,7 +33,7 @@ uniqtok=$(uniq_token)
 
 uniqdir="$HOME/.config/chromium.$uniqtok"
 
-cp -r /etc/skel.ppz/.config/chromium "$uniqdir"
+cp -r "$configdir" "$uniqdir"
 
 chromium --incognito --load-extension=/usr/share/https-everywhere-chrome-git --user-data-dir="$uniqdir" "$proxy" "$resolv" "${urls[@]}"
 
