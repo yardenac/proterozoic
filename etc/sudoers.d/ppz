@@ -1,3 +1,4 @@
+Defaults env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"
 %wheel ALL=(ALL) ALL
 %wheel ALL=(ex) NOPASSWD: /usr/bin/FvwmCommand
 %wheel ALL=(root) NOPASSWD: /usr/bin/su -s /usr/bin/bash - wp1
