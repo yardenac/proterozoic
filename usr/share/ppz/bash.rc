@@ -12,12 +12,13 @@ for NEWDIR in $(in_2_but_not_in_1 "$GOODPATH" "$PATH"); do case $NEWDIR in
 	/opt/qt/bin|\
 	/usr/lib/qt4/bin|\
 	/usr/share/java/apache-ant/bin|\
-	/usr/bin/vendor_perl|\
 	/opt/opencascade/bin|\
-	/usr/bin/core_perl)					GOODPATH=$GOODPATH:$NEWDIR;;
+	/usr/bin/core_perl|\
+	/usr/bin/site_perl|\
+	/usr/bin/vendor_perl)            GOODPATH=$GOODPATH:$NEWDIR;;
 	/usr/local/bin|\
-	/usr/local/sbin)						: ;; # we don't want these
-	*)											echo weird path component: $NEWDIR;;
+	/usr/local/sbin)                 : ;; # we don't want these
+	*)                               echo weird path: $NEWDIR;;
 esac; done
 has_hardstatus
 PS1="$(appropriate_ps1)"
