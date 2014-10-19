@@ -2,6 +2,8 @@
 
 # Check an arch repository for AUR updates
 
+export cower='cower --timeout=60'
+
 vergt () {
 	 [ "$1" = "$2" ] && return 1
 	 [ "$(vercmp "$1" "$2")" -gt 0 ]
@@ -23,17 +25,17 @@ ck_pkg() {
 	 (( "${#pkgdeets[@]}" )) || return 1
 	 name=${pkgdeets[0]}
 	 vers_here=${pkgdeets[1]}
-	 vers_there=$(cower --search --format="%v" "^${name}$") || {
+	 vers_there=$($cower --search --format="%v" "^${name}$") || {
 		  echo_red "package not in AUR: $name"
 		  return 1
 	 }
-	 flagged=$(cower --search --format="%t" "^${name}$")
+	 flagged=$($cower --search --format="%t" "^${name}$")
 	 [ "$flagged" = no ] && [ "$vers_here" = "$vers_there" ] && {
 		  [[ $verbose == y ]] && echo_blue "$name $vers_here "
 		  return
 	 }
 	 if vergt "$vers_here" "$vers_there"; then
-		  url=$(cower --search --format="%u" "^${name}$")
+		  url=$($cower --search --format="%u" "^${name}$")
 		  giturl=$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')
 		  [ "$giturl" ] || {
 				echo_blue_n "$name $vers_here "
