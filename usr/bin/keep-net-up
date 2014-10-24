@@ -74,8 +74,9 @@ while :; do
 				*) croak "$if: weird device";;
 		  esac
 
-		  echo now dhcp...
-		  dhcpcd -Bt 30 $if &>> $dhcp_file &
+		  hostname=$(rando oneword)
+		  echo now dhcp with hostname: $hostname ...
+		  dhcpcd -Bt 30 -h $hostname $if &>> $dhcp_file &
 		  tailtimed 20 $dhcp_file leased || echo "no lease"
 		  continue 2
 	 done
