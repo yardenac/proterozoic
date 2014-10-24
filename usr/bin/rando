@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+
+export COLUMNS=$(tput cols)
+
+# a bunch of password nonsense
+rand=80
+while let rand--; do
+	 random_password 25 31
+done | column
+
+# a bunch of words
+echo $(aspell -d en dump master | aspell -l en expand | sort -Ru | head -n 150)
