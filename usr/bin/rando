@@ -1,5 +1,11 @@
 #!/usr/bin/bash
 
+rando_oneword() {
+   word=$(aspell -d en dump master | aspell -l en munch-list single \
+           | aspell -l en expand | awk '{print $1}'\
+           | sort -Rs | head -n 1)
+	echo ${word,,}
+}
 
 rando_manypws() {
    export COLUMNS=$(tput cols)
