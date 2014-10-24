@@ -1,12 +1,28 @@
 #!/usr/bin/bash
 
-export COLUMNS=$(tput cols)
 
-# a bunch of password nonsense
-rand=80
-while let rand--; do
-	 random_password 25 31
-done | column
+rando_manypws() {
+   export COLUMNS=$(tput cols)
+   rand=${1:-80}
+   while let rand--; do
+      random_password 25 31
+   done | column
+}
 
-# a bunch of words
-echo $(aspell -d en dump master | aspell -l en expand | sort -Ru | head -n 150)
+rando_manywords() {
+   echo $(aspell -d en dump master | aspell -l en expand \
+      | sort -Ru | head -n 150)
+}
+
+functions=()
+for arg; do
+	 functions+=$arg
+done
+
+(( ${#functions[@]} )) || functions=(manypws manywords)
+
+for f in "${functions[@]}"; do
+	 if [ "$(type -t "rando_$f" 2>/dev/null)" = function ]; then
+		  "rando_$f"
+	 fi
+done
