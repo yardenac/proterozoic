@@ -1,0 +1,16 @@
+user_pref("extensions.torbutton.block_disk", false);
+user_pref("extensions.torbutton.custom.socks_host", "127.0.0.1");
+user_pref("extensions.torbutton.custom.socks_port", 9050);
+user_pref("extensions.torbutton.inserted_button", true);
+user_pref("extensions.torbutton.launch_warning", false);
+user_pref("extensions.torbutton.loglevel", 2);
+user_pref("extensions.torbutton.logmethod", 0);
+user_pref("extensions.torbutton.settings_method", custom);
+user_pref("extensions.torbutton.socks_port", 9050);
+user_pref("extensions.torbutton.use_privoxy", false);
+user_pref("extensions.torlauncher.control_port", 9151);
+user_pref("extensions.torlauncher.loglevel", 2);
+user_pref("extensions.torlauncher.logmethod", 0);
+user_pref("extensions.torlauncher.prompt_at_startup", false);
+user_pref("extensions.torlauncher.start_tor", false);
+user_pref("extensions.torlauncher.stretchmark", "stretchmark");

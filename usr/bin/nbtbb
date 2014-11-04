@@ -1,0 +1,21 @@
+#!/usr/bin/bash
+#
+# "less-bullshit tor-browser-bundle launcher"
+
+. /usr/share/ppz/bash.functions
+
+uniqtok=$(uniq_token)
+uniqdir=$HOME/.config/tbb.$uniqtok
+rm -rf $uniqdir
+mkdir -p $uniqdir
+
+tarball=( /opt/tor-browser-en/tor-browser-linux*_en-US.tar.xz )
+tar --strip-components=1 -xJf ${tarball[0]} -C $uniqdir
+
+cd $uniqdir
+
+prefsjs=$uniqdir/Browser/TorBrowser/Data/Browser/profile.default/prefs.js
+
+./start-tor-browser --class Tor\ Browser "${@}"
+
+rm -rf "$uniqdir"

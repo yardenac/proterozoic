@@ -122,6 +122,28 @@ integrity_simpleconf() {
 		  am_root && askyn "Update from $WPA_SC ... ?" && cp -f "$WPA_SC" "$wpaf"
 	 fi
 }
+integrity_tbb() {
+	 am_root || return 0
+
+	 # quick check if installed, then expensive version check
+	 [ -d /opt/tor-browser-en ] || return 0
+	 local ver_sys=($(pacman -Q tor-browser-en 2>/dev/null)) || return 0
+	 ver_sys=${ver_sys[1]}
+
+	 # if extracted version >= system version, quit
+	 local ver_ext= verfile=/opt/tor-browser-en/version-extracted
+	 read ver_ext < $verfile
+	 [ "$(vercmp "$ver_ext" "$ver_sys")" -ge 0 ] && return 0
+
+	 # extract it
+	 local tarball=( /opt/tor-browser-en/tor-browser-linux*_en-US.tar.xz )
+	 local extdir=/opt/tor-browser-en/extracted
+	 rm -rf $extdir
+	 mkdir -p $extdir
+	 tar --strip-components=1 -xJf ${tarball[0]} -C $extdir
+
+	 echo $ver_sys >| $verfile
+}
 integrity_users() {
 	 am_root || return 0
 
@@ -592,7 +614,7 @@ integrity_sensors() {
 
 for F in rootpw locales tz simpleconf users \
 	 iptables encdevs bashhistory emacsd tmpdir sshd \
-	 sensors everyone; do
+	 sensors tbb everyone; do
 
 	 integrity_${F} || echo "${F} failed..."
 done
