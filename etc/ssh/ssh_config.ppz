@@ -7,6 +7,7 @@ Protocol 2
 TCPKeepAlive no
 ServerAliveInterval 60
 ServerAliveCountMax 10
+Compression no
 ControlMaster auto
 ControlPersist no
 ControlPath ~/.ssh/master-%u-%r-%h-%p

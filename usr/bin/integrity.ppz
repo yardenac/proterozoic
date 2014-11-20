@@ -515,6 +515,7 @@ integrity_sshd() {
 		PermitRootLogin no
 		MaxAuthTries 3
 		MaxSessions 15
+		Compression no
 		PasswordAuthentication no
 		PubkeyAuthentication yes
 		ChallengeResponseAuthentication no
