@@ -1,6 +1,7 @@
 {
    "browser": {
-      "enabled_labs_experiments": [ "accelerated-filters" ]
+      "enabled_labs_experiments": [ "accelerated-filters" ],
+      "custom_chrome_frame": false
    },
    "default_search_provider": {
       "synced_guid": "330CC093-DDD7-3906-E3BE-1D600B4ACE3D"
