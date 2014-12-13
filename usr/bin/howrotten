@@ -1,0 +1,22 @@
+#!/usr/bin/bash
+# check how bitrotten this arch machine is
+
+. /usr/share/ppz/bash.functions
+
+hostname=$(</etc/hostname)
+
+rot_uptime() {
+	 uptime -s | colrm 17
+}
+rot_pacman() {
+	 tail -n 1 /var/log/pacman.log | colrm 1 1 | colrm 17
+}
+
+do_rots() {
+	 local arg;
+	 for arg; do
+		  echo $(rot_$arg) $hostname $arg
+	 done
+}
+
+do_rots uptime pacman
