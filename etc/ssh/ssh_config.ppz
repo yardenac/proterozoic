@@ -12,3 +12,4 @@ ControlMaster auto
 ControlPersist no
 ControlPath ~/.ssh/master-%u-%r-%h-%p
 RekeyLimit 200M 6H
+KexAlgorithms curve25519-sha256@libssh.org

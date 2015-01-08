@@ -520,6 +520,7 @@ integrity_sshd() {
 		PubkeyAuthentication yes
 		ChallengeResponseAuthentication no
 		UsePrivilegeSeparation sandbox
+		KexAlgorithms curve25519-sha256@libssh.org
 		UsePAM yes
 		X11Forwarding no
 		PrintMotd no
