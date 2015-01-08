@@ -49,6 +49,7 @@ bind '"\e[A"':history-search-backward
 bind '"\e[B"':history-search-forward
 eval "`dircolors -b`"
 export PATH=${GOODPATH}
+export GPG_TTY=$(tty)
 export HISTCONTROL=ignoredups #$HISTCONTROL${HISTCONTROL+,}ignoredups
 export HISTSIZE=100000
 export HISTIGNORE="&"
