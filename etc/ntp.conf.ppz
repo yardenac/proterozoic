@@ -1,7 +1,7 @@
-server 0.north-america.pool.ntp.org iburst
-server 1.north-america.pool.ntp.org iburst
-server 2.north-america.pool.ntp.org iburst
-server 3.north-america.pool.ntp.org iburst
+server 0.arch.pool.ntp.org iburst
+server 1.arch.pool.ntp.org iburst
+server 2.arch.pool.ntp.org iburst
+server 3.arch.pool.ntp.org iburst
 #server clock.fmt.he.net iburst prefer
 restrict default ignore
 restrict 127.0.0.1
