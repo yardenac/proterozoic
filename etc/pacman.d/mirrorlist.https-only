@@ -18,4 +18,5 @@ Server = https://mirror.lastmikoi.net/archlinux/$repo/os/$arch
 Server = https://arch.localmsp.org/arch/$repo/os/$arch
 Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch
 Server = https://ftp.iitm.ac.in/archlinux/$repo/os/$arch
+Server = https://arch.static.lu/$repo/os/$arch
 #Server = https://forum.cse.yzu.edu.tw/Linux/archlinux/$repo/os/$arch # expired "free" cert
