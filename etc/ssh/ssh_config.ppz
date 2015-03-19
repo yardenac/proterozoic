@@ -12,3 +12,4 @@ ControlMaster auto
 ControlPersist no
 ControlPath ~/.ssh/master-%u-%r-%h-%p
 RekeyLimit 200M 6H
+UpdateHostkeys ask
