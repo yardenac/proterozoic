@@ -36,8 +36,9 @@ uniqdir="$HOME/.config/chromium.$uniqtok"
 cp -r "$configdir" "$uniqdir"
 
 ionice -c 2 -n 0 nice -n 10 \
-	 chromium --incognito --load-extension=/usr/share/https-everywhere-chrome-git \
-	 --ssl-version-min=tls1 \
-	 --user-data-dir="$uniqdir" "$proxy" "$resolv" "${urls[@]}"
+   chromium --incognito \
+      --load-extension=/usr/share/newsblurbackgroundtab-git,/usr/share/https-everywhere-chrome-git \
+      --ssl-version-min=tls1 \
+      --user-data-dir="$uniqdir" "$proxy" "$resolv" "${urls[@]}"
 
 rm -rf "$uniqdir" "$HOME/.cache/chromium.$uniqtok"
