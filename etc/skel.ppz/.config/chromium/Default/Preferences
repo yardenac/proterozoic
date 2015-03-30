@@ -18,6 +18,7 @@
          "url": "http://3g2upl4pq6kufc4m.onion/?kp=-1&kf=w&kk=-1&k1=-1&ko=s&q={searchTerms}"
       }
    },
+   "enable_do_not_track": true,
    "geolocation": {
       "default_content_setting": 2
    },
