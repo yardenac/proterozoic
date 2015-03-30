@@ -36,6 +36,9 @@
          "notifications": 2
       }
    },
+   "safebrowsing": {
+      "enabled": false
+   },
    "search": {
       "suggest_enabled": false
    },
