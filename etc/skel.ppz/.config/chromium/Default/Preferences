@@ -38,7 +38,8 @@
          "geolocation": 2,
          "mouselock": 2,
          "notifications": 2
-      }
+      },
+      "password_manager_enabled": false
    },
    "safebrowsing": {
       "enabled": false
