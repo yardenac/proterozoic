@@ -2,6 +2,9 @@
    "alternate_error_pages": {
       "enabled": false
    },
+   "autofill": {
+      "enabled": false
+   },
    "browser": {
       "enabled_labs_experiments": [ "accelerated-filters" ],
       "custom_chrome_frame": false
