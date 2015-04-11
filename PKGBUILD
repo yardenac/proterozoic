@@ -8,10 +8,11 @@ install=proterozoic.install
 backup=(etc/httpd/conf/{site-specific.conf,httpd.conf.ppz} etc/locale.conf)
 makedepends=(findutils coreutils net-tools gcc-multilib sqlite3)
 depends=(aspell-en cryptsetup sudo bc iptables iproute2 openssh ntp
-         emacs-nox emacs-php-mode bash-completion fgetty screen htop
-         openbsd-netcat diffutils)
+         bash-completion fgetty screen htop openbsd-netcat diffutils)
 optdepends=(
 	 'ddrescue:	rip-dvd, rhyppe'
+	 'emacs-nox:      stuff'
+	 'emacs-php-mode: stuff'
 	 'gnupg:		repo-drop'
 	 'jshon:		ckrepo, linode-implement'
 	 'less:		rip-dvd'
