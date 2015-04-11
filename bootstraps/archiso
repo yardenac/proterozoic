@@ -28,9 +28,10 @@ sed -i \
 GNUPGHOME=/etc/pacman.d/gnupg/ pacman-key -r 3020A074 --keyserver pgp.mit.edu
 pacman-key --lsign-key 3020A074
 pacman --noconfirm -Rs gnu-netcat
-pacman --noconfirm -Syu proterozoic
+pacman --noconfirm -Syu
 pacman --noconfirm -Scc
-pacman --noconfirm -S python2 mprime biosdisk-git
+pacman --noconfirm -S proterozoic
+#pacman --noconfirm -S python2 mprime biosdisk-git
 
 gpasswd -a eu wheel
 gpasswd -a eu systemd-journal
@@ -39,7 +40,7 @@ timedatectl set-timezone America/Los_Angeles
 systemctl start ip{,6}tables ntpd
 
 mkdir /etc/ssh/keys
-echo 'ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBACr529+8mpJaMbfeXKAYFba9nhnv6nTlDd7VwnTSQda2aJXuwOu/aRD8GImPhu789x/KZFCALi9wTboRUYEprEKAwBQzl1vhqs7ZRniieF0b8MeOJNt3mEw+dXokuApne93VM+3QO20Vu26MQy7YN43pUqELI7zyUdSPMRVpmmCwWo6aA==' \
+echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKZHaN9x2NGws2vXrOduIqUpUVRnqbPAGTZ/SS5YUUCR' \
 	 >| /etc/ssh/keys/eu
 
 echo REMINDER: ssh port is $sshport
