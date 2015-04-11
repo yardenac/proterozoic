@@ -227,7 +227,7 @@ integrity_encdev() {
 
 	 name=$3
 	 dev=$4
-	 size=32m
+	 size=16m
 	 mapname=$name
 	 mountpoint=/media/$name
 	 shift 4

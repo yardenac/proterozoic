@@ -17,7 +17,7 @@ sed -i \
 	 -e s/%SET_TYPE%/digo/ig \
 	 -e "s/somename/${1}/ig" \
 	 -e "s/\(SSH_PORTS=(\)22)/\1${2})/ig" \
-	 -e 's/32m$/128m/ig' \
+	 -e 's/16m$/128m/ig' \
 	 -e 's/^#*:[\t ]*sync.*$/#&/ig' \
 	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/ppz.conf
 
