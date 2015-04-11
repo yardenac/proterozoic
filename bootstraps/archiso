@@ -28,8 +28,9 @@ sed -i \
 GNUPGHOME=/etc/pacman.d/gnupg/ pacman-key -r 3020A074 --keyserver pgp.mit.edu
 pacman-key --lsign-key 3020A074
 pacman --noconfirm -Rs gnu-netcat
-pacman --noconfirm -Syu proterozoic python2 mprime biosdisk-git
+pacman --noconfirm -Syu proterozoic
 pacman --noconfirm -Scc
+pacman --noconfirm -S python2 mprime biosdisk-git
 
 gpasswd -a eu wheel
 gpasswd -a eu systemd-journal
