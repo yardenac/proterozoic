@@ -3,7 +3,7 @@
 run_hook() {
     modprobe -a -q dm-crypt >/dev/null 2>&1
 
-	 ep-wait-for() {
+	 ep_wait_for() {
         local c=${2:-10}
 		  while :; do
 				[ -b "$1" ] && return
@@ -19,7 +19,7 @@ run_hook() {
 
     local hdMount=false headerDir=/boot
     if [ -n "${headerdev}" ]; then
-       ep-wait-for "${headerdev}" 10
+       ep_wait_for "${headerdev}" 10
        hdtype=$(blkid -s TYPE -o value "${headerdev}")
        if [ "${hdtype}" = ext4 ]; then
           hdMount=true
