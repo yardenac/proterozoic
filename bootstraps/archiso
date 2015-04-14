@@ -12,8 +12,10 @@ renice -n 19 $$
 GITURL=https://raw.github.com/yardenac/proterozoic/master
 
 mv -f /etc/pacman.conf{,.original}
+mkdir -p /etc/systemd/logind.conf.d
 wget $GITURL/usr/share/ppz/default/ppz.conf		-qO	/etc/ppz.conf
 wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
+wget $GITURL/usr/share/ppz/default/logind.conf  -qO   /etc/systemd/logind.conf.d/archiso.conf
 wget $GITURL/etc/pacman.d/mirrorlist.https-only	-qO- | sort -Ruo /etc/pacman.d/mirrorlist.https-only.random
 sed -i \
 	 -e 's/^IgnorePkg[ =]*/\0 linux /ig' \
@@ -38,6 +40,7 @@ gpasswd -a eu systemd-journal
 
 timedatectl set-timezone America/Los_Angeles
 systemctl start ip{,6}tables ntpd
+systemctl restart systemd-logind
 
 mkdir /etc/ssh/keys
 echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKZHaN9x2NGws2vXrOduIqUpUVRnqbPAGTZ/SS5YUUCR' \
