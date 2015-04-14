@@ -46,7 +46,7 @@ EOF
         esac
     done
 
-    if resolved=$(resolve_device "${cryptdev}" ${rootdelay}); then
+    if [ -n "${cryptdev}" ] && resolved=$(resolve_device "${cryptdev}" ${rootdelay}); then
         if $headerFlag || cryptsetup isLuks ${resolved} >/dev/null 2>&1; then
             dopassphrase=1
             # Ask for a passphrase
