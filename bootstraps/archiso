@@ -13,9 +13,11 @@ GITURL=https://raw.github.com/yardenac/proterozoic/master
 
 mv -f /etc/pacman.conf{,.original}
 mkdir -p /etc/systemd/logind.conf.d
+mkdir -p /etc/systemd/system/ntpd.service.d
 wget $GITURL/usr/share/ppz/default/ppz.conf		-qO	/etc/ppz.conf
 wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
 wget $GITURL/usr/share/ppz/default/logind.conf  -qO   /etc/systemd/logind.conf.d/archiso.conf
+wget $GITURL/usr/share/ppz/default/ntpd.service -qO   /etc/systemd/system/ntpd.service.d/archiso.conf
 wget $GITURL/etc/pacman.d/mirrorlist.https-only	-qO- | sort -Ruo /etc/pacman.d/mirrorlist.https-only.random
 sed -i \
 	 -e 's/^IgnorePkg[ =]*/\0 linux /ig' \
@@ -39,6 +41,7 @@ gpasswd -a eu wheel
 gpasswd -a eu systemd-journal
 
 timedatectl set-timezone America/Los_Angeles
+systemctl --system daemon-reload
 systemctl start ip{,6}tables ntpd
 systemctl restart systemd-logind
 
