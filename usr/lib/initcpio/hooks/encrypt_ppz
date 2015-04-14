@@ -4,16 +4,19 @@ run_hook() {
     modprobe -a -q dm-crypt >/dev/null 2>&1
 
 	 ep_wait_for() {
+		  echo "waiting for $1 ..."
         local c=${2:-10}
 		  while :; do
 				[ -b "$1" ] && return
 				if [ $c -le 0 ]; then
-					 read -n 1 -p "Cannot find $1. Try again? [*/n] " userkey
-					 [ "${userkey}" = n ] && return 0
+					 read -n 1 -p "Cannot find $1. Try again? [*/n] " userkey </dev/console
+					 echo
+					 [ "${userkey}" = n ] && return 1
 				fi
 				let c--
 				sleep 0.5
         done
+		  echo "weird wait error"
         return 1
 	 }
 
@@ -33,6 +36,17 @@ run_hook() {
         IFS=: read cryptdev cryptname cryptoptions <<EOF
 $cryptdevice
 EOF
+    elif [ -n "${cryptswitch}" ]; then
+        while read ep_name cryptdev cryptname; do
+				ep_wait_for "$cryptdev" 10 && break
+		  done < "$headerDir/$cryptswitch"
+		  if [ "$ep_name" = none ]; then
+				echo "NO CRYPT VOLUMES FOUND"
+				return 1
+		  else
+				ep_name=headers/$ep_name
+				cryptoptions=header
+		  fi
     else
         return
     fi
@@ -44,7 +58,7 @@ EOF
                 cryptargs="${cryptargs} --allow-discards"
                 ;;
             header)
-                cryptargs="${cryptargs} --header $headerDir/header.img"
+                cryptargs="${cryptargs} --header $headerDir/$ep_name.img"
                 headerFlag=true
                 ;;
             *)
