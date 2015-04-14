@@ -3,16 +3,23 @@
 run_hook() {
     modprobe -a -q dm-crypt >/dev/null 2>&1
 
-    local hdMount=false headerDir=/boot c=10
+	 ep-wait-for() {
+        local c=${2:-10}
+		  while :; do
+				[ -b "$1" ] && return
+				if [ $c -le 0 ]; then
+					 read -n 1 -p "Cannot find $1. Try again? [*/n] " userkey
+					 [ "${userkey}" = n ] && return 0
+				fi
+				let c--
+				sleep 0.5
+        done
+        return 1
+	 }
+
+    local hdMount=false headerDir=/boot
     if [ -n "${headerdev}" ]; then
-       until [ -b "${headerdev}" ]; do
-          if [ $c -le 0 ]; then
-             read -n 1 -p "Cannot find ${headerdev}. Try again? [*/n] " userkey
-             [ "${userkey}" = n ] && break
-          fi
-          let c--
-          sleep 0.5
-       done
+       ep-wait-for "${headerdev}" 10
        hdtype=$(blkid -s TYPE -o value "${headerdev}")
        if [ "${hdtype}" = ext4 ]; then
           hdMount=true
