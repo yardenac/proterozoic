@@ -101,8 +101,6 @@ integrity_simpleconf() {
 		  i686)		sed -i 's/^\[multilib\]$/#&/ig'			/etc/pacman.conf;;
 		  x86_64)	sed -i 's/^##*\(\[multilib\]\)$/\1/ig'	/etc/pacman.conf;;
 	 esac
-	 mkdir -p /media/{arch-cold-r{w,o},rodinia,green}
-	 [ -L /snowball ] || ln -s media/rodinia/pub /snowball
 	 [ -a /usr/share/terminfo/r/rxvt-unicode-256color ] || \
 		  ln -s /usr/share/terminfo/r/rxvt{,-unicode}-256color
 
