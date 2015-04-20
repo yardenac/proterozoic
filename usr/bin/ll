@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+
+. /usr/share/ppz/bash.functions
+
+ll "$@"
