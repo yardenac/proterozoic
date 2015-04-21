@@ -1,3 +1,4 @@
+(setq-default indent-tabs-mode nil)
 (setq default-tab-width 3)
 (setq make-backup-files nil)
 (setq inhibit-splash-screen t)
@@ -28,4 +29,4 @@
 (global-set-key (kbd "C-c C-e") 'auto-revert-mode)
 (global-set-key (kbd "C-c C-r") 'revert-buffer)
 (global-set-key (kbd "C-c C-p") 'shell-script-mode)
-(global-set-key (kbd "C-c C-;") 'toggle-truncate-lines)
+(global-set-key (kbd "C-c C-t") 'toggle-truncate-lines)
