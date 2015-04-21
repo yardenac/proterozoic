@@ -4,10 +4,15 @@ run_hook() {
     modprobe -a -q dm-crypt >/dev/null 2>&1
 
 	 ep_wait_for() {
-		  echo "waiting for $1 ..."
-        local c=10
+		  echo "waiting for $@ ..."
+        local disk c=$(( $# * 10 ))
 		  while :; do
-				[ -b "$1" ] && return
+				for disk; do
+					 if [ -b "$disk" ]; then
+						  ewf_found=$disk
+						  return
+					 fi
+				done
 				if [ $c -le 0 ]; then
 					 read -n 1 -p "Cannot find $1. Try again? [*/n] " userkey </dev/console
 					 echo
