@@ -5,8 +5,9 @@
 [ "$SYSTEM_TYPE" = desktop ] && numlockx on
 
 export XAUTHORITY=/tmp/.Xauthority.xuser
-xrdb -load /etc/X11/Xresources
-#xrdb -merge ~/.Xresources
+for xrfile in /etc/X11/xresources.d/*; do
+    xrdb -load "$xrfile"
+done
 
 fbpanel_profile=default
 xrandr &>/dev/null && {
