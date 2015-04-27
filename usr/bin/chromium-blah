@@ -35,6 +35,14 @@ uniqdir="$HOME/.config/chromium.$uniqtok"
 
 cp -r "$configdir" "$uniqdir"
 
+if ! $tor; then
+    sedexp='s%http://3g2upl4pq6kufc4m.onion/%https://duckduckgo.com/%ig'
+    sed -i "$sedexp" "${uniqdir}/Default/Preferences"
+    rm -f "${uniqdir}/Default/Web Data"
+	 sed "$sedexp" /usr/share/ppz/chromium.web.data.sql \
+		  | sqlite3 "${uniqdir}/Default/Web Data"
+fi
+
 ionice -c 2 -n 0 nice -n 10 \
    chromium --incognito \
       --load-extension=/usr/share/newsblurbackgroundtab-git,/usr/share/https-everywhere-chrome-git \
