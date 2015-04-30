@@ -6,7 +6,7 @@
 
 export XAUTHORITY=/tmp/.Xauthority.xuser
 for xrfile in /etc/X11/xresources.d/*; do
-    xrdb -load "$xrfile"
+    xrdb -override "$xrfile"
 done
 
 fbpanel_profile=default
