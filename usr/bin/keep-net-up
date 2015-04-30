@@ -47,7 +47,9 @@ while :; do
 		  ip link set dev $if address $(random_mac)
 		  ip link set dev $if up
 		  sleep 2
-		  case $(cat /sys/class/net/$if/device/class) in
+        class=$(cat /sys/class/net/$if/device/class) \
+            || class=$(test -d /sys/class/net/$if/wireless && echo 0x028000)
+        case "$class" in
 				0x028000) # wireless
 					 until ssid=$(avail_known_ssid $if); do
 						  stamp "No available networks ... waiting 5"
