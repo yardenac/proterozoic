@@ -1,0 +1,21 @@
+#!/usr/bin/bash
+
+file=/run/user/$UID/redshift-toggle
+
+if [ -a $file ]; then
+   read state < $file
+else
+   state=normal
+fi
+
+case $state in
+    normal)
+        redshift -r -m randr -O 4000K
+        echo night >| $file
+    ;;
+    night)
+        redshift -r -m randr -x
+        echo normal >| $file
+    ;;
+    *);;
+esac

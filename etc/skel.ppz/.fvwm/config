@@ -68,6 +68,7 @@ Key	m				A		4			NiceBash 80x39  - 'cd; . /usr/share/ppz/bash.functions; . /usr/s
 Key	c				A		4			NiceBash 69x34  - 'cal -y && read'
 Key	b				A		4			NiceTerm 40x39  - /usr/bin/bc -lq /etc/bcrc
 Key	i				A		4			Exec exec xcalib -invert -alter
+Key	o				A		4			Exec exec /usr/bin/redshift-toggle
 Key	l				A		4			Exec exec xscreensaver-command -lock
 Key	r				A		4			Refresh
 Key	q				A		4			Exec exec transset-df -a --dec 0.04
