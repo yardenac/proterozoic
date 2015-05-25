@@ -1,4 +1,5 @@
 .bash_history
+.cache/fontconfig/
 .config/pulse/cookie
 .config/pulse/*-runtime
 .config/tmpdir
