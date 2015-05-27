@@ -55,11 +55,14 @@ while :; do
 		  ip link set dev $if down
 
         # set mac address, if desired
-        [[ "mac" =~ ^([0-f]{2}:?){6}$ ]] && {
+        [[ "$mac" =~ ^([0-f]{2}:?){6}$ ]] && {
            ip link set dev $if address "$mac"
+           echo "user set mac: $mac"
         } || case "$mac" in
            hardware) :;;
-           random)   ip link set dev $if address $(random_mac);;
+           random)   mac=$(random_mac)
+                     ip link set dev $if address "$mac"
+                     echo "set random mac: $mac";;
            *)        echo "weird mac '$val' - using random"
         esac
 
