@@ -8,6 +8,7 @@ am_root || groups | grep -qw network || exit
 mac=random
 for arg; do
 	 case "$arg" in
+        hn=*)   hn=${arg#*=};;
         mac=*) mac=${arg#*=};;
         *)     echo "weird arg: $arg";;
 	 esac
@@ -93,9 +94,18 @@ while :; do
 				*) croak "$if: weird device";;
 		  esac
 
-		  hostname=$(rando oneword)
-		  echo now dhcp with hostname: $hostname ...
-		  dhcpcd -Bt 30 -h $hostname $if &>> $dhcp_file &
+        # set hostname, if desired
+        [[ "hn" =~ ^[0-z]+$ ]] || {
+            echo "weird hostname '$hn' - using random"
+            hn=random
+        }
+        case "$hn" in
+           system) hn=$(hostname);;
+           random) hn=$(rando oneword);;
+        esac
+
+		  echo now dhcp with hostname: $hn ...
+		  dhcpcd -Bt 30 -h "$hn" $if &>> $dhcp_file &
 		  tailtimed 20 $dhcp_file leased || echo "no lease"
 		  continue 2
 	 done
