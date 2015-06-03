@@ -144,16 +144,12 @@ AddToFunc ResizeDynamic
 
 DestroyMenu MenuFvwmRoot
 AddToMenu MenuFvwmRoot
-+ "Terminal"	Exec exec urxvt -pe -tabbedex
-+ "Seamonkey"	Exec exec seamonkey
-+ "Firefox"		Exec exec firefox
-+ "Chromium"	Exec exec chromium-blah
-+ "Notorium"	Exec exec chromium-blah 55114
++ "Terminal"   Exec exec urxvt -pe -tabbedex
++ "Ch Tor"     Exec exec chromium-blah
++ "Ch 55114"   Exec exec chromium-blah 55114
 + "NoProxium"	Exec exec chromium-blah noproxy
-+ "Reload WM"	Restart
-+ "Restart WM"	Quit
-+ "Reboot CPU"	Exec exec sudo /usr/bin/systemctl --no-block reboot
-+ "Window Ops"	Popup MenuFvwmWindowOps2
++ "Reload WM"  Restart
++ "Restart WM" Quit
 
 DestroyMenu MenuFvwmWindowOps2
 AddToMenu MenuFvwmWindowOps2
