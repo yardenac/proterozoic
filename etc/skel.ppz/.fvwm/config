@@ -147,7 +147,7 @@ AddToMenu MenuFvwmRoot
 + "Terminal"   Exec exec urxvt -pe -tabbedex
 + "Ch Tor"     Exec exec chromium-blah
 + "Ch 55114"   Exec exec chromium-blah 55114
-+ "NoProxium"	Exec exec chromium-blah noproxy
++ "Ch 55115"   Exec exec chromium-blah 55115
 + "Reload WM"  Restart
 + "Restart WM" Quit
 
