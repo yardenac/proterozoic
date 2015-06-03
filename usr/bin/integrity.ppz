@@ -190,13 +190,16 @@ integrity_iptables() {
 	 for PORT in ${OPEN_PORTS[@]}; do
 		  PROTOCOL=tcp
 		  [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
-		  [ "$CUSTOM" ] && CUSTOM+='\n'
-		  CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT "
+		  CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT \n"
 	 done
 	 for OPENU in ${OPEN_USERS[@]}; do
-		  [ "$CUSTOM" ] && CUSTOM+='\n'
-		  CUSTOM+="-A open-out -m owner --uid-owner ${OPENU} -j ACCEPT "
+		  CUSTOM+="-A open-out -m owner --uid-owner ${OPENU} -j ACCEPT \n"
 	 done
+    if [ "$BLOCK_OUT" = yes ]; then
+        CUSTOM+="-A OUTPUT -p tcp -j REJECT --reject-with tcp-reset \n"
+        CUSTOM+="-A OUTPUT -p udp -j REJECT --reject-with icmp-port-unreachable \n"
+        CUSTOM+="-P OUTPUT DROP\n"
+    fi
 	 sed 's/^#LOCAL$/'"$CUSTOM"'/ig' $default_rules > $tmp_should
 
 	 # current rules with comments & empty lines removed, and counters zeroed
