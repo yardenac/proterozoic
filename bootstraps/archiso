@@ -4,7 +4,7 @@
 # root 123m~$ /usr/bin/integrity.ppz
 
 sshport=$(( RANDOM + 32767 ))
-echo bootstrapping for the 2015.04.01 live cd... ssh port will be $sshport
+echo bootstrapping for the 2015.06.01 live cd... ssh port will be $sshport
 
 ionice -c 3 -p $$
 renice -n 19 $$
@@ -31,7 +31,6 @@ sed -i \
 
 GNUPGHOME=/etc/pacman.d/gnupg/ pacman-key -r 3020A074 --keyserver pgp.mit.edu
 pacman-key --lsign-key 3020A074
-pacman --noconfirm -Rs gnu-netcat
 pacman --noconfirm -Syu
 #pacman --noconfirm -Scc
 pacman --noconfirm -S proterozoic
