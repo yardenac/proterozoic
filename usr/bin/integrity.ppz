@@ -119,6 +119,12 @@ integrity_simpleconf() {
 		  echo_red "$wpaf is outdated"
 		  am_root && askyn "Update from $WPA_SC ... ?" && cp -f "$WPA_SC" "$wpaf"
 	 fi
+
+    pacman -Q apache &>/dev/null && {
+        [ -d /etc/httpd/ssl ] || mkdir /etc/httpd/ssl
+        local pem=/etc/httpd/ssl/dhparam.pem
+        [ -a $pem ] || openssl dhparam -out $pem 2048
+    }
 }
 integrity_users() {
 	 am_root || return 0

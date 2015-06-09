@@ -17,6 +17,7 @@ SSLRandomSeed startup file:/dev/urandom 8192
 SSLRandomSeed connect builtin
 SSLRandomSeed connect file:/dev/urandom 8192
 SSLSessionCache "shmcb:/run/httpd/ssl_scache(512000)"
+SSLOpenSSLConfCmd DHParameters /etc/httpd/ssl/dhparam.pem
 Mutex "file:/run/httpd"
 BrowserMatch "MSIE [2-5]" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
 User http
