@@ -120,11 +120,11 @@ integrity_simpleconf() {
 		  am_root && askyn "Update from $WPA_SC ... ?" && cp -f "$WPA_SC" "$wpaf"
 	 fi
 
-    pacman -Q apache &>/dev/null && {
+    if pacman -Q apache &>/dev/null; then
         [ -d /etc/httpd/ssl ] || mkdir /etc/httpd/ssl
         local pem=/etc/httpd/ssl/dhparam.pem
         [ -a $pem ] || openssl dhparam -out $pem 2048
-    }
+    fi
 }
 integrity_users() {
 	 am_root || return 0
