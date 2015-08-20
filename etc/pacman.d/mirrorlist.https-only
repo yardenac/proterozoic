@@ -28,4 +28,5 @@ Server = https://ftp.myrveln.se/pub/linux/archlinux/$repo/os/$arch
 Server = https://dgix.ru/mirrors/archlinux/$repo/os/$arch
 Server = https://mirror.gawsolutions.us/arch/$repo/os/$arch
 Server = https://kwk.pw/$repo/os/$arch
+Server = https://mirror.bitjungle.info/archlinux/$repo/os/$arch
 #Server = https://forum.cse.yzu.edu.tw/Linux/archlinux/$repo/os/$arch # expired "free" cert
