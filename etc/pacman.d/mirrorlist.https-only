@@ -31,4 +31,5 @@ Server = https://kwk.pw/arch/$repo/os/$arch
 Server = https://mirror.bitjungle.info/archlinux/$repo/os/$arch
 Server = https://mirror.fluxent.de/archlinux/$repo/os/$arch
 Server = https://mirror.pseudoform.org/$repo/os/$arch
+Server = https://arch.jensgutermuth.de/$repo/os/$arch
 #Server = https://forum.cse.yzu.edu.tw/Linux/archlinux/$repo/os/$arch # expired "free" cert
