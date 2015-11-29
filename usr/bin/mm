@@ -33,7 +33,7 @@ set_xtitle "[mm] $*"
 	 trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
 }
 
-ionice -c 2 -n 0 nice -n -5 mpv --geometry=${x}:${y} -fs --ao=alsa \
+ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}:${y} -fs --ao=alsa \
 	 --alang=en --slang=en \
 	 --stop-screensaver --msg-level=all=no:statusline=status:cache=info:network=info \
 	 --cache-initial=1024 --no-input-default-bindings \
