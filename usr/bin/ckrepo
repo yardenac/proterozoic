@@ -24,6 +24,9 @@ ck_pkg() {
 	 pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || return 1
 	 (( "${#pkgdeets[@]}" )) || return 1
 	 name=${pkgdeets[0]}
+    for ig_pkgn in ${ignore_pkgnames}; do
+        [ "x$name" = "x$ig_pkgn" ] && return
+    done
 	 vers_here=${pkgdeets[1]}
 	 vers_there=$($cower --search --format="%v" "^${name}$") || {
 		  echo_red "package not in AUR: $name"
@@ -76,6 +79,9 @@ ck_repo() {
 . /usr/share/ppz/bash.functions
 
 shopt -s nullglob
+
+conf=~/.config/ckrepo
+[ -f "$conf" ] && . "$conf"
 
 repos=() pkgs=()
 verbose=''
