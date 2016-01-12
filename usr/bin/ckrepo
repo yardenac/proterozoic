@@ -18,13 +18,13 @@ is_pkg() {
 	 return 0
 }
 ck_pkg() {
-	 local file pkgdeets name vers_here vers_there url giturl date vers_github
+	 local file ig_pkgn pkgdeets name vers_here vers_there url giturl date vers_github
 	 file=$(readlink -e "$1") || return 1
 	 is_pkg "$file" || return 1
 	 pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || return 1
 	 (( "${#pkgdeets[@]}" )) || return 1
 	 name=${pkgdeets[0]}
-    for ig_pkgn in ${ignore_pkgnames}; do
+    for ig_pkgn in "${ignore_pkgnames[@]}"; do
         [ "x$name" = "x$ig_pkgn" ] && return
     done
 	 vers_here=${pkgdeets[1]}
