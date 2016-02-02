@@ -25,10 +25,14 @@ integrity_everyone() {
 		  fi
 	 }
 
-	 # print almost-full filesystems (<10% or <100M free)
-	 df --output=pcent,avail,target | tail -n +2 | \
-		  awk '{sub(/%/,"",$1); if (($1>0) && (($1>90) || ($2<102400)))
-		        printf("ALMOST FULL: %s%% %s\n",$1,$3)}'
+    # print almost-full filesystems (<10% or <100M free)
+    if [ "$SKIP_NOSP_WARN" ] && $SKIP_NOSP_WARN; then
+        : #skip the warning
+    else
+        df --output=pcent,avail,target | tail -n +2 | \
+            awk '{sub(/%/,"",$1); if (($1>0) && (($1>90) || ($2<102400)))
+                  printf("ALMOST FULL: %s%% %s\n",$1,$3)}'
+    fi
 }
 integrity_rootpw() {
 	 am_root && shell_is_interactive || return 0
