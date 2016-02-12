@@ -19,6 +19,7 @@ optdepends=(
 	 'less:		rip-dvd'
 	 'memtest86+: testing memory at bootup'
 	 'nmap:		linode-implement'
+    'perl-math-random-secure: rando'
 	 'perl-term-readkey: rando'
 	 'python:	myip'
 	 'rsync:		rip-dvd, repo-drop'
