@@ -13,7 +13,7 @@ urxvt.scrollTtyKeypress: true
 urxvt.font: xft:Mono-12:antialias=true:hinting=false,xft:Code2001:antialias=true,xft:Symbola:antialias=true:pixelsize=11
 urxvt.letterSpace: -1
 urxvt.hold: false
-urxvt.perl-ext-common: default,tabbedex,url-select,-selection-popup,-matcher,confirm-paste
+urxvt.perl-ext-common: default,tabbedex,url-select,-selection-popup,-matcher,confirm-paste,font-size
 urxvt.tabbed.autohide: true
 urxvt.tabbed.title: true
 urxvt.url-select.launcher: /usr/bin/lurl
@@ -25,7 +25,9 @@ urxvt.buffered: true
 urxvt.iso14755: false
 urxvt.iso14755_52: false
 
-urxvt.keysym.M-u: perl:url-select:select_next
+urxvt.keysym.M-u:    url-select:select_next
+URxvt.keysym.C-Up:   font-size:increase
+URxvt.keysym.C-Down: font-size:decrease
 urxvt.underlineURLs: false
 urxvt.iconFile: /usr/share/icons/hicolor/48x48/apps/xfce-terminal.png
 urxvt.iconName: urxvt
