@@ -26,8 +26,8 @@ urxvt.iso14755: false
 urxvt.iso14755_52: false
 
 urxvt.keysym.M-u:    url-select:select_next
-URxvt.keysym.C-Up:   font-size:increase
-URxvt.keysym.C-Down: font-size:decrease
+URxvt.keysym.C-Shift-Up:   font-size:increase
+URxvt.keysym.C-Shift-Down: font-size:decrease
 urxvt.underlineURLs: false
 urxvt.iconFile: /usr/share/icons/hicolor/48x48/apps/xfce-terminal.png
 urxvt.iconName: urxvt
