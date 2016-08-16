@@ -37,6 +37,7 @@ ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}:${y} -fs --ao=alsa \
 	 --alang=en --slang=en \
 	 --stop-screensaver --msg-level=all=no:statusline=status:cache=info:network=info \
 	 --cache-initial=1024 --no-input-default-bindings \
-	 --input-conf=/usr/share/ppz/mplayer.input.conf "${args[@]}"
+    --input-conf=/usr/share/ppz/mplayer.input.conf \
+    --hr-seek=yes "${args[@]}"
 
 echo
