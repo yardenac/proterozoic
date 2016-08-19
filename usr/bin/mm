@@ -6,7 +6,7 @@
 
 do_unto_others
 
-args=(); x=1030; y=250; holdss=y
+args=(); x=700; y=400; holdss=y
 for arg; do
 	 case "$arg" in
 		  d) y=-1000;;
@@ -33,7 +33,7 @@ set_xtitle "[mm] $*"
 	 trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
 }
 
-ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}:${y} -fs --ao=alsa \
+ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}x${y} -fs --ao=alsa \
 	 --alang=en --slang=en \
 	 --stop-screensaver --msg-level=all=no:statusline=status:cache=info:network=info \
 	 --cache-initial=1024 --no-input-default-bindings \
