@@ -85,7 +85,7 @@ while :; do
 					 grep -iq 'ssid="'"$ssid"'"' "$WPA_SC" && {
 						  echo wpa_supp
 						  wpa_supplicant -d -i $if -c "$WPA_SC" &>> $wpas_file &
-						  tailtimed 20 $wpas_file 'State: ASSOCIATED -> 4WAY_HANDSHAKE' || croak 'no 4way'
+						  tailtimed 40 $wpas_file 'State: ASSOCIATED -> 4WAY_HANDSHAKE' || croak 'no 4way'
 					 };;
 				0x020000) #wired
 					 [ $(cat /sys/class/net/$if/operstate) = "up" ] || {
