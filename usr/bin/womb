@@ -54,6 +54,8 @@
 		  cd "$HOME"
 		  git init
 		  git add --all .
+        git config --global commit.gpgsign false
+        git config --global push.gpgsign false
 		  git config --global user.email ex@invalid.invalid
 		  git config --global user.name ex
 		  git commit -m init
