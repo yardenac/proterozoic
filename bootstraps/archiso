@@ -33,7 +33,7 @@ GNUPGHOME=/etc/pacman.d/gnupg/ pacman-key -r 3020A074 --keyserver pgp.mit.edu
 pacman-key --lsign-key 3020A074
 #pacman --noconfirm -Syu
 #pacman --noconfirm -Scc
-pacman --noconfirm -Sy proterozoic
+pacman --noconfirm -Syy proterozoic
 #pacman --noconfirm -S python2 mprime biosdisk-git
 
 gpasswd -a eu wheel
