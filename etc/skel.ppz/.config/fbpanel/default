@@ -1,20 +1,22 @@
 # image       - just shows an image
 Global {
-	edge = bottom
-	allign = left
-	margin = 0
-	widthtype = percent
-	width = 100
-	height = 13
-	transparent = true
-	tintcolor = #ffffff
-	alpha = 0
-	setdocktype = true
-	setpartialstrut = true
-	autohide = false
-	roundcorners = false
-	layer = none
-	MaxElemHeight = 32
+       Edge = bottom
+       Allign = left
+       WidthType = percent
+       Width = 100
+       HeightType = pixel
+       Height = 13
+       Margin = 0
+       SetDockType = true
+       SetPartialStrut = true
+       Transparent = true
+       TintColor = # ffffff
+       Alpha = 0
+       Autohide = false
+       RoundCorners = false
+       Layer = above
+       SetLayer = false
+       MaxElemHeight = 32
 }
 Plugin {
 	type = taskbar
