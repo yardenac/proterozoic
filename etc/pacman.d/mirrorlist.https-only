@@ -72,5 +72,6 @@ Server = https://mirror.jankoppe.de/$repo/os/$arch
 Server = https://mirrors.tuxns.net/archlinux/$repo/os/$arch
 Server = https://archlinux.ec-tech.fr/$repo/os/$arch
 Server = https://gluttony.sin.cvut.cz/arch/$repo/os/$arch
+Server = https://archlinux.mirror.wearetriple.com/
 #Server = https://arch-mirror.wtako.net/$repo/os/$arch # blocks tor with captcha
 #Server = https://forum.cse.yzu.edu.tw/Linux/archlinux/$repo/os/$arch # expired "free" cert
