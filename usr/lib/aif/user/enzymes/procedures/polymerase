@@ -44,7 +44,7 @@ sudo umount -R /mnt
 sudo systemctl --no-block poweroff && exec screen -D
 
 pkgs_always=(tor privoxy proterozoic)
-pkgs_x=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo,xrandr} xdotool \
+pkgs_x=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo,xrandr,xinput} xdotool \
         xf86-input-{keyboard,mouse} xscreensaver xclip libxft xcursor-themes \
         numlockx fvwm perl-xml-parser fbpanel wmctrl mingetty hsetroot \
         urxvt-url-select transset-df xcompmgr acpi ttf-code2000 ttf-code2001 ttf-symbola
@@ -57,4 +57,4 @@ pkgs_laptop=(dhcpcd)
 pkgs_printer=(cups hplip a2ps)
 pkgs_testing=(memtest86+ mprime)
 pkgs_other=(parted dmidecode base-devel amd-ucode intel-ucode)
-pkgs_more=(pkgfile openbsd-netcat)
+pkgs_more=(pkgfile openbsd-netcat tig)
