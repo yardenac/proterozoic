@@ -69,6 +69,7 @@ Include /etc/httpd/conf/site-specific.conf
 	Header always set X-Content-Security-Policy "${CSP}"
 	Header always set X-Webkit-CSP              "${CSP}"
 </IfDefine>
+RequestHeader unset Proxy early
 
 LoadModule authn_file_module modules/mod_authn_file.so
 LoadModule authn_core_module modules/mod_authn_core.so
