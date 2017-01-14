@@ -71,4 +71,6 @@ Server = https://archlinux.mirror.wearetriple.com/$repo/os/$arch
 Server = https://archlinux.ip-connect.vn.ua/$repo/os/$arch
 Server = https://ftp.acc.umu.se/mirror/archlinux/$repo/os/$arch
 Server = https://mirror.kku.ac.th/archlinux/$repo/os/$arch
+Server = https://ftp.spline.inf.fu-berlin.de/mirrors/archlinux/$repo/os/$arch
+Server = https://mirror.redsox.cc/archlinux/$repo/os/$arch
 #Server = https://arch-mirror.wtako.net/$repo/os/$arch # blocks tor with captcha
