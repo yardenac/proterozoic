@@ -1,8 +1,8 @@
-.bash_history
-.cache/fontconfig/
-.config/pulse/cookie
-.config/pulse/*-runtime
-.config/tmpdir
-.dbus/session-bus/
-.fvwm/errorlog
-.parallel/tmp/
+/.bash_history
+/.cache/fontconfig/
+/.config/pulse/cookie
+/.config/pulse/*-runtime
+/.config/tmpdir
+/.dbus/session-bus/
+/.fvwm/errorlog
+/.parallel/tmp/
