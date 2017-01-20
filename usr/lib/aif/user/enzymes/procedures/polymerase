@@ -56,5 +56,5 @@ pkgs_wireless=(wireless_tools wpa_supplicant b43-firmware iw) #wpa_actiond ifplu
 pkgs_laptop=(dhcpcd)
 pkgs_printer=(cups hplip a2ps)
 pkgs_hw=(memtest86+ mprime parted dmidecode amd-ucode intel-ucode)
-pkgs_dev=(base-devel s3cmd cower pkgbuild-introspection)
+pkgs_dev=(base-devel s3fs s3cmd cower pkgbuild-introspection python-magic python2-magic)
 pkgs_more=(pkgfile openbsd-netcat tig)
