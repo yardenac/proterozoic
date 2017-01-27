@@ -18,7 +18,6 @@ Server = https://mirror.lastmikoi.net/archlinux/$repo/os/$arch
 Server = https://arch.localmsp.org/arch/$repo/os/$arch
 Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch
 Server = https://ftp.iitm.ac.in/archlinux/$repo/os/$arch
-Server = https://arch.static.lu/$repo/os/$arch
 Server = https://fooo.biz/archlinux/$repo/os/$arch
 Server = https://lug.mtu.edu/archlinux/$repo/os/$arch
 Server = https://archlinux.honkgong.info/$repo/os/$arch
