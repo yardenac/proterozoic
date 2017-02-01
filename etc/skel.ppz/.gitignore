@@ -5,4 +5,5 @@
 /.config/tmpdir
 /.dbus/session-bus/
 /.fvwm/errorlog
+/.local/share/xorg/Xorg.0.log
 /.parallel/tmp/
