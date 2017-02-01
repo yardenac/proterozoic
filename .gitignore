@@ -3,6 +3,3 @@ pkg/
 *.pkg.tar.*
 *~
 stage
-subprojects/*/src/
-subprojects/*/pkg/
-subprojects/*/*.pkg.tar.*
