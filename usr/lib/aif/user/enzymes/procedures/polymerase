@@ -46,7 +46,7 @@ sudo systemctl --no-block poweroff && exec screen -D
 pkgs_always=(tor privoxy proterozoic)
 pkgs_x=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo,xrandr,xinput} xdotool \
         xf86-input-{keyboard,mouse} xscreensaver xclip libxft xcursor-themes \
-        numlockx fvwm perl-xml-parser fbpanel wmctrl mingetty hsetroot \
+        numlockx fvwm perl-xml-parser fbpanel wmctrl hsetroot \
         urxvt-url-select transset-df xcompmgr acpi ttf-code2000 ttf-code2001 ttf-symbola
         xf86-video-ati xf86-video-intel nvidia mtpfs xcalib redshift \
         urxvt-tabbedex-git urxvt-font-size-git)
