@@ -6,7 +6,7 @@ arch=(i686 x86_64)
 license=('GPL')
 install=proterozoic.install
 backup=(etc/httpd/conf/{site-specific.conf,httpd.conf.ppz} etc/locale.conf)
-makedepends=(findutils coreutils net-tools gcc-multilib sqlite3)
+makedepends=(findutils coreutils net-tools sqlite3)
 depends=(aspell-en cryptsetup sudo bc iptables iproute2 openssh ntp
          bash-completion screen htop diffutils)
 optdepends=(
@@ -30,9 +30,6 @@ optdepends=(
 package() {
 	 cp -a ${startdir}/{etc,usr,srv} ${pkgdir}/
 	 mkdir -p ${pkgdir}/etc/skel.ppz/.{macromedia,local/share/applications}
-
-	 b=-m64; [ $CARCH = i686 ] && b='-m32 -Wl,--dynamic-linker=/lib/ld-linux.so.2'
-	 /usr/bin/gcc $b $CFLAGS -Wall ${startdir}/c/cdtray.c -o ${pkgdir}/usr/bin/cdtray
 
 	 fbdir=${pkgdir}/etc/skel.ppz/.config/fbpanel
 	 for width in 1024 1280; do
