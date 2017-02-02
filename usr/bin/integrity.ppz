@@ -210,7 +210,7 @@ integrity_iptables() {
         CUSTOM+="-A OUTPUT -p udp -j REJECT --reject-with icmp-port-unreachable \n"
         CUSTOM+="-P OUTPUT DROP\n"
     fi
-	 sed 's/^#LOCAL$/'"$CUSTOM"'/ig' $default_rules > $tmp_should
+	 sed 's/^#LOCAL$/'"$CUSTOM"'/ig' $default_rules | sed '/^ *$/d' > $tmp_should
 
 	 # current rules with comments & empty lines removed, and counters zeroed
 	 touch $rules_file
