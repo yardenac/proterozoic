@@ -8,7 +8,7 @@ install=proterozoic.install
 backup=(etc/httpd/conf/{site-specific.conf,httpd.conf.ppz} etc/locale.conf)
 makedepends=(findutils coreutils net-tools sqlite3)
 depends=(aspell-en cryptsetup sudo bc iptables iproute2 openssh ntp
-         bash-completion screen htop diffutils)
+         bash-completion screen htop diffutils arch-https-mirrors-git)
 optdepends=(
 	 'aspell:     rando'
 	 'ddrescue:	rip-dvd, rhyppe'

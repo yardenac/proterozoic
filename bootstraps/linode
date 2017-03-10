@@ -10,8 +10,9 @@ GITURL=https://raw.github.com/yardenac/proterozoic/master
 
 mv -vf /etc/pacman.conf{,.original}
 curl $GITURL/usr/share/ppz/default/ppz.conf		-so	/etc/ppz.conf
-curl $GITURL/etc/pacman.d/mirrorlist.https-only	-so	/etc/pacman.d/mirrorlist.https-only.tmp
 curl $GITURL/usr/share/ppz/default/pacman.conf	-so	/etc/pacman.conf
+curl https://raw.github.com/yardenac/arch-https-mirrors/master/etc/pacman.d/mirrorlist.https-only \
+     -so /etc/pacman.d/mirrorlist.https-only.tmp
 sed -i s/https-only/https-only.tmp/ig 						/etc/pacman.conf
 sed -i \
 	 -e s/%SET_TYPE%/linode/ig \

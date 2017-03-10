@@ -8,8 +8,9 @@ GITURL=https://raw.github.com/yardenac/proterozoic/master
 rm -f /usr/share/terminfo/r/rxvt-unicode-256color
 mv -vf /etc/pacman.conf{,.original}
 curl $GITURL/usr/share/ppz/default/ppz.conf		-so	/etc/ppz.conf
-curl $GITURL/etc/pacman.d/mirrorlist.https-only	-so	/etc/pacman.d/mirrorlist.https-only.random
 curl $GITURL/usr/share/ppz/default/pacman.conf	-so	/etc/pacman.conf
+curl https://raw.github.com/yardenac/arch-https-mirrors/master/etc/pacman.d/mirrorlist.https-only \
+     -so /etc/pacman.d/mirrorlist.https-only.random
 sed -i \
 	 -e 's/^IgnorePkg[ =]*/\0 linux /ig' \
 	 -e s/https-only/https-only.random/ig 					/etc/pacman.conf
