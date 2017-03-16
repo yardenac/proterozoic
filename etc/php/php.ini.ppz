@@ -54,8 +54,8 @@ extension=gettext.so
 extension=pdo_mysql.so
 extension=ssh2.so
 extension=phar.so
+extension=opcache.so
 extension=openssl.so
-extension=xcache.so
 
 extension=bcmath.so
 bcmath.scale = 0
