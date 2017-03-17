@@ -68,7 +68,14 @@
 			},
 			"mgidfmbglheeadlobeabndjopdgiojde": {
 				"incognito": true
-			}
+         },
+         "ekjnponglcbkpjobdnoijpnkphfallfn": {
+            "incognito": true,
+            "preferences": {
+               "webrtc.ip_handling_policy": "default_public_interface_only",
+               "webrtc.multiple_routes_enabled": false
+            }
+         }
 		}
 	}
 }
