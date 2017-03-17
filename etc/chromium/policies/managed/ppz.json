@@ -27,6 +27,7 @@
     "SafeBrowsingExtendedReportingOptInAllowed": false,
     "SavingBrowserHistoryDisabled": true,
     "SearchSuggestEnabled": false,
+    "SpellCheckServiceEnabled": false,
     "SyncDisabled": true,
     "VideoCaptureAllowed": false,
     "WPADQuickCheckEnabled": false,
