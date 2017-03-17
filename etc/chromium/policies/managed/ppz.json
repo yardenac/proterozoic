@@ -1,2 +1,33 @@
 {
+    "AdditionalLaunchParameters": "--incognito --ssl-version-min=tls1",
+    "AudioCaptureAllowed": false,
+    "AutoFillEnabled": false,
+    "BackgroundModeEnabled": false,
+    "BrowserAddPersonEnabled": false,
+    "CaptivePortalAuthenticationIgnoresProxy": false,
+    "CloudPrintProxyEnabled": false,
+    "CloudPrintSubmitEnabled": false,
+    "DefaultGeolocationSetting": 2,
+    "DefaultMediaStreamSetting": 2,
+    "DefaultNotificationsSetting": 2,
+    "DefaultPluginsSetting": 3,
+    "DefaultWebBluetoothGuardSetting": 2,
+    "DisablePluginFinder": true,
+    "ExtensionInstallBlacklist": "*",
+    "ExtensionInstallWhitelist": [
+        "ehfhghddhachdadpdnpcpigiipkagfoe",
+        "gmbclidgiobnognmnejllpfcmkdppicp",
+        "cjelmkehlpcdogpnfjeicgklplbpgjih",
+        "mgidfmbglheeadlobeabndjopdgiojde",
+        "ekjnponglcbkpjobdnoijpnkphfallfn"
+    ],
+    "MetricsReportingEnabled": false,
+    "NetworkPredictionOptions": 2,
+    "PasswordManagerEnabled": false,
+    "SafeBrowsingExtendedReportingOptInAllowed": false,
+    "SavingBrowserHistoryDisabled": true,
+    "SearchSuggestEnabled": false,
+    "SyncDisabled": true,
+    "VideoCaptureAllowed": false,
+    "WPADQuickCheckEnabled": false
 }
