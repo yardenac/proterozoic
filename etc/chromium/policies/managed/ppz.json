@@ -29,5 +29,12 @@
     "SearchSuggestEnabled": false,
     "SyncDisabled": true,
     "VideoCaptureAllowed": false,
-    "WPADQuickCheckEnabled": false
+    "WPADQuickCheckEnabled": false,
+    "3rdparty": {
+        "extensions": {
+            "ekjnponglcbkpjobdnoijpnkphfallfn": {
+                "adminSettings": "{\"userSettings\":{\"webrtcIPAddressHidden\":true}}"
+            }
+        }
+    }
 }
