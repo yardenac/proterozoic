@@ -1,4 +1,5 @@
 export SHELL=/usr/bin/bash
+[ -f /usr/share/git/completion/git-prompt.sh ] && . /usr/share/git/completion/git-prompt.sh
 [ -f /usr/share/ppz/bash.functions  ] && . /usr/share/ppz/bash.functions
 [ -a /usr/bin/Xorg ] && . /usr/share/ppz/bash.functions.xorg
 set_proper_histfile
@@ -52,6 +53,10 @@ bind '"\e[B"':history-search-forward
 eval "`dircolors -b`"
 export PATH=${GOODPATH}
 export GPG_TTY=$(tty)
+export GIT_PS1_SHOWDIRTYSTATE=yes
+export GIT_PS1_SHOWSTASHSTATE=yes
+export GIT_PS1_SHOWUNTRACKEDFILES=yes
+export GIT_PS1_SHOWUPSTREAM=auto
 export HISTCONTROL=ignoredups #$HISTCONTROL${HISTCONTROL+,}ignoredups
 export HISTSIZE=100000
 export HISTIGNORE="&"
