@@ -75,6 +75,7 @@ export MAILCHECK=-1
 export VISUAL=emacs
 #export GRE_HOME=/tmp
 export PROMPT_COMMAND='history -a'
+export TSOCKS_CONFFILE="$HOME"/.config/tsocks.conf
 export XAUTHORITY=/tmp/.Xauthority.$USER
 export XDG_CONFIG_HOME=~/.config
 export RXVT_SOCKET=/tmp/.rxvt-unicode.socket.$USER.$EUID

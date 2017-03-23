@@ -531,6 +531,7 @@ integrity_sshd() {
 		MaxAuthTries 3
 		MaxSessions 15
 		Compression no
+      GatewayPorts clientspecified
 		PasswordAuthentication no
 		PubkeyAuthentication yes
 		ChallengeResponseAuthentication no

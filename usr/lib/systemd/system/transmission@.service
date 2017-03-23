@@ -9,8 +9,10 @@ ProtectSystem=full
 PrivateTmp=true
 NoNewPrivileges=true
 IOSchedulingClass=idle
-Environment=TRANSMISSION_HOME=%h
-ExecStart=/usr/bin/transmission-daemon -g %h/.config/transmission-daemon -f
+Environment = \
+   TRANSMISSION_HOME=%h \
+   TSOCKS_CONFFILE=%h/.config/tsocks.conf
+ExecStart=/usr/bin/tsocks /usr/bin/transmission-daemon -g %h/.config/transmission-daemon -f
 ExecStop=/usr/bin/transmission-remote --exit
 
 [Install]
