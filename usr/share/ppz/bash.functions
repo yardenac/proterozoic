@@ -282,7 +282,7 @@ __git_ps1_cleaner() {
         eval "__git_ps1_cleaner() {return;}"
         return
     }
-    local s=$(__git_ps1 %s | sed 's/^[a-z0-9]*//i')
+    local s=$(__git_ps1 %s | sed 's/^[a-z0-9-]*//i')
     echo "${s##* }"
 }
 has_hardstatus() {
