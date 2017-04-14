@@ -817,3 +817,8 @@ fa() { # "find all"
 	 done
 	 find "$@" \! -type d -exec stat -c %N '{}' \; | awk '{gsub(/[’‘]/,"")}{color = (system("[ -f " $3 " ] ")  == 0) ? "\033[1;36m" : "\033[1;31m"; print $1 " " $2 " " color $3 "\033[22;39m"}'
 }
+sums() {
+    for hash in md5 sha256 sha512; do
+        ${hash}sum "$@"
+    done
+}
