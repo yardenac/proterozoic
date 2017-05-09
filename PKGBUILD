@@ -25,8 +25,9 @@ optdepends=(
 	 'rsync:		rip-dvd, repo-drop'
     'tsocks:   transmission@'
 	 'yart:		wallpaper, icons, etc'
-	 abs dnsutils git parallel lsof s3fs sshfs unzip whois
+	 asp dnsutils git parallel lsof s3fs sshfs unzip whois
 )
+conflicts=(abs)
 
 package() {
 	 cp -a ${startdir}/{etc,usr,srv} ${pkgdir}/

@@ -108,12 +108,6 @@ integrity_simpleconf() {
 	 [ -a /usr/share/terminfo/r/rxvt-unicode-256color ] || \
 		  ln -s /usr/share/terminfo/r/rxvt{,-unicode}-256color
 
-	 [ -f /etc/abs.conf ] && {
-		  sed -i 's%^\(MIRRORLIST="/etc/pacman.d/mirrorlist\(\.otown\)\?"\)$%\#\1%ig' /etc/abs.conf
-		  grep -qiE '^MIRRORLIST="/etc/pacman.d/mirrorlist.https-only.random"$' /etc/abs.conf || \
-				echo 'MIRRORLIST="/etc/pacman.d/mirrorlist.https-only.random"' >> /etc/abs.conf
-	 }
-
 	 sort -Ru /etc/pacman.d/mirrorlist.https-only -o /etc/pacman.d/mirrorlist.https-only.random
 
 	 systemctl --quiet is-enabled tor &>/dev/null && sed -i 's/^#\(export [a-z]*_proxy\)/\1/ig' /usr/share/ppz/bash.rc
