@@ -1,0 +1,26 @@
+#!/usr/bin/bash
+
+. /usr/share/ppz/bash.functions
+
+# show the difference between a file and its sorted version
+# what do i have to change to make this file sorted?
+
+file='-'
+for arg; do
+    if [ -a "$arg" ]; then
+        file=$arg
+        continue
+    fi
+	 case "$arg" in
+        -)   file=${arg};;
+        *)   echo "weird arg: $arg";;
+	 esac
+done
+
+tmpfile=/tmp/sort-diff.$(uniq_token)
+trap "rm -rf $tmpfile; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+cat "$file" >| "$tmpfile"
+
+diff -C 1 \
+     <(cat "$tmpfile") \
+     <(cat "$tmpfile" | sort -u)
