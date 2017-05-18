@@ -48,7 +48,7 @@ while :; do
            echo "user set mac: $mac"
         } || case "$mac" in
            hardware) :;;
-           random)   mac=$(random_mac)
+           random)   mac=$(rando mac)
                      ip link set dev $if address "$mac"
                      echo "set random mac: $mac";;
            *)        echo "weird mac '$val' - using random"

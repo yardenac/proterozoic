@@ -20,12 +20,32 @@ rando_manywords() {
       | sort -Ru | head -n 150)
 }
 
+hexchars=0123456789abcdef
+rando_hex() {
+	 echo -n ${hexchars:$(( RANDOM % 16 )):1}
+}
+rando_mac() {
+	 local c=6
+	 while let c--; do
+		  rando_hex
+		  rando_hex
+		  (( c )) && echo -n : || echo
+	 done
+}
+rando_manymacs() {
+    export COLUMNS=$(tput cols)
+    macs=${1:-15}
+    while let macs--; do
+        rando_mac
+    done | column
+}
+
 functions=()
 for arg; do
 	 functions+=$arg
 done
 
-(( ${#functions[@]} )) || functions=(manypws manywords)
+(( ${#functions[@]} )) || functions=(manypws manymacs manywords)
 
 for f in "${functions[@]}"; do
 	 if [ "$(type -t "rando_$f" 2>/dev/null)" = function ]; then
