@@ -584,6 +584,18 @@ test_network() {
 		  return 1
 	 done
 }
+hexchars=0123456789abcdef
+random_hex() {
+	 echo -n ${hexchars:$(( RANDOM % 16 )):1}
+}
+random_mac() {
+	 local c=6
+	 while let c--; do
+		  random_hex
+		  random_hex
+		  (( c )) && echo -n : || echo
+	 done
+}
 ramsize() { #returns size of system's ram in megabytes
 	 awk '/MemTotal:/ { printf ("%0.0f\n",$2/1024); }' /proc/meminfo
 }

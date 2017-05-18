@@ -22,18 +22,6 @@ trap "knu_cleanup; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
 WPA_SC=$(edev-path "$WPA_SC")
 [ -a "$WPA_SC" ] || WPA_SC=/etc/wpa_supplicant.conf
 
-hexchars=0123456789abcdef
-random_hex() {
-	 echo -n ${hexchars:$(( RANDOM % 16 )):1}
-}
-random_mac() {
-	 local c=6
-	 while let c--; do
-		  random_hex
-		  random_hex
-		  (( c )) && echo -n : || echo
-	 done
-}
 avail_known_ssid() {
 	 comm -12 \
 		  <(iwlist $1 scan | awk '/ESSID:"/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' | sed '/^[   ]*$/d' | sort -u) \
