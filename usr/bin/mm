@@ -28,6 +28,8 @@ done
 
 set_xtitle "[mm] $*"
 
+[ "$(type -t pre-mm)" = 'file' ] && pre-mm
+
 [ "$holdss" ] && {
 	 holdss &
 	 trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
