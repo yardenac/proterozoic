@@ -1,0 +1,15 @@
+[Unit]
+Description=Watch Xscreensaver
+IgnoreOnIsolate=yes
+
+[Service]
+User=ex
+ExecStart=/usr/bin/xscreensaver-command -watch
+Restart=always
+RestartSec=0
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
