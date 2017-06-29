@@ -43,4 +43,6 @@ ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}x${y} -fs --ao=alsa \
     --term-status-msg='${time-pos} / ${duration} (${percent-pos}%) ${filename}' \
     --hr-seek=yes "${args[@]}"
 
+# [${demuxer-cache-duration}+${cache-used}] this updates too frequently, needs a throttle before i can use it
+
 echo
