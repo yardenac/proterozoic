@@ -12,15 +12,21 @@ COMMIT
 *filter
 :INPUT DROP [0:0]
 :FORWARD DROP [0:0]
-:OUTPUT ACCEPT [0:0]
+:OUTPUT DROP [0:0]
 :evil - [0:0]
 :open - [0:0]
+:open-out - [0:0]
 -A INPUT -i lo -j ACCEPT
 -A INPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
 -A INPUT -j evil
 -A INPUT -j open
 -A INPUT -p tcp -j REJECT --reject-with tcp-reset
 -A INPUT -p udp -j REJECT --reject-with icmp6-port-unreachable
+-A OUTPUT -o lo -j ACCEPT
+-A OUTPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
+-A OUTPUT -j open-out
+-A OUTPUT -p tcp -j REJECT --reject-with tcp-reset
+-A OUTPUT -p udp -j REJECT --reject-with icmp6-port-unreachable
 -A evil -m state --state INVALID -j DROP
 -A evil -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m conntrack --ctstate NEW -j DROP
 -A evil -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
