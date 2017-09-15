@@ -41,8 +41,8 @@ ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}x${y} -fs --ao=alsa \
 	 --cache-initial=1024 --cache=256000 --no-input-default-bindings \
     --input-conf=/usr/share/ppz/mplayer.input.conf \
     --term-status-msg='${time-pos} / ${duration} (${percent-pos}%) ${filename}' \
+    --no-osc --script-opts=osc-visibility=always,osc-timems=no,osc-layout=topslim \
+    --cursor-autohide=always \
     --hr-seek=yes "${args[@]}"
-
-# [${demuxer-cache-duration}+${cache-used}] this updates too frequently, needs a throttle before i can use it
 
 echo
