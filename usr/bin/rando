@@ -9,7 +9,7 @@ rando_oneword() {
 
 rando_manypws() {
    export COLUMNS=$(tput cols)
-   rand=${1:-80}
+   rand=${1:-68}
    while let rand--; do
       random_password 25 31
    done | column
@@ -17,7 +17,28 @@ rando_manypws() {
 
 rando_manywords() {
    echo $(aspell -d en dump master | aspell -l en expand \
-      | sort -Ru | head -n 150)
+      | sort -Ru | head -n 130)
+}
+
+rando_date_before() {
+    # random date no later than arg, and no earlier than "arg - 2^31 seconds"
+    date -d @$(( $(date +%s -d "$*") - (($RANDOM<<30|$RANDOM<<15|$RANDOM)>>14) ))
+}
+rando_manydates() {
+    local d=${1:-12}
+    while let d--; do
+        rando_date_before '18 years ago'
+    done | column
+}
+
+rando_zip() {
+    shuf -n 1 /usr/share/ppz/zips
+}
+rando_manyzips() {
+    local z=${1:-16}
+    while let z--; do
+        rando_zip
+    done | column
 }
 
 hexchars=0123456789abcdef
@@ -45,7 +66,7 @@ for arg; do
 	 functions+=$arg
 done
 
-(( ${#functions[@]} )) || functions=(manypws manymacs manywords)
+(( ${#functions[@]} )) || functions=(manypws manymacs manydates manyzips manywords)
 
 for f in "${functions[@]}"; do
 	 if [ "$(type -t "rando_$f" 2>/dev/null)" = function ]; then
