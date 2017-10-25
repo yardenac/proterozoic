@@ -38,6 +38,12 @@ ck_pkg() {
 		  return
 	 }
 	 if vergt "$vers_here" "$vers_there"; then
+        if [ "$vers_here" = "$vers_there.${vers_here##*.}" ]; then
+		      [[ $verbose == y ]] && \
+                echo_blue_n "$name $vers_here " && \
+                echo_green "INCREMENTAL"
+            return
+        fi
 		  url=$($cower --search --format="%u" "^${name}$")
 		  giturl=$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')
 		  [ "$giturl" ] || {
