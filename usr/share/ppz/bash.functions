@@ -442,9 +442,9 @@ unhash() {
 ############ WRAPPERS
 ll() {
 	if [ $# -gt 1 ]; then
-		ls --color=auto -FlAthrd "$@"
+		ls --color=auto -ZFlAthrd "$@"
 	else
-		ls --color=auto -FlAthr  "$@"
+		ls --color=auto -ZFlAthr  "$@"
 	fi
 }
 lls() {
