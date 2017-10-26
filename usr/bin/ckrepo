@@ -86,14 +86,14 @@ ck_repo() {
 
 shopt -s nullglob
 
+repos=() pkgs=()
+verbose='' loop=''
 conf=~/.config/ckrepo
 [ -f "$conf" ] && . "$conf"
-
-repos=() pkgs=()
-verbose=''
 for arg; do
 	 case "$arg" in
 		  -v|--verbose) verbose=y; continue;;
+        -l|--loop)    loop=y;    continue;;
 	 esac
 	 if item=$(full_path_strict "$arg"); then
 		  if is_repo "$item"; then
@@ -117,10 +117,15 @@ done
 print_repos=''
 [ ${#repos[@]} -gt 1 ] || [ "$verbose" ] && print_repos=y
 
-for repo in "${repos[@]}"; do
-	 ck_repo "$repo"
-done
-
-for pkg in "${pkgs[@]}"; do
-	 ck_pkg "$pkg"
+while :; do
+    echo_green $(date)
+    for repo in "${repos[@]}"; do
+	     ck_repo "$repo"
+    done
+    for pkg in "${pkgs[@]}"; do
+	     ck_pkg "$pkg"
+    done
+    [ "$loop" ] || break
+    sleep 1h
+    echo; echo
 done
