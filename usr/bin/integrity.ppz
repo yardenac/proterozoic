@@ -223,6 +223,51 @@ integrity_iptables() {
 
 	 rm -f $tmp_is $tmp_should
 }
+integrity_ip6tables() {
+	 am_root || return 0
+
+	 # this only works on the FILE. it does not interact directly with the tables,
+	 # except to call rc restart. only use rc for that, much cleaner that way!
+    mkdir -p /etc/iptables
+	 local PROTOCOL PORT CUSTOM= \
+		  rules_file=/etc/iptables/ip6tables.rules \
+		  default_rules=/usr/share/ppz/default/ip6tables.rules \
+		  tmp_is=/tmp/ip6tables.is.$(uniq_token) \
+		  tmp_should=/tmp/ip6tables.should.$(uniq_token)
+
+	 # rules as they should be, WITH custom open ports from ppz.conf
+	 for PORT in ${OPEN_PORTS[@]}; do
+		  PROTOCOL=tcp
+		  [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
+		  CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT \n"
+	 done
+	 for OPENU in ${OPEN_USERS[@]}; do
+		  CUSTOM+="-A open-out -m owner --uid-owner ${OPENU} -j ACCEPT \n"
+	 done
+    if [ "$BLOCK_OUT" = yes ]; then
+        CUSTOM+="-A OUTPUT -p tcp -j REJECT --reject-with tcp-reset \n"
+        CUSTOM+="-A OUTPUT -p udp -j REJECT --reject-with icmp6-port-unreachable \n"
+        CUSTOM+="-P OUTPUT DROP\n"
+    fi
+	 sed 's/^#LOCAL$/'"$CUSTOM"'/ig' $default_rules | sed '/^ *$/d' > $tmp_should
+
+	 # current rules with comments & empty lines removed, and counters zeroed
+	 touch $rules_file
+	 sed 's/^\(#.*\)\?$//ig;Tc;d;:c;s/\[[0-9]*:[0-9]*\]/[0:0]/ig' $rules_file > $tmp_is
+
+	 # if they're different, deal with that
+	 if ! [ -s $tmp_is ] || ! diff $tmp_is $tmp_should; then
+		  if ! [ -s $tmp_is ] || askyn "Impose new iptables rules?"; then
+				cat $tmp_should >| $rules_file
+				echo_red replaced iptables rules
+				chrooted && echo_red "Not resetting iptables" || systemctl restart ip6tables
+		  fi
+	 fi
+
+#	 askyn "are you inspecting the iptables sitch?"
+
+	 rm -f $tmp_is $tmp_should
+}
 integrity_encdev() {
 	 local size arg name type dev{,_canon,_intermediate} mountpoint mapname loop mem iters IFS=$'\n\r\t '
 
@@ -605,7 +650,7 @@ integrity_sensors() {
 #      post_upgrade
 
 for F in rootpw locales tz simpleconf users \
-	 iptables encdevs bashhistory emacsd tmpdir sshd \
+	 ip{,6}tables encdevs bashhistory emacsd tmpdir sshd \
 	 sensors everyone; do
 
 	 integrity_${F} || echo "${F} failed..."
