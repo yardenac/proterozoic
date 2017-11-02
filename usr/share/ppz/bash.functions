@@ -851,3 +851,12 @@ vidlength() {
         echo $(filename_fitted "$f" $(( $(tput cols) - 9 )))
     done
 }
+grexify() {
+    local tmpfile=/tmp/.$(uniq_token)
+    for arg; do
+        [ -f "$arg" ] || continue
+        mv -i "$arg" $tmpfile
+        grex $tmpfile >| "$arg"
+        rm -rf $tmpfile
+    done
+}
