@@ -855,7 +855,7 @@ grexify() {
     local tmpfile=/tmp/.$(uniq_token)
     files=() equals_too=''
     for arg; do
-        [ -f "$arg" ] && files+=("$arg")
+        [ -f "$arg" ] && files+=("$arg") && continue
         case "$arg" in
             --equals) equals_too=y;; # also filters lines ending with =
             *) echo "weird arg: $arg"
@@ -863,7 +863,7 @@ grexify() {
     done
     for file in "${files[@]}"; do
         mv -i "$file" $tmpfile
-        if [ "$equals_too" ]; then
+        if [[ "$equals_too" ]]; then
             grex $tmpfile | grep -vE '=$' >| "$file"
         else
             grex $tmpfile >| "$file"
