@@ -6,7 +6,7 @@
 do_unto_others
 
 while process_exists $PPID; do
-	 xdotool key ctrl
-	 secs=$(hms-to-secs $(xrdb -query | awk '/^xscreensaver.timeout:/ { print $2 }'))
-	 sleep $(( secs - 2 ))
+    xdotool key ctrl
+    secs=$(hms-to-secs $(xrdb -query | awk '/^xscreensaver.timeout:/ { print $2 }'))
+    sleep $(( secs - 2 ))
 done

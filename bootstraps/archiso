@@ -14,19 +14,19 @@ GITURL=https://raw.github.com/yardenac/proterozoic/master
 mv -f /etc/pacman.conf{,.original}
 mkdir -p /etc/systemd/logind.conf.d
 mkdir -p /etc/systemd/system/ntpd.service.d
-wget $GITURL/usr/share/ppz/default/ppz.conf		-qO	/etc/ppz.conf
-wget $GITURL/usr/share/ppz/default/pacman.conf	-qO	/etc/pacman.conf
+wget $GITURL/usr/share/ppz/default/ppz.conf      -qO   /etc/ppz.conf
+wget $GITURL/usr/share/ppz/default/pacman.conf   -qO   /etc/pacman.conf
 wget $GITURL/usr/share/ppz/default/logind.conf  -qO   /etc/systemd/logind.conf.d/archiso.conf
 wget $GITURL/usr/share/ppz/default/ntpd.service -qO   /etc/systemd/system/ntpd.service.d/archiso.conf
 wget https://raw.github.com/yardenac/arch-https-mirrors/master/etc/pacman.d/mirrorlist.https-only \
      -qO- | sort -Ruo /etc/pacman.d/mirrorlist.https-only.random
 sed -i \
-	 -e 's/^IgnorePkg[ =]*/\0 linux /ig' \
-	 -e s/https-only/https-only.random/ig 					/etc/pacman.conf
+    -e 's/^IgnorePkg[ =]*/\0 linux /ig' \
+    -e s/https-only/https-only.random/ig                /etc/pacman.conf
 sed -i \
-	 -e "s/somename/eu/ig" \
-	 -e "s/=(22)/=($sshport)/" \
-	 -e s/%SET_TYPE%/desktop/ig								/etc/ppz.conf
+    -e "s/somename/eu/ig" \
+    -e "s/=(22)/=($sshport)/" \
+    -e s/%SET_TYPE%/desktop/ig                        /etc/ppz.conf
 
 [ "$(uname -m)" = i686 ] && sed -i 's/\[multilib\]/#\0/ig' /etc/pacman.conf
 
@@ -49,6 +49,6 @@ systemctl restart systemd-logind
 
 mkdir /etc/ssh/keys
 echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKZHaN9x2NGws2vXrOduIqUpUVRnqbPAGTZ/SS5YUUCR' \
-	 >| /etc/ssh/keys/eu
+    >| /etc/ssh/keys/eu
 
 echo REMINDER: ssh port is $sshport

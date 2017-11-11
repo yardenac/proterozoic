@@ -1,14 +1,14 @@
 #!/usr/bin/bash
 
 millisleep() {
-	 local c=${1:-0}.
-	 local c=${1//[^0-9.]}.
-	 local bd=${c%%.*} #before dot
-	 local ad=${c#*.}; ad=${ad//.} #after dot
-	 while [ ${#bd} -lt 4 ]; do
-		  bd=0$bd
-	 done
-	 sleep ${bd:0: -3}.${bd: -3}${ad}
+    local c=${1:-0}.
+    local c=${1//[^0-9.]}.
+    local bd=${c%%.*} #before dot
+    local ad=${c#*.}; ad=${ad//.} #after dot
+    while [ ${#bd} -lt 4 ]; do
+        bd=0$bd
+    done
+    sleep ${bd:0: -3}.${bd: -3}${ad}
 }
 list_running() {
     local p c=0 ps=("$(pgrep $UTXT -f ${PROG_TO_KILL})")
@@ -25,15 +25,15 @@ UTXT=
 
 args=()
 while [ "$1" ]; do
-	 case "$1" in
-		  -a) POLICY=aggressive;;
-		  -s) POLICY=passive;;
-		  -p) shift; POLICY="$1";;
-		  -u) UTXT=" -u $EUID ";;
-		  /*) args+=("$@"); break;;
-		  *) args+=("$1");;
-	 esac
-	 shift
+    case "$1" in
+        -a) POLICY=aggressive;;
+        -s) POLICY=passive;;
+        -p) shift; POLICY="$1";;
+        -u) UTXT=" -u $EUID ";;
+        /*) args+=("$@"); break;;
+        *) args+=("$1");;
+    esac
+    shift
 done
 set -- "${args[@]}"
 
@@ -45,20 +45,20 @@ FULL_COMMAND=${@:-/usr/bin/fbpanel}
 LOCKDIR=/tmp/lock.file.${PROG_TO_KILL//\/}
 
 if mkdir ${LOCKDIR} 2>/dev/null; then
-	 trap "rm -rf ${LOCKDIR}; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
-	 case ${POLICY} in
-		  aggressive) c=8 # kills any existing, takes their place
-				while let c*=2 && list_running &>/dev/null; do
-					 for P in $(list_running); do
-						  case ${P} in
-								$$) ;;
-								*) kill -SIGTERM $P
-						  esac
-					 done
-					 [ $c -gt 2000 ] && break || millisleep $c
-				done;;
-		  passive|*) # if any already exist, defer to them
-				list_running &>/dev/null && exit;;
-	 esac
-	 nohup ${FULL_COMMAND} &>/dev/null &
+    trap "rm -rf ${LOCKDIR}; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+    case ${POLICY} in
+        aggressive) c=8 # kills any existing, takes their place
+            while let c*=2 && list_running &>/dev/null; do
+                for P in $(list_running); do
+                    case ${P} in
+                        $$) ;;
+                        *) kill -SIGTERM $P
+                    esac
+                done
+                [ $c -gt 2000 ] && break || millisleep $c
+            done;;
+        passive|*) # if any already exist, defer to them
+            list_running &>/dev/null && exit;;
+    esac
+    nohup ${FULL_COMMAND} &>/dev/null &
 fi

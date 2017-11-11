@@ -6,17 +6,17 @@
 hostname=$(</etc/hostname)
 
 rot_uptime() {
-	 uptime -s | colrm 17
+    uptime -s | colrm 17
 }
 rot_pacman() {
-	 tail -n 1 /var/log/pacman.log | colrm 1 1 | colrm 17
+    tail -n 1 /var/log/pacman.log | colrm 1 1 | colrm 17
 }
 
 do_rots() {
-	 local arg;
-	 for arg; do
-		  echo $(rot_$arg) $hostname $arg
-	 done
+    local arg;
+    for arg; do
+        echo $(rot_$arg) $hostname $arg
+    done
 }
 
 do_rots uptime pacman

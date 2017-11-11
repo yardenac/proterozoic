@@ -1,5 +1,5 @@
-xscreensaver.timeout:			0:01:00
-xscreensaver.dpmsStandby:		0:1:15
-xscreensaver.dpmsSuspend:		0:1:30
-xscreensaver.dpmsOff:			0:1:45
-xscreensaver.mode:				blank
+xscreensaver.timeout:         0:01:00
+xscreensaver.dpmsStandby:      0:1:15
+xscreensaver.dpmsSuspend:      0:1:30
+xscreensaver.dpmsOff:         0:1:45
+xscreensaver.mode:            blank

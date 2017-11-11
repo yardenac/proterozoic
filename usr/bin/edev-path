@@ -10,51 +10,51 @@
 # otherwise, echo nothing and return error
 
 BEGIN {
-	 IGNORECASE = RV = 1
+    IGNORECASE = RV = 1
 
-	 # hack the input files so we can use shebang + ignore stdin
-	 for ( i = 1 ; i < ARGC ; i++ ) {
-		  path = ARGV[i] # <-- note how path becomes the FINAL arg
-		  delete ARGV[i]
-	 }
-	 ARGC = 1
-	 ARGV[ARGC++] = "/etc/ppz.conf"
+    # hack the input files so we can use shebang + ignore stdin
+    for ( i = 1 ; i < ARGC ; i++ ) {
+        path = ARGV[i] # <-- note how path becomes the FINAL arg
+        delete ARGV[i]
+    }
+    ARGC = 1
+    ARGV[ARGC++] = "/etc/ppz.conf"
 
-	 # if just a normal path
-	 if (path ~ /^\//) {
-		  print path
-		  RV = 0
-		  exit
-	 }
+    # if just a normal path
+    if (path ~ /^\//) {
+        print path
+        RV = 0
+        exit
+    }
 
-	 # dev = name of edev
-	 dev = path
-	 sub(/\/.*$/,"",dev)
+    # dev = name of edev
+    dev = path
+    sub(/\/.*$/,"",dev)
 
-	 # path = path without edev prefix
-	 sub(/^[^\/]*/,"",path)
-	 sub(/\/+$/,"",path)
+    # path = path without edev prefix
+    sub(/^[^\/]*/,"",path)
+    sub(/\/+$/,"",path)
 }
 
 /^:/ {
-	 if ($2 != "edev") next
-	 if ($3 != dev) next
+    if ($2 != "edev") next
+    if ($3 != dev) next
 
-	 # look for field that is a path but not a key
-	 for ( i = 5 ; i <= NF ; i++ ) {
-		  if ($i !~ /^\//) continue
-		  if ($i ~ /\.key(\.gpg)?$/) continue
-		  print $i path
-		  RV = 0
-		  exit
-	 }
+    # look for field that is a path but not a key
+    for ( i = 5 ; i <= NF ; i++ ) {
+        if ($i !~ /^\//) continue
+        if ($i ~ /\.key(\.gpg)?$/) continue
+        print $i path
+        RV = 0
+        exit
+    }
 
-	 # otherwise, use the default format
-	 print "/media/" dev path
-	 RV = 0
-	 exit
+    # otherwise, use the default format
+    print "/media/" dev path
+    RV = 0
+    exit
 }
 
 END {
-	 exit RV
+    exit RV
 }

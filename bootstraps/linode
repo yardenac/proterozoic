@@ -9,27 +9,27 @@ read -N 1 -p $'\e[1;34mPress any key to begin stackscript...\e[m'
 GITURL=https://raw.github.com/yardenac/proterozoic/master
 
 mv -vf /etc/pacman.conf{,.original}
-curl $GITURL/usr/share/ppz/default/ppz.conf		-so	/etc/ppz.conf
-curl $GITURL/usr/share/ppz/default/pacman.conf	-so	/etc/pacman.conf
+curl $GITURL/usr/share/ppz/default/ppz.conf      -so   /etc/ppz.conf
+curl $GITURL/usr/share/ppz/default/pacman.conf   -so   /etc/pacman.conf
 curl https://raw.github.com/yardenac/arch-https-mirrors/master/etc/pacman.d/mirrorlist.https-only \
      -so /etc/pacman.d/mirrorlist.https-only.tmp
-sed -i s/https-only/https-only.tmp/ig 						/etc/pacman.conf
+sed -i s/https-only/https-only.tmp/ig                   /etc/pacman.conf
 sed -i \
-	 -e s/%SET_TYPE%/linode/ig \
-	 -e "s/somename/eu/ig" \
-	 -e 's/16m$/128m/ig' \
-	 -e 's/^#*:[\t ]*sync.*$/#&/ig' \
-	 -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'				/etc/ppz.conf
+    -e s/%SET_TYPE%/linode/ig \
+    -e "s/somename/eu/ig" \
+    -e 's/16m$/128m/ig' \
+    -e 's/^#*:[\t ]*sync.*$/#&/ig' \
+    -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'            /etc/ppz.conf
 
 echo "${SS_HOSTNAME}" >| /etc/hostname
 
 cat > /etc/fstab <<-EOF
-	/dev/xvda / ext3 rw,noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
+   /dev/xvda / ext3 rw,noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
 EOF
 
 case "$(uname -m)" in
-	 i686)  	sed -i 's/^\[multilib\]$/#&/ig'			/etc/pacman.conf;;
-	 x86_64)	sed -i 's/^##*\(\[multilib\]\)$/\1/ig'	/etc/pacman.conf;;
+    i686)     sed -i 's/^\[multilib\]$/#&/ig'         /etc/pacman.conf;;
+    x86_64)   sed -i 's/^##*\(\[multilib\]\)$/\1/ig'   /etc/pacman.conf;;
 esac
 
 echo "Forking md5sum for entropy..."
@@ -44,15 +44,15 @@ pacman --noprogressbar --noconfirm --needed -Sqyyu
 systemctl start dbus.service
 
 cat >| /etc/mkinitcpio.conf <<-EOF
-	HOOKS="base udev autodetect modconf block filesystems fsck ppz_tmp"
+   HOOKS="base udev autodetect modconf block filesystems fsck ppz_tmp"
 EOF
 pacman --noprogressbar --noconfirm --needed -Sq proterozoic
 sed -i s/https-only.tmp/https-only/ig /etc/pacman.conf
 pacman --noprogressbar --noconfirm --needed -Sq linux-linode
 
 rm -vf \
-	 /etc/{fstab,pacman.conf,locale.gen}.pacnew \
-	 /etc/pacman.d/mirrorlist.{https-only.tmp,pacnew}
+    /etc/{fstab,pacman.conf,locale.gen}.pacnew \
+    /etc/pacman.d/mirrorlist.{https-only.tmp,pacnew}
 
 # how to get proper "kernel name" in install file?
 

@@ -3,23 +3,23 @@
 shopt -s nullglob
 
 case "$1" in
-	 battery)
-		  for battery in /sys/class/power_supply/BAT*; do
-				read status < $battery/status
-				read ch_ful < $battery/charge_full
-				read ch_now < $battery/charge_now
-				perc=$(( 100 * ch_now / ch_ful ))
+    battery)
+        for battery in /sys/class/power_supply/BAT*; do
+            read status < $battery/status
+            read ch_ful < $battery/charge_full
+            read ch_now < $battery/charge_now
+            perc=$(( 100 * ch_now / ch_ful ))
 
-				[ "$perc" -ge 100 ] || echo -n "$perc"
+            [ "$perc" -ge 100 ] || echo -n "$perc"
 
-				case $status in
-					 Full|Charging) :;;
-					 Discharging|Unknown) echo -n '!';;
-					 ""|*) echo -n '?'
-				esac
-		  done
-		  ;;
-	 ""|*) :;;
+            case $status in
+                Full|Charging) :;;
+                Discharging|Unknown) echo -n '!';;
+                ""|*) echo -n '?'
+            esac
+        done
+        ;;
+    ""|*) :;;
 esac
 
 echo

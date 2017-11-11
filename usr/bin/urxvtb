@@ -9,7 +9,7 @@ export DISPLAY=${DISPLAY:-:0}
 urxvtc "$@"
 
 if [ $? -eq 2 ]; then
-	 pkill -f urxvtd
-	 urxvtd -q -o -f
-	 urxvtc "$@"
+    pkill -f urxvtd
+    urxvtd -q -o -f
+    urxvtc "$@"
 fi

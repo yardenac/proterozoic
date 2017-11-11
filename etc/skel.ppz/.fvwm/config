@@ -25,17 +25,17 @@ HideGeometryWindow
 OpaqueMoveSize unlimited
 
 FocusStyle * !EnterToFocus, !LeaveToUnfocus, !FocusByProgram, \
-			FocusByFunction, !FocusByFunctionWarpPointer, !Lenient, \
-			FocusClickButtons 13, PassFocusClick, AllowFocusClickFunction, \
-			GrabFocus, GrabFocusTransient, ReleaseFocus, ReleaseFocusTransient, \
-			SortWindowlistByFocus, ClickToFocus, ClickToFocusRaises
+         FocusByFunction, !FocusByFunctionWarpPointer, !Lenient, \
+         FocusClickButtons 13, PassFocusClick, AllowFocusClickFunction, \
+         GrabFocus, GrabFocusTransient, ReleaseFocus, ReleaseFocusTransient, \
+         SortWindowlistByFocus, ClickToFocus, ClickToFocusRaises
 Style * !Borders, !Handles, MWMFunctions, MWMDecor, HintOverride, \
-		  Icon unknown1.xpm, Color lightgrey/dimgrey, !Title, \
-		  !UsePPosition, NoPPosition, NoIcon, \
-		  DecorateTransient, EdgeMoveResistance 50 50, \
-		  IconBox 0 -10 -280 -1, SnapAttraction 10, ResizeOpaque
+        Icon unknown1.xpm, Color lightgrey/dimgrey, !Title, \
+        !UsePPosition, NoPPosition, NoIcon, \
+        DecorateTransient, EdgeMoveResistance 50 50, \
+        IconBox 0 -10 -280 -1, SnapAttraction 10, ResizeOpaque
 Style Fvwm*       NoTitle,  Sticky, WindowListSkip, \
-		BorderWidth 2, CirculateSkipIcon, CirculateSkip
+      BorderWidth 2, CirculateSkipIcon, CirculateSkip
 Style panel StaysOnTop
 Style mpv StaysOnTop
 Style plugin-container StaysOnTop
@@ -50,38 +50,38 @@ ColormapFocus FollowsFocus
 IgnoreModifiers L25
 
 # Nop functions are needed to override defaults
-Key	Help			R		A			-
-Key	Escape		A		MC			EscapeFunc
-Key	Tab			A		M			WindowListMakeFunc
-Key	Tab			A		MS			WindowListMakeFunc
-Key	F1				R		A			-
-Key 	F4 			SFTW	M			Current Delete
-Key 	F9 			SFTW	M			Current Iconify
-Key	F10			SFTW	M			Current Maximize
-Key	Left			A		CMS		Current WinTo $[w.id] -1
-Key	Right			A		CMS		Current WinTo $[w.id] +1
-Key	Left			A		CM			GoToDeskBetter -1
-Key	Right			A		CM			GoToDeskBetter +1
-Key	space			A		M			Menu MenuFvwmWindowOps2 Window 0 0 Nop
-Key 	apostrophe	A		4			NiceBash 100x20 - 'su - eu -c \\"urxvtb -e /usr/bin/womb\\"'
-Key	m				A		4			NiceBash 80x39  - 'cd; . /usr/share/ppz/bash.functions; . /usr/share/ppz/bash.functions.xorg; woman'
-Key	c				A		4			NiceBash 69x34  - 'cal -y && read'
-Key	b				A		4			NiceTerm 40x39  - /usr/bin/bc -lq /etc/bcrc
-Key	i				A		4			Exec exec xcalib -invert -alter
-Key	o				A		4			Exec exec /usr/bin/redshift-toggle
-Key	l				A		4			Exec exec xscreensaver-command -lock
-Key	r				A		4			Refresh
-Key	q				A		4			Exec exec transset-df -a --dec 0.04
-Key	w				A		4			Exec exec transset-df -a --inc 0.04
-Key	v				A		4			xdotool click 2
-Mouse 0				A 		A			-
-Mouse 1				R		A			-
-Mouse 1				SFTW	M			DragNMove
-Mouse 3				SFTW	M			ResizeDynamicFromVars
-Mouse 3				R     A			Menu MenuFvwmRoot Nop
-Key	XF86AudioLowerVolume A N	Exec exec amixer set Master 1-
-Key	XF86AudioRaiseVolume A N	Exec exec amixer set Master 1+
-Key	XF86AudioMute			A N	Exec exec amixer set Master toggle
+Key   Help         R      A         -
+Key   Escape      A      MC         EscapeFunc
+Key   Tab         A      M         WindowListMakeFunc
+Key   Tab         A      MS         WindowListMakeFunc
+Key   F1            R      A         -
+Key    F4          SFTW   M         Current Delete
+Key    F9          SFTW   M         Current Iconify
+Key   F10         SFTW   M         Current Maximize
+Key   Left         A      CMS      Current WinTo $[w.id] -1
+Key   Right         A      CMS      Current WinTo $[w.id] +1
+Key   Left         A      CM         GoToDeskBetter -1
+Key   Right         A      CM         GoToDeskBetter +1
+Key   space         A      M         Menu MenuFvwmWindowOps2 Window 0 0 Nop
+Key    apostrophe   A      4         NiceBash 100x20 - 'su - eu -c \\"urxvtb -e /usr/bin/womb\\"'
+Key   m            A      4         NiceBash 80x39  - 'cd; . /usr/share/ppz/bash.functions; . /usr/share/ppz/bash.functions.xorg; woman'
+Key   c            A      4         NiceBash 69x34  - 'cal -y && read'
+Key   b            A      4         NiceTerm 40x39  - /usr/bin/bc -lq /etc/bcrc
+Key   i            A      4         Exec exec xcalib -invert -alter
+Key   o            A      4         Exec exec /usr/bin/redshift-toggle
+Key   l            A      4         Exec exec xscreensaver-command -lock
+Key   r            A      4         Refresh
+Key   q            A      4         Exec exec transset-df -a --dec 0.04
+Key   w            A      4         Exec exec transset-df -a --inc 0.04
+Key   v            A      4         xdotool click 2
+Mouse 0            A       A         -
+Mouse 1            R      A         -
+Mouse 1            SFTW   M         DragNMove
+Mouse 3            SFTW   M         ResizeDynamicFromVars
+Mouse 3            R     A         Menu MenuFvwmRoot Nop
+Key   XF86AudioLowerVolume A N   Exec exec amixer set Master 1-
+Key   XF86AudioRaiseVolume A N   Exec exec amixer set Master 1+
+Key   XF86AudioMute         A N   Exec exec amixer set Master toggle
 
 #NiceTerm WIDTHxHEIGHT -/"" COMMAND
 DestroyFunc NiceTerm
@@ -98,8 +98,8 @@ AddToFunc NiceBash
 DestroyFunc WindowListMakeFunc
 AddToFunc WindowListMakeFunc
 + I WindowList (CurrentDesk) Root c c \
-  	 	NoGeometry, NoCurrentDeskTitle, CurrentAtEnd, \
-		IconifiedAtEnd, MaxLabelWidth 200
+         NoGeometry, NoCurrentDeskTitle, CurrentAtEnd, \
+      IconifiedAtEnd, MaxLabelWidth 200
 
 DestroyFunc WindowListFunc
 AddToFunc WindowListFunc
@@ -109,9 +109,9 @@ AddToFunc WindowListFunc
 
 DestroyMenuStyle WindowList
 MenuStyle WindowList \
-			 BorderWidth 0, \
-			 SelectOnRelease Meta_L, \
-			 ItemFormat "%.4i%l"
+          BorderWidth 0, \
+          SelectOnRelease Meta_L, \
+          ItemFormat "%.4i%l"
 
 DestroyFunc FuncFvwmRaiseLowerX
 DestroyFunc WinTo
@@ -157,7 +157,7 @@ AddToMenu MenuFvwmWindowOps2
 + "$[gt.&Lower]"             Lower
 + "$[gt.(De)&Iconify]"       Iconify
 + "$[gt.(Un)&Stick]"         Stick
-+ "$[gt.Toggle_&OnTop]"		  ToggleOnTopFunc
++ "$[gt.Toggle_&OnTop]"        ToggleOnTopFunc
 
 DestroyFunc ToggleOnTopFunc
 AddToFunc ToggleOnTopFunc

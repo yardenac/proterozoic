@@ -23,60 +23,60 @@ user_stats=($(awk -F : /^$user:/' { print $3 " " $4 " " $6 }' /etc/passwd))
 
 open_dev() { local name dev mountpoint mapname arg
 
-	 name=$3
-	 dev=$4
-	 mapname=$name
-	 mountpoint=/media/$name
-	 shift 4
-	 for arg; do
-		  shopt -s nocasematch
-		  if [ ${arg:0:1} = / ]; then 						# it's a path, mountpoint
-				mountpoint=$arg
-		  elif [[ $arg =~ ^[0-9.]+[bskmgtp]?$ ]]; then	# it's a size
-				:
-		  elif [[ $arg =~ ^[a-z0-9]+$ ]]; then		# its a mapper name
-				mapname=$arg
-		  else
-				ribbit "What the hell is this? $arg"
-		  fi
-	 done
+    name=$3
+    dev=$4
+    mapname=$name
+    mountpoint=/media/$name
+    shift 4
+    for arg; do
+        shopt -s nocasematch
+        if [ ${arg:0:1} = / ]; then                   # it's a path, mountpoint
+            mountpoint=$arg
+        elif [[ $arg =~ ^[0-9.]+[bskmgtp]?$ ]]; then   # it's a size
+            :
+        elif [[ $arg =~ ^[a-z0-9]+$ ]]; then      # its a mapper name
+            mapname=$arg
+        else
+            ribbit "What the hell is this? $arg"
+        fi
+    done
 
-	 # make sure it's mapped - user enters password here
-	 [ -a /dev/mapper/$mapname ] || {
-		  cryptsetup luksOpen $dev $mapname || croak "luksOpen failed"
-	 }
+    # make sure it's mapped - user enters password here
+    [ -a /dev/mapper/$mapname ] || {
+        cryptsetup luksOpen $dev $mapname || croak "luksOpen failed"
+    }
 
-	 # if it's mounted already, leave it be
-	 findmnt -n /dev/mapper/$mapname >/dev/null && {
-#		  echo "/dev/mapper/$mapname is already mounted"
-		  return
-	 }
-	 # if we're still here, it's not mounted.
+    # if it's mounted already, leave it be
+    findmnt -n /dev/mapper/$mapname >/dev/null && {
+#        echo "/dev/mapper/$mapname is already mounted"
+        return
+    }
+    # if we're still here, it's not mounted.
 
-	 # make sure filesystem exists, and fsck it
-	 case $(blkid -o value -s TYPE /dev/mapper/$mapname) in
-		  ext2|ext3|ext4)	e2fsck /dev/mapper/$mapname;;
-		  '')		croak "/dev/mapper/$mapname is not formatted with a filesystem";;
-		  *)		croak "Did not create fsck method for $type yet.";;
-	 esac
-	 (( $? )) && {
-		  echo_red fsck failed ... jsyk
-		  shell_is_interactive && read
-	 }
+    # make sure filesystem exists, and fsck it
+    case $(blkid -o value -s TYPE /dev/mapper/$mapname) in
+        ext2|ext3|ext4)   e2fsck /dev/mapper/$mapname;;
+        '')      croak "/dev/mapper/$mapname is not formatted with a filesystem";;
+        *)      croak "Did not create fsck method for $type yet.";;
+    esac
+    (( $? )) && {
+        echo_red fsck failed ... jsyk
+        shell_is_interactive && read
+    }
 
-	 # now mount it
-	 mkdir -p $mountpoint
-	 mount -o rw,relatime,nodiratime /dev/mapper/$mapname $mountpoint || croak "mount failed"
-	 [ -a ${user_stats[2]} ] || {
-		  cp -r /etc/skel.ppz ${user_stats[2]}
-		  [ -d ${user_stats[2]} ] || croak "HOME NOT A DIR???"
-		  chown -RPh ${user_stats[0]}:${user_stats[1]} ${user_stats[2]}
-		  shopt -s nullglob
-		  # remove X-user stuff
-		  rm -rf ${user_stats[2]}/.{fontconfig,config/{fbpanel,Terminal},fvwm,xinitrc}
-		  shopt -u nullglob
-		  chmod 700 ${user_stats[2]}
-	 }
+    # now mount it
+    mkdir -p $mountpoint
+    mount -o rw,relatime,nodiratime /dev/mapper/$mapname $mountpoint || croak "mount failed"
+    [ -a ${user_stats[2]} ] || {
+        cp -r /etc/skel.ppz ${user_stats[2]}
+        [ -d ${user_stats[2]} ] || croak "HOME NOT A DIR???"
+        chown -RPh ${user_stats[0]}:${user_stats[1]} ${user_stats[2]}
+        shopt -s nullglob
+        # remove X-user stuff
+        rm -rf ${user_stats[2]}/.{fontconfig,config/{fbpanel,Terminal},fvwm,xinitrc}
+        shopt -u nullglob
+        chmod 700 ${user_stats[2]}
+    }
 }
 
 # find the devline for this device, pass it as arguments

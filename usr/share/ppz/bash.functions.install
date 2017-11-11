@@ -1,58 +1,58 @@
 #!/usr/bin/bash
 
 static_per_nic() {
-	 # prints network envfile to stdout, based on current values (probably from dhcp)
-	 ip addr show dev $1 | awk -f <(cat <<-'EOF'
-		$1 ~ /^inet$/ {
-			gsub(/\//," ")
-			print "address=" $2 "\nnetmask=" $3 "\nbroadcast=" $5
-		}
-		EOF
-	 )
-	 ip route show dev $1 | awk '/^default via/ {print "gateway=" $3}'
-	 echo 'resolv="'$(grex /etc/resolv.conf | { while read; do echo -n "$REPLY"'\\n'; done; })\"
+    # prints network envfile to stdout, based on current values (probably from dhcp)
+    ip addr show dev $1 | awk -f <(cat <<-'EOF'
+      $1 ~ /^inet$/ {
+         gsub(/\//," ")
+         print "address=" $2 "\nnetmask=" $3 "\nbroadcast=" $5
+      }
+      EOF
+    )
+    ip route show dev $1 | awk '/^default via/ {print "gateway=" $3}'
+    echo 'resolv="'$(grex /etc/resolv.conf | { while read; do echo -n "$REPLY"'\\n'; done; })\"
 }
 
 static_networking_from_runtime() {
-	 local arg dev target='' devs=()
+    local arg dev target='' devs=()
 
-	 for arg; do
-		  case "$arg" in
-				eth0) devs+=("$arg");;
-				*)
-					 if [ -d "$arg"]; then
-						  target="$(readlink -e "$arg")"
-					 else
-						  echo_red "weird arg to static_networking: $arg"
-					 fi
-		  esac
-	 done
+    for arg; do
+        case "$arg" in
+            eth0) devs+=("$arg");;
+            *)
+                if [ -d "$arg"]; then
+                    target="$(readlink -e "$arg")"
+                else
+                    echo_red "weird arg to static_networking: $arg"
+                fi
+        esac
+    done
 
-	 # if no dev, use first non-lo network interface
-	 (( ${#devs[@]} )) || devs+=($(ip link | awk '/^[0-9]+:/ {sub(/:/,"",$2); if ($2 ~ "^(lo|dummy)[0-9]*$") next; print $2; exit}'))
+    # if no dev, use first non-lo network interface
+    (( ${#devs[@]} )) || devs+=($(ip link | awk '/^[0-9]+:/ {sub(/:/,"",$2); if ($2 ~ "^(lo|dummy)[0-9]*$") next; print $2; exit}'))
 
-	 for dev in "${devs[@]}"; do
-		  if am_root; then
-				mkdir -p "$target/etc/conf.d"
-				static_per_nic "$dev" >| "$target/etc/conf.d/network.$dev" \
-					 && echo_blue "generated $target/etc/conf.d/network.$dev"
-		  else
-				echo_blue "If I were root, I'd write this to: $target/etc/conf.d/network.$dev"
-				static_per_nic "$dev"
-		  fi
-	 done
+    for dev in "${devs[@]}"; do
+        if am_root; then
+            mkdir -p "$target/etc/conf.d"
+            static_per_nic "$dev" >| "$target/etc/conf.d/network.$dev" \
+                && echo_blue "generated $target/etc/conf.d/network.$dev"
+        else
+            echo_blue "If I were root, I'd write this to: $target/etc/conf.d/network.$dev"
+            static_per_nic "$dev"
+        fi
+    done
 }
 
 format_ext4() { local BBOPT=q
-	 case "$1" in
-		  automatic|auto) shift;;
-		  interactive)
-				shift
-				askyn "Format $1 ext4?" || return
-				askyn "Check for bad blocks?" && BBOPT=cc;;
-	 esac
-	 mke2fs -t ext4 -${BBOPT}E lazy_itable_init=1,discard \
-		  -O dir_index,extent,flex_bg,has_journal,uninit_bg,large_file,resize_inode,sparse_super ${1} \
-		  || askyn "mkfs failed. Continue?"
-			  #tune2fs 
+    case "$1" in
+        automatic|auto) shift;;
+        interactive)
+            shift
+            askyn "Format $1 ext4?" || return
+            askyn "Check for bad blocks?" && BBOPT=cc;;
+    esac
+    mke2fs -t ext4 -${BBOPT}E lazy_itable_init=1,discard \
+        -O dir_index,extent,flex_bg,has_journal,uninit_bg,large_file,resize_inode,sparse_super ${1} \
+        || askyn "mkfs failed. Continue?"
+           #tune2fs 
 }

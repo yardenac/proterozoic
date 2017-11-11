@@ -46,28 +46,28 @@ UserDir disabled root
 UserDir disabled
 <Directory />
     AllowOverride None
-	 Require all denied
+    Require all denied
 </Directory>
 <Directory "/srv/http">
     Options Indexes FollowSymLinks MultiViews
     AllowOverride None
-	 Require all granted
+    Require all granted
 </Directory>
 <FilesMatch "^\.ht(access|passwd)$">
     Require all denied
 </FilesMatch>
 <FilesMatch "~$">
-	Require all denied
+   Require all denied
 </FilesMatch>
 <Location />
-	 AllowMethods GET POST OPTIONS
+    AllowMethods GET POST OPTIONS
 </Location>
 Include /etc/httpd/conf/site-specific.conf
 
 <IfDefine CSP>
-	Header always set Content-Security-Policy   "${CSP}"
-	Header always set X-Content-Security-Policy "${CSP}"
-	Header always set X-Webkit-CSP              "${CSP}"
+   Header always set Content-Security-Policy   "${CSP}"
+   Header always set X-Content-Security-Policy "${CSP}"
+   Header always set X-Webkit-CSP              "${CSP}"
 </IfDefine>
 RequestHeader unset Proxy early
 

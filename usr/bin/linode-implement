@@ -14,17 +14,17 @@ doroutines=()
 nickname=''
 
 for arg; do
-	 if [[ "$arg" =~ ^doroutine- ]]; then
-		  doroutines+=(${arg#doroutine-})
-	 else
-		  case "$arg" in
-				nostackscript) use_stackscript='';;
-				x86_64|64|i686|32) arch="$arg";;
-				*)
-					 [[ "$arg" =~ ^[a-z0-9]+$ ]] && [ -z "$nickname" ] && nickname=$arg && continue
-					 echo_red "WEIRD ARG: $arg";;
-		  esac
-	 fi
+    if [[ "$arg" =~ ^doroutine- ]]; then
+        doroutines+=(${arg#doroutine-})
+    else
+        case "$arg" in
+            nostackscript) use_stackscript='';;
+            x86_64|64|i686|32) arch="$arg";;
+            *)
+                [[ "$arg" =~ ^[a-z0-9]+$ ]] && [ -z "$nickname" ] && nickname=$arg && continue
+                echo_red "WEIRD ARG: $arg";;
+        esac
+    fi
 done
 
 [ "$nickname" ] || croak "Need a linode nickname"
@@ -32,28 +32,28 @@ func_exists linoderc_setvars_"$nickname" || croak "No linode named $nickname"
 linoderc_setvars_"$nickname"
 
 case "$arch" in
-	 i686|32)
-		  latest_arch=104
-		  stock_kernel=137 # "latest 3.0 i686"
-		  pv_kernel=92
-		  ;;
-	 x86_64|64)
-		  latest_arch=105
-		  stock_kernel=138 # "latest 3.0 x86_64"
-		  pv_kernel=95
-		  ;;
-	 *) croak "Weird architecture: $arch";;
+    i686|32)
+        latest_arch=104
+        stock_kernel=137 # "latest 3.0 i686"
+        pv_kernel=92
+        ;;
+    x86_64|64)
+        latest_arch=105
+        stock_kernel=138 # "latest 3.0 x86_64"
+        pv_kernel=95
+        ;;
+    *) croak "Weird architecture: $arch";;
 esac
 
 id_from_label() {
-	 local n label
-	 for n in $(seq 1 $(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -l)); do
-		  label=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e $n -e LABEL -u)
-		  [[ "$label" == "$1" ]] || continue
-		  echo $(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e $n -e LINODEID -u)
-		  return
-	 done
-	 return 1
+    local n label
+    for n in $(seq 1 $(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -l)); do
+        label=$(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e $n -e LABEL -u)
+        [[ "$label" == "$1" ]] || continue
+        echo $(curl -sS ${LINODEURL}'linode.list' | jshon -e DATA -e $n -e LINODEID -u)
+        return
+    done
+    return 1
 }
 
 LINODEURL='https://api.linode.com?api_key='$API_KEY'&api_action='
@@ -62,203 +62,203 @@ linodeid=$(id_from_label "$LINODE_LABEL") || croak "Could not find the linode '$
 ssh_host_use=${LINODE_CONSOLE%%@*}@$(ssh_host_resolv ${LINODE_CONSOLE##*@}.linode.com)
 
 do_or_report() {
-	 [ "$1" == "say" ] && {
-		  local say=1
-		  shift
-	 } || local say=0
-	 local result=$(curl -sS ${LINODEURL}"$@")
-	 (( $(echo $result | jshon -e ERRORARRAY -l) )) && {
-		  echo "FAILED AT: $*"
-		  echo $result | jshon
-		  return 1
-	 }; :
-	 (( $say )) && echo "$result"
-	 return 0
+    [ "$1" == "say" ] && {
+        local say=1
+        shift
+    } || local say=0
+    local result=$(curl -sS ${LINODEURL}"$@")
+    (( $(echo $result | jshon -e ERRORARRAY -l) )) && {
+        echo "FAILED AT: $*"
+        echo $result | jshon
+        return 1
+    }; :
+    (( $say )) && echo "$result"
+    return 0
 }
 filtered_ssh() {
-	 ssh $ssh_host_use "$@" 2>/dev/null | tr -d '\f\r\n'
+    ssh $ssh_host_use "$@" 2>/dev/null | tr -d '\f\r\n'
 }
 block_for_job() { #returns when no more jobs pending
-	 while (( $(curl -sS ${LINODEURL}'linode.job.list&linodeid='$linodeid'&pendingonly=1' | jshon -e DATA -l) )); do
-		  echo -n .
-		  sleep 1
-	 done
-	 echo done!
+    while (( $(curl -sS ${LINODEURL}'linode.job.list&linodeid='$linodeid'&pendingonly=1' | jshon -e DATA -l) )); do
+        echo -n .
+        sleep 1
+    done
+    echo done!
 }
 block_for_shutdown() { #returns when linode shuts itself down
-	 echo -n "Waiting for linode to shut down..."
-	 while :; do
-		  local status=$(filtered_ssh status)
-		  case "$status" in
-				'Powered Off')
-					 echo done!
-					 return;;
-				Running|*)
-					 echo -n .
-					 sleep 5
-					 continue
-		  esac
-	 done
+    echo -n "Waiting for linode to shut down..."
+    while :; do
+        local status=$(filtered_ssh status)
+        case "$status" in
+            'Powered Off')
+                echo done!
+                return;;
+            Running|*)
+                echo -n .
+                sleep 5
+                continue
+        esac
+    done
 }
 block_for_ssh() { # returns when port 22 appears to be open on the machine
-	 echo -n "Waiting for SSH server to be up..."
-	 until nmap $LINODE_DOMAIN -p 22 -sV --version-all -oG - | grep -iq '22/open'; do
-		  echo -n .
-		  sleep 1
-	 done
-	 echo done!
+    echo -n "Waiting for SSH server to be up..."
+    until nmap $LINODE_DOMAIN -p 22 -sV --version-all -oG - | grep -iq '22/open'; do
+        echo -n .
+        sleep 1
+    done
+    echo done!
 }
 
 destroy_running() {
-	 local status=$(filtered_ssh status) || croak "No lish..."
-	 echo "Linode status is: $status"
-	 case "$status" in
-		  'Powered Off') :;;
-		  'Running')
-				echo "Going to destroy running instance..."
-				ssh $ssh_host_use destroy;;
-		  *) echo "unrecognized status string: $status"
-	 esac
-	 echo "Removing previous linode from known_hosts"
-	 ssh-keygen -qR $LINODE_DOMAIN
-	 ssh-keygen -qR $LINODE_IP
-	 ssh-keygen -qR $LINODE_DOMAIN,$LINODE_IP
+    local status=$(filtered_ssh status) || croak "No lish..."
+    echo "Linode status is: $status"
+    case "$status" in
+        'Powered Off') :;;
+        'Running')
+            echo "Going to destroy running instance..."
+            ssh $ssh_host_use destroy;;
+        *) echo "unrecognized status string: $status"
+    esac
+    echo "Removing previous linode from known_hosts"
+    ssh-keygen -qR $LINODE_DOMAIN
+    ssh-keygen -qR $LINODE_IP
+    ssh-keygen -qR $LINODE_DOMAIN,$LINODE_IP
 }
 update_stackscript() { local SS_COMMIT_TXT
-	 local num_sss=$(curl -sS ${LINODEURL}'stackscript.list' | jshon -e DATA -l);
-	 case $num_sss in
-		  0)	echo "Creating new stackscript..."
-				do_or_report 'stackscript.create&DistributionIDList='$latest_arch'&label=AUTO&rev_note=first+commit' --data-urlencode script@$ss_file || return 1
-				return
-				;;
-		  1)	ss_id=$(curl -sS ${LINODEURL}'stackscript.list' | jshon -e DATA -e 0 -e STACKSCRIPTID);;
-		  2|*) croak "More than one stackscript? clean that shit up!";;
-	 esac
+    local num_sss=$(curl -sS ${LINODEURL}'stackscript.list' | jshon -e DATA -l);
+    case $num_sss in
+        0)   echo "Creating new stackscript..."
+            do_or_report 'stackscript.create&DistributionIDList='$latest_arch'&label=AUTO&rev_note=first+commit' --data-urlencode script@$ss_file || return 1
+            return
+            ;;
+        1)   ss_id=$(curl -sS ${LINODEURL}'stackscript.list' | jshon -e DATA -e 0 -e STACKSCRIPTID);;
+        2|*) croak "More than one stackscript? clean that shit up!";;
+    esac
 
-	 # if we made it this far, there is exactly 1 stackscript with id # $ss_id
-	 cmp -s $ss_file <(curl -sS ${LINODEURL}'stackscript.list&stackscriptid='$ss_id | jshon -e DATA -e 0 -e SCRIPT -u) && {
-		  echo "Stackscript does not need updating"
-		  return
-	 }
-	 usetvar SS_COMMIT_TXT "Please write a stackscript commit entry: " 'unnamed revision' ''
-	 do_or_report 'stackscript.update&DistributionIDList='$latest_arch'&StackScriptID='$ss_id \
-		  --data-urlencode script@$ss_file --data-urlencode rev_note="$SS_COMMIT_TXT" || return 1
+    # if we made it this far, there is exactly 1 stackscript with id # $ss_id
+    cmp -s $ss_file <(curl -sS ${LINODEURL}'stackscript.list&stackscriptid='$ss_id | jshon -e DATA -e 0 -e SCRIPT -u) && {
+        echo "Stackscript does not need updating"
+        return
+    }
+    usetvar SS_COMMIT_TXT "Please write a stackscript commit entry: " 'unnamed revision' ''
+    do_or_report 'stackscript.update&DistributionIDList='$latest_arch'&StackScriptID='$ss_id \
+        --data-urlencode script@$ss_file --data-urlencode rev_note="$SS_COMMIT_TXT" || return 1
 }
 delete_disks() {
-	 while :; do
-		  local disklist=$(curl -sS ${LINODEURL}'linode.disk.list&linodeid='$linodeid)
-		  local numdisks=$(echo $disklist | jshon -e DATA -l)
-		  echo "Disks left: $numdisks"
-		  (( $numdisks )) || break # while there are disks left
-		  local firstdiskid=$(echo $disklist | jshon -e DATA -e 0 -e DISKID)
-		  echo -n "Deleting disk with id # $firstdiskid"
-		  do_or_report 'linode.disk.delete&linodeid='$linodeid'&diskid='$firstdiskid || return 1
-		  block_for_job
-	 done
+    while :; do
+        local disklist=$(curl -sS ${LINODEURL}'linode.disk.list&linodeid='$linodeid)
+        local numdisks=$(echo $disklist | jshon -e DATA -l)
+        echo "Disks left: $numdisks"
+        (( $numdisks )) || break # while there are disks left
+        local firstdiskid=$(echo $disklist | jshon -e DATA -e 0 -e DISKID)
+        echo -n "Deleting disk with id # $firstdiskid"
+        do_or_report 'linode.disk.delete&linodeid='$linodeid'&diskid='$firstdiskid || return 1
+        block_for_job
+    done
 }
 delete_configs() {
-	 while :; do
-		  local configlist=$(curl -sS ${LINODEURL}'linode.config.list&linodeid='$linodeid)
-		  local numconfigs=$(echo $configlist | jshon -e DATA -l)
-		  echo "Configs left: $numconfigs"
-		  (( $numconfigs )) || break #while configs left
-		  local firstconfig=$(echo $configlist | jshon -e DATA -e 0 -e ConfigID)
-		  echo -n "Deleting config with id # $firstconfig"
-		  do_or_report 'linode.config.delete&linodeid='$linodeid'&configid='$firstconfig || return 1
-		  block_for_job
-	 done
+    while :; do
+        local configlist=$(curl -sS ${LINODEURL}'linode.config.list&linodeid='$linodeid)
+        local numconfigs=$(echo $configlist | jshon -e DATA -l)
+        echo "Configs left: $numconfigs"
+        (( $numconfigs )) || break #while configs left
+        local firstconfig=$(echo $configlist | jshon -e DATA -e 0 -e ConfigID)
+        echo -n "Deleting config with id # $firstconfig"
+        do_or_report 'linode.config.delete&linodeid='$linodeid'&configid='$firstconfig || return 1
+        block_for_job
+    done
 }
 deploy() {
-	 local pubkey result IFS=$'\n' ssdate=.$(date +%F.%H-%M-%S)
-	 echo -n "Getting disk size... "
-	 local totalhd=$(curl -sS ${LINODEURL}'linode.list&linodeid='$linodeid | jshon -e DATA -e 0 -e TOTALHD)
-	 echo "${totalhd} MB"
-	 echo -n "Creating disk image & config"
-	 [ "$use_stackscript" ] && {
-		  [ -a "$prikey" ] && pubkey=$(ssh-keygen -yf "$prikey") || return 1
-		  result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch'&label=D'$ssdate'&size=4096&linodeid='$linodeid'&stackscriptid='$ss_id \
-				--data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'","ss_mysqlpass":"'$mysqlpass'","ss_pubkey":"'"${pubkey}"'"}' \
-				--data-urlencode rootpass="$rootpass") || return 1
-	 } || {
-		  result=$(do_or_report say 'linode.disk.createfromdistribution&distributionid='$latest_arch'&label=D'$ssdate'&size=4096&linodeid='$linodeid \
-				--data-urlencode rootpass="$rootpass") || return 1
-	 }
-	 diskid=$(echo $result | jshon -e DATA -e DiskID)
-	 result=$(do_or_report say 'linode.config.create&kernelid='$pv_kernel'&helper_xen=false&helper_automount=false&helper_depmod=false&label=NORMAL'$ssdate'&linodeid='$linodeid \
-		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pv-grub
-	 config_pvgrub=$(echo $result | jshon -e DATA -e ConfigID)
-	 result=$(do_or_report say 'linode.config.create&kernelid='$finnix_kernel'&label=RESCUE'$ssdate'&linodeid='$linodeid \
-		  --data-urlencode disklist=25665,$diskid,,,,,,,25669) || return 1 #finnix rescue
-	 config_finnix=$(echo $result | jshon -e DATA -e ConfigID)
-	 result=$(do_or_report say 'linode.config.create&kernelid='$stock_kernel'&label=INITIAL'$ssdate'&linodeid='$linodeid \
-		  --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pre-linux-linode boot
-	 config_prebuilt=$(echo $result | jshon -e DATA -e ConfigID)
-	 block_for_job
+    local pubkey result IFS=$'\n' ssdate=.$(date +%F.%H-%M-%S)
+    echo -n "Getting disk size... "
+    local totalhd=$(curl -sS ${LINODEURL}'linode.list&linodeid='$linodeid | jshon -e DATA -e 0 -e TOTALHD)
+    echo "${totalhd} MB"
+    echo -n "Creating disk image & config"
+    [ "$use_stackscript" ] && {
+        [ -a "$prikey" ] && pubkey=$(ssh-keygen -yf "$prikey") || return 1
+        result=$(do_or_report say 'linode.disk.createfromstackscript&distributionid='$latest_arch'&label=D'$ssdate'&size=4096&linodeid='$linodeid'&stackscriptid='$ss_id \
+            --data-urlencode stackscriptudfresponses='{"ss_hostname":"'$LINODE_HOST'","ss_mysqlpass":"'$mysqlpass'","ss_pubkey":"'"${pubkey}"'"}' \
+            --data-urlencode rootpass="$rootpass") || return 1
+    } || {
+        result=$(do_or_report say 'linode.disk.createfromdistribution&distributionid='$latest_arch'&label=D'$ssdate'&size=4096&linodeid='$linodeid \
+            --data-urlencode rootpass="$rootpass") || return 1
+    }
+    diskid=$(echo $result | jshon -e DATA -e DiskID)
+    result=$(do_or_report say 'linode.config.create&kernelid='$pv_kernel'&helper_xen=false&helper_automount=false&helper_depmod=false&label=NORMAL'$ssdate'&linodeid='$linodeid \
+        --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pv-grub
+    config_pvgrub=$(echo $result | jshon -e DATA -e ConfigID)
+    result=$(do_or_report say 'linode.config.create&kernelid='$finnix_kernel'&label=RESCUE'$ssdate'&linodeid='$linodeid \
+        --data-urlencode disklist=25665,$diskid,,,,,,,25669) || return 1 #finnix rescue
+    config_finnix=$(echo $result | jshon -e DATA -e ConfigID)
+    result=$(do_or_report say 'linode.config.create&kernelid='$stock_kernel'&label=INITIAL'$ssdate'&linodeid='$linodeid \
+        --data-urlencode disklist=$diskid,,,,,,,,) || return 1 #pre-linux-linode boot
+    config_prebuilt=$(echo $result | jshon -e DATA -e ConfigID)
+    block_for_job
 
-	 echo -n "Booting now"
-	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_prebuilt || return 1
-	 block_for_job
-	 [ "$use_stackscript" ] || return 0
-	 block_for_shutdown
+    echo -n "Booting now"
+    do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_prebuilt || return 1
+    block_for_job
+    [ "$use_stackscript" ] || return 0
+    block_for_shutdown
 
-	 echo -n "Deleting the prebuilt-kernel config"
-	 do_or_report 'linode.config.delete&linodeid='$linodeid'&configid='$config_prebuilt || return 1
-	 block_for_job
+    echo -n "Deleting the prebuilt-kernel config"
+    do_or_report 'linode.config.delete&linodeid='$linodeid'&configid='$config_prebuilt || return 1
+    block_for_job
 
-	 echo -n "Booting the REAL one now!"
-	 do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_pvgrub || return 1
-	 block_for_job
+    echo -n "Booting the REAL one now!"
+    do_or_report 'linode.boot&linodeid='$linodeid'&configid='$config_pvgrub || return 1
+    block_for_job
 }
 negotiate() {
-	 [ "$use_stackscript" ] || return 0
+    [ "$use_stackscript" ] || return 0
 
-	 block_for_ssh
+    block_for_ssh
 
-	 lido_use=$(ssh_host_resolv $LINODE_DOMAIN)
+    lido_use=$(ssh_host_resolv $LINODE_DOMAIN)
 
-	 ssh-keygen -qR $lido_use
-	 ssh-keygen -qR $LINODE_DOMAIN
-	 ssh-keygen -qR $LINODE_IP
-	 ssh-keygen -qR $LINODE_DOMAIN,$LINODE_IP
+    ssh-keygen -qR $lido_use
+    ssh-keygen -qR $LINODE_DOMAIN
+    ssh-keygen -qR $LINODE_IP
+    ssh-keygen -qR $LINODE_DOMAIN,$LINODE_IP
 
-	 echo "Scraping for valid SSH host credentials..."
-	 ssh-keyscan -H $LINODE_DOMAIN >> ~/.ssh/known_hosts
-	 ssh-keyscan -H $LINODE_IP >> ~/.ssh/known_hosts
+    echo "Scraping for valid SSH host credentials..."
+    ssh-keyscan -H $LINODE_DOMAIN >> ~/.ssh/known_hosts
+    ssh-keyscan -H $LINODE_IP >> ~/.ssh/known_hosts
 
-	 # do initial decryption while we change default password
-	 askyn "Try to ssh now?" && ssh -t $LINODE_USER@$lido_use 'passwd'
+    # do initial decryption while we change default password
+    askyn "Try to ssh now?" && ssh -t $LINODE_USER@$lido_use 'passwd'
 
-	 # this is important because it runs integrity.ppz
-	 echo "logging into root ..."
-	 ssh -t $LINODE_USER@$lido_use su -
+    # this is important because it runs integrity.ppz
+    echo "logging into root ..."
+    ssh -t $LINODE_USER@$lido_use su -
 
-	 # instead of pushing git, do git_home_clone!
-#	 askyn "git home stuff?" && {
-#		  ssh $LINODE_USER@$lido_use git_home_clone
-#	 }
+    # instead of pushing git, do git_home_clone!
+#    askyn "git home stuff?" && {
+#        ssh $LINODE_USER@$lido_use git_home_clone
+#    }
 }
 do_all() {
-	 echo
-	 echo "Found linode '$LINODE_LABEL' with id# $linodeid"
-	 echo -n "You probably want to detach any running ssh sessions, or they will hang."
-	 askyn "This script will DESTROY $LINODE_LABEL/$linodeid. You want to cancel, right?" && exit
-	 for thing in \
-		  destroy_running \
-		  update_stackscript \
-		  delete_disks \
-		  delete_configs \
-		  deploy \
-		  negotiate; do
+    echo
+    echo "Found linode '$LINODE_LABEL' with id# $linodeid"
+    echo -n "You probably want to detach any running ssh sessions, or they will hang."
+    askyn "This script will DESTROY $LINODE_LABEL/$linodeid. You want to cancel, right?" && exit
+    for thing in \
+        destroy_running \
+        update_stackscript \
+        delete_disks \
+        delete_configs \
+        deploy \
+        negotiate; do
 
-		  say_and_do $thing && continue
-		  echo "$thing failed..."
-		  return 1
-	 done
+        say_and_do $thing && continue
+        echo "$thing failed..."
+        return 1
+    done
 }
 if (( ${#doroutines[@]} )); then
-	 for routine in "${doroutines[@]}"; do
-		  $routine
-	 done
+    for routine in "${doroutines[@]}"; do
+        $routine
+    done
 else
-	 do_all "$@"
+    do_all "$@"
 fi

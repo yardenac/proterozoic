@@ -33,11 +33,11 @@ sudo tee -a /mnt/etc/grub.d/40_custom <<EOF
 EOF
 
 sudo arch-chroot /mnt
-	pacman -Syu "${pkgs[@]}"
-	pacman -Syu proterozoic
-	mkinitcpio -p linux
-	grub-install --target=i386-pc --recheck --debug /dev/sda
-	grub-mkconfig -o /boot/grub/grub.cfg
+   pacman -Syu "${pkgs[@]}"
+   pacman -Syu proterozoic
+   mkinitcpio -p linux
+   grub-install --target=i386-pc --recheck --debug /dev/sda
+   grub-mkconfig -o /boot/grub/grub.cfg
 #  networking
 
 sudo umount -R /mnt

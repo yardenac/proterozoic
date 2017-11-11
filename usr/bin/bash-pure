@@ -1,4 +1,4 @@
 #!/usr/bin/bash
 
 exec -cl -a '-bash-pure' bash --init-file /dev/null --rcfile /dev/null --noprofile --norc \
-	 -c "$*" bash-pure "$*"
+    -c "$*" bash-pure "$*"

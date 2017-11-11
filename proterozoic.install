@@ -1,65 +1,65 @@
 #!/usr/bin/bash
 preowned_files=(
-	 etc/default/useradd
-	 etc/ssh/ssh_config
-	 etc/logrotate.conf
-	 etc/issue
-	 etc/ntp.conf
-	 etc/apcupsd/apcupsd.conf
-	 etc/privoxy/config
-	 etc/fuse.conf
-	 etc/httpd/conf/httpd.conf
-	 etc/php/php.ini
-	 etc/php/php-fpm.conf
-	 etc/screenrc
+    etc/default/useradd
+    etc/ssh/ssh_config
+    etc/logrotate.conf
+    etc/issue
+    etc/ntp.conf
+    etc/apcupsd/apcupsd.conf
+    etc/privoxy/config
+    etc/fuse.conf
+    etc/httpd/conf/httpd.conf
+    etc/php/php.ini
+    etc/php/php-fpm.conf
+    etc/screenrc
 )
 ######### FUNCTIONS
 are_same() {
-	 [ -a "$1" ] && [ -a "$2" ] || return 1
-	 diff -qd "$1" "$2" >/dev/null
+    [ -a "$1" ] && [ -a "$2" ] || return 1
+    diff -qd "$1" "$2" >/dev/null
 }
 clobberella() {
-	 F="$1"
-	 [ -f "$F.ppz" ] || return 0
-	 [ -f "$F" ] && { #do a "nice clobber" - make a (unique) backup
-		  are_same ${F}{,.ppz} && return || \
-				for N in {001..999}; do
-					 [ -f "$F.old.$N" ]			|| { mv -n ${F}{,.old.$N};	break; }
-					 are_same ${F}{,.old.$N}	&& { rm -f "$F";				break; }
-				done
-	 }
-	 cp -n "$F.ppz" "$F"
+    F="$1"
+    [ -f "$F.ppz" ] || return 0
+    [ -f "$F" ] && { #do a "nice clobber" - make a (unique) backup
+        are_same ${F}{,.ppz} && return || \
+            for N in {001..999}; do
+                [ -f "$F.old.$N" ]         || { mv -n ${F}{,.old.$N};   break; }
+                are_same ${F}{,.old.$N}   && { rm -f "$F";            break; }
+            done
+    }
+    cp -n "$F.ppz" "$F"
 }
 enforce_locales() {
-	 FILE=etc/locale.gen
-	 cat > ${FILE} <<-EOF
-		en_US.UTF-8 UTF-8
-		en_US ISO-8859-1
-		EOF
-	 locale-gen
+    FILE=etc/locale.gen
+    cat > ${FILE} <<-EOF
+      en_US.UTF-8 UTF-8
+      en_US ISO-8859-1
+      EOF
+    locale-gen
 }
 pwn_files() {
-	 for F in ${preowned_files[@]}; do
-		  clobberella "$F"
-	 done
+    for F in ${preowned_files[@]}; do
+        clobberella "$F"
+    done
 }
 
 ########## HOOKS
 
 pre_install() {
-	 enforce_locales
+    enforce_locales
 }
 post_install() {
-	 pwn_files
-	 /usr/bin/integrity.ppz
+    pwn_files
+    /usr/bin/integrity.ppz
 }
 
 pre_upgrade() {
-	 for F in ${preowned_files[@]}; do
-		  are_same ${F}{,.ppz} && rm -f "$F" || :
-	 done
+    for F in ${preowned_files[@]}; do
+        are_same ${F}{,.ppz} && rm -f "$F" || :
+    done
 }
 post_upgrade() {
-	 pwn_files
-	 /usr/bin/integrity.ppz
+    pwn_files
+    /usr/bin/integrity.ppz
 }

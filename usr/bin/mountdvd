@@ -8,31 +8,31 @@ trap 'exit 46;' HUP QUIT INT TERM ABRT TSTP CONT
 
 mountpoint=/media/dvd
 
-[ -a $mountpoint ]			|| mkdir $mountpoint
-[ -d $mountpoint ]			|| croak "Not a directory! $mountpoint"
+[ -a $mountpoint ]         || mkdir $mountpoint
+[ -d $mountpoint ]         || croak "Not a directory! $mountpoint"
 
 mountpoint_empty() {
-	 ! mountpoint -q $mountpoint
+    ! mountpoint -q $mountpoint
 }
 
 for arg; do
-	 case "$arg" in
-		  --unmount)
-				mountpoint_empty || umount /media/dvd
-				exit
-				;;
-		  *)
-				file="$(full_path_strict "$arg")"						|| croak "Unknown option: $arg"
-				[ -f "$file" ]													|| croak "Not a file: $file"
-				is dvd "$file"													|| croak "Not a DVD image: $file"
-				[ "$(blkid -o value -s TYPE "$file")" = iso9660 ]	|| croak "Broken DVD image?: $file"
-				;;
-	 esac
+    case "$arg" in
+        --unmount)
+            mountpoint_empty || umount /media/dvd
+            exit
+            ;;
+        *)
+            file="$(full_path_strict "$arg")"                  || croak "Unknown option: $arg"
+            [ -f "$file" ]                                       || croak "Not a file: $file"
+            is dvd "$file"                                       || croak "Not a DVD image: $file"
+            [ "$(blkid -o value -s TYPE "$file")" = iso9660 ]   || croak "Broken DVD image?: $file"
+            ;;
+    esac
 done
 
 echo_blue_n 'Waiting to mount `'"$file"'` to `'"$mountpoint"'` ...'
 findmnt -fnT $mountpoint -o SOURCE >/dev/null \
-	 && old=$(findmnt --poll=umount -fnT $mountpoint -o SOURCE)
+    && old=$(findmnt --poll=umount -fnT $mountpoint -o SOURCE)
 echo_blue " done! was $old"
 
 mount -t iso9660 -vio ro,loop "$file" "$mountpoint"

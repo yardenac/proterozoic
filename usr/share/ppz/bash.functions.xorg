@@ -1,18 +1,18 @@
 export DISPLAY=${DISPLAY:-:0.0}
 hatch() {
-	hatch_do() {
-		[ "$1" ] || return
-		"$@" &>/dev/null &
-	}
-	hatch_do "$@" &>/dev/null &
-	PROC=$!
-	while process_exists $PROC; do
-		sleep 0.1
-	done
-	sleep 0.3
+   hatch_do() {
+      [ "$1" ] || return
+      "$@" &>/dev/null &
+   }
+   hatch_do "$@" &>/dev/null &
+   PROC=$!
+   while process_exists $PROC; do
+      sleep 0.1
+   done
+   sleep 0.3
 }
 set_xtitle() {
-	 echo -en "\e]2;$*\a"
+    echo -en "\e]2;$*\a"
 }
 active_win_hash() {
     #print 0x###### hash for the currently active window. bit of a hack... 
@@ -22,42 +22,42 @@ title_of_active_win() {
     wmctrl -l | grep -Ri '^'$(active_win_hash) | colrm 1 22
 }
 #holdss() {
-#	unto
-#	while true; do
-#		xscreensaver-command -deactivate &>/dev/null
-#		sleep 55
-#		pid_exists $PPID && [ "$PPID" -ne "1" ] && continue
-#		break
-#	done
+#   unto
+#   while true; do
+#      xscreensaver-command -deactivate &>/dev/null
+#      sleep 55
+#      pid_exists $PPID && [ "$PPID" -ne "1" ] && continue
+#      break
+#   done
 #}
 win_from_pid() {
-	 type wmctrl &>/dev/null || return 1
-	 wmctrl -l | awk '/^.*\['"$1"'\]$/ { print $1 }'
+    type wmctrl &>/dev/null || return 1
+    wmctrl -l | awk '/^.*\['"$1"'\]$/ { print $1 }'
 }
 cb() { #cb from term | cb to remotehost | cb to term | ...
-	 [ "$2" = term -o -z "$2" ] && {
-		  local COMMAND="xclip -selection primary"
-	 } || {
-		  local COMMAND="ssh $2 xclip -d :0.0 -selection clipboard"
-	 }
-	 [ "$1" = to -o -z "$1" ] && {
-		  xclip -selection clipboard -o | $COMMAND -i -l 2
-	 } || {
-		  $COMMAND -o | xclip -selection clipboard -i -l 2
-	 }
+    [ "$2" = term -o -z "$2" ] && {
+        local COMMAND="xclip -selection primary"
+    } || {
+        local COMMAND="ssh $2 xclip -d :0.0 -selection clipboard"
+    }
+    [ "$1" = to -o -z "$1" ] && {
+        xclip -selection clipboard -o | $COMMAND -i -l 2
+    } || {
+        $COMMAND -o | xclip -selection clipboard -i -l 2
+    }
 }
 tweak_ss() {
-	 xrdb -override - /usr/share/ppz/xscreensaver-times/"$1"
-	 xscreensaver-command -restart &>/dev/null
-	 sleep "$2"
-	 xrdb -override - /usr/share/ppz/xscreensaver-times/"$3"
-	 xscreensaver-command -restart &>/dev/null
+    xrdb -override - /usr/share/ppz/xscreensaver-times/"$1"
+    xscreensaver-command -restart &>/dev/null
+    sleep "$2"
+    xrdb -override - /usr/share/ppz/xscreensaver-times/"$3"
+    xscreensaver-command -restart &>/dev/null
 }
 tratio() {
-	 [ -a /usr/bin/transmission-remote ] || return 1
-	 transmission-remote --session-stats \
-		  | tail -n 4 | awk '
-			   /^  Uploaded/ {printf $2*1024 " \\ "}
-			   /^  Downloaded/ {printf $2 " = "}
-			   /^  Ratio/ {print $2}'
+    [ -a /usr/bin/transmission-remote ] || return 1
+    transmission-remote --session-stats \
+        | tail -n 4 | awk '
+            /^  Uploaded/ {printf $2*1024 " \\ "}
+            /^  Downloaded/ {printf $2 " = "}
+            /^  Ratio/ {print $2}'
 }

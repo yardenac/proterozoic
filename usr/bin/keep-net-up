@@ -7,11 +7,11 @@ am_root || groups | grep -qw network || exit
 
 mac=random
 for arg; do
-	 case "$arg" in
+    case "$arg" in
         hn=*)   hn=${arg#*=};;
         mac=*) mac=${arg#*=};;
         *)     echo "weird arg: $arg";;
-	 esac
+    esac
 done
 
 wpas_file=/run/keep-net-up/log-wpa
@@ -23,24 +23,24 @@ WPA_SC=$(edev-path "$WPA_SC")
 [ -a "$WPA_SC" ] || WPA_SC=/etc/wpa_supplicant.conf
 
 avail_known_ssid() {
-	 comm -12 \
-		  <(iwlist $1 scan | awk '/ESSID:"/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' | sed '/^[   ]*$/d' | sort -u) \
-		  <(awk '/^#/ {FS=":";$0=$0;print $2} /ssid="/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' "$WPA_SC") \
-		  | first-or-fail
+    comm -12 \
+        <(iwlist $1 scan | awk '/ESSID:"/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' | sed '/^[   ]*$/d' | sort -u) \
+        <(awk '/^#/ {FS=":";$0=$0;print $2} /ssid="/ {gsub(/(^[^"]*"|"[^"]*$)/,"");print}' "$WPA_SC") \
+        | first-or-fail
 }
 
 while :; do
-	 test_network -n0 -t10 -w45
-	 stamp "Network down!"
-	 dhcpcd -k
-	 pkill -x --signal SIGTERM dhcpcd
-	 pkill -x --signal SIGTERM wpa_supplicant
-	 knu_cleanup
+    test_network -n0 -t10 -w45
+    stamp "Network down!"
+    dhcpcd -k
+    pkill -x --signal SIGTERM dhcpcd
+    pkill -x --signal SIGTERM wpa_supplicant
+    knu_cleanup
 
-	 for if in $(awk '$1 ~ /^lo:$/ {next}
-			   $1 ~ /:$/ {sub(/:/,"",$1); print $1}' /proc/net/dev | sort -u); do
+    for if in $(awk '$1 ~ /^lo:$/ {next}
+            $1 ~ /:$/ {sub(/:/,"",$1); print $1}' /proc/net/dev | sort -u); do
 
-		  ip link set dev $if down
+        ip link set dev $if down
 
         # set mac address, if desired
         [[ "$mac" =~ ^([0-f]{2}:?){6}$ ]] && {
@@ -54,36 +54,36 @@ while :; do
            *)        echo "weird mac '$val' - using random"
         esac
 
-		  ip link set dev $if up
-		  sleep 2
+        ip link set dev $if up
+        sleep 2
         class=$(cat /sys/class/net/$if/device/class) \
             || class=$(test -d /sys/class/net/$if/wireless && echo 0x028000)
         case "$class" in
-				0x028000) # wireless
-					 until ssid=$(avail_known_ssid $if); do
-						  stamp "No available networks ... waiting 5"
-						  sleep 5
-					 done
-					 echo found ssid: $ssid
-					 wep_key=$(awk '/^#:'"$ssid"':/ {FS=":";$0=$0;print $3}' "$WPA_SC")
-					 echo wep: @$wep_key@
-					 [ "$wep_key" ] \
-						  && iwconfig $if essid "$ssid" key $wep_key \
-						  || iwconfig $if essid "$ssid"
-					 grep -iq 'ssid="'"$ssid"'"' "$WPA_SC" && {
-						  echo wpa_supp
-						  wpa_supplicant -d -i $if -c "$WPA_SC" &>> $wpas_file &
-						  tailtimed 40 $wpas_file 'State: ASSOCIATED -> 4WAY_HANDSHAKE' || croak 'no 4way'
-					 };;
-				0x020000) #wired
-					 [ $(cat /sys/class/net/$if/operstate) = "up" ] || {
-						  ip link set dev $if down
-						  echo "$if: failed to operate"
-						  continue
-					 };;
-				"") croak "$if: No loopbacks!";;
-				*) croak "$if: weird device";;
-		  esac
+            0x028000) # wireless
+                until ssid=$(avail_known_ssid $if); do
+                    stamp "No available networks ... waiting 5"
+                    sleep 5
+                done
+                echo found ssid: $ssid
+                wep_key=$(awk '/^#:'"$ssid"':/ {FS=":";$0=$0;print $3}' "$WPA_SC")
+                echo wep: @$wep_key@
+                [ "$wep_key" ] \
+                    && iwconfig $if essid "$ssid" key $wep_key \
+                    || iwconfig $if essid "$ssid"
+                grep -iq 'ssid="'"$ssid"'"' "$WPA_SC" && {
+                    echo wpa_supp
+                    wpa_supplicant -d -i $if -c "$WPA_SC" &>> $wpas_file &
+                    tailtimed 40 $wpas_file 'State: ASSOCIATED -> 4WAY_HANDSHAKE' || croak 'no 4way'
+                };;
+            0x020000) #wired
+                [ $(cat /sys/class/net/$if/operstate) = "up" ] || {
+                    ip link set dev $if down
+                    echo "$if: failed to operate"
+                    continue
+                };;
+            "") croak "$if: No loopbacks!";;
+            *) croak "$if: weird device";;
+        esac
 
         # set hostname, if desired
         [[ "hn" =~ ^[0-z]+$ ]] || {
@@ -95,10 +95,10 @@ while :; do
            random) hn=$(rando oneword);;
         esac
 
-		  echo now dhcp with hostname: $hn ...
-		  dhcpcd -Bt 30 -h "$hn" $if &>> $dhcp_file &
-		  tailtimed 20 $dhcp_file leased || echo "no lease"
-		  continue 2
-	 done
-	 croak "all ifs failed"
+        echo now dhcp with hostname: $hn ...
+        dhcpcd -Bt 30 -h "$hn" $if &>> $dhcp_file &
+        tailtimed 20 $dhcp_file leased || echo "no lease"
+        continue 2
+    done
+    croak "all ifs failed"
 done

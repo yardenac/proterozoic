@@ -53,25 +53,25 @@
    "webintents": {
       "enabled": false
    },
-	"extensions": {
-		"settings": {
-			"ehfhghddhachdadpdnpcpigiipkagfoe": {
-				"incognito": true,
-				"newAllowFileAccess": false
-			},
-			"gmbclidgiobnognmnejllpfcmkdppicp": {
-				"incognito": true,
-				"newAllowFileAccess": false
-			},
-			"cjelmkehlpcdogpnfjeicgklplbpgjih": {
-				"incognito": true
-			},
-			"mgidfmbglheeadlobeabndjopdgiojde": {
-				"incognito": true
+   "extensions": {
+      "settings": {
+         "ehfhghddhachdadpdnpcpigiipkagfoe": {
+            "incognito": true,
+            "newAllowFileAccess": false
+         },
+         "gmbclidgiobnognmnejllpfcmkdppicp": {
+            "incognito": true,
+            "newAllowFileAccess": false
+         },
+         "cjelmkehlpcdogpnfjeicgklplbpgjih": {
+            "incognito": true
+         },
+         "mgidfmbglheeadlobeabndjopdgiojde": {
+            "incognito": true
          },
          "ekjnponglcbkpjobdnoijpnkphfallfn": {
             "incognito": true
          }
-		}
-	}
+      }
+   }
 }

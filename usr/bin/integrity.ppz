@@ -10,20 +10,20 @@
 
 integrity_everyone() {
 
-	 # test for wheel
-	 local wheel found=0 wheels=$(awk -F: '/^wheel/ {print $4}' /etc/group)
-	 wheels=(${wheels//,/ })
-	 for wheel in "${wheels[@]}"; do
-		  [ "$wheel" = root ] && continue
-		  let found++
-	 done
-	 (( found )) || {
-		  if am_root; then
-				gpasswd -a $LUSER wheel
-		  else
-				echo_red "Nobody but root in wheel!"
-		  fi
-	 }
+    # test for wheel
+    local wheel found=0 wheels=$(awk -F: '/^wheel/ {print $4}' /etc/group)
+    wheels=(${wheels//,/ })
+    for wheel in "${wheels[@]}"; do
+        [ "$wheel" = root ] && continue
+        let found++
+    done
+    (( found )) || {
+        if am_root; then
+            gpasswd -a $LUSER wheel
+        else
+            echo_red "Nobody but root in wheel!"
+        fi
+    }
 
     # print almost-full filesystems (<10% or <100M free)
     if [ "$SKIP_NOSP_WARN" ] && $SKIP_NOSP_WARN; then
@@ -35,88 +35,88 @@ integrity_everyone() {
     fi
 }
 integrity_rootpw() {
-	 am_root && shell_is_interactive || return 0
+    am_root && shell_is_interactive || return 0
 
-	 grep -iq ENCRYPT_METHOD /etc/login.defs || \
-		  echo "ENCRYPT_METHOD SHA512" >> /etc/login.defs
+    grep -iq ENCRYPT_METHOD /etc/login.defs || \
+        echo "ENCRYPT_METHOD SHA512" >> /etc/login.defs
 
-	 # this is messy and needs attention
-	 # checking is not this easy - hash is seeded
-	 # write a program that simulates login to check?
-	 # ^ should work for non-root user too!
+    # this is messy and needs attention
+    # checking is not this easy - hash is seeded
+    # write a program that simulates login to check?
+    # ^ should work for non-root user too!
 
-	 while :; do
-		  roothash=$(awk 'BEGIN {FS=":"} /^root:/ {print $2}' /etc/shadow)
-		  case $roothash in
-				'') askyn "Root pw sucks! Set it?" && passwd || return;;
-				*) break
-		  esac
-	 done
+    while :; do
+        roothash=$(awk 'BEGIN {FS=":"} /^root:/ {print $2}' /etc/shadow)
+        case $roothash in
+            '') askyn "Root pw sucks! Set it?" && passwd || return;;
+            *) break
+        esac
+    done
 }
 integrity_locales() {
-	 am_root || return 0
-	 local L=$(locale)
-	 [ "${L}" ] && return #has locale, so ok
-	 askyn "You have no locale!? Should we fix this?" \
-		  && echo "Oops, Not implemented yet..."
+    am_root || return 0
+    local L=$(locale)
+    [ "${L}" ] && return #has locale, so ok
+    askyn "You have no locale!? Should we fix this?" \
+        && echo "Oops, Not implemented yet..."
 }
 integrity_tz() {
-	 am_root || return 0
-	 local suspicious_tzs=(America/Vancouver America/New_York)
-	 local matches=0
-	 for stz in "${suspicious_tzs[@]}"; do
-		  cmp -s /etc/localtime /usr/share/zoneinfo/$stz && let matches++
-	 done
-	 (( $matches )) || return 0
-	 [ -a /etc/localtime.userok ] && return
-	 local c=22; while let c--; do
-		  usetvar TZONE "You have a default arch timezone. To keep it, press C-c or C-\ ...
+    am_root || return 0
+    local suspicious_tzs=(America/Vancouver America/New_York)
+    local matches=0
+    for stz in "${suspicious_tzs[@]}"; do
+        cmp -s /etc/localtime /usr/share/zoneinfo/$stz && let matches++
+    done
+    (( $matches )) || return 0
+    [ -a /etc/localtime.userok ] && return
+    local c=22; while let c--; do
+        usetvar TZONE "You have a default arch timezone. To keep it, press C-c or C-\ ...
 To replace it, pick a new one: " /usr/share/zoneinfo/America/Los_Angeles USERCANCELLED || {
-				echo_red "Still using default time zone!"
-				break
-		  }
-		  [ "$TZONE" = "USERCANCELLED" ] && { #THIS WILL NEVER RUN! IT'S BROKEN!
-				echo "If this file exists, it means the system is SUPPOSED to" \
-					 "have the default timezone (Vancouver or NY). Otherwise," \
-					 "root would always be prompted to change it." > /etc/localtime.userok
-				echo_red "Default timezone kept. You won't be asked again."
-				break
-		  }
-		  [ -f ${TZONE} ] && {
-				cp -f ${TZONE} /etc/localtime
-				break
-		  }
-		  echo_blue "That timezone doesn't exist."
-	 done
+            echo_red "Still using default time zone!"
+            break
+        }
+        [ "$TZONE" = "USERCANCELLED" ] && { #THIS WILL NEVER RUN! IT'S BROKEN!
+            echo "If this file exists, it means the system is SUPPOSED to" \
+                "have the default timezone (Vancouver or NY). Otherwise," \
+                "root would always be prompted to change it." > /etc/localtime.userok
+            echo_red "Default timezone kept. You won't be asked again."
+            break
+        }
+        [ -f ${TZONE} ] && {
+            cp -f ${TZONE} /etc/localtime
+            break
+        }
+        echo_blue "That timezone doesn't exist."
+    done
 }
 integrity_simpleconf() {
-	 am_root || return 0
-	 grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
-	 grep -iEq ^/usr/bin/bash$ /etc/shells || echo /usr/bin/bash >> /etc/shells
-	 grep -iEq '^sshd[ :	]*ALL[ :	]*ALLOW$' /etc/hosts.allow 2>/dev/null \
-		  || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
-	 [ -a /etc/rc.sysinit ] && sed -i 's%^\(/usr/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
-	 case $SYSTEM_TYPE in
-		  linode|digo)			sed -i '/add_module/ !b;d' /usr/lib/initcpio/install/ppz_tmp
-									sed -i 's%^\#\(server clock.fmt.he.net.*\)$%\1%ig' /etc/ntp.conf;;
-		  desktop|laptop|*)	sed -i 's%^\(server clock.fmt.he.net.*\)$%\#\1%ig' /etc/ntp.conf;;
-	 esac
-	 case "$(uname -m)" in
-		  i686)		sed -i 's/^\[multilib\]$/#&/ig'			/etc/pacman.conf;;
-		  x86_64)	sed -i 's/^##*\(\[multilib\]\)$/\1/ig'	/etc/pacman.conf;;
-	 esac
-	 [ -a /usr/share/terminfo/r/rxvt-unicode-256color ] || \
-		  ln -s /usr/share/terminfo/r/rxvt{,-unicode}-256color
+    am_root || return 0
+    grep -iEq ^/usr/bin/womb$ /etc/shells || echo /usr/bin/womb >> /etc/shells
+    grep -iEq ^/usr/bin/bash$ /etc/shells || echo /usr/bin/bash >> /etc/shells
+    grep -iEq '^sshd[ :   ]*ALL[ :   ]*ALLOW$' /etc/hosts.allow 2>/dev/null \
+        || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
+    [ -a /etc/rc.sysinit ] && sed -i 's%^\(/usr/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
+    case $SYSTEM_TYPE in
+        linode|digo)         sed -i '/add_module/ !b;d' /usr/lib/initcpio/install/ppz_tmp
+                           sed -i 's%^\#\(server clock.fmt.he.net.*\)$%\1%ig' /etc/ntp.conf;;
+        desktop|laptop|*)   sed -i 's%^\(server clock.fmt.he.net.*\)$%\#\1%ig' /etc/ntp.conf;;
+    esac
+    case "$(uname -m)" in
+        i686)      sed -i 's/^\[multilib\]$/#&/ig'         /etc/pacman.conf;;
+        x86_64)   sed -i 's/^##*\(\[multilib\]\)$/\1/ig'   /etc/pacman.conf;;
+    esac
+    [ -a /usr/share/terminfo/r/rxvt-unicode-256color ] || \
+        ln -s /usr/share/terminfo/r/rxvt{,-unicode}-256color
 
-	 sort -Ru /etc/pacman.d/mirrorlist.https-only -o /etc/pacman.d/mirrorlist.https-only.random
+    sort -Ru /etc/pacman.d/mirrorlist.https-only -o /etc/pacman.d/mirrorlist.https-only.random
 
-	 systemctl --quiet is-enabled tor &>/dev/null && sed -i 's/^#\(export [a-z]*_proxy\)/\1/ig' /usr/share/ppz/bash.rc
+    systemctl --quiet is-enabled tor &>/dev/null && sed -i 's/^#\(export [a-z]*_proxy\)/\1/ig' /usr/share/ppz/bash.rc
 
-	 local wpaf=/etc/wpa_supplicant.conf
-	 if [ "$WPA_SC" ] && [ -s $wpaf ] && [ -s "$WPA_SC" ] && ! diff $wpaf "$WPA_SC"; then
-		  echo_red "$wpaf is outdated"
-		  am_root && askyn "Update from $WPA_SC ... ?" && cp -f "$WPA_SC" "$wpaf"
-	 fi
+    local wpaf=/etc/wpa_supplicant.conf
+    if [ "$WPA_SC" ] && [ -s $wpaf ] && [ -s "$WPA_SC" ] && ! diff $wpaf "$WPA_SC"; then
+        echo_red "$wpaf is outdated"
+        am_root && askyn "Update from $WPA_SC ... ?" && cp -f "$WPA_SC" "$wpaf"
+    fi
 
     if pacman -Q apache &>/dev/null; then
         [ -d /etc/httpd/ssl ] || mkdir /etc/httpd/ssl
@@ -125,522 +125,522 @@ integrity_simpleconf() {
     fi
 }
 integrity_users() {
-	 am_root || return 0
+    am_root || return 0
 
-	 # "extra" users are declared in ppz.conf. this makes sure they really exist.
+    # "extra" users are declared in ppz.conf. this makes sure they really exist.
 
-	 local user v u_name u_nums u_home IFS=$'\n'
-	 for user in $(awk '/^:/ { if ($2 == "user") print }' /etc/ppz.conf); do
+    local user v u_name u_nums u_home IFS=$'\n'
+    for user in $(awk '/^:/ { if ($2 == "user") print }' /etc/ppz.conf); do
 
-#		  echo_red "DOING USER: $user"
+#        echo_red "DOING USER: $user"
 
-		  IFS=$'\n\r\t ' v=($user)
-		  u_name=${v[2]}
-		  u_nums=${v[3]}
-		  u_home=$(edev-path ${v[5]}) || {
-				echo_red "homedir ${v[5]} on undeclared encrypted device!"
-				continue
-		  }
-		  # if we're still here, u_home is now a real path :)
-		  # it's not the job of this function to CREATE the path
-		  # if user isn't in passwd, create it
-		  getent passwd "${u_name}" >/dev/null || {
-				echo_red "adding user ${u_name}!"
-				useradd -lMNd ${u_home} -u ${u_nums%%:*} -g ${u_nums##*:} -s ${v[4]} ${u_name}
-				echo $u_name:\' | chpasswd
-		  }
-	 done
+        IFS=$'\n\r\t ' v=($user)
+        u_name=${v[2]}
+        u_nums=${v[3]}
+        u_home=$(edev-path ${v[5]}) || {
+            echo_red "homedir ${v[5]} on undeclared encrypted device!"
+            continue
+        }
+        # if we're still here, u_home is now a real path :)
+        # it's not the job of this function to CREATE the path
+        # if user isn't in passwd, create it
+        getent passwd "${u_name}" >/dev/null || {
+            echo_red "adding user ${u_name}!"
+            useradd -lMNd ${u_home} -u ${u_nums%%:*} -g ${u_nums##*:} -s ${v[4]} ${u_name}
+            echo $u_name:\' | chpasswd
+        }
+    done
 
-	 # only works up to 10...
-	 local luser pw homefull uc=0 #user count
-	 for luser in "${SSH_USERS[@]}"; do
-		  if [ ${luser:0:1} = "@" ]; then
-				let uc++
-				luser=${luser#@}
+    # only works up to 10...
+    local luser pw homefull uc=0 #user count
+    for luser in "${SSH_USERS[@]}"; do
+        if [ ${luser:0:1} = "@" ]; then
+            let uc++
+            luser=${luser#@}
 
-				# make user
-				getent passwd $luser >/dev/null || {
-					 useradd -lMNd /home/$luser -u 5433$uc -u 100 -s /usr/bin/false $luser
-					 pw=$(random_password)
-					 echo $luser:$pw | chpasswd
-					 echo "New password for $luser is: $pw"
-				}
+            # make user
+            getent passwd $luser >/dev/null || {
+                useradd -lMNd /home/$luser -u 5433$uc -u 100 -s /usr/bin/false $luser
+                pw=$(random_password)
+                echo $luser:$pw | chpasswd
+                echo "New password for $luser is: $pw"
+            }
 
-				# make dirs
-				homefull=/home/wall/$luser/home/$luser
-				mkdir -p $homefull/www
-				[ "$(readlink -e /home/$luser)" = $homefull ] || {
-					 rm -rf /home/$luser
-					 ln -s $homefull /home/$luser
-				}
-				chown $luser:users $homefull
-				chmod 755 $homefull
-				[ "$pw" ] && echo $pw >| $homefull/.pw || :
-		  fi
-	 done
+            # make dirs
+            homefull=/home/wall/$luser/home/$luser
+            mkdir -p $homefull/www
+            [ "$(readlink -e /home/$luser)" = $homefull ] || {
+                rm -rf /home/$luser
+                ln -s $homefull /home/$luser
+            }
+            chown $luser:users $homefull
+            chmod 755 $homefull
+            [ "$pw" ] && echo $pw >| $homefull/.pw || :
+        fi
+    done
 }
 integrity_iptables() {
-	 am_root || return 0
+    am_root || return 0
 
-	 # this only works on the FILE. it does not interact directly with the tables,
-	 # except to call rc restart. only use rc for that, much cleaner that way!
-	 local PROTOCOL PORT CUSTOM= \
-		  rules_file=/etc/iptables/iptables.rules \
-		  default_rules=/usr/share/ppz/default/iptables.rules \
-		  tmp_is=/tmp/iptables.is.$(uniq_token) \
-		  tmp_should=/tmp/iptables.should.$(uniq_token)
+    # this only works on the FILE. it does not interact directly with the tables,
+    # except to call rc restart. only use rc for that, much cleaner that way!
+    local PROTOCOL PORT CUSTOM= \
+        rules_file=/etc/iptables/iptables.rules \
+        default_rules=/usr/share/ppz/default/iptables.rules \
+        tmp_is=/tmp/iptables.is.$(uniq_token) \
+        tmp_should=/tmp/iptables.should.$(uniq_token)
 
-	 # rules as they should be, WITH custom open ports from ppz.conf
-	 for PORT in ${OPEN_PORTS[@]}; do
-		  PROTOCOL=tcp
-		  [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
-		  CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT \n"
-	 done
-	 for OPENU in ${OPEN_USERS[@]}; do
-		  CUSTOM+="-A open-out -m owner --uid-owner ${OPENU} -j ACCEPT \n"
-	 done
+    # rules as they should be, WITH custom open ports from ppz.conf
+    for PORT in ${OPEN_PORTS[@]}; do
+        PROTOCOL=tcp
+        [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
+        CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT \n"
+    done
+    for OPENU in ${OPEN_USERS[@]}; do
+        CUSTOM+="-A open-out -m owner --uid-owner ${OPENU} -j ACCEPT \n"
+    done
     if [ "$BLOCK_OUT" = yes ]; then
         CUSTOM+="-A OUTPUT -p tcp -j REJECT --reject-with tcp-reset \n"
         CUSTOM+="-A OUTPUT -p udp -j REJECT --reject-with icmp-port-unreachable \n"
         CUSTOM+="-P OUTPUT DROP\n"
     fi
-	 sed 's/^#LOCAL$/'"$CUSTOM"'/ig' $default_rules | sed '/^ *$/d' > $tmp_should
+    sed 's/^#LOCAL$/'"$CUSTOM"'/ig' $default_rules | sed '/^ *$/d' > $tmp_should
 
-	 # current rules with comments & empty lines removed, and counters zeroed
-	 touch $rules_file
-	 sed 's/^\(#.*\)\?$//ig;Tc;d;:c;s/\[[0-9]*:[0-9]*\]/[0:0]/ig' $rules_file > $tmp_is
+    # current rules with comments & empty lines removed, and counters zeroed
+    touch $rules_file
+    sed 's/^\(#.*\)\?$//ig;Tc;d;:c;s/\[[0-9]*:[0-9]*\]/[0:0]/ig' $rules_file > $tmp_is
 
-	 # if they're different, deal with that
-	 if ! [ -s $tmp_is ] || ! diff $tmp_is $tmp_should; then
-		  if ! [ -s $tmp_is ] || askyn "Impose new iptables rules?"; then
-				cat $tmp_should >| $rules_file
-				echo_red replaced iptables rules
-				chrooted && echo_red "Not resetting iptables" || systemctl restart iptables
-		  fi
-	 fi
+    # if they're different, deal with that
+    if ! [ -s $tmp_is ] || ! diff $tmp_is $tmp_should; then
+        if ! [ -s $tmp_is ] || askyn "Impose new iptables rules?"; then
+            cat $tmp_should >| $rules_file
+            echo_red replaced iptables rules
+            chrooted && echo_red "Not resetting iptables" || systemctl restart iptables
+        fi
+    fi
 
-#	 askyn "are you inspecting the iptables sitch?"
+#    askyn "are you inspecting the iptables sitch?"
 
-	 rm -f $tmp_is $tmp_should
+    rm -f $tmp_is $tmp_should
 }
 integrity_ip6tables() {
-	 am_root || return 0
+    am_root || return 0
 
-	 # this only works on the FILE. it does not interact directly with the tables,
-	 # except to call rc restart. only use rc for that, much cleaner that way!
+    # this only works on the FILE. it does not interact directly with the tables,
+    # except to call rc restart. only use rc for that, much cleaner that way!
     mkdir -p /etc/iptables
-	 local PROTOCOL PORT CUSTOM= \
-		  rules_file=/etc/iptables/ip6tables.rules \
-		  default_rules=/usr/share/ppz/default/ip6tables.rules \
-		  tmp_is=/tmp/ip6tables.is.$(uniq_token) \
-		  tmp_should=/tmp/ip6tables.should.$(uniq_token)
+    local PROTOCOL PORT CUSTOM= \
+        rules_file=/etc/iptables/ip6tables.rules \
+        default_rules=/usr/share/ppz/default/ip6tables.rules \
+        tmp_is=/tmp/ip6tables.is.$(uniq_token) \
+        tmp_should=/tmp/ip6tables.should.$(uniq_token)
 
-	 # rules as they should be, WITH custom open ports from ppz.conf
-	 for PORT in ${OPEN_PORTS[@]}; do
-		  PROTOCOL=tcp
-		  [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
-		  CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT \n"
-	 done
-	 for OPENU in ${OPEN_USERS[@]}; do
-		  CUSTOM+="-A open-out -m owner --uid-owner ${OPENU} -j ACCEPT \n"
-	 done
+    # rules as they should be, WITH custom open ports from ppz.conf
+    for PORT in ${OPEN_PORTS[@]}; do
+        PROTOCOL=tcp
+        [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
+        CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT \n"
+    done
+    for OPENU in ${OPEN_USERS[@]}; do
+        CUSTOM+="-A open-out -m owner --uid-owner ${OPENU} -j ACCEPT \n"
+    done
     if [ "$BLOCK_OUT" = yes ]; then
         CUSTOM+="-A OUTPUT -p tcp -j REJECT --reject-with tcp-reset \n"
         CUSTOM+="-A OUTPUT -p udp -j REJECT --reject-with icmp6-port-unreachable \n"
         CUSTOM+="-P OUTPUT DROP\n"
     fi
-	 sed 's/^#LOCAL$/'"$CUSTOM"'/ig' $default_rules | sed '/^ *$/d' > $tmp_should
+    sed 's/^#LOCAL$/'"$CUSTOM"'/ig' $default_rules | sed '/^ *$/d' > $tmp_should
 
-	 # current rules with comments & empty lines removed, and counters zeroed
-	 touch $rules_file
-	 sed 's/^\(#.*\)\?$//ig;Tc;d;:c;s/\[[0-9]*:[0-9]*\]/[0:0]/ig' $rules_file > $tmp_is
+    # current rules with comments & empty lines removed, and counters zeroed
+    touch $rules_file
+    sed 's/^\(#.*\)\?$//ig;Tc;d;:c;s/\[[0-9]*:[0-9]*\]/[0:0]/ig' $rules_file > $tmp_is
 
-	 # if they're different, deal with that
-	 if ! [ -s $tmp_is ] || ! diff $tmp_is $tmp_should; then
-		  if ! [ -s $tmp_is ] || askyn "Impose new iptables rules?"; then
-				cat $tmp_should >| $rules_file
-				echo_red replaced iptables rules
-				chrooted && echo_red "Not resetting iptables" || systemctl restart ip6tables
-		  fi
-	 fi
+    # if they're different, deal with that
+    if ! [ -s $tmp_is ] || ! diff $tmp_is $tmp_should; then
+        if ! [ -s $tmp_is ] || askyn "Impose new iptables rules?"; then
+            cat $tmp_should >| $rules_file
+            echo_red replaced iptables rules
+            chrooted && echo_red "Not resetting iptables" || systemctl restart ip6tables
+        fi
+    fi
 
-#	 askyn "are you inspecting the iptables sitch?"
+#    askyn "are you inspecting the iptables sitch?"
 
-	 rm -f $tmp_is $tmp_should
+    rm -f $tmp_is $tmp_should
 }
 integrity_encdev() {
-	 local size arg name type dev{,_canon,_intermediate} mountpoint mapname loop mem iters IFS=$'\n\r\t '
+    local size arg name type dev{,_canon,_intermediate} mountpoint mapname loop mem iters IFS=$'\n\r\t '
 
-	 # makes sure device exists and is luks
-	 # creates it with default key if necessary
+    # makes sure device exists and is luks
+    # creates it with default key if necessary
 
-	 # if making it the FIRST time, we open it once to format it.
-	 # otherwise, we dont open it
+    # if making it the FIRST time, we open it once to format it.
+    # otherwise, we dont open it
 
-#	 echo_red "DOING ENCDEV: $@"
+#    echo_red "DOING ENCDEV: $@"
 
-	 name=$3
-	 dev=$4
-	 size=16m
-	 mapname=$name
-	 mountpoint=/media/$name
-	 shift 4
-	 for arg; do
-		  shopt -s nocasematch
-		  if [ ${arg:0:1} = / ]; then 						# it's a path, mountpoint
-				mountpoint=$arg
-		  elif [[ $arg =~ ^[0-9.]+[bskmgtp]?$ ]]; then	# it's a size
-				size=$arg
-		  elif [[ $arg =~ ^[a-z0-9]+$ ]]; then		# its a mapper name
-				mapname=$arg
-		  else
-				ribbit 2 "What the hell is this? $arg"
-		  fi
-	 done
+    name=$3
+    dev=$4
+    size=16m
+    mapname=$name
+    mountpoint=/media/$name
+    shift 4
+    for arg; do
+        shopt -s nocasematch
+        if [ ${arg:0:1} = / ]; then                   # it's a path, mountpoint
+            mountpoint=$arg
+        elif [[ $arg =~ ^[0-9.]+[bskmgtp]?$ ]]; then   # it's a size
+            size=$arg
+        elif [[ $arg =~ ^[a-z0-9]+$ ]]; then      # its a mapper name
+            mapname=$arg
+        else
+            ribbit 2 "What the hell is this? $arg"
+        fi
+    done
 
-	 # convert to number of 512 byte blocks - both dd and blockdev use this
-	 size=$(fsconv $size 'in' s)
+    # convert to number of 512 byte blocks - both dd and blockdev use this
+    size=$(fsconv $size 'in' s)
 
-	 # if it's a uuid
-	 if [[ "$dev" =~ ^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$ ]]; then
-		  dev=/dev/disk/by-uuid/$dev
-	 fi
+    # if it's a uuid
+    if [[ "$dev" =~ ^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$ ]]; then
+        dev=/dev/disk/by-uuid/$dev
+    fi
 
-	 # make sure it exists
-	 until dev_canon=$(readlink -e "$dev"); do
-		  # apparently it doesn't. if it was supposed to be a device, screw that
-		  [ "${dev:0:4}" = /dev ] && {
-				shell_is_interactive || ribbit 2 "edev '$dev' doesn't exist! Check hardware."
+    # make sure it exists
+    until dev_canon=$(readlink -e "$dev"); do
+        # apparently it doesn't. if it was supposed to be a device, screw that
+        [ "${dev:0:4}" = /dev ] && {
+            shell_is_interactive || ribbit 2 "edev '$dev' doesn't exist! Check hardware."
 
-				# we can comment it out so the message doesn't bother us again
-				askyn "$dev ($name) doesn't exist! Avoid checking in the future?" \
-					 && sed -i 's/^:\s*edev\s*.*\s*\('"${dev##*/}"'.*\)$/#\0/ig' /etc/ppz.conf
-				ribbit 2
-		  }
-		  # otherwise, we make it
-		  echo_red "Encrypted loopback file doesn't exist! Touching it..."
-		  am_root || ribbit 2 "Root must fix."
-		  local dev_intermediate=$(readlink -m "$dev")
-		  mkdir -p "$(dirname "$dev_intermediate")"
-		  touch "$dev_intermediate"
-		  chmod 644 "$dev_intermediate"
-	 done
-	 dev=$dev_canon
+            # we can comment it out so the message doesn't bother us again
+            askyn "$dev ($name) doesn't exist! Avoid checking in the future?" \
+                && sed -i 's/^:\s*edev\s*.*\s*\('"${dev##*/}"'.*\)$/#\0/ig' /etc/ppz.conf
+            ribbit 2
+        }
+        # otherwise, we make it
+        echo_red "Encrypted loopback file doesn't exist! Touching it..."
+        am_root || ribbit 2 "Root must fix."
+        local dev_intermediate=$(readlink -m "$dev")
+        mkdir -p "$(dirname "$dev_intermediate")"
+        touch "$dev_intermediate"
+        chmod 644 "$dev_intermediate"
+    done
+    dev=$dev_canon
 
-	 # fewer crypt iterations on low-mem cpus
-	 iters=9999
-	 mem=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
-	 [ "$mem" -lt 1048576 ] && iters=999
+    # fewer crypt iterations on low-mem cpus
+    iters=9999
+    mem=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
+    [ "$mem" -lt 1048576 ] && iters=999
 
-	 # make sure it's luks formatted
-	 until type=$(/usr/bin/blkid -po value -s TYPE "$dev") && [ "$type" = crypto_LUKS ]; do
-		  echo_red "$dev is NOT luks formatted!"
-		  am_root || ribbit 2 "Non-root user cannot fix or create the LUKS device"
-		  kernel_supports_luks || ribbit 2 "no xts encryption, cannot fix or create"
-		  # make sure dev is either empty OR we have permission to override!
-		  [ -s "$dev" ] && {
-				[ "$type" ] \
-					 && echo_red "Encrypted device $edev is formatted as: $type!" \
-					 || echo_red "Encrypted device $edev is not in a known block format!"
-				shell_is_interactive || ribbit 2 "Will not overwrite anything without your permission..."
-				askyn "Skip and preserve data? (Otherwise we'll overwrite it...)" && ribbit 2
-		  }
+    # make sure it's luks formatted
+    until type=$(/usr/bin/blkid -po value -s TYPE "$dev") && [ "$type" = crypto_LUKS ]; do
+        echo_red "$dev is NOT luks formatted!"
+        am_root || ribbit 2 "Non-root user cannot fix or create the LUKS device"
+        kernel_supports_luks || ribbit 2 "no xts encryption, cannot fix or create"
+        # make sure dev is either empty OR we have permission to override!
+        [ -s "$dev" ] && {
+            [ "$type" ] \
+                && echo_red "Encrypted device $edev is formatted as: $type!" \
+                || echo_red "Encrypted device $edev is not in a known block format!"
+            shell_is_interactive || ribbit 2 "Will not overwrite anything without your permission..."
+            askyn "Skip and preserve data? (Otherwise we'll overwrite it...)" && ribbit 2
+        }
 
-		  # fill w/random data, using given size if it's a file (or all of partition)
-		  [ -b $dev ] \
-				&& dd_with_progress if=/dev/urandom of="$dev" bs=512 \
-				|| dd_with_progress if=/dev/urandom of="$dev" bs=512 count=$size
+        # fill w/random data, using given size if it's a file (or all of partition)
+        [ -b $dev ] \
+            && dd_with_progress if=/dev/urandom of="$dev" bs=512 \
+            || dd_with_progress if=/dev/urandom of="$dev" bs=512 count=$size
 
-		  # now format luks, using default key
-		  echo -n "loosest slots in town" | \
-				cryptsetup -qvi $iters -S 1 -d - -s 512 -c aes-xts-plain64 -h whirlpool luksFormat "$dev"
+        # now format luks, using default key
+        echo -n "loosest slots in town" | \
+            cryptsetup -qvi $iters -S 1 -d - -s 512 -c aes-xts-plain64 -h whirlpool luksFormat "$dev"
 
-		  chrooted && {
-				echo_red "WE ARE DOING DEV MAPPINGS IN A CHROOT! LOOK FOR ERRORS!"
-		  }
-		  # as long as mapname is unique here, it should work ok ... i think
+        chrooted && {
+            echo_red "WE ARE DOING DEV MAPPINGS IN A CHROOT! LOOK FOR ERRORS!"
+        }
+        # as long as mapname is unique here, it should work ok ... i think
 
-		  # open it once, format ext4, then close it
-		  echo -n "loosest slots in town" | \
-				cryptsetup luksOpen "$dev" ${mapname}tmp -d - \
-				|| ribbit 2 "Can't open luks device we just made! Something is fucked."
+        # open it once, format ext4, then close it
+        echo -n "loosest slots in town" | \
+            cryptsetup luksOpen "$dev" ${mapname}tmp -d - \
+            || ribbit 2 "Can't open luks device we just made! Something is fucked."
 
-		  # format ext4
-		  . /usr/share/ppz/bash.functions.install
-		  format_ext4 automatic /dev/mapper/${mapname}tmp || ribbit 2 "Formatting ext4 failed"
+        # format ext4
+        . /usr/share/ppz/bash.functions.install
+        format_ext4 automatic /dev/mapper/${mapname}tmp || ribbit 2 "Formatting ext4 failed"
 
-		  if type=$(/usr/bin/blkid -o value -s TYPE /dev/mapper/${mapname}tmp) \
-				&& [ "$type" = ext4 ]; then
-				echo "Formatting ext4 was successful"
-		  else
-				ribbit 2 "Formatting $dev ext4 returned 0 but did not seem to work."
-		  fi
+        if type=$(/usr/bin/blkid -o value -s TYPE /dev/mapper/${mapname}tmp) \
+            && [ "$type" = ext4 ]; then
+            echo "Formatting ext4 was successful"
+        else
+            ribbit 2 "Formatting $dev ext4 returned 0 but did not seem to work."
+        fi
 
-		  cryptsetup luksClose ${mapname}tmp
-	 done
+        cryptsetup luksClose ${mapname}tmp
+    done
 
-	 # make sure its not DEFAULT KEY
-	 am_root && cryptsetup luksDump "$dev" | grep -qiE '^Key Slot 7: DISABLED$' && {
-		  if askyn "Shall we set a new, secure key for $dev ... ?"; then
-				cryptsetup -yvi $iters -S 7 -d <(echo -n "loosest slots in town") luksAddKey "$dev"
-				echo_red "Please enter the new password again, so we can kill the old one :)"
-				cryptsetup luksKillSlot "$dev" 1
-		  else
-				echo_red "Leaving insecure default key for $dev ..."
-		  fi
-	 }
+    # make sure its not DEFAULT KEY
+    am_root && cryptsetup luksDump "$dev" | grep -qiE '^Key Slot 7: DISABLED$' && {
+        if askyn "Shall we set a new, secure key for $dev ... ?"; then
+            cryptsetup -yvi $iters -S 7 -d <(echo -n "loosest slots in town") luksAddKey "$dev"
+            echo_red "Please enter the new password again, so we can kill the old one :)"
+            cryptsetup luksKillSlot "$dev" 1
+        else
+            echo_red "Leaving insecure default key for $dev ..."
+        fi
+    }
 
-	 # make sure size is right
-	 [ -b "$dev" ] || { # we dont resize block devices
-		  # we know dev is path to a loopback file
+    # make sure size is right
+    [ -b "$dev" ] || { # we dont resize block devices
+        # we know dev is path to a loopback file
 
-		  # $size is number of 512-byte sectors we want it to be.
-		  # We subtract from that the number of sectors it ACTUALLY is.
-		  sectors_wanting=$(( $size - ( $(stat -c %s $dev) / 512 ) ))
+        # $size is number of 512-byte sectors we want it to be.
+        # We subtract from that the number of sectors it ACTUALLY is.
+        sectors_wanting=$(( $size - ( $(stat -c %s $dev) / 512 ) ))
 
-		  [[ "$sectors_wanting" =~ ^[0-9]+$ ]] || ribbit "Reading loop size fucked up."
+        [[ "$sectors_wanting" =~ ^[0-9]+$ ]] || ribbit "Reading loop size fucked up."
 
-		  if [ $sectors_wanting -lt 0 ]; then
-				ribbit "Must shrink loopback devices manually - good luck..."
-		  elif [ $sectors_wanting -eq 0 ]; then
-				: #echo "$dev is correct size: $size sectors"
-		  else
-				# this means we grow the size
-				am_root || ribbit "$dev is the wrong size - root must fix!"
-				echo "Growing $dev by $sectors_wanting sectors to $size sectors"
-				dd if=/dev/urandom bs=512 count=$sectors_wanting >> $dev \
-					 || ribbit "dd grow command failed"
+        if [ $sectors_wanting -lt 0 ]; then
+            ribbit "Must shrink loopback devices manually - good luck..."
+        elif [ $sectors_wanting -eq 0 ]; then
+            : #echo "$dev is correct size: $size sectors"
+        else
+            # this means we grow the size
+            am_root || ribbit "$dev is the wrong size - root must fix!"
+            echo "Growing $dev by $sectors_wanting sectors to $size sectors"
+            dd if=/dev/urandom bs=512 count=$sectors_wanting >> $dev \
+                || ribbit "dd grow command failed"
 
-				# for each loopback that might exist for $dev
-				# will this work in a chroot??
-				for loop in $(losetup -j $dev | sed 's%^\(/[^:]*\):.*$%\1%ig;t;d'); do
+            # for each loopback that might exist for $dev
+            # will this work in a chroot??
+            for loop in $(losetup -j $dev | sed 's%^\(/[^:]*\):.*$%\1%ig;t;d'); do
 
-					 echo_red "Resizing $dev at $loop - if in chroot, take note this worked :D"
+                echo_red "Resizing $dev at $loop - if in chroot, take note this worked :D"
 
-					 # make it read new size
-					 losetup -c $loop
+                # make it read new size
+                losetup -c $loop
 
-					 # if mapped, resize that too
-					 # running this for each loop is a bug, but for now i'll be lazy
-					 # and assume there will always be just one loop :P
-					 cryptsetup status $mapname \
-						  | grep -iq /dev/mapper/$mapname' is active and is in use.' && {
+                # if mapped, resize that too
+                # running this for each loop is a bug, but for now i'll be lazy
+                # and assume there will always be just one loop :P
+                cryptsetup status $mapname \
+                    | grep -iq /dev/mapper/$mapname' is active and is in use.' && {
 
-						  # code to read current map size - probably dont need?
-						  #$(blockdev --getsz /dev/mapper/$mapname)
+                    # code to read current map size - probably dont need?
+                    #$(blockdev --getsz /dev/mapper/$mapname)
 
-						  # resize mapping
-						  cryptsetup resize $mapname
+                    # resize mapping
+                    cryptsetup resize $mapname
 
-						  # resize filesystem inside mapping - online or offline
-						  # if we're running in a chroot, this will (should) also fail
-						  ! chrooted && findmnt -n /dev/mapper/$mapname >/dev/null \
-								&& mount -o remount,resize /dev/mapper/$mapname \
-								|| resize2fs /dev/mapper/$mapname
-					 }
-				done
-		  fi
-	 }
+                    # resize filesystem inside mapping - online or offline
+                    # if we're running in a chroot, this will (should) also fail
+                    ! chrooted && findmnt -n /dev/mapper/$mapname >/dev/null \
+                        && mount -o remount,resize /dev/mapper/$mapname \
+                        || resize2fs /dev/mapper/$mapname
+                }
+            done
+        fi
+    }
 
-	 # we have made sure the luks device exists, is formatted and sized right
-	 # if we just formatted luks, we also created the filesystem inside
-	 # for root, this is enough.
-	 am_root && return
+    # we have made sure the luks device exists, is formatted and sized right
+    # if we just formatted luks, we also created the filesystem inside
+    # for root, this is enough.
+    am_root && return
 
-	 # if still here, we are not root.
-	 # we are interested it opening up OUR device for use.
-	 # openmap gives us privilege to do that.
+    # if still here, we are not root.
+    # we are interested it opening up OUR device for use.
+    # openmap gives us privilege to do that.
 
-	 # right now takes usename as argument - maybe $UID is enough? testing.
-	 sudo /usr/bin/bash /usr/bin/openmap $(whoami)
+    # right now takes usename as argument - maybe $UID is enough? testing.
+    sudo /usr/bin/bash /usr/bin/openmap $(whoami)
 }
 integrity_encdevs() { local devcond devline IFS=$'\n'
 
-	 # which devices do we care about? all (if root) or just ours?
-	 am_root \
-		  && devcond='(1)' \
-		  || devcond='($3 == "'$(encdev_from_user $USER)'")'
+    # which devices do we care about? all (if root) or just ours?
+    am_root \
+        && devcond='(1)' \
+        || devcond='($3 == "'$(encdev_from_user $USER)'")'
 
-	 # for devices we care about, make sure they all work
-	 for devline in $(awk '/^:/ {
-					if (($2 == "edev") && '"$devcond"') print
-				}' /etc/ppz.conf); do
-		  IFS=$'\n\r\t '; integrity_encdev $devline
-	 done
+    # for devices we care about, make sure they all work
+    for devline in $(awk '/^:/ {
+               if (($2 == "edev") && '"$devcond"') print
+            }' /etc/ppz.conf); do
+        IFS=$'\n\r\t '; integrity_encdev $devline
+    done
 }
 integrity_tmpdir() {
-	 am_root && return
-	 export mytmpdir=/tmp/.$EUID.$USER
-	 export mytmpln=~/.config/tmpdir
-	 [ -a $mytmpdir ] || mkdir $mytmpdir
-	 [ -O $mytmpdir ] || {
-		  echo_red "$mytmpdir WAS STOLEN??"
-		  return
-	 }
-	 enforce_perms 700 $mytmpdir
-	 [ -L $mytmpln ] || ln -s $mytmpdir $mytmpln
-	 [ "$(readlink -m $mytmpln)" == $mytmpdir ] || {
-		  rm -f $mytmpln
-		  ln -s $mytmpdir $mytmpln
-	 }
+    am_root && return
+    export mytmpdir=/tmp/.$EUID.$USER
+    export mytmpln=~/.config/tmpdir
+    [ -a $mytmpdir ] || mkdir $mytmpdir
+    [ -O $mytmpdir ] || {
+        echo_red "$mytmpdir WAS STOLEN??"
+        return
+    }
+    enforce_perms 700 $mytmpdir
+    [ -L $mytmpln ] || ln -s $mytmpdir $mytmpln
+    [ "$(readlink -m $mytmpln)" == $mytmpdir ] || {
+        rm -f $mytmpln
+        ln -s $mytmpdir $mytmpln
+    }
 }
 integrity_emacsd() {
-	 [ -O $HOME ] || return 1
+    [ -O $HOME ] || return 1
 
-	 local F=~/.emacs.d
-	 [ -L ${F} ] || {
-		  [ -d ${F} ] && mv ${F} ${F}.$(uniq_token)
-		  [ -a ${F} ] && echo "weird ${F}!" || ln -s /etc/.emacs.d ~/
-	 }
-	 am_root && {
-		  enforce_perms 444 /etc/.emacs.d/init.el
-		  enforce_perms 555 /etc/.emacs.d
-	 }
-	 return 0
+    local F=~/.emacs.d
+    [ -L ${F} ] || {
+        [ -d ${F} ] && mv ${F} ${F}.$(uniq_token)
+        [ -a ${F} ] && echo "weird ${F}!" || ln -s /etc/.emacs.d ~/
+    }
+    am_root && {
+        enforce_perms 444 /etc/.emacs.d/init.el
+        enforce_perms 555 /etc/.emacs.d
+    }
+    return 0
 }
 integrity_bashhistory() { local hf hfs attrset skel_file backup_file lo_text
-	 [ "$USER" ] && [ "$HOME" ] || return 0
+    [ "$USER" ] && [ "$HOME" ] || return 0
 
-	 set_proper_histfile
+    set_proper_histfile
 
-	 # which files will we check and/or fix?
-	 am_root && hfs=($(awk -F : '{
-		  if ($6 ~ /\/(home|media|root)/) print $6 "/.bash_history"
-	 }' /etc/passwd)) || hfs=(${HISTFILE:-$HOME/.bash_history})
+    # which files will we check and/or fix?
+    am_root && hfs=($(awk -F : '{
+        if ($6 ~ /\/(home|media|root)/) print $6 "/.bash_history"
+    }' /etc/passwd)) || hfs=(${HISTFILE:-$HOME/.bash_history})
 
-	 for hf in "${hfs[@]}"; do
+    for hf in "${hfs[@]}"; do
 
-		  [ -d "${hf%/*}" ] || continue
+        [ -d "${hf%/*}" ] || continue
 
-		  # if the file is append-only, leave it be (and report)
-		  # for non-priv user, we couldnt do anything else if we tried!
-		  attrset=$(lsattr "$hf" 2>/dev/null) \
-				&& [ "${attrset:5:1}" = a ] && continue
+        # if the file is append-only, leave it be (and report)
+        # for non-priv user, we couldnt do anything else if we tried!
+        attrset=$(lsattr "$hf" 2>/dev/null) \
+            && [ "${attrset:5:1}" = a ] && continue
 
-		  # now for the ridiculous logic of enforcing the skel prefix!
-		  # this could probably make more sense if i thought about it...
-		  skel_file=/etc/skel.ppz/.bash_history
-		  if ! [ -s "$hf" ]; then
-				# file is empty, no-brainer. just fill with skel file.
-				echo_red "$hf is empty - filling it from skel"
-				cat ${skel_file} >> ${hf}
-		  elif cmp -s <(head -n 1 ${hf}) <(head -n 1 ${skel_file}); then
-				: #first lines match. peachy.
-		  elif askyn "$hf ("$(du -sh ${hf} | cut -f 1)") has no skel prefix. Join them?"; then
-				# user has consented to the replacement algorithm
-				backup_file=${hf}.ppz.$(date +%s)
-				mv ${hf} ${backup_file}
-				cp ${skel_file} ${hf}
-				cat ${backup_file} >> ${hf}
-				cmp -s <(cat ${skel_file} ${backup_file} | md5sum) <(cat ${hf} | md5sum) \
-					 && rm ${backup_file} \
-					 || echo_red "Delete ${backup_file} yourself, I wasn't sure..."
-		  fi
+        # now for the ridiculous logic of enforcing the skel prefix!
+        # this could probably make more sense if i thought about it...
+        skel_file=/etc/skel.ppz/.bash_history
+        if ! [ -s "$hf" ]; then
+            # file is empty, no-brainer. just fill with skel file.
+            echo_red "$hf is empty - filling it from skel"
+            cat ${skel_file} >> ${hf}
+        elif cmp -s <(head -n 1 ${hf}) <(head -n 1 ${skel_file}); then
+            : #first lines match. peachy.
+        elif askyn "$hf ("$(du -sh ${hf} | cut -f 1)") has no skel prefix. Join them?"; then
+            # user has consented to the replacement algorithm
+            backup_file=${hf}.ppz.$(date +%s)
+            mv ${hf} ${backup_file}
+            cp ${skel_file} ${hf}
+            cat ${backup_file} >> ${hf}
+            cmp -s <(cat ${skel_file} ${backup_file} | md5sum) <(cat ${hf} | md5sum) \
+                && rm ${backup_file} \
+                || echo_red "Delete ${backup_file} yourself, I wasn't sure..."
+        fi
 
-		  am_root && [ ${hf:0:5} != /tmp/ ] && {
-				echo_red "Marking $hf append-only."
-				say_and_do chattr +a "$hf"
-		  }
-	 done;
+        am_root && [ ${hf:0:5} != /tmp/ ] && {
+            echo_red "Marking $hf append-only."
+            say_and_do chattr +a "$hf"
+        }
+    done;
 
-	 am_root && return
+    am_root && return
 
-	 # force global custom bash_logout
-	 [ -a ~/.bash_logout ] && {
-		  read lo_text <~/.bash_logout || return 1
-		  [ "$lo_text" = '. /usr/share/ppz/bash.logout' ] && return
-	 }
-	 echo '. /usr/share/ppz/bash.logout' >| ~/.bash_logout
+    # force global custom bash_logout
+    [ -a ~/.bash_logout ] && {
+        read lo_text <~/.bash_logout || return 1
+        [ "$lo_text" = '. /usr/share/ppz/bash.logout' ] && return
+    }
+    echo '. /usr/share/ppz/bash.logout' >| ~/.bash_logout
 }
 integrity_sshd() {
-	 [ "${SSH_PORTS[*]}" = '22' ] && echo_red "You should switch to a high SSH port!"
-	 am_root || return 0
-	 local port PORT_TXT
-	 for port in "${SSH_PORTS[@]}"; do
-		  PORT_TXT+="Port $port"$'\n'
-	 done
-	 local OLDFILE=/etc/ssh/sshd_config
-	 local NEWFILE=${OLDFILE}.$(uniq_token)
-	 cat > ${NEWFILE} <<-EOF
-		${PORT_TXT}ListenAddress 0.0.0.0
-		Protocol 2
-		LoginGraceTime 2m
-		RekeyLimit 200M 6H
-		PermitRootLogin no
-		MaxAuthTries 3
-		MaxSessions 15
-		Compression no
+    [ "${SSH_PORTS[*]}" = '22' ] && echo_red "You should switch to a high SSH port!"
+    am_root || return 0
+    local port PORT_TXT
+    for port in "${SSH_PORTS[@]}"; do
+        PORT_TXT+="Port $port"$'\n'
+    done
+    local OLDFILE=/etc/ssh/sshd_config
+    local NEWFILE=${OLDFILE}.$(uniq_token)
+    cat > ${NEWFILE} <<-EOF
+      ${PORT_TXT}ListenAddress 0.0.0.0
+      Protocol 2
+      LoginGraceTime 2m
+      RekeyLimit 200M 6H
+      PermitRootLogin no
+      MaxAuthTries 3
+      MaxSessions 15
+      Compression no
       GatewayPorts clientspecified
-		PasswordAuthentication no
-		PubkeyAuthentication yes
-		ChallengeResponseAuthentication no
-		HostKey /etc/ssh/ssh_host_ed25519_key
-		PubkeyAcceptedKeyTypes ssh-ed25519
-		KexAlgorithms curve25519-sha256@libssh.org
-		UsePAM yes
-		X11Forwarding no
-		AllowAgentForwarding no
-		PrintMotd no
-		PrintLastLog no
-		MaxStartups 3
-		IgnoreRhosts yes
-		HostBasedAuthentication no
-		PermitEmptyPasswords no
-		AuthorizedKeysFile /etc/ssh/keys/%u
-		Subsystem	sftp	internal-sftp
+      PasswordAuthentication no
+      PubkeyAuthentication yes
+      ChallengeResponseAuthentication no
+      HostKey /etc/ssh/ssh_host_ed25519_key
+      PubkeyAcceptedKeyTypes ssh-ed25519
+      KexAlgorithms curve25519-sha256@libssh.org
+      UsePAM yes
+      X11Forwarding no
+      AllowAgentForwarding no
+      PrintMotd no
+      PrintLastLog no
+      MaxStartups 3
+      IgnoreRhosts yes
+      HostBasedAuthentication no
+      PermitEmptyPasswords no
+      AuthorizedKeysFile /etc/ssh/keys/%u
+      Subsystem   sftp   internal-sftp
 
-		AllowUsers
-		EOF
-	 for USER in ${SSH_USERS[@]}; do
-		  case "${USER:0:1}" in
-				\!|@)	local BAREUSER=${USER:1};;
-				*)		local BAREUSER=${USER};;
-		  esac
-		  local USER_ALLOWED=yes
-		  [ ${USER:0:1} = \! ] && USER_ALLOWED=no
-		  [ ${BAREUSER} = root ] && \
-				sed -i 's/^#*\(PermitRootLogin\).*$/\1 '${USER_ALLOWED}'/gi' ${NEWFILE}
-		  [ ${USER_ALLOWED} = yes ] && sed -i 's/^#*\(AllowUsers\(\s[a-zA-Z]*\)*\)$/\1 '${BAREUSER}'/gi' ${NEWFILE}
-		  [ ${USER:0:1} = @ ] && cat >> ${NEWFILE} <<-EOF
+      AllowUsers
+      EOF
+    for USER in ${SSH_USERS[@]}; do
+        case "${USER:0:1}" in
+            \!|@)   local BAREUSER=${USER:1};;
+            *)      local BAREUSER=${USER};;
+        esac
+        local USER_ALLOWED=yes
+        [ ${USER:0:1} = \! ] && USER_ALLOWED=no
+        [ ${BAREUSER} = root ] && \
+            sed -i 's/^#*\(PermitRootLogin\).*$/\1 '${USER_ALLOWED}'/gi' ${NEWFILE}
+        [ ${USER_ALLOWED} = yes ] && sed -i 's/^#*\(AllowUsers\(\s[a-zA-Z]*\)*\)$/\1 '${BAREUSER}'/gi' ${NEWFILE}
+        [ ${USER:0:1} = @ ] && cat >> ${NEWFILE} <<-EOF
 
-			Match User ${BAREUSER}
-			   ChrootDirectory /home/wall/${BAREUSER}
-			   X11Forwarding no
-			   AllowTcpForwarding no
-			   ForceCommand internal-sftp
-			EOF
-	 done
-#	 ALL OF THIS is such a stinking mess! when fix???
-#	 askyn "did you inspect?"
-	 if conffile_checkup "${OLDFILE}" "${NEWFILE}"; then
-		  #file changed
-		  chrooted || {
-				# not chrooted
-				echo_red pkilling sshd
-				pkill -HUP -f /usr/bin/sshd; SSHD_ON=$?
-		  }
-	 else
-		  #file didnt change
-		  [ -n "$(pgrep -f /usr/bin/sshd)" ]; SSHD_ON=$?
-	 fi
-	 ifn $SSHD_ON || {
-		  askyn "sshd is not running. Start it?" && {
-				systemctl start sshd.service
-		  } || echo_red "did not start sshd"
-	 }
+         Match User ${BAREUSER}
+            ChrootDirectory /home/wall/${BAREUSER}
+            X11Forwarding no
+            AllowTcpForwarding no
+            ForceCommand internal-sftp
+         EOF
+    done
+#    ALL OF THIS is such a stinking mess! when fix???
+#    askyn "did you inspect?"
+    if conffile_checkup "${OLDFILE}" "${NEWFILE}"; then
+        #file changed
+        chrooted || {
+            # not chrooted
+            echo_red pkilling sshd
+            pkill -HUP -f /usr/bin/sshd; SSHD_ON=$?
+        }
+    else
+        #file didnt change
+        [ -n "$(pgrep -f /usr/bin/sshd)" ]; SSHD_ON=$?
+    fi
+    ifn $SSHD_ON || {
+        askyn "sshd is not running. Start it?" && {
+            systemctl start sshd.service
+        } || echo_red "did not start sshd"
+    }
 }
 integrity_sensors() {
-	 pacman -Qq lm_sensors &>/dev/null || return 0
-	 local sc=/etc/conf.d/lm_sensors
-	 [ -s $sc ] && return
-	 echo_red "Missing $sc"
-	 am_root || return 0
-	 askyn "Auto-generate $sc ?" || {
-		  echo_red ok, do it yourself
-		  return
-	 }
-	 yes "" | /usr/bin/sensors-detect
-	 echo_blue "Remember, systemd enable lm_sensors (or something?)"
+    pacman -Qq lm_sensors &>/dev/null || return 0
+    local sc=/etc/conf.d/lm_sensors
+    [ -s $sc ] && return
+    echo_red "Missing $sc"
+    am_root || return 0
+    askyn "Auto-generate $sc ?" || {
+        echo_red ok, do it yourself
+        return
+    }
+    yes "" | /usr/bin/sensors-detect
+    echo_blue "Remember, systemd enable lm_sensors (or something?)"
 }
 
 # this gets run in:
@@ -650,8 +650,8 @@ integrity_sensors() {
 #      post_upgrade
 
 for F in rootpw locales tz simpleconf users \
-	 ip{,6}tables encdevs bashhistory emacsd tmpdir sshd \
-	 sensors everyone; do
+    ip{,6}tables encdevs bashhistory emacsd tmpdir sshd \
+    sensors everyone; do
 
-	 integrity_${F} || echo "${F} failed..."
+    integrity_${F} || echo "${F} failed..."
 done

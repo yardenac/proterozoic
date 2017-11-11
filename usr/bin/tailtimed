@@ -10,10 +10,10 @@ file=$2
 text=$3
 
 while [ $(date +%s) -lt $((start + $timeout)) ]; do
-	 echo -n tailing [$file] ...
-	 grep -qi "$text" "$file" && echo y && exit 0
-	 echo n
-	 sleep 3
+    echo -n tailing [$file] ...
+    grep -qi "$text" "$file" && echo y && exit 0
+    echo n
+    sleep 3
 done
 
 exit -1

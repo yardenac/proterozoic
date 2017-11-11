@@ -4,13 +4,13 @@ shopt -sq nocasematch nullglob dotglob
 do_unto_others
 
 check_ssh_connectivity() {
-	 [[ "$1" =~ ^([a-z\.]+@)?[a-z\.]+$ ]]				|| return 1 # $1 = "user@host" or "host"
-	 grep -qE 'Host[[:space:]]+'"$1" ~/.ssh/config	|| return 1 # not in config
-	 : | ssh "$1" 'exit 234;' &>/dev/null
-	 [ "$?" = 234 ]											|| return 1 # didnt exec remote command!
+    [[ "$1" =~ ^([a-z\.]+@)?[a-z\.]+$ ]]            || return 1 # $1 = "user@host" or "host"
+    grep -qE 'Host[[:space:]]+'"$1" ~/.ssh/config   || return 1 # not in config
+    : | ssh "$1" 'exit 234;' &>/dev/null
+    [ "$?" = 234 ]                                 || return 1 # didnt exec remote command!
 }
 do_mount() {
-	 sudo /usr/bin/mountdvd "$file" || croak "Mount did not work!"
+    sudo /usr/bin/mountdvd "$file" || croak "Mount did not work!"
 }
 
 # init vars
@@ -22,13 +22,13 @@ check_files=y
 [ -a ~/.config/ppzrc ] && . ~/.config/ppzrc
 
 for arg; do
-	 case "$arg" in
-		  --as-is) rescue=n;;
-		  *)
-				[[ "$arg" =~ ^[0-9a-z]+$ ]] && disc_name=$arg && continue
-				croak "Unrecognized option: $arg"
-				;;
-	 esac
+    case "$arg" in
+        --as-is) rescue=n;;
+        *)
+            [[ "$arg" =~ ^[0-9a-z]+$ ]] && disc_name=$arg && continue
+            croak "Unrecognized option: $arg"
+            ;;
+    esac
 done
 
 # sanitize vars
@@ -36,75 +36,75 @@ done
 file="$dvdrip_ddir/dvd-$disc_name"
 tmp_files=()
 for f in file_{5,J} hashlist_after_{5,J} sorted{5,J} rsync_out; do
-	 eval $f=/tmp/.$(uniq_token)
-	 tmp_files+=($f)
+    eval $f=/tmp/.$(uniq_token)
+    tmp_files+=($f)
 done
 
 # rescue from disc
 [ $rescue = y ] && {
-	 SLEEPINC=1.5
-	 until cdtray $drive; do
-		  sleep $SLEEPINC
-		  SLEEPINC=$(echo "scale=30; $SLEEPINC*1.2" | bc)
-	 done
-	 while :; do
-		  if ! ddrescue -r -1 -vb 2048 $drive "$file"{,.log}; then
-				askyn "ddrescue failed - run again?" && continue || croak
-		  fi
-		  if ddrescuelog -D "$file.log"; then
-				check_files=n
-				eject $drive
-				askyn "100% rescued! Continue with transfer?" || croak "Never mind then!"
-		  else
-				askyn "rescue is not complete - run again?" && continue
-				eject $drive
-		  fi
-		  break
-	 done
+    SLEEPINC=1.5
+    until cdtray $drive; do
+        sleep $SLEEPINC
+        SLEEPINC=$(echo "scale=30; $SLEEPINC*1.2" | bc)
+    done
+    while :; do
+        if ! ddrescue -r -1 -vb 2048 $drive "$file"{,.log}; then
+            askyn "ddrescue failed - run again?" && continue || croak
+        fi
+        if ddrescuelog -D "$file.log"; then
+            check_files=n
+            eject $drive
+            askyn "100% rescued! Continue with transfer?" || croak "Never mind then!"
+        else
+            askyn "rescue is not complete - run again?" && continue
+            eject $drive
+        fi
+        break
+    done
 }
 
 # mounting might happen now -- prepare cleanup
 trap "
-	rm -rf ${tmp_files[*]}
-	sudo /usr/bin/mountdvd --unmount
-	exit
+   rm -rf ${tmp_files[*]}
+   sudo /usr/bin/mountdvd --unmount
+   exit
 " EXIT HUP QUIT INT TERM ABRT TSTP CONT
 
 md5diff() {
-	 comm --output-delimiter=\  --nocheck-order -3 "$2" "$3" \
-		  | sed 's/^ //' | colrm 1 "$1" | sort -u | input_bad
+    comm --output-delimiter=\  --nocheck-order -3 "$2" "$3" \
+        | sed 's/^ //' | colrm 1 "$1" | sort -u | input_bad
 }
 
 # THIS NEEDS ATTENTION
 
 # compile bad-files list
 [ $check_files = y ] && ! ddrescuelog -D "$file.log" && {
-	 echo_blue "DOING 5's PASS"
-	 echo -n 5 >| $file_5
-	 ddrescue -vF '?*/-' $file_5 "$file"{,.log} || croak "Bad zeros"
-	 do_mount
-	 find $dvdrip_mountpoint -type f -print0 | xargs -0 md5sum | tee $hashlist_after_5
-	 sort -u $hashlist_after_5 >| $sorted5
-	 sudo /usr/bin/mountdvd --unmount
-	 
-	 echo_blue "DOING J's PASS"
-	 echo -n J >| $file_J
-	 ddrescue -vF '?*/-' $file_J   "$file"{,.log} || croak "Bad As"
-	 do_mount
-	 find $dvdrip_mountpoint -type f -print0 | xargs -0 md5sum | tee $hashlist_after_J
-	 sort -u $hashlist_after_J >| $sortedJ
-	 sudo /usr/bin/mountdvd --unmount
+    echo_blue "DOING 5's PASS"
+    echo -n 5 >| $file_5
+    ddrescue -vF '?*/-' $file_5 "$file"{,.log} || croak "Bad zeros"
+    do_mount
+    find $dvdrip_mountpoint -type f -print0 | xargs -0 md5sum | tee $hashlist_after_5
+    sort -u $hashlist_after_5 >| $sorted5
+    sudo /usr/bin/mountdvd --unmount
+    
+    echo_blue "DOING J's PASS"
+    echo -n J >| $file_J
+    ddrescue -vF '?*/-' $file_J   "$file"{,.log} || croak "Bad As"
+    do_mount
+    find $dvdrip_mountpoint -type f -print0 | xargs -0 md5sum | tee $hashlist_after_J
+    sort -u $hashlist_after_J >| $sortedJ
+    sudo /usr/bin/mountdvd --unmount
 
 
-	 # show bad-files list to user
-	 echo_blue "Comparing md5sums..."
-	 cols_to_cut=$(echo "34 + 1 + ${#dvdrip_mountpoint}" | bc)
-	 if md5diff $cols_to_cut $hashlist_after_5 $hashlist_after_J; then
-		  askyn "No files were different! Does that sound right to you?" || croak k
-	 else
-		  echo_red "Some files did not match!"
-		  askyn "Acceptable to transfer without these files?" || croak k
-	 fi
+    # show bad-files list to user
+    echo_blue "Comparing md5sums..."
+    cols_to_cut=$(echo "34 + 1 + ${#dvdrip_mountpoint}" | bc)
+    if md5diff $cols_to_cut $hashlist_after_5 $hashlist_after_J; then
+        askyn "No files were different! Does that sound right to you?" || croak k
+    else
+        echo_red "Some files did not match!"
+        askyn "Acceptable to transfer without these files?" || croak k
+    fi
 }
 
 # mount
@@ -112,33 +112,33 @@ do_mount
 
 # show list of files (just to doublecheck...)
 if [ $(ls -1Ad $dvdrip_mountpoint/*{,/*{,/*{,/*{,/*}}}} | wc -l) -gt "$(tput lines)" ]; then
-	 askyn "View long file list?" && find $dvdrip_mountpoint | less
+    askyn "View long file list?" && find $dvdrip_mountpoint | less
 else
-	 echo_red "-- BEGIN FILE LIST"
-	 ls --color=auto -FlAhd $dvdrip_mountpoint/*{,/*{,/*{,/*{,/*}}}}
-	 echo_red "-- END FILE LIST"
+    echo_red "-- BEGIN FILE LIST"
+    ls --color=auto -FlAhd $dvdrip_mountpoint/*{,/*{,/*{,/*{,/*}}}}
+    echo_red "-- END FILE LIST"
 fi
 
 # transfer
 check_ssh_connectivity $dvdrip_host || croak "Cannot connect to $dvdrip_host via ssh!"
 rsync --inplace --chmod u+w --out-format="%t %o %f ... %n" -aPh \
-	 --bwlimit=$bwl $dvdrip_mountpoint/ $dvdrip_host:$dvdrip_rdest/$disc_name \
-	 || { askyn "rsync failed - bail?" && croak; }
+    --bwlimit=$bwl $dvdrip_mountpoint/ $dvdrip_host:$dvdrip_rdest/$disc_name \
+    || { askyn "rsync failed - bail?" && croak; }
 
 # reeeeally make sure the transfer worked 100%
 echo_blue DOUBLE CHECKING...
 set +o noclobber
 rsync --inplace --chmod u+w --out-format="%t %o %f ... %n" -aznc -e 'ssh -C' \
-	 $dvdrip_mountpoint/ $dvdrip_host:$dvdrip_rdest/$disc_name &> $rsync_out
+    $dvdrip_mountpoint/ $dvdrip_host:$dvdrip_rdest/$disc_name &> $rsync_out
 [ $? -ne 0 ] || [ -s $rsync_out ] && {
-	 echo_red --
-	 cat $rsync_out
-	 echo_red --
-	 askyn "rsync checksum failed! Quit before cleanup, right?" && croak
+    echo_red --
+    cat $rsync_out
+    echo_red --
+    askyn "rsync checksum failed! Quit before cleanup, right?" && croak
 }
 
 # cleanup - we're really sure now
 sudo /usr/bin/mountdvd --unmount || croak "unmount failed"
 ddrescuelog -D "$file.log" \
-	 && rm -f "$file"{,.log} \
-	 || mv "$file.log" "$dvdrip_ddir"/logs/
+    && rm -f "$file"{,.log} \
+    || mv "$file.log" "$dvdrip_ddir"/logs/

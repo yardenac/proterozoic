@@ -6,11 +6,11 @@ url=$1
 [[ "$url" =~ ^(https?|ftp|file)://[-A-Za-z0-9\+\&@#/%?=~_|\!:,.\;]*[-A-Za-z0-9\+\&@#/%=~_|]$ ]] || exit 1
 
 run_as_ex() {
-	 if [ "$USER" == ex ]; then
-		  "$@"
-	 else
-		  sudo -u ex "$@"
-	 fi
+    if [ "$USER" == ex ]; then
+        "$@"
+    else
+        sudo -u ex "$@"
+    fi
 }
 
 run_as_ex FvwmCommand "Exec exec chromium-blah '$url'"

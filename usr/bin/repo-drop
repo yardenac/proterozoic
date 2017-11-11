@@ -7,18 +7,18 @@
 # Use local functions if possible (for `./package-this`)
 funcspath=usr/share/ppz/bash.functions
 if [ -s $funcspath ]; then
-	 . $funcspath
+    . $funcspath
 elif [ -s /$funcspath ]; then
-	 . /$funcspath
+    . /$funcspath
 else
-	 echo "No functions file!"
-	 exit 1
+    echo "No functions file!"
+    exit 1
 fi
 
 # config sets bash array $rd_args
 configfile=~/.config/repo-drop
 if [ -s $configfile ]; then
-	 . $configfile
+    . $configfile
 fi
 
 shopt -s nullglob
@@ -26,122 +26,122 @@ shopt -s nullglob
 dirs=()
 packs=()
 for arg in "$@" "${rd_args[@]}"; do
-	 item=$(full_path_strict "$arg") || ribbit "SKIPPING NON-EXISTENT ITEM: $arg"
-	 if [ -d "$item" ]; then
-		  dirs+=("${item%/}")
-	 elif is pkg "$item"; then
-		  packs+=($item)
-	 else
-		  echo_red "SKIPPING WEIRD ARG: $item"
-	 fi
+    item=$(full_path_strict "$arg") || ribbit "SKIPPING NON-EXISTENT ITEM: $arg"
+    if [ -d "$item" ]; then
+        dirs+=("${item%/}")
+    elif is pkg "$item"; then
+        packs+=($item)
+    else
+        echo_red "SKIPPING WEIRD ARG: $item"
+    fi
 done
 
 (( ${#dirs[@]} )) && (( ${#packs[@]} )) || \
-	 croak "USAGE: repo-drop /path/to/repo/ to-add.pkg.tar.xz"
+    croak "USAGE: repo-drop /path/to/repo/ to-add.pkg.tar.xz"
 
 _gpg_verify() {
-	 if gpg --verify "${1}.sig" </dev/null &>/dev/null; then
-		  echo_green_n " [VALID SIGNATURE]"
-	 else
-		  case "$?" in
-				2) echo_red_n " [NO SIGNATURE]";;
-				*) echo_red_n " [INVALID SIGNATURE]";;
-		  esac
-		  return 1
-	 fi
+    if gpg --verify "${1}.sig" </dev/null &>/dev/null; then
+        echo_green_n " [VALID SIGNATURE]"
+    else
+        case "$?" in
+            2) echo_red_n " [NO SIGNATURE]";;
+            *) echo_red_n " [INVALID SIGNATURE]";;
+        esac
+        return 1
+    fi
 }
 
 _gpg_sign() {
-	 rm -f "$1.sig"
-	 if gpg --detach-sign --use-agent "$1"; then
-		  echo_green_n " [SIGNED]"
-	 else
-		  echo_red_n " [ERROR SIGNING]"
-		  return 1
-	 fi
+    rm -f "$1.sig"
+    if gpg --detach-sign --use-agent "$1"; then
+        echo_green_n " [SIGNED]"
+    else
+        echo_red_n " [ERROR SIGNING]"
+        return 1
+    fi
 }
 
 _gpg_sign_verify() {
-	 local file files=()
-	 for arg; do
-		  if [ -f "$arg" ]; then
-				files+=("$arg")
-		  else
-				echo_red "WEIRD ARG TO _gpg_sign: $arg"
-		  fi
-	 done
-	 (( ${#files[@]} )) || echo_red "_gpg_sign: NO FILES GIVEN"
-	 errors=0
-	 for file in "${files[@]}"; do
-		  echo_green_n "SIGNING: $file"
-		  until _gpg_verify "$file"; do
-				_gpg_sign "$file" || {
-					 let errors++
-					 continue
-				}
-		  done
-		  echo
-	 done
-	 return $errors
+    local file files=()
+    for arg; do
+        if [ -f "$arg" ]; then
+            files+=("$arg")
+        else
+            echo_red "WEIRD ARG TO _gpg_sign: $arg"
+        fi
+    done
+    (( ${#files[@]} )) || echo_red "_gpg_sign: NO FILES GIVEN"
+    errors=0
+    for file in "${files[@]}"; do
+        echo_green_n "SIGNING: $file"
+        until _gpg_verify "$file"; do
+            _gpg_sign "$file" || {
+                let errors++
+                continue
+            }
+        done
+        echo
+    done
+    return $errors
 }
 
 for pack in "${packs[@]}"; do
 
-	 _gpg_sign_verify "$pack" || continue
+    _gpg_sign_verify "$pack" || continue
 
-	 pack_base=$(basename "$pack")
-	 pack_dir=$(dirname "$pack")
-	 arch=$(bsdtar -xOf "$pack" .PKGINFO | awk '/^arch =/ {print $3}')
-	 oldfiles=()
-	 newfiles=()
-	 for dir in "${dirs[@]}"; do
+    pack_base=$(basename "$pack")
+    pack_dir=$(dirname "$pack")
+    arch=$(bsdtar -xOf "$pack" .PKGINFO | awk '/^arch =/ {print $3}')
+    oldfiles=()
+    newfiles=()
+    for dir in "${dirs[@]}"; do
 
-		  case $arch in
-				'i686'|'x86_64') dbs=("$dir"{,/$arch}/*.db.tar.gz);;
-				'any') dbs=("$dir"{,/{i686,x86_64}}/*.db.tar.gz);;
-				*) echo_red "SKIPPING PKG WITH UNKNOWN ARCHITECTURE: $arch"; continue 2;;
-		  esac
+        case $arch in
+            'i686'|'x86_64') dbs=("$dir"{,/$arch}/*.db.tar.gz);;
+            'any') dbs=("$dir"{,/{i686,x86_64}}/*.db.tar.gz);;
+            *) echo_red "SKIPPING PKG WITH UNKNOWN ARCHITECTURE: $arch"; continue 2;;
+        esac
 
-		  (( ${#dbs[@]} )) || echo_red "NO VALID DBs for $arch in $dir"
+        (( ${#dbs[@]} )) || echo_red "NO VALID DBs for $arch in $dir"
 
-		  for db in "${dbs[@]}"; do
-				is db "$db" || continue
-				repo=$(dirname "$db")
-				if [ -a "$repo/$pack_base" ]; then
-					 newfiles+=("$repo/$pack_base")
-					 askyn "$repo/$pack_base  <-- ALREADY EXISTS. REPLACE?" || {
-						  echo_red "NOT ADDING, ALREADY EXISTS: $repo/$pack_base"
-						  continue
-					 }
-				fi
-				oldfiles+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
+        for db in "${dbs[@]}"; do
+            is db "$db" || continue
+            repo=$(dirname "$db")
+            if [ -a "$repo/$pack_base" ]; then
+                newfiles+=("$repo/$pack_base")
+                askyn "$repo/$pack_base  <-- ALREADY EXISTS. REPLACE?" || {
+                    echo_red "NOT ADDING, ALREADY EXISTS: $repo/$pack_base"
+                    continue
+                }
+            fi
+            oldfiles+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
 
-				uplist=("$pack_base")
-				if [ -f "$pack_base.sig" ]; then
-					 uplist+=("$pack_base.sig")
-				else
-					 oldfiles+=("$repo/$pack_base.sig")
-				fi
-				for upfile in "${uplist[@]}"; do
-					 rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack_dir/$upfile" "$repo/$upfile"
-				done
+            uplist=("$pack_base")
+            if [ -f "$pack_base.sig" ]; then
+                uplist+=("$pack_base.sig")
+            else
+                oldfiles+=("$repo/$pack_base.sig")
+            fi
+            for upfile in "${uplist[@]}"; do
+                rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack_dir/$upfile" "$repo/$upfile"
+            done
 
-				repo-add "$db" "$repo/$pack_base"
-				_gpg_sign_verify "$db"
-		  done
-	 done
+            repo-add "$db" "$repo/$pack_base"
+            _gpg_sign_verify "$db"
+        done
+    done
 
-	 to_del=()
-	 for oldfile in "${oldfiles[@]}"; do
-		  (( ${#newfiles[@]} )) || to_del+=("$oldfile"{,.sig})
-		  for newfile in "${newfiles[@]}"; do
-				[ "$oldfile" = "$newfile" ] || to_del+=("$oldfile"{,.sig})
-		  done
-	 done
+    to_del=()
+    for oldfile in "${oldfiles[@]}"; do
+        (( ${#newfiles[@]} )) || to_del+=("$oldfile"{,.sig})
+        for newfile in "${newfiles[@]}"; do
+            [ "$oldfile" = "$newfile" ] || to_del+=("$oldfile"{,.sig})
+        done
+    done
 
-	 (( ${#to_del[@]} )) && {
-		  ls -lF "${to_del[@]}"
-		  askyn "Delete older pkgs on server?" && rm -vf "${to_del[@]}"
-	 }
-	 askyn "Delete local pkg?" && rm -vf "$pack"{,.sig}
+    (( ${#to_del[@]} )) && {
+        ls -lF "${to_del[@]}"
+        askyn "Delete older pkgs on server?" && rm -vf "${to_del[@]}"
+    }
+    askyn "Delete local pkg?" && rm -vf "$pack"{,.sig}
 done

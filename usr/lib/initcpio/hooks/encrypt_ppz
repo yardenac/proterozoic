@@ -3,30 +3,30 @@
 run_hook() {
     modprobe -a -q dm-crypt >/dev/null 2>&1
 
-	 ep_wait_for() {
-		  echo "waiting for $# disks ..."
+    ep_wait_for() {
+        echo "waiting for $# disks ..."
         local disk c=$(( $# * 10 ))
-		  for disk; do
-				echo "   $disk"
-		  done
-		  while :; do
-				for disk; do
-					 if [ -b "$disk" ]; then
-						  ewf_found=$disk
-						  return
-					 fi
-				done
-				if [ $c -le 0 ]; then
-					 read -n 1 -p "Cannot find $1. Try again? [*/n] " userkey
-					 echo
-					 [ "${userkey}" = n ] && return 1
-				fi
-				let c--
-				sleep 0.5
+        for disk; do
+            echo "   $disk"
         done
-		  echo "weird wait error"
+        while :; do
+            for disk; do
+                if [ -b "$disk" ]; then
+                    ewf_found=$disk
+                    return
+                fi
+            done
+            if [ $c -le 0 ]; then
+                read -n 1 -p "Cannot find $1. Try again? [*/n] " userkey
+                echo
+                [ "${userkey}" = n ] && return 1
+            fi
+            let c--
+            sleep 0.5
+        done
+        echo "weird wait error"
         return 1
-	 }
+    }
 
     local hdMount=false headerDir=/boot
     if [ -n "${headerdev}" ]; then
@@ -45,18 +45,18 @@ run_hook() {
 $cryptdevice
 EOF
     elif [ -n "${cryptswitch}" ]; then
-		  ewf_found=none
+        ewf_found=none
         ep_wait_for $(awk '/^none/ {next} {print $2}' "$headerDir/$cryptswitch")
         while read ep_name cryptdev cryptname; do
             [ "$ewf_found" = "$cryptdev" ] && break
-		  done < "$headerDir/$cryptswitch"
-		  if [ "$ep_name" = none ]; then
-				echo "NO CRYPT VOLUMES FOUND"
-				return 1
-		  else
-				ep_name=headers/$ep_name
-				cryptoptions=header
-		  fi
+        done < "$headerDir/$cryptswitch"
+        if [ "$ep_name" = none ]; then
+            echo "NO CRYPT VOLUMES FOUND"
+            return 1
+        else
+            ep_name=headers/$ep_name
+            cryptoptions=header
+        fi
     else
         return
     fi

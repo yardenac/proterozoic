@@ -6,21 +6,21 @@ cols=$(tput cols)
 
 files=()
 for arg; do
-	 if item=$(full_path_strict "$arg"); then
-		  if is plain "$item"; then
-				files+=("$item")
-		  else
-				echo_red "Not a text file: $item"
-		  fi
-	 else
-		  echo_red "Not a file: $item"
-	 fi
+    if item=$(full_path_strict "$arg"); then
+        if is plain "$item"; then
+            files+=("$item")
+        else
+            echo_red "Not a text file: $item"
+        fi
+    else
+        echo_red "Not a file: $item"
+    fi
 done
 
 for file in "${files[@]}"; do
-	 awk '{
-		cols = '$cols'
-		if (length($0) < cols) {print}
-		else {print "\033[1;31m" substr($0,0,cols) "\033[22;39m"}
-	 }' "$file"
+    awk '{
+      cols = '$cols'
+      if (length($0) < cols) {print}
+      else {print "\033[1;31m" substr($0,0,cols) "\033[22;39m"}
+    }' "$file"
 done

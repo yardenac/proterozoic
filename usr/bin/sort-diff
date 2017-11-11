@@ -11,10 +11,10 @@ for arg; do
         file=$arg
         continue
     fi
-	 case "$arg" in
+    case "$arg" in
         -)   file=${arg};;
         *)   echo "weird arg: $arg";;
-	 esac
+    esac
 done
 
 tmpfile=/tmp/sort-diff.$(uniq_token)

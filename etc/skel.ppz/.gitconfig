@@ -1,16 +1,16 @@
 [alias]
-	glog	= log -30 --pretty='%p..%Cgreen%h%Creset %G? %ad %s%Cblue%d%Creset' --date=short
-	stiff	= diff --color=auto --cached
+   glog   = log -30 --pretty='%p..%Cgreen%h%Creset %G? %ad %s%Cblue%d%Creset' --date=short
+   stiff   = diff --color=auto --cached
 [commit]
    gpgsign = true
 [core]
-	editor = emacs
-	pager = less -+S
+   editor = emacs
+   pager = less -+S
 [push]
-	default = simple
+   default = simple
    gpgsign = if-asked
 [color]
-	diff = auto
-	interactive = auto
+   diff = auto
+   interactive = auto
 [http]
    sslverify = true

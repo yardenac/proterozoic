@@ -5,16 +5,16 @@
 # USAGE: dude /some/dirs*/
 
 summarize_dir() {
-	 local bytes under over full left
-	 bytes=$(du -sb "$1" | awk '{print $1}')
-	 under=$(echo "scale=0; $bytes/$size" | bc)
-	 over=$(($under + 1))
-	 full=$(echo "scale=2; ($bytes-(($under)*$size))/(1024*1024)" | bc)
-	 left=$(echo "scale=2; ((($over)*$size)-$bytes)/(1024*1024)" | bc)
-	 echo_blue_n "$1"
-	 echo -n ":     "
-	 (( $under )) && echo -n "${under}d + "
-	 echo "${full} -- ${left}"
+    local bytes under over full left
+    bytes=$(du -sb "$1" | awk '{print $1}')
+    under=$(echo "scale=0; $bytes/$size" | bc)
+    over=$(($under + 1))
+    full=$(echo "scale=2; ($bytes-(($under)*$size))/(1024*1024)" | bc)
+    left=$(echo "scale=2; ((($over)*$size)-$bytes)/(1024*1024)" | bc)
+    echo_blue_n "$1"
+    echo -n ":     "
+    (( $under )) && echo -n "${under}d + "
+    echo "${full} -- ${left}"
 }
 
 . /usr/share/ppz/bash.functions
@@ -24,21 +24,21 @@ shopt -s nullglob
 size=4707319808 # dvd+r
 dirs=()
 for arg; do
-	 case "$arg" in
-		  -cd) size=737280000; continue;;
-		  +) size=4700372992; continue;;
-		  -) continue;;
-	 esac
-	 if [ -d "$arg" ]; then
-		  arg=$(full_path_strict "$arg") || {
-				echo_red "Skipping weird dir: $arg"
-		  }
-		  dirs+=("$arg")
-	 else
-		  echo_red "Skipping weird option: $arg"
-	 fi
+    case "$arg" in
+        -cd) size=737280000; continue;;
+        +) size=4700372992; continue;;
+        -) continue;;
+    esac
+    if [ -d "$arg" ]; then
+        arg=$(full_path_strict "$arg") || {
+            echo_red "Skipping weird dir: $arg"
+        }
+        dirs+=("$arg")
+    else
+        echo_red "Skipping weird option: $arg"
+    fi
 done
 
 for dir in "${dirs[@]}"; do
-	 summarize_dir "$dir"
+    summarize_dir "$dir"
 done

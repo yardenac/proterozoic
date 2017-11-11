@@ -8,22 +8,22 @@ do_unto_others
 
 args=(); x=700; y=400; holdss=y
 for arg; do
-	 case "$arg" in
-		  d) y=-1000;;
-		  e) x=200;;
-		  f) x=1290;;
-		  m) holdss='';;
-		  *)
-				is_ssh_host "$arg" && {
-					 as=mm
-					 for a in "$@"; do
-						  [ "$a" = "$arg" ] || as="$as $(printf %q "$(printf %q "$a")")"
-					 done
-					 exec urxvtb -pe -tabbedex -geometry 80x6+720+694 -e bash -c \
-						  "exec ssh -t $arg exec $as"
-				}
-				args+=("$arg")
-	 esac
+    case "$arg" in
+        d) y=-1000;;
+        e) x=200;;
+        f) x=1290;;
+        m) holdss='';;
+        *)
+            is_ssh_host "$arg" && {
+                as=mm
+                for a in "$@"; do
+                    [ "$a" = "$arg" ] || as="$as $(printf %q "$(printf %q "$a")")"
+                done
+                exec urxvtb -pe -tabbedex -geometry 80x6+720+694 -e bash -c \
+                    "exec ssh -t $arg exec $as"
+            }
+            args+=("$arg")
+    esac
 done
 
 set_xtitle "[mm] $*"
@@ -31,14 +31,14 @@ set_xtitle "[mm] $*"
 [ "$(type -t pre-mm)" = 'file' ] && pre-mm
 
 [ "$holdss" ] && {
-	 holdss &
-	 trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
+    holdss &
+    trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
 }
 
 ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}x${y} -fs --ao=alsa \
-	 --alang=en --slang=en \
-	 --stop-screensaver --msg-level=all=no:statusline=status:cache=info:network=info \
-	 --cache-initial=1024 --cache=256000 --no-input-default-bindings \
+    --alang=en --slang=en \
+    --stop-screensaver --msg-level=all=no:statusline=status:cache=info:network=info \
+    --cache-initial=1024 --cache=256000 --no-input-default-bindings \
     --input-conf=/usr/share/ppz/mplayer.input.conf \
     --term-status-msg='${time-pos} / ${duration} (${percent-pos}%) ${filename}' \
     --no-osc --script-opts=osc-visibility=always,osc-timems=no,osc-layout=topslim \

@@ -5,82 +5,82 @@
 export cower='cower --timeout=60'
 
 vergt () {
-	 [ "$1" = "$2" ] && return 1
-	 [ "$(vercmp "$1" "$2")" -gt 0 ]
+    [ "$1" = "$2" ] && return 1
+    [ "$(vercmp "$1" "$2")" -gt 0 ]
 }
 is_pkg() {
-	 local type
-	 type=$(file -ib "$1") || return 1
-	 case "${type%%;*}" in
-		  application/x-xz|application/x-gzip) return 0;;
-		  *) return 1
-	 esac
-	 return 0
+    local type
+    type=$(file -ib "$1") || return 1
+    case "${type%%;*}" in
+        application/x-xz|application/x-gzip) return 0;;
+        *) return 1
+    esac
+    return 0
 }
 ck_pkg() {
-	 local file ig_pkgn pkgdeets name vers_here vers_there url giturl date vers_github
-	 file=$(readlink -e "$1") || return 1
-	 is_pkg "$file" || return 1
-	 pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || return 1
-	 (( "${#pkgdeets[@]}" )) || return 1
-	 name=${pkgdeets[0]}
+    local file ig_pkgn pkgdeets name vers_here vers_there url giturl date vers_github
+    file=$(readlink -e "$1") || return 1
+    is_pkg "$file" || return 1
+    pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || return 1
+    (( "${#pkgdeets[@]}" )) || return 1
+    name=${pkgdeets[0]}
     for ig_pkgn in "${ignore_pkgnames[@]}"; do
         [ "x$name" = "x$ig_pkgn" ] && return
     done
     name=${name//+/\\+}
-	 vers_here=${pkgdeets[1]}
-	 vers_there=$($cower --search --format="%v" "^${name}$") || {
-		  echo_red "package not in AUR: $name"
-		  return 1
-	 }
-	 flagged=$($cower --search --format="%t" "^${name}$")
-	 [ "$flagged" = no ] && [ "$vers_here" = "$vers_there" ] && {
-		  [[ $verbose == y ]] && echo_blue "$name $vers_here "
-		  return
-	 }
-	 if vergt "$vers_here" "$vers_there"; then
+    vers_here=${pkgdeets[1]}
+    vers_there=$($cower --search --format="%v" "^${name}$") || {
+        echo_red "package not in AUR: $name"
+        return 1
+    }
+    flagged=$($cower --search --format="%t" "^${name}$")
+    [ "$flagged" = no ] && [ "$vers_here" = "$vers_there" ] && {
+        [[ $verbose == y ]] && echo_blue "$name $vers_here "
+        return
+    }
+    if vergt "$vers_here" "$vers_there"; then
         if [ "$vers_here" = "$vers_there.${vers_here##*.}" ]; then
-		      [[ $verbose == y ]] && \
+            [[ $verbose == y ]] && \
                 echo_blue_n "$name $vers_here " && \
                 echo_green "INCREMENTAL"
             return
         fi
-		  url=$($cower --search --format="%u" "^${name}$")
-		  giturl=$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')
-		  [ "$giturl" ] || {
-				echo_blue_n "$name $vers_here "
-				echo_cyan "$vers_there"
-				return
-		  }
-		  date=$(curl -s "$giturl"/commits | jshon -e 0 -e commit -e author -e date | tr -d \")
-		  vers_github=$(date -d "$date" "+%Y%m%d-1")
-		  vergt "$vers_github" "$vers_here" || return
-		  echo_blue_n "$name $vers_here "
-		  echo_cyan_n "$vers_github"
-		  echo " $url/commits/master"
-	 elif [ "$vers_here" != "$vers_there" ]; then
-		  echo_blue_n "$name $vers_here "
-		  echo_yellow "$vers_there"
-	 elif [ "$flagged" = yes ]; then
-		  echo_blue_n "$name $vers_here "
-		  echo_cyan_n "$vers_there "
-		  echo_yellow "FLAGGED"
-	 else
-		  echo_red "WEIRD THING HAPPENED"
-	 fi
+        url=$($cower --search --format="%u" "^${name}$")
+        giturl=$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')
+        [ "$giturl" ] || {
+            echo_blue_n "$name $vers_here "
+            echo_cyan "$vers_there"
+            return
+        }
+        date=$(curl -s "$giturl"/commits | jshon -e 0 -e commit -e author -e date | tr -d \")
+        vers_github=$(date -d "$date" "+%Y%m%d-1")
+        vergt "$vers_github" "$vers_here" || return
+        echo_blue_n "$name $vers_here "
+        echo_cyan_n "$vers_github"
+        echo " $url/commits/master"
+    elif [ "$vers_here" != "$vers_there" ]; then
+        echo_blue_n "$name $vers_here "
+        echo_yellow "$vers_there"
+    elif [ "$flagged" = yes ]; then
+        echo_blue_n "$name $vers_here "
+        echo_cyan_n "$vers_there "
+        echo_yellow "FLAGGED"
+    else
+        echo_red "WEIRD THING HAPPENED"
+    fi
 }
 is_repo() {
-	 [ -d "$1" ] || return 1
-	 local item=${1%/}
-	 is db "$item"/*.db.tar.gz && return 0
-	 return 1
+    [ -d "$1" ] || return 1
+    local item=${1%/}
+    is db "$item"/*.db.tar.gz && return 0
+    return 1
 }
 ck_repo() {
-	 local file
-	 [ "$print_repos" ] && echo_green "$1"
-	 find -P "$1" -xdev -maxdepth 1 -ignore_readdir_race -type f | sort | while read file; do
-		  ck_pkg "$file"
-	 done
+    local file
+    [ "$print_repos" ] && echo_green "$1"
+    find -P "$1" -xdev -maxdepth 1 -ignore_readdir_race -type f | sort | while read file; do
+        ck_pkg "$file"
+    done
 }
 
 . /usr/share/ppz/bash.functions
@@ -92,25 +92,25 @@ verbose='' loop=''
 conf=~/.config/ckrepo
 [ -f "$conf" ] && . "$conf"
 for arg; do
-	 case "$arg" in
-		  -v|--verbose) verbose=y; continue;;
+    case "$arg" in
+        -v|--verbose) verbose=y; continue;;
         -l|--loop)    loop=y;    continue;;
-	 esac
-	 if item=$(full_path_strict "$arg"); then
-		  if is_repo "$item"; then
-				repos+=("$item")
-		  elif is_pkg "$item"; then
-				pkgs+=("$item")
-		  else
-				echo_red "Not a repo or pkg: $item"
-		  fi
-	 else
-		  echo_red "Unknown option: $item"
-	 fi
+    esac
+    if item=$(full_path_strict "$arg"); then
+        if is_repo "$item"; then
+            repos+=("$item")
+        elif is_pkg "$item"; then
+            pkgs+=("$item")
+        else
+            echo_red "Not a repo or pkg: $item"
+        fi
+    else
+        echo_red "Unknown option: $item"
+    fi
 done
 
 (( ${#repos[@]} )) || {
-	 is_repo ./ && repos+=(./)
+    is_repo ./ && repos+=(./)
 }
 
 (( ${#repos[@]} + ${#pkgs[@]} )) || croak "USAGE: ckrepo repo/ [repo/]"
@@ -121,10 +121,10 @@ print_repos=''
 while :; do
     echo_green $(date)
     for repo in "${repos[@]}"; do
-	     ck_repo "$repo"
+        ck_repo "$repo"
     done
     for pkg in "${pkgs[@]}"; do
-	     ck_pkg "$pkg"
+        ck_pkg "$pkg"
     done
     [ "$loop" ] || break
     sleep 1h

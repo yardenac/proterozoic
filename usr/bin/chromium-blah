@@ -10,26 +10,26 @@ uniqtok=$(uniq_token)
 uniqdir="$HOME/.config/chromium.$uniqtok"
 cleanup=y
 for arg; do
-	 [[ "$arg" =~ ^[0-9]+$ ]] && {
-		  proxy=--proxy-server=socks5://localhost:"$arg"
-		  tor=false
-		  continue
-	 }
-	 case "$arg" in
-		  tor)     :;;
-		  noproxy) proxy=''; resolv=''; tor=false;;
-		  mine)    configdir="${HOME}/.config/chromium";;
+    [[ "$arg" =~ ^[0-9]+$ ]] && {
+        proxy=--proxy-server=socks5://localhost:"$arg"
+        tor=false
+        continue
+    }
+    case "$arg" in
+        tor)     :;;
+        noproxy) proxy=''; resolv=''; tor=false;;
+        mine)    configdir="${HOME}/.config/chromium";;
         --keepin=*)   cleanup=''; uniqdir="$HOME/.config/chromium.${arg##*=}";;
-		  *)       urls+=("$arg");;
-	 esac
+        *)       urls+=("$arg");;
+    esac
 done
 
 (( "${#urls[@]}" )) || {
-	 if $tor; then
-		  urls=('http://3g2upl4pq6kufc4m.onion/?kp=-1&kf=w&kk=-1&k1=-1&ko=s')
-	 else
-		  urls=('chrome://version')
-	 fi
+    if $tor; then
+        urls=('http://3g2upl4pq6kufc4m.onion/?kp=-1&kf=w&kk=-1&k1=-1&ko=s')
+    else
+        urls=('chrome://version')
+    fi
 }
 
 if [ ! -d "$uniqdir" ]; then
@@ -40,8 +40,8 @@ if [[ "$cleanup" ]] && ! $tor; then
     sedexp='s%http://3g2upl4pq6kufc4m.onion/%https://duckduckgo.com/%ig'
     sed -i "$sedexp" "${uniqdir}/Default/Preferences"
     rm -f "${uniqdir}/Default/Web Data"
-	 sed "$sedexp" /usr/share/ppz/chromium.web.data.sql \
-		  | sqlite3 "${uniqdir}/Default/Web Data"
+    sed "$sedexp" /usr/share/ppz/chromium.web.data.sql \
+        | sqlite3 "${uniqdir}/Default/Web Data"
 fi
 
 ionice -c 2 -n 0 nice -n 10 \

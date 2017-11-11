@@ -1,62 +1,62 @@
 # image       - just shows an image
 Global {
-	edge = bottom
-	allign = right
-	margin = 0
-	widthtype = pixel
-	width = 1280
-	height = 13
-	transparent = true
-	tintcolor = #ffffff
-	alpha = 0
-	setdocktype = true
-	setpartialstrut = true
-	autohide = false
-	roundcorners = false
-	layer = none
-	MaxElemHeight = 32
+   edge = bottom
+   allign = right
+   margin = 0
+   widthtype = pixel
+   width = 1280
+   height = 13
+   transparent = true
+   tintcolor = #ffffff
+   alpha = 0
+   setdocktype = true
+   setpartialstrut = true
+   autohide = false
+   roundcorners = false
+   layer = none
+   MaxElemHeight = 32
 }
 Plugin {
-	type = taskbar
-	expand = true
-	config {
-		ShowIconified = true
-		ShowMapped    = true
-		ShowAllDesks = false
-		tooltips = true
-		IconsOnly = false
-		MaxTaskWidth = 160
-	}
+   type = taskbar
+   expand = true
+   config {
+      ShowIconified = true
+      ShowMapped    = true
+      ShowAllDesks = false
+      tooltips = true
+      IconsOnly = false
+      MaxTaskWidth = 160
+   }
 }
 Plugin {
-	type = tray
+   type = tray
 }
 Plugin {
-	type = inmon
-	expand = false
-	padding = 0
-	config {
-		Command = /usr/bin/bash /usr/bin/genmon battery
-		PollingTime = 6
-		TextFmt = <span color="#ffff00" font="Sans 15" style="oblique" weight="heavy" rise="-20989" letter_spacing="-2048" font_stretch="ultracondensed">%s</span>
-	}
+   type = inmon
+   expand = false
+   padding = 0
+   config {
+      Command = /usr/bin/bash /usr/bin/genmon battery
+      PollingTime = 6
+      TextFmt = <span color="#ffff00" font="Sans 15" style="oblique" weight="heavy" rise="-20989" letter_spacing="-2048" font_stretch="ultracondensed">%s</span>
+   }
 }
 Plugin {
-	type = pager
-	expand = false
-	padding = 0
-	config {
-		showwallpaper = false
-	}
+   type = pager
+   expand = false
+   padding = 0
+   config {
+      showwallpaper = false
+   }
 }
 Plugin {
-	type = tclock
-	padding = 0
-	expand = false
-	config {
-		ClockFmt = <span color="#ffffcc" font="Sans 15" style="normal" weight="bold" rise="-19965" letter_spacing="-2048" font_stretch="ultracondensed">%l:%M<span font="Sans 10" weight="normal">:%S</span></span>
-		ShowCalendar = false
-		ShowTooltip = false
-		TooltipFmt = <span stretch="ultracondensed"><span font="Sans 19">%A</span>&#xA;<span font="Sans 12">%B %-e, %Y</span></span>
-	}
+   type = tclock
+   padding = 0
+   expand = false
+   config {
+      ClockFmt = <span color="#ffffcc" font="Sans 15" style="normal" weight="bold" rise="-19965" letter_spacing="-2048" font_stretch="ultracondensed">%l:%M<span font="Sans 10" weight="normal">:%S</span></span>
+      ShowCalendar = false
+      ShowTooltip = false
+      TooltipFmt = <span stretch="ultracondensed"><span font="Sans 19">%A</span>&#xA;<span font="Sans 12">%B %-e, %Y</span></span>
+   }
 }
