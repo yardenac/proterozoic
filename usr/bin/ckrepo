@@ -27,6 +27,7 @@ ck_pkg() {
     for ig_pkgn in "${ignore_pkgnames[@]}"; do
         [ "x$name" = "x$ig_pkgn" ] && return
     done
+    name=${name//+/\\+}
 	 vers_here=${pkgdeets[1]}
 	 vers_there=$($cower --search --format="%v" "^${name}$") || {
 		  echo_red "package not in AUR: $name"
