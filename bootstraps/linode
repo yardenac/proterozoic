@@ -24,7 +24,7 @@ sed -i \
 echo "${SS_HOSTNAME}" >| /etc/hostname
 
 cat > /etc/fstab <<-EOF
-   /dev/xvda / ext3 rw,noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
+	/dev/xvda / ext3 rw,noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
 EOF
 
 case "$(uname -m)" in
@@ -44,7 +44,7 @@ pacman --noprogressbar --noconfirm --needed -Sqyyu
 systemctl start dbus.service
 
 cat >| /etc/mkinitcpio.conf <<-EOF
-   HOOKS="base udev autodetect modconf block filesystems fsck ppz_tmp"
+	HOOKS="base udev autodetect modconf block filesystems fsck ppz_tmp"
 EOF
 pacman --noprogressbar --noconfirm --needed -Sq proterozoic
 sed -i s/https-only.tmp/https-only/ig /etc/pacman.conf

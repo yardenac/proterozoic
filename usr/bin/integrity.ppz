@@ -562,35 +562,35 @@ integrity_sshd() {
     local OLDFILE=/etc/ssh/sshd_config
     local NEWFILE=${OLDFILE}.$(uniq_token)
     cat > ${NEWFILE} <<-EOF
-      ${PORT_TXT}ListenAddress 0.0.0.0
-      Protocol 2
-      LoginGraceTime 2m
-      RekeyLimit 200M 6H
-      PermitRootLogin no
-      MaxAuthTries 3
-      MaxSessions 15
-      Compression no
-      GatewayPorts clientspecified
-      PasswordAuthentication no
-      PubkeyAuthentication yes
-      ChallengeResponseAuthentication no
-      HostKey /etc/ssh/ssh_host_ed25519_key
-      PubkeyAcceptedKeyTypes ssh-ed25519
-      KexAlgorithms curve25519-sha256@libssh.org
-      UsePAM yes
-      X11Forwarding no
-      AllowAgentForwarding no
-      PrintMotd no
-      PrintLastLog no
-      MaxStartups 3
-      IgnoreRhosts yes
-      HostBasedAuthentication no
-      PermitEmptyPasswords no
-      AuthorizedKeysFile /etc/ssh/keys/%u
-      Subsystem   sftp   internal-sftp
-
-      AllowUsers
-      EOF
+		${PORT_TXT}ListenAddress 0.0.0.0
+		Protocol 2
+		LoginGraceTime 2m
+		RekeyLimit 200M 6H
+		PermitRootLogin no
+		MaxAuthTries 3
+		MaxSessions 15
+		Compression no
+		GatewayPorts clientspecified
+		PasswordAuthentication no
+		PubkeyAuthentication yes
+		ChallengeResponseAuthentication no
+		HostKey /etc/ssh/ssh_host_ed25519_key
+		PubkeyAcceptedKeyTypes ssh-ed25519
+		KexAlgorithms curve25519-sha256@libssh.org
+		UsePAM yes
+		X11Forwarding no
+		AllowAgentForwarding no
+		PrintMotd no
+		PrintLastLog no
+		MaxStartups 3
+		IgnoreRhosts yes
+		HostBasedAuthentication no
+		PermitEmptyPasswords no
+		AuthorizedKeysFile /etc/ssh/keys/%u
+		Subsystem sftp internal-sftp
+		
+		AllowUsers
+		EOF
     for USER in ${SSH_USERS[@]}; do
         case "${USER:0:1}" in
             \!|@)   local BAREUSER=${USER:1};;
@@ -602,13 +602,13 @@ integrity_sshd() {
             sed -i 's/^#*\(PermitRootLogin\).*$/\1 '${USER_ALLOWED}'/gi' ${NEWFILE}
         [ ${USER_ALLOWED} = yes ] && sed -i 's/^#*\(AllowUsers\(\s[a-zA-Z]*\)*\)$/\1 '${BAREUSER}'/gi' ${NEWFILE}
         [ ${USER:0:1} = @ ] && cat >> ${NEWFILE} <<-EOF
-
-         Match User ${BAREUSER}
-            ChrootDirectory /home/wall/${BAREUSER}
-            X11Forwarding no
-            AllowTcpForwarding no
-            ForceCommand internal-sftp
-         EOF
+			
+			Match User ${BAREUSER}
+				ChrootDirectory /home/wall/${BAREUSER}
+				X11Forwarding no
+				AllowTcpForwarding no
+				ForceCommand internal-sftp
+			EOF
     done
 #    ALL OF THIS is such a stinking mess! when fix???
 #    askyn "did you inspect?"

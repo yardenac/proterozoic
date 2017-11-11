@@ -14,6 +14,6 @@ build () {
 
 help () {
     cat <<-EOF
-      This adds some extra things to initrd just in case
-      EOF
+		This adds some extra things to initrd just in case
+		EOF
 }

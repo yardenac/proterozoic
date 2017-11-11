@@ -3,11 +3,11 @@
 static_per_nic() {
     # prints network envfile to stdout, based on current values (probably from dhcp)
     ip addr show dev $1 | awk -f <(cat <<-'EOF'
-      $1 ~ /^inet$/ {
-         gsub(/\//," ")
-         print "address=" $2 "\nnetmask=" $3 "\nbroadcast=" $5
-      }
-      EOF
+		$1 ~ /^inet$/ {
+			gsub(/\//," ")
+			print "address=" $2 "\nnetmask=" $3 "\nbroadcast=" $5
+		}
+		EOF
     )
     ip route show dev $1 | awk '/^default via/ {print "gateway=" $3}'
     echo 'resolv="'$(grex /etc/resolv.conf | { while read; do echo -n "$REPLY"'\\n'; done; })\"

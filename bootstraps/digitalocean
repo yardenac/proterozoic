@@ -23,8 +23,8 @@ sed -i \
     -e 's/^#*:[\t ]*user[\t ]*ex.*$/#&/ig'            /etc/ppz.conf
 
 cat > /etc/fstab <<-EOF
-   /dev/sda  / ext4 noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
-   /dev/mapper/swap none swap defaults 0 0
+	/dev/sda  / ext4 noatime,nodiratime,barrier=0,commit=5,errors=remount-ro 0 1
+	/dev/mapper/swap none swap defaults 0 0
 EOF
 
 case "$(uname -m)" in
@@ -44,7 +44,7 @@ pacman --noprogressbar --noconfirm -Sq bash
 pacman --noprogressbar --noconfirm -Squ
 
 cat >| /etc/mkinitcpio.conf <<-EOF
-   HOOKS="base systemd filesystems fsck ppz_tmp"
+	HOOKS="base systemd filesystems fsck ppz_tmp"
 EOF
 
 pacman --noprogressbar --noconfirm -Sq python{,2} fakeroot git rxvt-unicode-terminfo
