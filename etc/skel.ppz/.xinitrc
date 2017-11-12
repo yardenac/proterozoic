@@ -15,10 +15,10 @@ xrandr &>/dev/null && {
 } || {
    # we have no compositing
    xrdb -override - <<-EOF
-      urxvt.transparent: true
-      urxvt.shading: 50u
-      urxvt.font: xft:Bitstream Vera Sans Mono-12:antialias=true:hinting=false,xft:Code2000
-   EOF
+		urxvt.transparent: true
+		urxvt.shading: 50u
+		urxvt.font: xft:Bitstream Vera Sans Mono-12:antialias=true:hinting=false,xft:Code2000
+	EOF
    fbpanel_profile=1024
 }
 
