@@ -49,13 +49,13 @@ pkgs_x=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo,xrandr,xinput} xdotool \
         numlockx fvwm perl-xml-parser fbpanel wmctrl hsetroot \
         urxvt-url-select transset-df xcompmgr acpi ttf-code2000 ttf-code2001 ttf-symbola
         xf86-video-ati xf86-video-intel nvidia-dkms mtpfs xcalib redshift \
-        urxvt-tabbedex-git urxvt-font-size-git)
+        urxvt-tabbedex-git urxvt-font-size-git yart)
 pkgs_web=(alsa-utils chromium wget)
 pkgs_cd=(cdrkit dvd+rw-tools handbrake-cli libisoburn squashfs-tools archiso-git)
 pkgs_wireless=(wireless_tools wpa_supplicant b43-firmware iw) #wpa_actiond ifplugd
 pkgs_laptop=(dhcpcd)
 pkgs_printer=(cups hplip a2ps)
 pkgs_hw=(memtest86+ mprime parted dmidecode amd-ucode intel-ucode)
-pkgs_dev=(base-devel s3fs s3cmd cower pkgbuild-introspection python-magic python2-magic)
+pkgs_dev=(base-devel s3fs s3cmd cower pkgbuild-introspection python-magic python2-magic asp)
 pkgs_more=(pkgfile openbsd-netcat tig)
 pkgs_sec=(audit)

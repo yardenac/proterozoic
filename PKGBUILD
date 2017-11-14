@@ -13,10 +13,7 @@ depends=(aspell-en cryptsetup sudo bc iptables iproute2 openssh ntp
 optdepends=(
     'emacs-nox:      stuff'
     'emacs-php-mode: stuff'
-    'memtest86+: testing memory at bootup'
     'python:   myip'
-    'yart:      wallpaper, icons, etc'
-    asp
 )
 conflicts=(abs)
 
