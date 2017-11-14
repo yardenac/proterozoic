@@ -27,13 +27,12 @@ ck_pkg() {
     for ig_pkgn in "${ignore_pkgnames[@]}"; do
         [ "x$name" = "x$ig_pkgn" ] && return
     done
-    name=${name//+/\\+}
     vers_here=${pkgdeets[1]}
-    vers_there=$($cower --search --format="%v" "^${name}$") || {
+    vers_there=$($cower --info --format="%v" "${name}") || {
         echo_red "package not in AUR: $name"
         return 1
     }
-    flagged=$($cower --search --format="%t" "^${name}$")
+    flagged=$($cower --info --format="%t" "${name}")
     [ "$flagged" = no ] && [ "$vers_here" = "$vers_there" ] && {
         [[ $verbose == y ]] && echo_blue "$name $vers_here "
         return
@@ -45,7 +44,7 @@ ck_pkg() {
                 echo_green "INCREMENTAL"
             return
         fi
-        url=$($cower --search --format="%u" "^${name}$")
+        url=$($cower --info --format="%u" "${name}")
         giturl=$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')
         [ "$giturl" ] || {
             echo_blue_n "$name $vers_here "
