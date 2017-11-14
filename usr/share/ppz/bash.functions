@@ -871,3 +871,13 @@ grexify() {
         rm -rf $tmpfile
     done
 }
+wehave() {
+    local arg= missing=()
+    for arg; do
+        pacman -Qq "$arg" &>/dev/null || missing+=("$arg")
+    done
+    if (( ${#missing[@]} )); then
+        echo_red "PACKAGES MISSING, PLEASE RUN: pacman -Syu ${missing[@]}"
+        return 1
+    fi
+}

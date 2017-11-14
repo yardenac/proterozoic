@@ -642,7 +642,19 @@ integrity_sensors() {
     yes "" | /usr/bin/sensors-detect
     echo_blue "Remember, systemd enable lm_sensors (or something?)"
 }
-
+integrity_laptop() {
+    am_root || return 0
+    [ $SYSTEM_TYPE = laptop ] || return
+    local f=/etc/laptop-mode/conf.d/cpufreq.conf
+    [ -f $f ] || return
+    sed -i \
+        -e 's/^\(CONTROL_CPU_FREQUENCY=\).*/\11/' \
+        -e 's/^\(BATT_CPU_GOVERNOR=\).*/\1conservative/' \
+        -e 's/^\(LM_AC_CPU_GOVERNOR=\).*/\1performance/' \
+        -e 's/^\(NOLM_AC_CPU_GOVERNOR=\).*/\1performance/' $f
+    wehave acpid cpupower laptop-mode-tools-git thermald || return
+    systemctl enable acpid laptop-mode thermald
+}
 # this gets run in:
 #   post_install
 #    functions.d
@@ -651,7 +663,7 @@ integrity_sensors() {
 
 for F in rootpw locales tz simpleconf users \
     ip{,6}tables encdevs bashhistory emacsd tmpdir sshd \
-    sensors everyone; do
+    sensors laptop everyone; do
 
     integrity_${F} || echo "${F} failed..."
 done
