@@ -15,6 +15,8 @@ else
     exit 1
 fi
 
+wehave gnupg rsync || return 1
+
 # config sets bash array $rd_args
 configfile=~/.config/repo-drop
 if [ -s $configfile ]; then
