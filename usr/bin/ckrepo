@@ -117,15 +117,19 @@ done
 print_repos=''
 [ ${#repos[@]} -gt 1 ] || [ "$verbose" ] && print_repos=y
 
-while :; do
-    echo_green $(date)
-    for repo in "${repos[@]}"; do
-        ck_repo "$repo"
+loop() {
+    while :; do
+        echo_green $(date)
+        for repo in "${repos[@]}"; do
+            ck_repo "$repo"
+        done
+        for pkg in "${pkgs[@]}"; do
+            ck_pkg "$pkg"
+        done
+        [ "$loop" ] || break
+        sleep 1h
+        echo; echo
     done
-    for pkg in "${pkgs[@]}"; do
-        ck_pkg "$pkg"
-    done
-    [ "$loop" ] || break
-    sleep 1h
-    echo; echo
-done
+    exit
+}
+loop
