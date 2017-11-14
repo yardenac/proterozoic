@@ -13,6 +13,7 @@ ExecStart=-/usr/bin/agetty --nice 5 --noclear --noissue --autologin ex %I $TERM
 Type=idle
 Restart=always
 RestartSec=0
+RestrictAddressFamilies=~AF_PACKET
 UtmpIdentifier=%I
 TTYPath=/dev/%I
 TTYReset=yes

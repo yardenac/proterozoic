@@ -5,10 +5,16 @@ Before=network.target
 Conflicts=network@.service dhcpcd@.service
 
 [Service]
-ProtectSystem=full
-ProtectHome=true
-PrivateTmp=true
+MemoryDenyWriteExecute=true
 NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectSystem=full
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+SystemCallArchitectures=native
 ExecStart=/usr/bin/keep-net-up
 ExecStop=/usr/bin/dhcpcd -k
 ExecStopPost=/usr/bin/ip route flush default
