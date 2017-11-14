@@ -10,15 +10,10 @@ makedepends=(findutils coreutils net-tools sqlite3)
 depends=(aspell-en cryptsetup sudo bc iptables iproute2 openssh ntp
          bash-completion screen htop diffutils arch-https-mirrors-git)
 optdepends=(
-    'ddrescue:   rip-dvd, rhyppe'
     'emacs-nox:      stuff'
     'emacs-php-mode: stuff'
-    'jshon:      linode-implement'
-    'less:      rip-dvd'
     'memtest86+: testing memory at bootup'
-    'nmap:      linode-implement'
     'python:   myip'
-    'rsync:      rip-dvd'
     'tsocks:   transmission@'
     'yart:      wallpaper, icons, etc'
     asp dnsutils git parallel lsof s3fs sshfs unzip whois

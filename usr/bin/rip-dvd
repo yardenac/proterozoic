@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 . /usr/share/ppz/bash.functions
+wehave ddrescue less rsync || return 1
 shopt -sq nocasematch nullglob dotglob
 do_unto_others
 

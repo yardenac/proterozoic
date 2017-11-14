@@ -3,6 +3,7 @@
 # USAGE: linode-implement nickname [nostackscript] [doroutine-ROUTINE] [arch]
 
 . /usr/share/ppz/bash.functions
+wehave jshon nmap || return 1
 
 [ -f ~/.config/linoderc ] || croak "No linoderc"
 . ~/.config/linoderc
