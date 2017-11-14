@@ -13,7 +13,7 @@ optdepends=(
     'ddrescue:   rip-dvd, rhyppe'
     'emacs-nox:      stuff'
     'emacs-php-mode: stuff'
-    'jshon:      ckrepo, linode-implement'
+    'jshon:      linode-implement'
     'less:      rip-dvd'
     'memtest86+: testing memory at bootup'
     'nmap:      linode-implement'

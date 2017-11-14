@@ -83,6 +83,7 @@ ck_repo() {
 }
 
 . /usr/share/ppz/bash.functions
+wehave jshon || return 1
 
 shopt -s nullglob
 
