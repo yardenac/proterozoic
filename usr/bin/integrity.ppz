@@ -630,11 +630,11 @@ integrity_sshd() {
     }
 }
 integrity_sensors() {
-    pacman -Qq lm_sensors &>/dev/null || return 0
+    am_root || return 0
     local sc=/etc/conf.d/lm_sensors
     [ -s $sc ] && return
+    wehave lm_sensors || return
     echo_red "Missing $sc"
-    am_root || return 0
     askyn "Auto-generate $sc ?" || {
         echo_red ok, do it yourself
         return
