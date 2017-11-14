@@ -8,15 +8,15 @@ install=proterozoic.install
 backup=(etc/httpd/conf/{site-specific.conf,httpd.conf.ppz} etc/locale.conf)
 makedepends=(findutils coreutils net-tools sqlite3)
 depends=(aspell-en cryptsetup sudo bc iptables iproute2 openssh ntp
-         bash-completion screen htop diffutils arch-https-mirrors-git)
+         bash-completion screen htop diffutils arch-https-mirrors-git
+         dnsutils git parallel lsof s3fs sshfs tsocks unzip whois)
 optdepends=(
     'emacs-nox:      stuff'
     'emacs-php-mode: stuff'
     'memtest86+: testing memory at bootup'
     'python:   myip'
-    'tsocks:   transmission@'
     'yart:      wallpaper, icons, etc'
-    asp dnsutils git parallel lsof s3fs sshfs unzip whois
+    asp
 )
 conflicts=(abs)
 
