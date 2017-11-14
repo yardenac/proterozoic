@@ -10,7 +10,6 @@ makedepends=(findutils coreutils net-tools sqlite3)
 depends=(aspell-en cryptsetup sudo bc iptables iproute2 openssh ntp
          bash-completion screen htop diffutils arch-https-mirrors-git)
 optdepends=(
-    'aspell:     rando'
     'ddrescue:   rip-dvd, rhyppe'
     'emacs-nox:      stuff'
     'emacs-php-mode: stuff'
@@ -19,8 +18,6 @@ optdepends=(
     'less:      rip-dvd'
     'memtest86+: testing memory at bootup'
     'nmap:      linode-implement'
-    'perl-math-random-secure: rando'
-    'perl-term-readkey: rando'
     'python:   myip'
     'rsync:      rip-dvd, repo-drop'
     'tsocks:   transmission@'
