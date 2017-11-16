@@ -5,81 +5,67 @@
     sleep 10
     exit 1
 }
-
+homedir_i_own() {
+    local rv=0 c=1 try="$1" base="$1"
+    # this echoes path to a homedir owned by $USER
+    # returns 0 if homedir already existed
+    # returns 1 if we had to create it
+    # please FFS dont use homedirs with spaces :P
+    until [ -d $try ] && [ -O $try ] && [ -a $try/.xinitrc ]; do
+        [ ${base:0:5} = /tmp/ ] || {
+            echo "Cannot make homedir unless it's in /tmp!"
+            sleep 10
+            exit 1
+        }
+        [ -a $try ] || {
+            cp -PR --preserve=links,mode,timestamps /etc/skel.ppz $try
+            chmod 700 $try
+            break
+        }
+        # apparently it exists but not (dir + ours)
+        [ -O $try ] && {
+            # ours but not a dir
+            rm -rf --one-file-system $try
+        } || {
+            # not ours, or rm failed
+            export try=$base.$c
+            let c++
+            continue
+        }
+    done
+    echo $try
+}
+setup_home() {
+    cd "$HOME"
+    git init
+    git add --all .
+    git config --global commit.gpgsign false
+    git config --global push.gpgsign false
+    git config --global user.email ex@invalid.invalid
+    git config --global user.name ex
+    git commit -m init
+    /usr/bin/integrity.ppz
+    . /usr/share/ppz/bash.functions
+    set_proper_histfile
+    xdg-mime default zathura-fullscreen.desktop application/pdf
+    xdg-mime default zathura-fullscreen.desktop application/x-pdf
+    git add --all .
+    git commit -m setup
+}
 [ "$USER" = ex ] && {
-
-    homedir_i_own() { local rv=0 c=1 try="$1" base="$1"
-        # this echoes path to a homedir owned by $USER
-        # returns 0 if homedir already existed
-        # returns 1 if we had to create it
-        # please FFS dont use homedirs with spaces :P
-        until [ -d $try ] && [ -O $try ] && [ -a $try/.xinitrc ]; do
-            [ ${base:0:5} = /tmp/ ] || {
-                echo "Cannot make homedir unless it's in /tmp!"
-                sleep 10
-                exit 1
-            }
-            [ -a $try ] || {
-                cp -PR --preserve=links,mode,timestamps /etc/skel.ppz $try
-                chmod 700 $try
-#                echo DID THE CP...
-#                sleep 10
-                break
-            }
-            # apparently it exists but not (dir + ours)
-            [ -O $try ] && {
-                # ours but not a dir
-                rm -rf --one-file-system $try
-            } || {
-                # not ours, or rm failed
-                export try=$base.$c
-                let c++
-                continue
-            }
-        done
-        echo $try
-    }
     case $HOME in
         /|/etc/skel.ppz) HOME=/tmp/ex
     esac
     export HOME=$(homedir_i_own $HOME)
-
-#    echo HOME: $HOME
-#    echo DISPLAY: $DISPLAY
-
     [ "$(/usr/bin/tty)" = /dev/tty3 ] \
         && [ -x /usr/bin/xinit ] \
         && ! /usr/bin/pgrep -x X &>/dev/null && {
-
-        cd "$HOME"
-        git init
-        git add --all .
-        git config --global commit.gpgsign false
-        git config --global push.gpgsign false
-        git config --global user.email ex@invalid.invalid
-        git config --global user.name ex
-        git commit -m init
-
-        /usr/bin/integrity.ppz
-
-        . /usr/share/ppz/bash.functions
-
-        # make sure xauthority file works
-        set_proper_histfile
-
-        xdg-mime default zathura-fullscreen.desktop application/pdf
-        xdg-mime default zathura-fullscreen.desktop application/x-pdf
-
+        setup_home
         . /etc/ppz.conf
         if [ "$WALLPAPER" ]; then
             sed -i "s%/usr/share/ppz/wallpaper%$WALLPAPER%" ~/.fvwm/config
         fi
-
-        git add --all .
-        git commit -m setup
-
         exec /usr/bin/xinit -- /usr/bin/X vt3 -f 0 -nolisten tcp -retro
-
         exit $? #this makes respawn work
     }
 }
