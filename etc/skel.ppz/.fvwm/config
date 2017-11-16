@@ -64,7 +64,7 @@ Key   Left         A      CM         GoToDeskBetter -1
 Key   Right         A      CM         GoToDeskBetter +1
 Key   space         A      M         Menu MenuFvwmWindowOps2 Window 0 0 Nop
 Key    apostrophe   A      4         NiceBash 100x20 - 'su - eu -c \\"urxvtb -e /usr/bin/womb\\"'
-Key   m            A      4         NiceBash 80x38  - 'cd; . /usr/share/ppz/bash.functions; . /usr/share/ppz/bash.functions.xorg; woman'
+Key   m            A      4         NiceTerm 80x38  - /usr/bin/woman
 Key   c            A      4         NiceBash 69x34  - 'cal -y && read'
 Key   b            A      4         NiceTerm 40x39  - /usr/bin/bc -lq /etc/bcrc
 Key   i            A      4         Exec exec xcalib -invert -alter

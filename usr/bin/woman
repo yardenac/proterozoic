@@ -1,0 +1,38 @@
+#!/usr/bin/bash
+
+. /usr/share/ppz/bash.functions
+. /usr/share/ppz/bash.functions.xorg
+pushd
+trap "popd; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+
+window= target=''
+for arg; do
+    case "$arg" in
+        --window) window=y;;
+        *) target="$target $arg";;
+    esac
+done
+
+[ "$target" ] || IFS=$'\n' read -ep $'\e[1;34mEnter command to look up:\e[m ' target
+
+woman_do() {
+    local host= target=
+    for arg; do
+        if grep -Pq "^Host $1\$" ~/.ssh/config; then
+            host="$arg"
+        else
+            target="$target $arg"
+        fi
+    done
+    if [ "$host" ]; then
+        urxvtb -geometry 80x38 -pe -tabbedex -e ssh -t "$host" \
+               bash --init-file /dev/null --rcfile /dev/null --noprofile --norc -c \
+               'cd; . /usr/share/ppz/bash.functions; . /usr/share/ppz/bash.functions.xorg; woman '"$target"
+    else
+        set_xtitle "$target [woman]"
+        help "$target" 2>/dev/null && read || e\
+           --eval "(manual-entry \"$target\")"\
+           --eval '(kill-buffer-and-window)'
+    fi
+}
+woman_do $target
