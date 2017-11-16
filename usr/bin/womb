@@ -36,7 +36,13 @@ homedir_i_own() {
     echo $try
 }
 setup_home() {
+    case $HOME in
+        /|/etc/skel.ppz) "HOME=/tmp/$USER"
+    esac
+    export HOME=$(homedir_i_own $HOME)
     cd "$HOME"
+}
+setup_git() {
     git init
     git add --all .
     git config --global commit.gpgsign false
@@ -52,15 +58,12 @@ setup_home() {
     git add --all .
     git commit -m setup
 }
-[ "$USER" = ex ] && {
-    case $HOME in
-        /|/etc/skel.ppz) HOME=/tmp/ex
-    esac
-    export HOME=$(homedir_i_own $HOME)
+if [ "$USER" = ex ]; then
+    setup_home
     [ "$(/usr/bin/tty)" = /dev/tty3 ] \
         && [ -x /usr/bin/xinit ] \
         && ! /usr/bin/pgrep -x X &>/dev/null && {
-        setup_home
+        setup_git
         . /etc/ppz.conf
         if [ "$WALLPAPER" ]; then
             sed -i "s%/usr/share/ppz/wallpaper%$WALLPAPER%" ~/.fvwm/config
@@ -68,7 +71,9 @@ setup_home() {
         exec /usr/bin/xinit -- /usr/bin/X vt3 -f 0 -nolisten tcp -retro
         exit $? #this makes respawn work
     }
-}
+elif [ "$USER" = ew ]; then
+    setup_home
+fi
 
 case "${2%% *}" in
     rsync|git)   :;;
