@@ -644,15 +644,14 @@ integrity_sensors() {
 }
 integrity_laptop() {
     am_root || return 0
-    [ $SYSTEM_TYPE = laptop ] || return
+    [ $SYSTEM_TYPE = laptop ] || return 0
+    wehave acpid cpupower laptop-mode-tools-git thermald || return 0
     local f=/etc/laptop-mode/conf.d/cpufreq.conf
-    [ -f $f ] || return
-    sed -i \
+    [ -f $f ] && sed -i \
         -e 's/^\(CONTROL_CPU_FREQUENCY=\).*/\11/' \
         -e 's/^\(BATT_CPU_GOVERNOR=\).*/\1conservative/' \
         -e 's/^\(LM_AC_CPU_GOVERNOR=\).*/\1performance/' \
         -e 's/^\(NOLM_AC_CPU_GOVERNOR=\).*/\1performance/' $f
-    wehave acpid cpupower laptop-mode-tools-git thermald || return 0
     systemctl enable acpid laptop-mode thermald
 }
 # this gets run in:
