@@ -2,7 +2,7 @@
 
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.xorg
-pushd
+pushd "$HOME"
 trap "popd; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
 
 window= target=''
@@ -18,7 +18,7 @@ done
 woman_do() {
     local host= target=
     for arg; do
-        if grep -Pq "^Host $1\$" ~/.ssh/config; then
+        if grep -Pq "^Host $arg\$" ~/.ssh/config; then
             host="$arg"
         else
             target="$target $arg"
