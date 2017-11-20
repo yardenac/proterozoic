@@ -37,7 +37,7 @@ homedir_i_own() {
 }
 setup_home() {
     case $HOME in
-        /|/etc/skel.ppz) "HOME=/tmp/$USER"
+        /|/etc/skel.ppz) HOME="/tmp/$USER"
     esac
     export HOME=$(homedir_i_own $HOME)
     cd "$HOME"
