@@ -631,6 +631,9 @@ integrity_sshd() {
 }
 integrity_sensors() {
     am_root || return 0
+    case "$SYSTEM_TYPE" in
+        server|linode|digo) return 0;;
+    esac
     local sc=/etc/conf.d/lm_sensors
     [ -s $sc ] && return
     wehave lm_sensors || return
