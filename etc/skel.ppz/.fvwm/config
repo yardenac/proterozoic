@@ -58,6 +58,7 @@ Key   F1            R      A         -
 Key    F4          SFTW   M         Current Delete
 Key    F9          SFTW   M         Current Iconify
 Key   F10         SFTW   M         Current Maximize
+Key   F10         SFTW   4         Current Move 0 0
 Key   Left         A      CMS      Current WinTo $[w.id] -1
 Key   Right         A      CMS      Current WinTo $[w.id] +1
 Key   Left         A      CM         GoToDeskBetter -1
