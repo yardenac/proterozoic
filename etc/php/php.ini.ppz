@@ -52,15 +52,9 @@ extension=curl.so
 extension=gd.so
 extension=gettext.so
 extension=pdo_mysql.so
-extension=ssh2.so
-extension=phar.so
-extension=opcache.so
-extension=openssl.so
-
 extension=bcmath.so
 bcmath.scale = 0
-
-extension=mysql.so
+zend_extension=opcache.so
 mysql.allow_local_infile = On
 mysql.allow_persistent = On
 mysql.cache_size = 2000
