@@ -1,0 +1,39 @@
+#!/usr/bin/bash
+
+. /usr/share/ppz/bash.functions
+am_root || { er"you need to be root"; return; }
+
+dirs=()
+for arg; do
+    [ -d "$arg" ] && dirs+=("$arg") && continue
+    case "$arg" in
+        *) echo "weird arg: $arg";;
+    esac
+done
+rsync_do() {
+    rsync --inplace --info=flist0,name0,progress2 --no-i-r --chmod=u+w,Du+x -haxHAX "$@"
+}
+cpdir_do() {
+    local d="${1%/}"
+    echo_blue "REMAKING DIR: $d"
+    [ -d "$d" ] || { er "not a dir: $d"; return; }
+    [ -d "$d.b" ] && { er "already exists: $d.b"; return; }
+    [ -d "$d.c" ] && { er "already exists: $d.c"; return; }
+    rsync_do "$d/" "$d.b/" || { er "rsync 1 fail"; return; }
+    mv -i "$d" "$d.c"
+    if [ -d /usr/bin.c ]; then
+        /usr/bin.c/mv -i "$d.b" "$d"
+    elif [ -d /usr/lib.c ]; then
+        LD_LIBRARY_PATH=/usr/lib.c /usr/lib.c/ld-linux-x86-64.so.2 /usr/bin/mv -i "$d.b" "$d"
+    else
+        mv -i "$d.b" "$d"
+    fi
+    rsync_do -c "$d.c/" "$d/" || { er "rsync 2 fail"; return; }
+    rm -rf --one-file-system "$d.c"
+}
+doloop() {
+    for dir in "${dirs[@]}"; do
+        cpdir_do "$dir"
+    done
+}
+doloop

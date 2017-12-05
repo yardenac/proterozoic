@@ -235,6 +235,7 @@ while let c--; do
     eval echo_${ansi_colors[$c]}'_n()
       { echo -ne "\e[1;3'"$c"'m$@\e[m" >&2; }'
 done
+alias er=echo_red
 clear_input_buffer() {
     #example: clear_input_buffer "clearing input buffer..." "ok\n"
 
