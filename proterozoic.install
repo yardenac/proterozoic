@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 preowned_files=(
     etc/default/useradd
+    etc/default/grub
     etc/ssh/ssh_config
     etc/logrotate.conf
     etc/issue
