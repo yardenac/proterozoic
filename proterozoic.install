@@ -1,18 +1,19 @@
 #!/usr/bin/bash
 preowned_files=(
-    etc/default/useradd
-    etc/default/grub
-    etc/ssh/ssh_config
-    etc/logrotate.conf
-    etc/issue
-    etc/ntp.conf
     etc/apcupsd/apcupsd.conf
-    etc/privoxy/config
+    etc/default/grub
+    etc/default/useradd
     etc/fuse.conf
     etc/httpd/conf/httpd.conf
-    etc/php/php.ini
+    etc/issue
+    etc/logrotate.conf
+    etc/mkinitcpio.conf
+    etc/ntp.conf
     etc/php/php-fpm.conf
+    etc/php/php.ini
+    etc/privoxy/config
     etc/screenrc
+    etc/ssh/ssh_config
 )
 ######### FUNCTIONS
 are_same() {
