@@ -21,16 +21,23 @@ are_same() {
     diff -qd "$1" "$2" >/dev/null
 }
 clobberella() {
-    F="$1"
-    [ -f "$F.ppz" ] || return 0
+    . /etc/ppz.conf
+    local F="$1" suff=
+    if [ -f "$F.ppz" ]; then
+        suff=.ppz
+    elif [ -f "$F.ppz.$SYSTEM_TYPE" ]; then
+        suff=.ppz.$SYSTEM_TYPE
+    else
+        return 0
+    fi
     [ -f "$F" ] && { #do a "nice clobber" - make a (unique) backup
-        are_same ${F}{,.ppz} && return || \
+        are_same ${F}{,$suff} && return || \
             for N in {001..999}; do
                 [ -f "$F.old.$N" ]         || { mv -n ${F}{,.old.$N};   break; }
                 are_same ${F}{,.old.$N}   && { rm -f "$F";            break; }
             done
     }
-    cp -n "$F.ppz" "$F"
+    cp -n "$F$suff" "$F"
 }
 enforce_locales() {
     FILE=etc/locale.gen
