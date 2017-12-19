@@ -30,8 +30,6 @@ package() {
     cat ${pkgdir}/usr/share/ppz/chromium.web.data.sql \
         | sqlite3 ${pkgdir}/etc/skel.ppz/.config/chromium/Default/Web\ Data
 
-    chmod 444 ${pkgdir}/etc/.emacs.d/init.el
-    chmod 555 ${pkgdir}/etc/.emacs.d
     chmod 440 ${pkgdir}/etc/sudoers.d/ppz
     chmod 750 ${pkgdir}/etc/sudoers.d
     chmod 770 ${pkgdir}/etc/privoxy

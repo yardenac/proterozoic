@@ -484,20 +484,6 @@ integrity_tmpdir() {
         ln -s $mytmpdir $mytmpln
     }
 }
-integrity_emacsd() {
-    [ -O $HOME ] || return 1
-
-    local F=~/.emacs.d
-    [ -L ${F} ] || {
-        [ -d ${F} ] && mv ${F} ${F}.$(uniq_token)
-        [ -a ${F} ] && echo "weird ${F}!" || ln -s /etc/.emacs.d ~/
-    }
-    am_root && {
-        enforce_perms 444 /etc/.emacs.d/init.el
-        enforce_perms 555 /etc/.emacs.d
-    }
-    return 0
-}
 integrity_bashhistory() { local hf hfs attrset skel_file backup_file lo_text
     [ "$USER" ] && [ "$HOME" ] || return 0
 
@@ -664,7 +650,7 @@ integrity_laptop() {
 #      post_upgrade
 
 for F in rootpw locales tz simpleconf users \
-    ip{,6}tables encdevs bashhistory emacsd tmpdir sshd \
+    ip{,6}tables encdevs bashhistory tmpdir sshd \
     sensors laptop everyone; do
 
     integrity_${F} || echo "${F} failed..."
