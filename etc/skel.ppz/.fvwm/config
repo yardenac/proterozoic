@@ -75,6 +75,7 @@ Key   r            A      4         Refresh
 Key   q            A      4         Exec exec transset-df -a --dec 0.04
 Key   w            A      4         Exec exec transset-df -a --inc 0.04
 Key   v            A      4         Exec exec xdotool click 2
+Key   Insert       A      4         Exec exec bash -c 'xclip -selection p -o | xclip -selection c -i'
 Mouse 0            A       A         -
 Mouse 1            R      A         -
 Mouse 1            SFTW   M         DragNMove
