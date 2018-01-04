@@ -1,10 +1,8 @@
 {
-    "AdditionalLaunchParameters": "--incognito --ssl-version-min=tls1",
     "AudioCaptureAllowed": false,
     "AutoFillEnabled": false,
     "BackgroundModeEnabled": false,
     "BrowserAddPersonEnabled": false,
-    "CaptivePortalAuthenticationIgnoresProxy": false,
     "CloudPrintProxyEnabled": false,
     "CloudPrintSubmitEnabled": false,
     "DefaultGeolocationSetting": 2,
@@ -27,6 +25,7 @@
     "SafeBrowsingExtendedReportingOptInAllowed": false,
     "SavingBrowserHistoryDisabled": true,
     "SearchSuggestEnabled": false,
+    "SitePerProcess": true,
     "SpellCheckServiceEnabled": false,
     "SyncDisabled": true,
     "VideoCaptureAllowed": false,

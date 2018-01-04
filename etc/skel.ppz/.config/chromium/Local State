@@ -1,5 +1,8 @@
 {
    "background_mode": {
       "enabled": false
+   },
+   "browser": {
+      "enabled_labs_experiments": ["enable-site-per-process"]
    }
 }
