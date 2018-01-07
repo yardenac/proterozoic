@@ -873,3 +873,8 @@ wehave() {
         return 1
     fi
 }
+rs() {
+    rsync --inplace --out-format="%t %o %f ... %n" \
+          --info=flist0,progress2 --no-i-r --chmod=u+w,Du+x \
+          -Phe "ssh -S none" "$@"
+}
