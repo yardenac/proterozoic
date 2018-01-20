@@ -35,6 +35,13 @@ while :; do
     dhcpcd -k
     pkill -x --signal SIGTERM dhcpcd
     pkill -x --signal SIGTERM wpa_supplicant
+    ip route flush table main
+    for module in "${WIFI_MODULES[@]}"; do
+        modprobe -r "$module"
+    done
+    for module in "${WIFI_MODULES[@]}"; do
+        modprobe "$module"
+    done
     knu_cleanup
 
     for if in $(awk '$1 ~ /^lo:$/ {next}
