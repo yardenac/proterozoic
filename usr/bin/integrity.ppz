@@ -34,6 +34,10 @@ integrity_everyone() {
                   printf("ALMOST FULL: %s%% %s\n",$1,$3)}'
     fi
 }
+integrity_sec() {
+    am_root || return 0
+    mount -o remount,hidepid=2,gid=26 /proc
+}
 integrity_rootpw() {
     am_root && shell_is_interactive || return 0
 
@@ -649,7 +653,7 @@ integrity_laptop() {
 #     ppz/bash.rc
 #      post_upgrade
 
-for F in rootpw locales tz simpleconf users \
+for F in sec rootpw locales tz simpleconf users \
     ip{,6}tables encdevs bashhistory tmpdir sshd \
     sensors laptop everyone; do
 
