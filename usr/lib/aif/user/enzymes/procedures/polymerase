@@ -25,12 +25,6 @@ genfstab -U -p /mnt | sudo tee -a /mnt/etc/fstab
 curl -o biosimg.exe $url
 sudo biosdisk mkimage -i /mnt/boot/flashbios.img biosimg.exe
 sudo cp /usr/lib/syslinux/bios/memdisk /mnt/boot/
-sudo tee -a /mnt/etc/grub.d/40_custom <<EOF
-   menuentry "Flash BIOS" {
-      linux16 /memdisk
-      initrd16 /flashbios.img
-   }
-EOF
 
 sudo arch-chroot /mnt
    pacman -Syu "${pkgs[@]}"
@@ -55,7 +49,7 @@ pkgs_cd=(cdrkit dvd+rw-tools handbrake-cli libisoburn squashfs-tools archiso-git
 pkgs_wireless=(wireless_tools wpa_supplicant b43-firmware iw) #wpa_actiond ifplugd
 pkgs_laptop=(dhcpcd)
 pkgs_printer=(cups hplip a2ps)
-pkgs_hw=(memtest86+ mprime parted dmidecode amd-ucode intel-ucode)
+pkgs_hw=(memtest86+ mprime parted dmidecode amd-ucode intel-ucode biosdisk-git)
 pkgs_dev=(base-devel s3fs s3cmd cower pkgbuild-introspection python-magic python2-magic asp)
 pkgs_more=(pkgfile openbsd-netcat tig)
 pkgs_sec=(audit)
