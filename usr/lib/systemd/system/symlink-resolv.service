@@ -5,9 +5,7 @@ Before=systemd-networkd.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/ln -sf /run/systemd/network/resolv.conf /etc/resolv.conf
-ExecStopPost=/usr/bin/rm /etc/resolv.conf
-ExecStopPost=/usr/bin/touch /etc/resolv.conf
+ExecStart=/usr/bin/ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 [Install]
 WantedBy=systemd-networkd.service
