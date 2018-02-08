@@ -8,3 +8,4 @@
 /.local/share/xorg/Xorg.0.log
 /.local/share/xorg/Xorg.0.log.old
 /.parallel/tmp/
+/.tig_history
