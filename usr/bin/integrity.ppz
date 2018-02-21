@@ -133,7 +133,7 @@ integrity_users() {
 
     # "extra" users are declared in ppz.conf. this makes sure they really exist.
 
-    local user v u_name u_nums u_home IFS=$'\n'
+    local user v u_name u_nums u_homesrc u_homepw IFS=$'\n'
     for user in $(awk '/^:/ { if ($2 == "user") print }' /etc/ppz.conf); do
 
 #        echo_red "DOING USER: $user"
@@ -141,18 +141,24 @@ integrity_users() {
         IFS=$'\n\r\t ' v=($user)
         u_name=${v[2]}
         u_nums=${v[3]}
-        u_home=$(edev-path ${v[5]}) || {
+        u_homesrc=$(edev-path ${v[5]}) || {
             echo_red "homedir ${v[5]} on undeclared encrypted device!"
             continue
         }
-        # if we're still here, u_home is now a real path :)
+        # if we're still here, u_homesrc is now a real path :)
         # it's not the job of this function to CREATE the path
         # if user isn't in passwd, create it
         getent passwd "${u_name}" >/dev/null || {
             echo_red "adding user ${u_name}!"
-            useradd -lMNd ${u_home} -u ${u_nums%%:*} -g ${u_nums##*:} -s ${v[4]} ${u_name}
+            useradd -lMNd ${u_homesrc} -u ${u_nums%%:*} -g ${u_nums##*:} -s ${v[4]} ${u_name}
             echo $u_name:\' | chpasswd
         }
+
+        u_homepw=$(getent passwd "$u_name" | cut -d: -f6)
+        case "$u_name" in
+            ew|ex) echo "C /tmp/$u_name 0700 $u_name users - $u_homepw" >| "/usr/lib/tmpfiles.d/$u_name.conf"
+                   [ "$u_homepw" = "$u_homesrc" ] && usermod -d "/tmp/$u_name" "$u_name";;
+        esac
     done
 
     # only works up to 10...
