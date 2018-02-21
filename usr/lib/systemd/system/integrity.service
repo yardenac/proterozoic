@@ -2,8 +2,7 @@
 Description=Proterozoic Integrity
 Wants=network.target
 After=network.target
-Before=iptables.service ip6tables.service
-Before=sshd.service
+Before=iptables.service ip6tables.service sshd.service base.target
 
 [Service]
 Type=oneshot
@@ -11,4 +10,4 @@ RestrictAddressFamilies=~AF_PACKET
 ExecStart=/usr/bin/integrity.ppz
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=base.target
