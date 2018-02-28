@@ -3,6 +3,6 @@
       "enabled": false
    },
    "browser": {
-      "enabled_labs_experiments": ["enable-site-per-process"]
+      "enabled_labs_experiments": ["enable-site-per-process","enable-devtools-experiments"]
    }
 }
