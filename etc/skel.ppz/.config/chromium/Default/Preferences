@@ -55,24 +55,24 @@
    },
    "extensions": {
       "settings": {
+         "cjelmkehlpcdogpnfjeicgklplbpgjih": {
+            "incognito": true
+         },
          "ehfhghddhachdadpdnpcpigiipkagfoe": {
             "incognito": true,
             "newAllowFileAccess": false
+         },
+         "ekjnponglcbkpjobdnoijpnkphfallfn": {
+            "incognito": true
          },
          "gmbclidgiobnognmnejllpfcmkdppicp": {
             "incognito": true,
             "newAllowFileAccess": false
          },
-         "cjelmkehlpcdogpnfjeicgklplbpgjih": {
-            "incognito": true
-         },
-         "mgidfmbglheeadlobeabndjopdgiojde": {
+         "ngpgelmapbhdaloljhnooakekchnnmjk": {
             "incognito": true
          },
          "pamahahcaaddkbaccgihgdfbkiianjck": {
-            "incognito": true
-         },
-         "ekjnponglcbkpjobdnoijpnkphfallfn": {
             "incognito": true
          }
       }
