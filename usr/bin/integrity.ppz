@@ -651,7 +651,7 @@ integrity_laptop() {
         -e 's/^\(BATT_CPU_GOVERNOR=\).*/\1conservative/' \
         -e 's/^\(LM_AC_CPU_GOVERNOR=\).*/\1performance/' \
         -e 's/^\(NOLM_AC_CPU_GOVERNOR=\).*/\1performance/' $f
-    systemctl enable acpid laptop-mode thermald
+    systemctl enable acpid integrity laptop-mode thermald # restorecond symlink-resolv systemd-networkd systemd-resolved
 }
 # this gets run in:
 #   post_install
