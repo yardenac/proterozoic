@@ -3,6 +3,12 @@
       "enabled": false
    },
    "browser": {
-      "enabled_labs_experiments": ["enable-site-per-process","enable-devtools-experiments"]
+      "enabled_labs_experiments": [
+         "enable-asm-webassembly",
+         "enable-site-per-process",
+         "enable-devtools-experiments",
+         "enable-webassembly",
+         "enable-webassembly-streaming"
+      ]
    }
 }
