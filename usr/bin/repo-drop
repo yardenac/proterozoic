@@ -24,6 +24,7 @@ if [ -s $configfile ]; then
 fi
 
 shopt -s nullglob
+shopt -s extglob
 
 dirs=()
 packs=()
@@ -116,7 +117,7 @@ for pack in "${packs[@]}"; do
                     continue
                 }
             fi
-            oldfiles+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-*-*-*.pkg.tar.?z)
+            oldfiles+=("$repo/${pack_base%-*-*-*.pkg.tar.?z}"-!(*-*)-!(*-*)-!(*-*).pkg.tar.?z)
 
             uplist=("$pack_base")
             if [ -f "$pack_base.sig" ]; then
