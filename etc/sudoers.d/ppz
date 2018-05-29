@@ -1,4 +1,4 @@
-Defaults env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"
+Defaults env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy IGNORE_CC_MISMATCH"
 %wheel ALL=(ALL) ALL
 Defaults:%wheel timestamp_timeout=10
 %wheel ALL=(ex) NOPASSWD: /usr/bin/FvwmCommand
