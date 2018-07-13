@@ -4,8 +4,7 @@
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.xorg
 
-do_unto_others
-
+nice=true
 args=(); x=700; y=400; holdss=y
 for arg; do
     case "$arg" in
@@ -13,6 +12,7 @@ for arg; do
         e) x=200;;
         f) x=1290;;
         m) holdss='';;
+        --notnice) nice=false;;
         *)
             is_ssh_host "$arg" && {
                 as=mm
@@ -25,6 +25,8 @@ for arg; do
             args+=("$arg")
     esac
 done
+
+$nice && do_unto_others
 
 set_xtitle "[mm] $*"
 

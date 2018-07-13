@@ -26,7 +26,6 @@ has_hardstatus
 PS1="$(appropriate_ps1)"
 __expand_tilde_by_ref() { sleep 0; }
 _expand() { sleep 0; }
-[ -a /snowball ] && alias pacman='pacman --cachedir /snowball/pkgcache'
 alias bc='bc -lq /etc/bcrc' #BC_ENV_ARGS=/etc/bcrc
 alias column='column -c $COLUMNS'
 alias cp='cp -i'
