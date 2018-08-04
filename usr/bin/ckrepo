@@ -17,8 +17,29 @@ is_pkg() {
     esac
     return 0
 }
+show_if_diff_hash() {
+    name=$1; vhere=$2; vthere=$3; hash=$4; url=$5
+    [ "$hash" ] || return
+    [[ "$vhere" =~ "$hash" ]] && return
+    echo_blue_n "$name $vhere "
+    echo_cyan_n "$vthere $hash"
+    echo " $url"
+}
+show_github() {
+    local commit date hash vers_github vers_here url
+    vers_here=$1
+    url=$2
+    url="${url##*::}"
+    url="${url##git+}"
+    url="${url%%.git}"
+    commit=$(curl -s "$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')"/commits | jshon -e 0)
+    date=$(echo "$commit" | jshon -e commit -e author -e date | tr -d \")
+    hash=$(echo "$commit" | jshon -e sha | tr -d \" | colrm 8)
+    vers_github=$(date -d "$date" "+%Y%m%d-1")
+    show_if_diff_hash "$name" "$vers_here" "$vers_github" "$hash" "$url/commits/master"
+}
 ck_pkg() {
-    local file ig_pkgn pkgdeets name vers_here vers_there url giturl date vers_github
+    local base file giturl hash ig_pkgn name pkgdeets url vers_here vers_there
     file=$(readlink -e "$1") || return 1
     is_pkg "$file" || return 1
     pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || return 1
@@ -32,6 +53,7 @@ ck_pkg() {
         echo_red "package not in AUR: $name"
         return 1
     }
+    base=$($cower --info --format="%b" "${name}")
     flagged=$($cower --info --format="%t" "${name}")
     [ "$flagged" = no ] && [ "$vers_here" = "$vers_there" ] && {
         [[ $verbose == y ]] && echo_blue "$name $vers_here "
@@ -45,18 +67,26 @@ ck_pkg() {
             return
         fi
         url=$($cower --info --format="%u" "${name}")
-        giturl=$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')
-        [ "$giturl" ] || {
-            echo_blue_n "$name $vers_here "
-            echo_cyan "$vers_there"
-            return
-        }
-        date=$(curl -s "$giturl"/commits | jshon -e 0 -e commit -e author -e date | tr -d \")
-        vers_github=$(date -d "$date" "+%Y%m%d-1")
-        vergt "$vers_github" "$vers_here" || return
-        echo_blue_n "$name $vers_here "
-        echo_cyan_n "$vers_github"
-        echo " $url/commits/master"
+        if [[ "$url" =~ github.com ]]; then
+            show_github "$vers_here" "$url"
+        else
+            hash=''
+            if cower --quiet --force --timeout=60 --ignorerepo -d "${name}" >/dev/null; then
+                giturl=$(awk '($1 ~ /source/ && $3 ~ /^([a-zA-Z0-9-]+::)?git/) {print $3; exit}' "${base}"/.SRCINFO)
+                if ! [ "${giturl}" ]; then
+                    :
+                elif [[ "$giturl" =~ github.com ]]; then
+                    show_github "$vers_here" "$giturl"
+                    return
+                else
+                    url="${giturl##*::}"
+                    url="${url##git+}"
+                    hash=$(git ls-remote --heads "$url" master 2>/dev/null | awk '($2 = "refs/heads/master") {print $1}')
+                    hash=${hash:0:7}
+                fi
+            fi
+            show_if_diff_hash "$name" "$vers_here" "$vers_there" "$hash" "$url"
+        fi
     elif [ "$vers_here" != "$vers_there" ]; then
         echo_blue_n "$name $vers_here "
         echo_yellow "$vers_there"
@@ -101,6 +131,8 @@ for arg; do
             repos+=("$item")
         elif is_pkg "$item"; then
             pkgs+=("$item")
+            loop=''
+            repos=()
         else
             echo_red "Not a repo or pkg: $item"
         fi
@@ -118,15 +150,22 @@ done
 print_repos=''
 [ ${#repos[@]} -gt 1 ] || [ "$verbose" ] && print_repos=y
 
+tmpdir=/tmp/ckrepo.$(uniq_token)
+ckr_cleanup() { popd &>/dev/null; rm -rf "$tmpdir"; }
+trap "ckr_cleanup; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+mkdir "$tmpdir"
+pushd "$tmpdir" >/dev/null
+
 loop() {
     while :; do
-        echo_green $(date)
+        [ "$loop" ] && echo_green $(date)
         for repo in "${repos[@]}"; do
             ck_repo "$repo"
         done
         for pkg in "${pkgs[@]}"; do
             ck_pkg "$pkg"
         done
+        rm -rf "$tmpdir"/*
         [ "$loop" ] || break
         sleep 1h
         echo; echo
