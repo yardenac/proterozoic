@@ -39,7 +39,7 @@ show_github() {
     show_if_diff_hash "$name" "$vers_here" "$vers_github" "$hash" "$url/commits/master"
 }
 ck_pkg() {
-    local base file giturl hash ig_pkgn name pkgdeets url vers_here vers_there
+    local base file giturl hash ig_pkgn incremental name perlvers pkgdeets url vers_here vers_there
     file=$(readlink -e "$1") || return 1
     is_pkg "$file" || return 1
     pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || return 1
@@ -55,17 +55,28 @@ ck_pkg() {
     }
     base=$($cower --info --format="%b" "${name}")
     flagged=$($cower --info --format="%t" "${name}")
-    [ "$flagged" = no ] && [ "$vers_here" = "$vers_there" ] && {
-        [[ $verbose == y ]] && echo_blue "$name $vers_here "
-        return
-    }
-    if vergt "$vers_here" "$vers_there"; then
-        if [ "$vers_here" = "$vers_there.${vers_here##*.}" ]; then
-            [[ $verbose == y ]] && \
-                echo_blue_n "$name $vers_here " && \
+    incremental=false
+    [ "$vers_here" = "$vers_there.${vers_here##*.}" ] && incremental=true
+    if [ "$vers_here" = "$vers_there" ] || $incremental; then
+        perlvers=$(pacman -Qlqp "$file" | awk '($0 ~ /^\/usr\/lib\/perl5\/[0-9\.]+\/$/) {split($0,a,"/"); print a[5]}')
+        if [ "$perlvers" ] && [ "$perlvers" != 5.28 ]; then
+            echo_blue_n "$name $vers_here "
+            echo_yellow_n "PERL $perlvers "
+            echo "https://aur.archlinux.org/packages/${base}"
+        elif [ "$flagged" = yes ]; then
+            echo_blue_n "$name $vers_here "
+            echo_cyan_n "$vers_there "
+            echo_yellow_n "FLAGGED "
+            echo "https://aur.archlinux.org/packages/${base}"
+        elif [[ $verbose == y ]]; then
+            if $incremental; then
+                echo_blue_n "$name $vers_here "
                 echo_green "INCREMENTAL"
-            return
+            else
+                echo_blue "$name $vers_here "
+            fi
         fi
+    elif vergt "$vers_here" "$vers_there"; then
         url=$($cower --info --format="%u" "${name}")
         if [[ "$url" =~ github.com ]]; then
             show_github "$vers_here" "$url"
@@ -73,27 +84,21 @@ ck_pkg() {
             hash=''
             if cower --quiet --force --timeout=60 --ignorerepo -d "${name}" >/dev/null; then
                 giturl=$(awk '($1 ~ /source/ && $3 ~ /^([a-zA-Z0-9-]+::)?git/) {print $3; exit}' "${base}"/.SRCINFO)
-                if ! [ "${giturl}" ]; then
-                    :
-                elif [[ "$giturl" =~ github.com ]]; then
+                if [[ "$giturl" =~ github.com ]]; then
                     show_github "$vers_here" "$giturl"
                     return
-                else
+                elif [ "${giturl}" ]; then
                     url="${giturl##*::}"
                     url="${url##git+}"
                     hash=$(git ls-remote --heads "$url" master 2>/dev/null | awk '($2 = "refs/heads/master") {print $1}')
-                    hash=${hash:0:7}
+                    show_if_diff_hash "$name" "$vers_here" "$vers_there" "${hash:0:7}" "$url"
+                    return
                 fi
             fi
-            show_if_diff_hash "$name" "$vers_here" "$vers_there" "$hash" "$url"
         fi
     elif [ "$vers_here" != "$vers_there" ]; then
         echo_blue_n "$name $vers_here "
         echo_yellow "$vers_there"
-    elif [ "$flagged" = yes ]; then
-        echo_blue_n "$name $vers_here "
-        echo_cyan_n "$vers_there "
-        echo_yellow "FLAGGED"
     else
         echo_red "WEIRD THING HAPPENED"
     fi

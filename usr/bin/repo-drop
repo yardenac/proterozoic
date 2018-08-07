@@ -144,7 +144,7 @@ for pack in "${packs[@]}"; do
 
     (( ${#to_del[@]} )) && {
         ls -lF "${to_del[@]}"
-        askyn "Delete older pkgs on server?" && rm -vf "${to_del[@]}"
+        askyn "Delete other pkgs on server?" && rm -vf "${to_del[@]}"
     }
     askyn "Delete local pkg?" && rm -vf "$pack"{,.sig}
 done
