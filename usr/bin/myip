@@ -9,6 +9,7 @@ import ssl
 for env in ['http_proxy', 'HTTP_PROXY', 'https_proxy', 'HTTPS_PROXY', 'all_proxy', 'ALL_PROXY']:
     os.environ[env] = ''
 
-response = urllib.request.urlopen("https://api.duckduckgo.com/?format=json&q=whats+my+ip",capath="/etc/ssl/certs")
+context = ssl.create_default_context(capath="/etc/ssl/certs")
+response = urllib.request.urlopen("https://api.duckduckgo.com/?format=json&q=whats+my+ip",context=context)
 
 print (re.sub('<[^>]*>','',json.loads(response.read().decode())['Answer']))
