@@ -878,3 +878,11 @@ rs() {
           --info=flist0,progress2 --no-i-r --chmod=u+w,Du+x \
           -Phe "ssh -S none" "$@"
 }
+isprime() {
+    [[ "$1" =~ ^[0-9]+$ ]] || return 1
+    local i=1 num=$((10#$1))
+    while let i++ && [ $i -lt $num ]; do
+        [ $(($num % $i)) -eq 0 ] && return 1
+    done
+    return 0
+}
