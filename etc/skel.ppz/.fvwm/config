@@ -151,6 +151,7 @@ AddToMenu MenuFvwmRoot
 + "Ch Tor"     Exec exec chromium-blah
 + "Ch 55114"   Exec exec chromium-blah 55114
 + "Ch 55115"   Exec exec chromium-blah 55115
++ "Ch 55116"   Exec exec chromium-blah 55116
 + "Reload WM"  Restart
 + "Restart WM" Quit
 
