@@ -195,7 +195,7 @@ integrity_iptables() {
 
     # this only works on the FILE. it does not interact directly with the tables,
     # except to call rc restart. only use rc for that, much cleaner that way!
-    local PROTOCOL PORT CUSTOM= \
+    local PROTOCOL PORT iface CUSTOM= \
         rules_file=/etc/iptables/iptables.rules \
         default_rules=/usr/share/ppz/default/iptables.rules \
         tmp_is=/tmp/iptables.is.$(uniq_token) \
@@ -208,7 +208,12 @@ integrity_iptables() {
         CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT \n"
     done
     for OPENU in ${OPEN_USERS[@]}; do
-        CUSTOM+="-A open-out -m owner --uid-owner ${OPENU} -j ACCEPT \n"
+        iface=' -o tun0'
+        [[ ${OPENU} =~ : ]] && case "${OPENU%%:*}" in
+            any) iface='';;
+            *)   iface=" -o "${OPENU%%:*}
+        esac
+        CUSTOM+="-A open-out $iface -m owner --uid-owner ${OPENU##*:} -j ACCEPT \n"
     done
     if [ "$BLOCK_OUT" = yes ]; then
         CUSTOM+="-A OUTPUT -p tcp -j REJECT --reject-with tcp-reset \n"
@@ -240,7 +245,7 @@ integrity_ip6tables() {
     # this only works on the FILE. it does not interact directly with the tables,
     # except to call rc restart. only use rc for that, much cleaner that way!
     mkdir -p /etc/iptables
-    local PROTOCOL PORT CUSTOM= \
+    local PROTOCOL PORT iface CUSTOM= \
         rules_file=/etc/iptables/ip6tables.rules \
         default_rules=/usr/share/ppz/default/ip6tables.rules \
         tmp_is=/tmp/ip6tables.is.$(uniq_token) \
@@ -253,7 +258,12 @@ integrity_ip6tables() {
         CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT \n"
     done
     for OPENU in ${OPEN_USERS[@]}; do
-        CUSTOM+="-A open-out -m owner --uid-owner ${OPENU} -j ACCEPT \n"
+        iface=' -o tun0'
+        [[ ${OPENU} =~ : ]] && case "${OPENU%%:*}" in
+            any) iface='';;
+            *)   iface=" -o "${OPENU%%:*}
+        esac
+        CUSTOM+="-A open-out $iface -m owner --uid-owner ${OPENU##*:} -j ACCEPT \n"
     done
     if [ "$BLOCK_OUT" = yes ]; then
         CUSTOM+="-A OUTPUT -p tcp -j REJECT --reject-with tcp-reset \n"
