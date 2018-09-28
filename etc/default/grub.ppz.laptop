@@ -1,9 +1,8 @@
-. /etc/ppz.conf
 GRUB_DEFAULT=0
 GRUB_TIMEOUT=1
 GRUB_DISTRIBUTOR="Arch"
 GRUB_CMDLINE_LINUX_DEFAULT=""
-GRUB_CMDLINE_LINUX="headerdev=$GRUB_HEADERDEV cryptswitch=$GRUB_CRYPTSWITCH elevator=deadline i915.modeset=1 nvidia-drm.modeset=1 audit=1 security=selinux selinux=1"
+GRUB_CMDLINE_LINUX="rd.luks.options=timeout=20 rootflags=x-systemd.device-timeout=20 elevator=deadline i915.modeset=1 nvidia-drm.modeset=1 audit=1 security=selinux selinux=1 headerfor=nothing"
 GRUB_PRELOAD_MODULES="part_gpt part_msdos"
 GRUB_TERMINAL_INPUT=console
 GRUB_GFXMODE=1024x768x32

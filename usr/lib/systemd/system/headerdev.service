@@ -1,0 +1,13 @@
+[Unit]
+Description=Decrypt disks
+ConditionPathExists=/etc/initrd-release
+Requires=headerdev.mount
+After=headerdev.mount
+Before=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/share/ppz/bin/headerdev
+
+[Install]
+RequiredBy=default.target

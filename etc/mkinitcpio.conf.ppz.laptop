@@ -1,2 +1,2 @@
-HOOKS="base udev modconf autodetect block keyboard encrypt_ppz lvm2 filesystems fsck ppz_tmp" # -base -udev systemd raid ide pata scsi
+HOOKS="base systemd modconf autodetect block keyboard sd-vconsole headerdev sd-encrypt sd-lvm2 fsck filesystems"
 MODULES="intel_agp i915 drm coretemp ac battery button fan sbs video fuse ata_generic ata_piix ahci mmc_block nf_conntrack"

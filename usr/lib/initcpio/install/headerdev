@@ -1,0 +1,9 @@
+#!/bin/bash
+
+build() {
+    add_file /etc/systemd/system/headerdev.mount.d/local.conf
+    add_binary sed
+    add_binary systemctl
+    add_systemd_unit headerdev.mount
+    add_systemd_unit headerdev.service
+}

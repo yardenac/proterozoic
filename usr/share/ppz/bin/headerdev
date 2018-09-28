@@ -1,0 +1,24 @@
+#!/usr/bin/ash
+
+[ -f /init_functions ] || exit 1
+
+genct() {
+    local cmdline='' headerfor=''
+    read cmdline </proc/cmdline
+    for karg in $cmdline; do
+        case "$karg" in
+            headerfor=*) headerfor=${karg##headerfor=};;
+        esac
+    done
+    if [ -n headerfor ]; then
+        sed 's/^\([^#$]\)/#\1/ig; /'"${headerfor}"'/ !b; s/^#*//ig' /headerdev/headers/crypttab.initramfs >| /etc/crypttab
+        /usr/lib/systemd/system-generators/systemd-cryptsetup-generator
+        systemctl daemon-reload
+        systemctl restart cryptsetup.target
+    else
+        echo "No header device"
+        exit 1
+    fi
+}
+
+genct

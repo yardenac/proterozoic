@@ -1,0 +1,12 @@
+[Unit]
+Description=Device with LUKS headers for early boot
+ConditionPathExists=/etc/initrd-release
+Before=headerdev.service
+
+[Mount]
+Where=/headerdev
+Type=ext4
+
+[Install]
+RequiredBy=default.target
+RequiredBy=headerdev.service
