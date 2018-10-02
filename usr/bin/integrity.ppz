@@ -211,7 +211,11 @@ integrity_iptables() {
         ofilter='-o tun0'
         [[ ${OPENU} =~ : ]] && case "${OPENU%%:*}" in
             any)   ofilter='';;
-            local) ofilter="-d $LOCAL_NET";;
+            local) ofilter=''
+                   for netmask in "${LOCAL_NET[@]}"; do
+                       CUSTOM+="-A open-out -d $netmask -m owner --uid-owner ${OPENU##*:} -j ACCEPT \n"
+                   done
+                   continue;;
             *)     ofilter="-o "${OPENU%%:*}
         esac
         CUSTOM+="-A open-out $ofilter -m owner --uid-owner ${OPENU##*:} -j ACCEPT \n"
