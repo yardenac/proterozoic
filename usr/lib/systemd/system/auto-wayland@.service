@@ -1,0 +1,30 @@
+[Unit]
+Description=Automatic Weston Login
+Wants=dbus.socket
+After=dbus.socket systemd-user-sessions.service plymouth-quit-wait.service
+Before=getty.target rescue.service graphical.target
+Conflicts=rescue.service
+ConditionPathExists=/dev/tty0
+IgnoreOnIsolate=yes
+
+[Service]
+ExecStart=-/usr/bin/agetty --nice 5 --noclear --noissue --autologin ew %I $TERM
+Type=notify
+NotifyAccess=all
+Restart=no
+#RestartSec=0
+RestrictAddressFamilies=~AF_PACKET
+UtmpIdentifier=%I
+UtmpMode=user
+TTYPath=/dev/%I
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+KillMode=process
+IgnoreSIGPIPE=no
+SendSIGHUP=yes
+StandardInput=tty-fail
+Environment=LANG= LANGUAGE= LC_CTYPE= LC_NUMERIC= LC_TIME= LC_COLLATE= LC_MONETARY= LC_MESSAGES= LC_PAPER= LC_NAME= LC_ADDRESS= LC_TELEPHONE= LC_MEASUREMENT= LC_IDENTIFICATION= DISPLAY= XKB_DEFAULT_LAYOUT=us
+
+[Install]
+WantedBy=graphical.target multi-user.target

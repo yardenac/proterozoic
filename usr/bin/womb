@@ -43,12 +43,13 @@ setup_home() {
     cd "$HOME"
 }
 setup_git() {
+    [ -d .git ] && return
     git init
     git add --all .
     git config --global commit.gpgsign false
     git config --global push.gpgsign false
-    git config --global user.email ex@invalid.invalid
-    git config --global user.name ex
+    git config --global user.email $USER@invalid.invalid
+    git config --global user.name $USER
     git commit -m init
     /usr/bin/integrity.ppz
     . /usr/share/ppz/bash.functions
@@ -73,6 +74,13 @@ if [ "$USER" = ex ]; then
     }
 elif [ "$USER" = ew ]; then
     setup_home
+    [ "$(/usr/bin/tty)" = /dev/tty5 ] && {
+        setup_git
+        . /etc/ppz.conf
+        unset DISPLAY
+        exec /usr/bin/weston
+        #exit $? #this makes respawn work
+    }
 fi
 
 case "${2%% *}" in
