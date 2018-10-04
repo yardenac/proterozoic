@@ -2,4 +2,4 @@
 Description=Keep-Net-Up
 
 [Service]
-ExecStart=/usr/bin/keep-net-up
+ExecStart=/usr/bin/keep-net-up --loop --nostamp

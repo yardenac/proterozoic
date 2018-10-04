@@ -5,8 +5,83 @@
 
 am_root || exit
 
-while :; do
-    test_network -n0 -t10 -w15
-    stamp "Network down! restarting..."
-    systemctl restart "${NET_SERVICES[@]}"
+v=stamp loop=false
+for arg; do
+    case "$arg" in
+        --loop)    loop=true;;
+        --quiet)   v=none;;
+        --errors)  v=errors;;
+        --nostamp) v=all;;
+        *)         echo_red "WEIRD ARG: $arg";;
+    esac
 done
+
+do_network_test() {
+    local dev wifidev gateway vpn_gateway
+    #local userscript=$HOME/.config/bin/test_network.sh
+
+    # figure out what the wifi device is called
+    for dev in $(ip link show | awk '/^[0-9]/ {print $2}'); do
+        case "${dev%:}" in
+            lo|enp*|lxcbr*|tun*) continue;;
+            wlan*) wifidev=${dev%:}; break;;
+            *)     echo "WEIRD DEVICE: $dev";;
+        esac
+    done
+
+    # check for local gateway
+    gateway=$(ip route | awk '/^default via/ { print $3}')
+    [ "$gateway" ] && ping -i 0.4 -c 5 -w 4 -nq "$gateway" &>/dev/null
+    verbosely $? $v "GATEWAY UP" "GATEWAY DOWN" || {
+        systemctl restart ip{,6}tables systemd-networkd wpa_supplicant@$wifidev
+        sleep 10
+    }
+
+    # check openvpn
+    systemctl --quiet is-active openvpn-client@\*.service
+    verbosely $? $v "DOING VPN TEST" "NO VPN TEST" && {
+        #TODO: ip route: tun0? enough lines? wait, see if it's starting up
+
+        vpn_gateway=$(ip address show dev tun0 scope global | awk '($1 == "inet") {print $2}') \
+            && [[ "$vpn_gateway" =~ ^[0-9\.]+/[0-9]+$ ]] \
+            && ping -i 0.4 -c 5 -w 4 -nq "${vpn_gateway%%/*}" &>/dev/null
+        verbosely $? $v "   VPN UP" "   VPN DOWN" || {
+            systemctl restart openvpn-client@\*.service
+            sleep 30
+        }
+    }
+
+    # check tor
+    systemctl --quiet is-active tor
+    verbosely $? $v "DOING TOR TEST" "NO TOR TEST" && {
+        test_tor
+        verbosely $? $v "   TOR UP" "   TOR DOWN" || {
+            systemctl restart tor
+            sleep 15
+        }
+    }
+
+    # check dns
+    systemctl --quiet is-active systemd-resolved.service
+    verbosely $? $v "DOING DNS TEST" "NO DNS TEST" && {
+        ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+        [ -f /run/systemd/resolve/resolv.conf ] && \
+            [ "$(dig +short ns1.linode.com A)" = 162.159.27.72 ]
+        verbosely $? $v "   DNS UP" "   DNS DOWN" || {
+            systemctl restart systemd-resolved
+            sleep 5
+        }
+    }
+
+    #if [ -x "$userscript" ]; then
+    #    verbosity=$v "$userscript"
+    #    verbosely $? $v "USER SCRIPT OK" "USER SCRIPT FAILED" || return 1
+    #fi
+}
+do_loop() {
+    while :; do
+        do_network_test
+        sleep 60
+    done
+}
+$loop && do_loop || do_network_test
