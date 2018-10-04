@@ -558,6 +558,7 @@ test_tor() {
 verbosely() {
     local returncode=$1 verbosity=$2 yesmsg=$3 errmsg=$4
     case "$verbosity" in
+        stamp)  (( $returncode )) && stamp red "$errmsg" || stamp green "$yesmsg";;
         all)    (( $returncode )) && echo_red "$errmsg" || echo_green "$yesmsg";;
         errors) (( $returncode )) && echo_red "$errmsg";;
     esac
@@ -795,7 +796,15 @@ ssh_key_from_host() {
    '
 }
 stamp() {
-    echo_green_n $(date '+%Y %b %e %a %T [%Z %z]')
+    local c color=green
+    for c in "${ansi_colors[@]}"; do
+        if [ "$1" = "$c" ]; then
+            color=$c
+            shift
+            break
+        fi
+    done
+    echo_${color}_n $(date '+%Y %b %e %a %T [%Z %z]')
     echo : "$@"
 }
 glog() {
