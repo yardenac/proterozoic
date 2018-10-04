@@ -555,12 +555,21 @@ test_tor() {
 #   fwget 10 1 https://www.nytimes3xbfgragh.onion/ http://127.0.0.1:8118 | grep -iq "The New York Times: Find breaking news, multimedia, reviews" || \
 #   fwget 10 1 http://fncuwbiisyh6ak3i.onion/ http://127.0.0.1:8118 | grep -iq keybase
 }
+verbosely() {
+    local returncode=$1 verbosity=$2 yesmsg=$3 errmsg=$4
+    case "$verbosity" in
+        all)    (( $returncode )) && echo_red "$errmsg" || echo_green "$yesmsg";;
+        errors) (( $returncode )) && echo_red "$errmsg";;
+    esac
+    return $returncode
+}
 test_network() {
-    local tor=false verbose=false loopinc=45
+    local tor=false v=errors loopinc=45 gateway
     local loopnum=1 forever=false timeout=5
     for arg; do
         case "$arg" in
-            --verbose) verbose=true;;
+            --verbose) v=all;;
+            --quiet)   v=none;;
             -n*) loopnum="${arg##-n}";;
             -t*) timeout="${arg##-t}";;
             -w*) loopinc="${arg##-w}";;
@@ -568,15 +577,16 @@ test_network() {
         esac
     done
     (( loopnum )) || loopnum=99 forever=true
-    $forever && stamp "Looping every $loopinc until network failure..."
-    local gateway=$(ip route | awk '/^default via/ { print $3}')
+    $forever && [ $v != none ] && stamp "Looping every $loopinc until network failure..."
+    gateway=$(ip route | awk '/^default via/ { print $3}')
     [ "$gateway" ] || {
         echo_red "NO GATEWAY"
         return 1
     }
-    systemctl --quiet is-active tor &>/dev/null && tor=true || echo_red "NO TOR - DISABLING TOR TEST"
+    systemctl --quiet is-active tor &>/dev/null
+    verbosely $? $v "" "NO TOR - DISABLING TOR TEST" && tor=true
     while (( loopnum )); do
-        $verbose && echo -n .
+        [ "$v" = all ] && echo -n .
         $forever && sleep "$loopinc" || let loopnum--
         if $tor; then
             test_tor && continue || echo_red "CANNOT REACH TOR"
