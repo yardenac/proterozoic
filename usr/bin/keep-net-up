@@ -39,7 +39,7 @@ do_network_test() {
 
     # check openvpn
     systemctl --quiet is-active openvpn-client@\*.service
-    verbosely $? $v "DOING VPN TEST" "NO VPN TEST" && {
+    verbosely $? $v "" "" && { # "DOING VPN TEST" "NO VPN TEST"
         #TODO: ip route: tun0? enough lines? wait, see if it's starting up
 
         vpn_gateway=$(ip address show dev tun0 scope global | awk '($1 == "inet") {print $2}') \
@@ -53,7 +53,7 @@ do_network_test() {
 
     # check tor
     systemctl --quiet is-active tor
-    verbosely $? $v "DOING TOR TEST" "NO TOR TEST" && {
+    verbosely $? $v "" "" && { # "DOING TOR TEST" "NO TOR TEST"
         test_tor
         verbosely $? $v "   TOR UP" "   TOR DOWN" || {
             systemctl restart tor
@@ -63,7 +63,7 @@ do_network_test() {
 
     # check dns
     systemctl --quiet is-active systemd-resolved.service
-    verbosely $? $v "DOING DNS TEST" "NO DNS TEST" && {
+    verbosely $? $v "" "" && { # "DOING DNS TEST" "NO DNS TEST"
         ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
         [ -f /run/systemd/resolve/resolv.conf ] && \
             [ "$(dig +short ns1.linode.com A)" = 162.159.27.72 ]
