@@ -17,7 +17,7 @@ for arg; do
 done
 
 do_network_test() {
-    local dev wifidev gateway vpn_gateway
+    local dev wifidev gateway vpn_local vpn_gateway
     #local userscript=$HOME/.config/bin/test_network.sh
 
     # figure out what the wifi device is called
@@ -42,10 +42,18 @@ do_network_test() {
     verbosely $? $v "" "" && { # "DOING VPN TEST" "NO VPN TEST"
         #TODO: ip route: tun0? enough lines? wait, see if it's starting up
 
-        vpn_gateway=$(ip address show dev tun0 scope global | awk '($1 == "inet") {print $2}') \
-            && [[ "$vpn_gateway" =~ ^[0-9\.]+/[0-9]+$ ]] \
+        vpn_local=$(ip address show dev tun0 scope global | awk '($1 == "inet") {print $2}') \
+            && [[ "$vpn_local" =~ ^[0-9\.]+/[0-9]+$ ]] \
+            && ping -i 0.4 -c 5 -w 4 -nq "${vpn_local%%/*}" &>/dev/null
+        verbosely $? $v "" "VPN DOWN LOCALLY" || {
+            systemctl restart openvpn-client@\*.service
+            sleep 30
+        }
+
+        vpn_gateway=$(ip route show dev tun0 via "$vpn_local" | awk '{print $3; exit}') \
+            && [[ "$vpn_gateway" =~ ^[0-9\.]+$ ]] \
             && ping -i 0.4 -c 5 -w 4 -nq "${vpn_gateway%%/*}" &>/dev/null
-        verbosely $? $v "   VPN UP" "   VPN DOWN" || {
+        verbosely $? $v "VPN UP" "VPN DOWN" || {
             systemctl restart openvpn-client@\*.service
             sleep 30
         }
@@ -55,7 +63,7 @@ do_network_test() {
     systemctl --quiet is-active tor
     verbosely $? $v "" "" && { # "DOING TOR TEST" "NO TOR TEST"
         test_tor
-        verbosely $? $v "   TOR UP" "   TOR DOWN" || {
+        verbosely $? $v "TOR UP" "TOR DOWN" || {
             systemctl restart tor
             sleep 15
         }
@@ -67,7 +75,7 @@ do_network_test() {
         ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
         [ -f /run/systemd/resolve/resolv.conf ] && \
             [ "$(dig +short ns1.linode.com A)" = 162.159.27.72 ]
-        verbosely $? $v "   DNS UP" "   DNS DOWN" || {
+        verbosely $? $v "DNS UP" "DNS DOWN" || {
             systemctl restart systemd-resolved
             sleep 5
         }
