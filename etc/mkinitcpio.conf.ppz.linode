@@ -1,1 +1,1 @@
-HOOKS="base systemd filesystems fsck ppz_tmp"
+HOOKS="base systemd filesystems fsck"

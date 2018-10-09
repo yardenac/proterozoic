@@ -101,8 +101,7 @@ integrity_simpleconf() {
         || echo 'sshd : ALL : ALLOW' >> /etc/hosts.allow
     [ -a /etc/rc.sysinit ] && sed -i 's%^\(/usr/bin/rm -rf /tmp.*\)$%\#\1%ig' /etc/rc.sysinit #comment
     case $SYSTEM_TYPE in
-        linode|digo)         sed -i '/add_module/ !b;d' /usr/lib/initcpio/install/ppz_tmp
-                           sed -i 's%^\#\(server clock.fmt.he.net.*\)$%\1%ig' /etc/ntp.conf;;
+        linode|digo)      sed -i 's%^\#\(server clock.fmt.he.net.*\)$%\1%ig' /etc/ntp.conf;;
         desktop|laptop|*)   sed -i 's%^\(server clock.fmt.he.net.*\)$%\#\1%ig' /etc/ntp.conf;;
     esac
     case "$(uname -m)" in
