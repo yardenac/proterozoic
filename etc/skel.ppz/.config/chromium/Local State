@@ -4,6 +4,7 @@
    },
    "browser": {
       "enabled_labs_experiments": [
+         "enable-account-consistency@2",
          "enable-asm-webassembly",
          "enable-site-per-process",
          "enable-devtools-experiments",
