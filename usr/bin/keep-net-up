@@ -24,7 +24,7 @@ done
 
 do_network_test() {
     local dev wifidev gateway vpn_local vpn_gateway
-    #local userscript=$HOME/.config/bin/test_network.sh
+    local userscript=$HOME/.config/bin/test_network.sh
 
     # figure out what the wifi device is called
     for dev in $(ip link show | awk '/^[0-9]/ {print $2}'); do
@@ -88,10 +88,10 @@ do_network_test() {
         }
     }
 
-    #if [ -x "$userscript" ]; then
-    #    verbosity=$v "$userscript"
-    #    verbosely $? $v "USER SCRIPT OK" "USER SCRIPT FAILED" || return 1
-    #fi
+    if [ -O "$userscript" ] && [ -x "$userscript" ]; then
+        verbosity=$v "$userscript"
+        verbosely $? $v "USER SCRIPT OK" "USER SCRIPT FAILED"
+    fi
 }
 do_loop() {
     while :; do
