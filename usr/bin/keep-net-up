@@ -3,7 +3,13 @@
 . /etc/ppz.conf
 . /usr/share/ppz/bash.functions
 
-am_root || exit
+root_do() {
+    if am_root; then
+        "$@"
+    else
+        verbosely 1 $v "" "root would do $@"
+    fi; :
+}
 
 v=stamp loop=false
 for arg; do
@@ -33,7 +39,7 @@ do_network_test() {
     gateway=$(ip route | awk '/^default via/ { print $3}')
     [ "$gateway" ] && ping -i 0.4 -c 5 -w 4 -nq "$gateway" &>/dev/null
     verbosely $? $v "GATEWAY UP" "GATEWAY DOWN" || {
-        systemctl restart ip{,6}tables systemd-networkd wpa_supplicant@$wifidev
+        root_do systemctl restart ip{,6}tables systemd-networkd wpa_supplicant@$wifidev
         sleep 10
     }
 
@@ -46,7 +52,7 @@ do_network_test() {
             && [[ "$vpn_local" =~ ^[0-9\.]+/[0-9]+$ ]] \
             && ping -i 0.4 -c 5 -w 4 -nq "${vpn_local%%/*}" &>/dev/null
         verbosely $? $v "" "VPN DOWN LOCALLY" || {
-            systemctl restart openvpn-client@\*.service
+            root_do systemctl restart openvpn-client@\*.service
             sleep 30
         }
 
@@ -54,7 +60,7 @@ do_network_test() {
             && [[ "$vpn_gateway" =~ ^[0-9\.]+$ ]] \
             && ping -i 0.4 -c 5 -w 4 -nq "${vpn_gateway%%/*}" &>/dev/null
         verbosely $? $v "VPN UP" "VPN DOWN" || {
-            systemctl restart openvpn-client@\*.service
+            root_do systemctl restart openvpn-client@\*.service
             sleep 30
         }
     }
@@ -64,7 +70,7 @@ do_network_test() {
     verbosely $? $v "" "" && { # "DOING TOR TEST" "NO TOR TEST"
         test_tor
         verbosely $? $v "TOR UP" "TOR DOWN" || {
-            systemctl restart tor
+            root_do systemctl restart tor
             sleep 15
         }
     }
@@ -72,11 +78,12 @@ do_network_test() {
     # check dns
     systemctl --quiet is-active systemd-resolved.service
     verbosely $? $v "" "" && { # "DOING DNS TEST" "NO DNS TEST"
-        ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+        [ "$(readlink -e /etc/resolv.conf)" = "/run/systemd/resolve/resolv.conf" ] || \
+            root_do ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
         [ -f /run/systemd/resolve/resolv.conf ] && \
             [ "$(dig +short ns1.linode.com A)" = 162.159.27.72 ]
         verbosely $? $v "DNS UP" "DNS DOWN" || {
-            systemctl restart systemd-resolved
+            root_do systemctl restart systemd-resolved
             sleep 5
         }
     }
