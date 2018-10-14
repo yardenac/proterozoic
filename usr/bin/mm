@@ -4,7 +4,7 @@
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.xorg
 
-nice=true
+nice=false
 args=(); x=700; y=400; holdss=y
 for arg; do
     case "$arg" in
@@ -12,7 +12,7 @@ for arg; do
         e) x=200;;
         f) x=1290;;
         m) holdss='';;
-        --notnice) nice=false;;
+        --nice) nice=true;;
         *)
             is_ssh_host "$arg" && {
                 as=mm
