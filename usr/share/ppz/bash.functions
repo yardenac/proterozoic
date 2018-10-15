@@ -545,16 +545,6 @@ fwget() { # fwget [TIMEOUT [TRIES [URL [PROXY]]]]
    fi
    /usr/bin/curl --proxy "$4" --retry ${RETRIES} --max-time ${TIMEOUT} ${URL} -so- 2>/dev/null
 }
-test_tor() {
-   fwget 6 0 http://zqktlwi4fecvo6ri.onion/ http://127.0.0.1:8118 | grep -iq hidden\ wiki || \
-   fwget 6 0 http://duskgytldkxiuqc6.onion/ http://127.0.0.1:8118 | grep -iq rendezvous || \
-   fwget 6 0 http://3g2upl4pq6kufc4m.onion/ http://127.0.0.1:8118 | grep -iq "doesn't track you"
-#   fwget 10 1 http://pubdrop4dw6rk3aq.onion/ http://127.0.0.1:8118 | grep -iq securedrop || \
-#   fwget 10 1 http://4thievzv3hh26qeh.onion/ http://127.0.0.1:8118 | grep -iq "Four Thieves Vinegar" || \
-#   fwget 10 1 https://www.facebookcorewwwi.onion/ http://127.0.0.1:8118 | grep -iq "facebook" || \
-#   fwget 10 1 https://www.nytimes3xbfgragh.onion/ http://127.0.0.1:8118 | grep -iq "The New York Times: Find breaking news, multimedia, reviews" || \
-#   fwget 10 1 http://fncuwbiisyh6ak3i.onion/ http://127.0.0.1:8118 | grep -iq keybase
-}
 verbosely() {
     local returncode=$1 verbosity=$2 yesmsg=$3 errmsg=$4
     case "$verbosity" in
@@ -563,39 +553,6 @@ verbosely() {
         errors) (( $returncode )) && echo_red "$errmsg";;
     esac
     return $returncode
-}
-test_network() {
-    local tor=false v=errors loopinc=45 gateway
-    local loopnum=1 forever=false timeout=5
-    for arg; do
-        case "$arg" in
-            --verbose) v=all;;
-            --quiet)   v=none;;
-            -n*) loopnum="${arg##-n}";;
-            -t*) timeout="${arg##-t}";;
-            -w*) loopinc="${arg##-w}";;
-            *) echo_red "WEIRD ARG: $arg";;
-        esac
-    done
-    (( loopnum )) || loopnum=99 forever=true
-    $forever && [ $v != none ] && stamp "Looping every $loopinc until network failure..."
-    gateway=$(ip route | awk '/^default via/ { print $3}')
-    [ "$gateway" ] || {
-        echo_red "NO GATEWAY"
-        return 1
-    }
-    systemctl --quiet is-active tor &>/dev/null
-    verbosely $? $v "" "NO TOR - DISABLING TOR TEST" && tor=true
-    while (( loopnum )); do
-        [ "$v" = all ] && echo -n .
-        $forever && sleep "$loopinc" || let loopnum--
-        if $tor; then
-            test_tor && continue || echo_red "CANNOT REACH TOR"
-        fi
-        fwget $timeout 2 https://duckduckgo.com/ '' | grep -iq "doesn't track you" && continue || echo_red "CANNOT REACH DUCKDUCKGO"
-        ping -i 0.4 -c 5 -w 4 -nq "$gateway" &>/dev/null && continue || echo_red "CANNOT PING GATEWAY"
-        return 1
-    done
 }
 ramsize() { #returns size of system's ram in megabytes
     awk '/MemTotal:/ { printf ("%0.0f\n",$2/1024); }' /proc/meminfo
