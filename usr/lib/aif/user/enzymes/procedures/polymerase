@@ -37,7 +37,7 @@ sudo arch-chroot /mnt
 sudo umount -R /mnt
 sudo systemctl --no-block poweroff && exec screen -D
 
-pkgs_always=(tor privoxy proterozoic)
+pkgs_always=(tor torsocks privoxy proterozoic)
 pkgs_x=(xorg-{server,xinit,xrdb,xsetroot,xhost,xwininfo,xrandr,xinput} xdotool \
         xf86-input-{keyboard,mouse} xscreensaver xclip libxft xcursor-themes \
         numlockx fvwm perl-xml-parser fbpanel wmctrl hsetroot \

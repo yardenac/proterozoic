@@ -7,7 +7,7 @@ root_do() {
     if am_root; then
         "$@"
     else
-        verbosely 1 $v "" "root would do $@"
+        verbosely 1 $v "" "root would do $*"
     fi; :
 }
 
@@ -25,8 +25,8 @@ done
 test_tor() {
    fwget 6 0 http://zqktlwi4fecvo6ri.onion/ http://127.0.0.1:8118 | grep -iq hidden\ wiki || \
    fwget 6 0 http://duskgytldkxiuqc6.onion/ http://127.0.0.1:8118 | grep -iq rendezvous || \
-   fwget 6 0 http://3g2upl4pq6kufc4m.onion/ http://127.0.0.1:8118 | grep -iq "doesn't track you"
-#   fwget 10 1 http://pubdrop4dw6rk3aq.onion/ http://127.0.0.1:8118 | grep -iq securedrop || \
+   fwget 6 0 http://3g2upl4pq6kufc4m.onion/ http://127.0.0.1:8118 | grep -iq "doesn't track you" || \
+   fwget 6 0 http://pubdrop4dw6rk3aq.onion/ http://127.0.0.1:8118 | grep -iq securedrop
 #   fwget 10 1 http://4thievzv3hh26qeh.onion/ http://127.0.0.1:8118 | grep -iq "Four Thieves Vinegar" || \
 #   fwget 10 1 https://www.facebookcorewwwi.onion/ http://127.0.0.1:8118 | grep -iq "facebook" || \
 #   fwget 10 1 https://www.nytimes3xbfgragh.onion/ http://127.0.0.1:8118 | grep -iq "The New York Times: Find breaking news, multimedia, reviews" || \
@@ -46,56 +46,70 @@ do_network_test() {
     done
 
     # check for local gateway
-    gateway=$(ip route | awk '/^default via/ { print $3}')
-    [ "$gateway" ] && ping -i 0.4 -c 5 -w 4 -nq "$gateway" &>/dev/null
-    verbosely $? $v "GATEWAY UP" "GATEWAY DOWN" || {
-        root_do systemctl restart ip{,6}tables systemd-networkd wpa_supplicant@$wifidev
-        sleep 10
-    }
+    while :; do
+        gateway=$(ip route | awk '/^default via/ { print $3}')
+        [ "$gateway" ] && ping -i 0.4 -c 5 -w 4 -nq "$gateway" &>/dev/null
+        verbosely $? $v "GATEWAY UP" "GATEWAY DOWN" && break || {
+                root_do systemctl restart ip{,6}tables systemd-networkd wpa_supplicant@$wifidev
+                am_root || break
+                sleep 10
+            }
+    done
 
     # check openvpn
     systemctl --quiet is-active openvpn-client@\*.service
     verbosely $? $v "" "" && { # "DOING VPN TEST" "NO VPN TEST"
-        #TODO: ip route: tun0? enough lines? wait, see if it's starting up
+        while :; do
+            #TODO: ip route: tun0? enough lines? wait, see if it's starting up
 
-        vpn_local=$(ip address show dev tun0 scope global | awk '($1 == "inet") {print $2}') \
-            && [[ "$vpn_local" =~ ^[0-9\.]+/[0-9]+$ ]] \
-            && ping -i 0.4 -c 5 -w 4 -nq "${vpn_local%%/*}" &>/dev/null
-        verbosely $? $v "" "VPN DOWN LOCALLY" || {
-            root_do systemctl restart openvpn-client@\*.service
-            sleep 30
-        }
+            vpn_local=$(ip address show dev tun0 scope global | awk '($1 == "inet") {print $2}') \
+                && [[ "$vpn_local" =~ ^[0-9\.]+/[0-9]+$ ]] \
+                && ping -i 0.4 -c 5 -w 4 -nq "${vpn_local%%/*}" &>/dev/null
+            verbosely $? $v "" "VPN DOWN LOCALLY" || {
+                root_do systemctl restart openvpn-client@\*.service
+                am_root || break
+                sleep 10
+                continue
+            }
 
-        vpn_gateway=$(ip route show dev tun0 via "$vpn_local" | awk '{print $3; exit}') \
-            && [[ "$vpn_gateway" =~ ^[0-9\.]+$ ]] \
-            && ping -i 0.4 -c 5 -w 4 -nq "${vpn_gateway%%/*}" &>/dev/null
-        verbosely $? $v "VPN UP" "VPN DOWN" || {
-            root_do systemctl restart openvpn-client@\*.service
-            sleep 30
-        }
+            vpn_gateway=$(ip route show dev tun0 via "$vpn_local" | awk '{print $3; exit}') \
+                && [[ "$vpn_gateway" =~ ^[0-9\.]+$ ]] \
+                && ping -i 0.4 -c 5 -w 4 -nq "${vpn_gateway%%/*}" &>/dev/null
+            verbosely $? $v "VPN UP" "VPN DOWN" && break || {
+                    root_do systemctl restart openvpn-client@\*.service
+                    am_root || break
+                    sleep 30
+                }
+        done
     }
 
     # check tor
     systemctl --quiet is-active tor
     verbosely $? $v "" "" && { # "DOING TOR TEST" "NO TOR TEST"
-        test_tor
-        verbosely $? $v "TOR UP" "TOR DOWN" || {
-            root_do systemctl restart tor
-            sleep 15
-        }
+        while :; do
+            test_tor
+            verbosely $? $v "TOR UP" "TOR DOWN" && break || {
+                    root_do systemctl restart tor
+                    am_root || break
+                    sleep 15
+                }
+        done
     }
 
     # check dns
     systemctl --quiet is-active systemd-resolved.service
     verbosely $? $v "" "" && { # "DOING DNS TEST" "NO DNS TEST"
-        [ "$(readlink -e /etc/resolv.conf)" = "/run/systemd/resolve/resolv.conf" ] || \
-            root_do ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
-        [ -f /run/systemd/resolve/resolv.conf ] && \
-            [ "$(dig +short ns1.linode.com A)" = 162.159.27.72 ]
-        verbosely $? $v "DNS UP" "DNS DOWN" || {
-            root_do systemctl restart systemd-resolved
-            sleep 5
-        }
+        while :; do
+            [ "$(readlink -e /etc/resolv.conf)" = "/run/systemd/resolve/resolv.conf" ] || \
+                root_do ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+            [ -f /run/systemd/resolve/resolv.conf ] && \
+                [ "$(dig +short ns1.linode.com A)" = 162.159.27.72 ]
+            verbosely $? $v "DNS UP" "DNS DOWN" && break || {
+                    root_do systemctl restart systemd-resolved
+                    am_root || break
+                    sleep 5
+                }
+        done
     }
 
     if [ -O "$userscript" ] && [ -x "$userscript" ]; then
