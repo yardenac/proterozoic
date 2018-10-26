@@ -40,7 +40,7 @@ do_network_test() {
     for dev in $(ip link show | awk '/^[0-9]/ {print $2}'); do
         case "${dev%:}" in
             lo|enp*|lxcbr*|tun*) continue;;
-            wlan*) wifidev=${dev%:}; break;;
+            wlan*|wlp*) wifidev=${dev%:}; break;;
             *)     echo "WEIRD DEVICE: $dev";;
         esac
     done
