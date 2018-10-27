@@ -4,14 +4,16 @@
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.xorg
 
+userscript=$HOME/.config/bin/pre-mm.sh
+
 nice=false
-args=(); x=700; y=400; holdss=y
+args=() files=() x=700 y=400 holdss=''
 for arg; do
+    if [ -a "$arg" ]; then
+        files+=("$arg")
+        continue
+    fi
     case "$arg" in
-        d) y=-1000;;
-        e) x=200;;
-        f) x=1290;;
-        m) holdss='';;
         --nice) nice=true;;
         *)
             is_ssh_host "$arg" && {
@@ -26,25 +28,32 @@ for arg; do
     esac
 done
 
+for file in "${files[@]}"; do
+    [[ "$file" =~ \.(avi|mkv|mp4) ]] && holdss=y
+done
+
 $nice && do_unto_others
 
 set_xtitle "[mm] $*"
 
-[ "$(type -t pre-mm)" = 'file' ] && pre-mm
+if [ -O "$userscript" ] && [ -x "$userscript" ]; then
+    holdss="$holdss" "$userscript"
+fi
 
 [ "$holdss" ] && {
     holdss &
     trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
+    args+=(--stop-screensaver)
 }
 
 ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}x${y} -fs --ao=alsa \
     --alang=en --slang=en \
-    --stop-screensaver --msg-level=all=no:statusline=status:cache=info:network=info \
+    --msg-level=all=no:statusline=status:cache=info:network=info \
     --cache-initial=1024 --cache=256000 --no-input-default-bindings \
     --input-conf=/usr/share/ppz/mplayer.input.conf \
     --term-status-msg='${time-pos} / ${duration} (${percent-pos}%) ${filename}' \
     --no-osc --script-opts=osc-visibility=always,osc-timems=no,osc-layout=topslim \
     --cursor-autohide=always \
-    --hr-seek=yes "${args[@]}"
+    --hr-seek=yes "${args[@]}" "${files[@]}"
 
 echo
