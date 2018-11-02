@@ -24,9 +24,8 @@ COMMIT
 -A INPUT -p udp -j REJECT --reject-with icmp6-port-unreachable
 -A OUTPUT -o lo -j ACCEPT
 -A OUTPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
+-A OUTPUT -p ipv6-icmp -j ACCEPT
 -A OUTPUT -j open-out
--A OUTPUT -p tcp -j REJECT --reject-with tcp-reset
--A OUTPUT -p udp -j REJECT --reject-with icmp6-port-unreachable
 -A evil -m state --state INVALID -j DROP
 -A evil -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m conntrack --ctstate NEW -j DROP
 -A evil -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
@@ -35,6 +34,10 @@ COMMIT
 -A evil -p icmpv6 -m icmp6 --icmpv6-type 2 -j ACCEPT
 -A evil -p icmpv6 -m icmp6 --icmpv6-type 3 -j ACCEPT
 -A evil -p icmpv6 -m icmp6 --icmpv6-type 4 -j ACCEPT
+-A evil -p icmpv6 -m icmp6 --icmpv6-type 129 -j ACCEPT
+-A evil -p icmpv6 -m icmp6 --icmpv6-type 134 -j ACCEPT
+-A evil -p icmpv6 -m icmp6 --icmpv6-type 136 -j ACCEPT
+-A evil -p icmpv6 -m icmp6 --icmpv6-type 137 -j ACCEPT
 -A evil -p icmpv6 -j DROP
 #LOCAL
 COMMIT

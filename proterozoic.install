@@ -14,6 +14,7 @@ preowned_files=(
     etc/privoxy/config
     etc/screenrc
     etc/ssh/ssh_config
+    etc/tor/torrc.ppz
 )
 ######### FUNCTIONS
 are_same() {

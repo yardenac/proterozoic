@@ -1,0 +1,4 @@
+Log notice syslog
+DataDirectory /var/lib/tor
+ClientUseIPv6 1
+ClientPreferIPv6ORPort 1

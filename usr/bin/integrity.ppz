@@ -189,16 +189,26 @@ integrity_users() {
         fi
     done
 }
-integrity_iptables() {
+integrity_iptables() { i_iptables_do 4; }
+integrity_ip6tables() { i_iptables_do 6; }
+i_iptables_do() {
     am_root || return 0
+    local locnet= netmask OPENU PROTOCOL PORT ofilter CUSTOM= v=
+    case "$1" in
+        4) [ -n "$LOCAL_NET"   ] && locnet=("${LOCAL_NET[@]}")
+           [ -n "$LOCAL_NET_4" ] && locnet=("${LOCAL_NET_4[@]}")
+           ;;
+        6) [ -n "$LOCAL_NET_6" ] && locnet=("${LOCAL_NET_6[@]}")
+           v=6
+           ;;
+        *) return 1
+    esac
+    local rules_file=/etc/iptables/ip${v}tables.rules \
+        default_rules=/usr/share/ppz/default/ip${v}tables.rules \
+        tmp_is=/tmp/ip${v}tables.is.$(uniq_token) \
+        tmp_should=/tmp/ip${v}tables.should.$(uniq_token)
 
-    # this only works on the FILE. it does not interact directly with the tables,
-    # except to call rc restart. only use rc for that, much cleaner that way!
-    local PROTOCOL PORT ofilter CUSTOM= \
-        rules_file=/etc/iptables/iptables.rules \
-        default_rules=/usr/share/ppz/default/iptables.rules \
-        tmp_is=/tmp/iptables.is.$(uniq_token) \
-        tmp_should=/tmp/iptables.should.$(uniq_token)
+    mkdir -p /etc/iptables
 
     # rules as they should be, WITH custom open ports from ppz.conf
     for PORT in ${OPEN_PORTS[@]}; do
@@ -211,7 +221,8 @@ integrity_iptables() {
         [[ ${OPENU} =~ : ]] && case "${OPENU%%:*}" in
             any)   ofilter='';;
             local) ofilter=''
-                   for netmask in "${LOCAL_NET[@]}"; do
+                   [ -n "$locnet" ] || continue
+                   for netmask in "${locnet[@]}"; do
                        CUSTOM+="-A open-out -d $netmask -m owner --uid-owner ${OPENU##*:} -j ACCEPT \n"
                    done
                    continue;;
@@ -221,7 +232,7 @@ integrity_iptables() {
     done
     if [ "$BLOCK_OUT" = yes ]; then
         CUSTOM+="-A OUTPUT -p tcp -j REJECT --reject-with tcp-reset \n"
-        CUSTOM+="-A OUTPUT -p udp -j REJECT --reject-with icmp-port-unreachable \n"
+        CUSTOM+="-A OUTPUT -p udp -j REJECT --reject-with icmp${v}-port-unreachable \n"
         CUSTOM+="-P OUTPUT DROP\n"
     fi
     sed 's%^#LOCAL$%'"$CUSTOM"'%ig' $default_rules | sed '/^ *$/d' > $tmp_should
@@ -232,65 +243,12 @@ integrity_iptables() {
 
     # if they're different, deal with that
     if ! [ -s $tmp_is ] || ! diff $tmp_is $tmp_should; then
-        if ! [ -s $tmp_is ] || askyn "Impose new iptables rules?"; then
+        if ! [ -s $tmp_is ] || askyn "Impose new ip${v}tables rules?"; then
             cat $tmp_should >| $rules_file
-            echo_red replaced iptables rules
-            chrooted && echo_red "Not resetting iptables" || systemctl restart iptables
+            echo_red replaced ip${v}tables rules
+            chrooted && echo_red "Not resetting ip${v}tables" || systemctl restart ip${v}tables
         fi
     fi
-
-#    askyn "are you inspecting the iptables sitch?"
-
-    rm -f $tmp_is $tmp_should
-}
-integrity_ip6tables() {
-    am_root || return 0
-
-    # this only works on the FILE. it does not interact directly with the tables,
-    # except to call rc restart. only use rc for that, much cleaner that way!
-    mkdir -p /etc/iptables
-    local PROTOCOL PORT ofilter CUSTOM= \
-        rules_file=/etc/iptables/ip6tables.rules \
-        default_rules=/usr/share/ppz/default/ip6tables.rules \
-        tmp_is=/tmp/ip6tables.is.$(uniq_token) \
-        tmp_should=/tmp/ip6tables.should.$(uniq_token)
-
-    # rules as they should be, WITH custom open ports from ppz.conf
-    for PORT in ${OPEN_PORTS[@]}; do
-        PROTOCOL=tcp
-        [[ ${PORT} =~ : ]] && PROTOCOL=${PORT%%:*}
-        CUSTOM+="-A open -p ${PROTOCOL} -m ${PROTOCOL} --dport ${PORT##*:} -j ACCEPT \n"
-    done
-    for OPENU in ${OPEN_USERS[@]}; do
-        ofilter='-o tun0'
-        [[ ${OPENU} =~ : ]] && case "${OPENU%%:*}" in
-            any)   ofilter='';;
-            local) continue;;
-            *)     ofilter="-o "${OPENU%%:*}
-        esac
-        CUSTOM+="-A open-out $ofilter -m owner --uid-owner ${OPENU##*:} -j ACCEPT \n"
-    done
-    if [ "$BLOCK_OUT" = yes ]; then
-        CUSTOM+="-A OUTPUT -p tcp -j REJECT --reject-with tcp-reset \n"
-        CUSTOM+="-A OUTPUT -p udp -j REJECT --reject-with icmp6-port-unreachable \n"
-        CUSTOM+="-P OUTPUT DROP\n"
-    fi
-    sed 's/^#LOCAL$/'"$CUSTOM"'/ig' $default_rules | sed '/^ *$/d' > $tmp_should
-
-    # current rules with comments & empty lines removed, and counters zeroed
-    touch $rules_file
-    sed 's/^\(#.*\)\?$//ig;Tc;d;:c;s/\[[0-9]*:[0-9]*\]/[0:0]/ig' $rules_file > $tmp_is
-
-    # if they're different, deal with that
-    if ! [ -s $tmp_is ] || ! diff $tmp_is $tmp_should; then
-        if ! [ -s $tmp_is ] || askyn "Impose new iptables rules?"; then
-            cat $tmp_should >| $rules_file
-            echo_red replaced iptables rules
-            chrooted && echo_red "Not resetting iptables" || systemctl restart ip6tables
-        fi
-    fi
-
-#    askyn "are you inspecting the iptables sitch?"
 
     rm -f $tmp_is $tmp_should
 }
