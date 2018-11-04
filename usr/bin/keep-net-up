@@ -32,6 +32,13 @@ test_tor() {
 #   fwget 10 1 https://www.nytimes3xbfgragh.onion/ http://127.0.0.1:8118 | grep -iq "The New York Times: Find breaking news, multimedia, reviews" || \
 #   fwget 10 1 http://fncuwbiisyh6ak3i.onion/ http://127.0.0.1:8118 | grep -iq keybase
 }
+shopt -s expand_aliases
+alias revpn='
+   root_do systemctl restart openvpn-client@\*.service
+   am_root || break
+   sleep 20
+   continue
+'
 do_network_test() {
     local dev wifidev gateway vpn_local vpn_gateway
     local userscript=$HOME/.config/bin/test_network.sh
@@ -57,12 +64,6 @@ do_network_test() {
     done
 
     # check openvpn
-    alias revpn='
-       root_do systemctl restart openvpn-client@\*.service
-       am_root || break
-       sleep 20
-       continue
-    '
     systemctl --quiet is-active openvpn-client@\*.service
     verbosely $? $v "" "" && while :; do
         vpn_local=$(ip address show dev tun0 scope global | awk '($1 == "inet") {print $2}') \
