@@ -155,8 +155,8 @@ integrity_users() {
 
         u_homepw=$(getent passwd "$u_name" | cut -d: -f6)
         case "$u_name" in
-            ew|ex) echo "C /tmp/$u_name 0700 $u_name users - $u_homepw" >| "/usr/lib/tmpfiles.d/$u_name.conf"
-                   [ "$u_homepw" = "$u_homesrc" ] && usermod -d "/tmp/$u_name" "$u_name"
+            ew|ex) echo "C /tmp/$u_name 0700 $u_name users - $u_homesrc" >| "/usr/lib/tmpfiles.d/$u_name.conf"
+                   [ "$u_homepw" != "/tmp/$u_name" ] && usermod -d "/tmp/$u_name" "$u_name"
                    systemd-tmpfiles --create;;
         esac
     done
