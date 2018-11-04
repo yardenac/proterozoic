@@ -44,6 +44,8 @@ alias alpine='alpine -P /usr/local/lib/pine.conf -d0'
 alias rm='rm --one-file-system -i'
 alias rsync_root='rsync -aAXDxhP --stats --inplace'
 alias ssh-local='ssh -S none -o HostName=127.0.0.1 -o ProxyCommand=none -o CheckHostIP=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+alias test_network=keep-net-up
+alias test_tor=keep-net-up
 alias tig='tig --all'
 alias wfm="find \$(manpath | tr : ' ') | grep"
 alias zgrep='zgrep -i --color=auto'
