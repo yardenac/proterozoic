@@ -53,4 +53,8 @@ pkgs_printer=(cups hplip a2ps)
 pkgs_hw=(memtest86+ mprime parted dmidecode amd-ucode intel-ucode biosdisk-git)
 pkgs_dev=(base-devel s3fs s3cmd cower pkgbuild-introspection python-magic python2-magic asp)
 pkgs_more=(pkgfile openbsd-netcat tig)
-pkgs_sec=(audit)
+pkgs_selinux=(audit checkpolicy libse{linux,manage,pol} mcstrans policycoreutils restorecond secilc setools
+   selinux-{alpm-hook,dbus-config,gui,python{,2},refpolicy-{arch,git,src},sandbox,utils}
+   {{lib,}util-linux,shadow}-selinux{,-debug}
+   {pam{,base},systemd{,-resolvconf,-svcompat}}-selinux
+   {coreutils,cronie,dbus,findutils,iproute2,libsystemd,logrotate,openssh,psmisc,sudo}-selinux)

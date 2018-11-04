@@ -1,4 +1,1 @@
--w /etc/audit/audit.rules -p rwxa -k PPZ_auditrules
--w /etc/passwd            -p rwxa -k PPZ_passwd
--w /etc/security/                 -k PPZ_sec
--a entry,always -S chmod          -k PPZ_chmod
+#-a never,exclude -S all -F success=1
