@@ -6,15 +6,20 @@
 
 userscript=$HOME/.config/bin/pre-mm.sh
 
-nice=false
+nice=false debug=no
 args=() files=() x=700 y=400 holdss=''
 for arg; do
     if [ -a "$arg" ]; then
-        files+=("$arg")
+        if [[ "$arg" =~ .(srt|sub)$ ]]; then
+            args+=("--sub-file=$arg")
+        else
+            files+=("$arg")
+        fi
         continue
     fi
     case "$arg" in
         --nice) nice=true;;
+        --debug) debug=warn;;
         *)
             is_ssh_host "$arg" && {
                 as=mm
@@ -48,7 +53,7 @@ fi
 
 ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}x${y} -fs --ao=alsa \
     --alang=en --slang=en \
-    --msg-level=all=no:statusline=status:cache=info:network=info \
+    --msg-level=all=${debug}:statusline=status:cache=info:network=info \
     --cache-initial=1024 --cache=256000 --no-input-default-bindings \
     --input-conf=/usr/share/ppz/mplayer.input.conf \
     --term-status-msg='${time-pos} / ${duration} (${percent-pos}%) ${filename}' \
