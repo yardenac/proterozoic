@@ -1,2 +1,0 @@
-# galaxy nexus
-SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", ATTRS{idProduct}=="685c", MODE="0666"
