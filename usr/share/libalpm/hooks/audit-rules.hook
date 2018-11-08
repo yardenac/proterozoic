@@ -8,5 +8,5 @@ Target = etc/audit/rules.d/*
 [Action]
 Description = Updating audit rules...
 When = PostTransaction
-Exec = /bin/sh -c '/usr/bin/systemctl daemon-reload; /usr/bin/systemctl restart auditd.service'
+Exec = /bin/sh -c '[ -d /run/systemd/system ] && /usr/bin/systemctl daemon-reload && /usr/bin/systemctl restart auditd.service'
 Depends = audit
