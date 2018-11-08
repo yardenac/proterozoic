@@ -20,7 +20,7 @@ is_pkg() {
 show_if_diff_hash() {
     name=$1; vhere=$2; vthere=$3; hash=$4; url=$5
     [ "$hash" ] || return
-    [[ "$vhere" =~ "$hash" ]] && return
+    [[ $verbose != y ]] && [[ "$vhere" =~ "$hash" ]] && return
     echo_blue_n "$name $vhere "
     echo_cyan_n "$vthere $hash"
     echo " $url"
@@ -32,7 +32,7 @@ show_github() {
     url="${url##*::}"
     url="${url##git+}"
     url="${url%%.git}"
-    commit=$(curl -s "$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')"/commits | jshon -e 0)
+    commit=$(curl -sL "$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')"/commits | jshon -e 0)
     date=$(echo "$commit" | jshon -e commit -e author -e date | tr -d \")
     hash=$(echo "$commit" | jshon -e sha | tr -d \" | colrm 8)
     vers_github=$(date -d "$date" "+%Y%m%d-1")
