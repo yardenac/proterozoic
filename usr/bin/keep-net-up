@@ -1,7 +1,10 @@
 #!/usr/bin/bash
 
+self=$(readlink -e "$0") || exit 1
+self=$(dirname "${self}") || exit 1
+
 . /etc/ppz.conf
-. /usr/share/ppz/bash.functions
+. "$self/../share/ppz/bash.functions"
 
 root_do() {
     if am_root; then
@@ -32,11 +35,34 @@ test_tor() {
 #   fwget 10 1 https://www.nytimes3xbfgragh.onion/ http://127.0.0.1:8118 | grep -iq "The New York Times: Find breaking news, multimedia, reviews" || \
 #   fwget 10 1 http://fncuwbiisyh6ak3i.onion/ http://127.0.0.1:8118 | grep -iq keybase
 }
+journal_wait() {
+    # true if journal unit $1 prints $2 within $3 secs, otherwise false
+    local fifo=/tmp/.$(uniq_token) pid unit=$1 string=$2 timeout=${3:-15}
+    local start=$(date +%s)
+    trap "rm -rf $fifo" HUP QUIT INT TERM ABRT TSTP CONT
+    mkfifo "$fifo" || return
+    timeout -k 5 "$timeout" journalctl -xfn 0 -u "$unit" > "$fifo" & pid=$!
+    while read; do
+        secs=$(( "$(date +%s)" - start ))
+        [ $v = stamp ] && echo_spaces_return "$REPLY"
+        [[ "$REPLY" =~ "$string" ]] || continue
+        verbosely 1 $v "" "FOUND IN JOURNAL AFTER ${secs}s: $string"
+        kill "$pid"
+        rm -rf "$fifo"
+        return
+    done < "$fifo"
+    wait
+    secs=$(( "$(date +%s)" - start ))
+    verbosely 1 $v "" "NOT FOUND IN JOURNAL AFTER ${secs}s: $string"
+    rm -rf "$fifo"
+    return 1
+}
+
 shopt -s expand_aliases
 alias revpn='{
    root_do systemctl restart openvpn-client@\*.service
    am_root || break
-   sleep 20
+   journal_wait "system-openvpn\x2dclient.slice" "Initialization Sequence Completed" 40
    continue
 }'
 do_network_test() {
@@ -59,7 +85,7 @@ do_network_test() {
         verbosely $? $v "GATEWAY UP" "GATEWAY DOWN" && break || {
                 root_do systemctl restart ip{,6}tables systemd-networkd wpa_supplicant@$wifidev
                 am_root || break
-                sleep 10
+                journal_wait system-wpa_supplicant.slice CTRL-EVENT-CONNECTED 20
             }
     done
 
@@ -91,7 +117,7 @@ do_network_test() {
             verbosely $? $v "TOR UP" "TOR DOWN" && break || {
                     root_do systemctl restart tor
                     am_root || break
-                    sleep 15
+                    journal_wait tor 'Bootstrapped 100%: Done' 30
                 }
         done
     }

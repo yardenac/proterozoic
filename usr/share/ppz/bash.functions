@@ -268,6 +268,18 @@ comm_front() {
     [ $(cursor_position) -eq 0 ] || echo -en '\e[1;41m<->\e[m';
     [ "$1" -eq 0 ] || echo "[${1}] "
 }
+echo_spaces_return() { # spaces until the end of the line
+    local char=0 cols=$(tput cols) string=$*
+    while let cols--; do
+        if [ $char -lt ${#string} ]; then
+            echo -ne "${string:$char:1}"
+            let char++
+        else
+            echo -n ' '
+        fi
+    done
+    echo -ne '\r'
+}
 clear_line() {
     echo -ne "\r"
     let NUMCHARS=$( tput cols )
@@ -761,9 +773,9 @@ stamp() {
             break
         fi
     done
-    [ -z "$@" ] && return
+    [ -z "$*" ] && return
     echo_${color}_n $(date '+%Y %b %e %a %T [%Z %z]')
-    echo : "$@"
+    echo : "$*"
 }
 glog() {
     git glog -n $(($(tput lines)/5)) "$@" | colrm $(tput cols)
