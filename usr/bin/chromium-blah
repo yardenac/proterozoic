@@ -5,10 +5,9 @@ tor=true
 proxy=--proxy-server=localhost:8118
 resolv='--host-resolver-rules=MAP * 0.0.0.0'
 configdir=/etc/skel.ppz/.config/chromium
-urls=()
-uniqtok=$(uniq_token)
 uniqdir="$HOME/.config/chromium.$uniqtok"
-cleanup=y
+fjargs=() urls=() cleanup=y uniqtok=$(uniq_token)
+profile=--profile=/etc/firejail/chromium-ppz.profile
 for arg; do
     [[ "$arg" =~ ^[0-9]+$ ]] && {
         proxy=--proxy-server=socks5://localhost:"$arg"
@@ -19,6 +18,7 @@ for arg; do
         tor)     :;;
         noproxy) proxy=''; resolv=''; tor=false;;
         mine)    configdir="${HOME}/.config/chromium";;
+        --devs)  fjargs+=--ignore=nou2f;;
         --keepin=*)   cleanup=''; uniqdir="$HOME/.config/chromium.${arg##*=}";;
         *)       urls+=("$arg");;
     esac
@@ -45,7 +45,7 @@ if [[ "$cleanup" ]] && ! $tor; then
 fi
 
 ionice -c 2 -n 0 nice -n 10 \
-   firejail chromium --incognito \
+   firejail $profile "${fjargs[@]}" chromium --incognito \
       --load-extension=/usr/share/newsblurbackgroundtab-git,/usr/share/https-everywhere-chrome-git,/usr/share/stylus-git,/usr/share/chromium-ublock-origin-git,/usr/share/chromium-pdfjs-git/chromium \
       --ssl-version-min=tls1 \
       --user-data-dir="$uniqdir" "$proxy" "$resolv" "${urls[@]}"
