@@ -15,6 +15,7 @@
 (autoload 'tidy-parse-config-file "tidy" "Parse the `tidy-config-file'" t)
 (autoload 'tidy-save-settings "tidy" "Save settings to `tidy-config-file'" t)
 (autoload 'tidy-build-menu  "tidy" "Install an options menu for HTML Tidy." t)
+(autoload 'magit-status "magit" nil t)
 
 (defun my-html-mode-hook () "Customize my html-mode."
   (tidy-build-menu html-mode-map)

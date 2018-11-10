@@ -11,11 +11,6 @@ depends=(aspell-en cryptsetup sudo bc iptables iproute2 openssh ntp
          ccze
          bash-completion screen htop diffutils arch-https-mirrors-git
          dnsutils git parallel lsof s3fs sshfs tsocks unzip whois)
-optdepends=(
-    'emacs-nox:      stuff'
-    'emacs-php-mode: stuff'
-    'python:   myip'
-)
 conflicts=(abs)
 
 package() {
