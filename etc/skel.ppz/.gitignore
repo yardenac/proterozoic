@@ -1,5 +1,6 @@
 /.bash_history
 /.cache/fontconfig/
+/.cache/mesa_shader_cache/
 /.config/pulse/cookie
 /.config/pulse/*-runtime
 /.config/tmpdir

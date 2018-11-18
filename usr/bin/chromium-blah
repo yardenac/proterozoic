@@ -5,8 +5,8 @@ tor=true
 proxy=--proxy-server=localhost:8118
 resolv='--host-resolver-rules=MAP * 0.0.0.0'
 configdir=/etc/skel.ppz/.config/chromium
-uniqdir="$HOME/.config/chromium.$uniqtok"
 fjargs=() urls=() cleanup=y uniqtok=$(uniq_token)
+uniqdir="$HOME/.config/chromium.$uniqtok"
 profile=--profile=/etc/firejail/chromium-ppz.profile
 for arg; do
     [[ "$arg" =~ ^[0-9]+$ ]] && {
