@@ -46,7 +46,7 @@ do_network_test() {
     # figure out what the wifi device is called
     for dev in $(ip link show | awk '/^[0-9]/ {print $2}'); do
         case "${dev%:}" in
-            lo|enp*|lxcbr*|tun*) continue;;
+            lo|enp*|eth*|lxcbr*|tun*) continue;;
             wlan*|wlp*) wifidev=${dev%:}; break;;
             *)     echo "WEIRD DEVICE: $dev";;
         esac
