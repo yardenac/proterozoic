@@ -39,7 +39,7 @@ journal_wait() {
     # true if journal unit $1 prints $2 within $3 secs, otherwise false
     local fifo=/tmp/.$(uniq_token) pid unit=$1 string=$2 timeout=${3:-15}
     local start=$(date +%s)
-    trap "rm -rf $fifo" HUP QUIT INT TERM ABRT TSTP CONT
+    trap "rm -f $fifo" HUP QUIT INT TERM ABRT TSTP CONT
     mkfifo "$fifo" || return
     timeout -k 5 "$timeout" journalctl -xfn 0 -u "$unit" > "$fifo" & pid=$!
     while read; do
@@ -48,13 +48,13 @@ journal_wait() {
         [[ "$REPLY" =~ "$string" ]] || continue
         verbosely 1 $v "" "FOUND IN JOURNAL AFTER ${secs}s: $string"
         kill "$pid"
-        rm -rf "$fifo"
+        rm -f "$fifo"
         return
     done < "$fifo"
     wait
     secs=$(( "$(date +%s)" - start ))
     verbosely 1 $v "" "NOT FOUND IN JOURNAL AFTER ${secs}s: $string"
-    rm -rf "$fifo"
+    rm -f "$fifo"
     return 1
 }
 
