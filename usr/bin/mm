@@ -7,14 +7,24 @@
 userscript=$HOME/.config/bin/pre-mm.sh
 
 nice=false debug=no
-args=() files=() x=700 y=400 holdss=''
+args=() dirs=() files=() vids=() x=700 y=400 holdss=''
+process_file() {
+    local file=$*
+    [ "$file" ] || return
+    case "${file##*.}" in
+        jpg|jpeg|png|nfo) return;;
+        srt|sub)     args+=("--sub-file=$file");;
+        avi|mkv|mp4) vids+=("$file");;
+        *) if [ -d "$file" ]; then
+               dirs+=("$file")
+           else
+               files+=("$file")
+           fi;;
+    esac
+}
 for arg; do
     if [ -a "$arg" ]; then
-        if [[ "$arg" =~ .(srt|sub)$ ]]; then
-            args+=("--sub-file=$arg")
-        else
-            files+=("$arg")
-        fi
+        process_file "$arg"
         continue
     fi
     case "$arg" in
@@ -33,9 +43,21 @@ for arg; do
     esac
 done
 
-for file in "${files[@]}"; do
-    [[ "$file" =~ \.(avi|mkv|mp4) ]] && holdss=y
-done
+if (( "${#dirs[@]}" )); then
+    fifo=/tmp/.$(uniq_token)
+    trap "rm -f $fifo" EXIT HUP QUIT INT TERM ABRT
+    mkfifo $fifo
+    for dir in "${dirs[@]}"; do
+        find "$dir" -type f >> $fifo &
+    done
+    while read; do
+        process_file "$REPLY"
+    done < $fifo
+    wait
+    rm -f $fifo
+fi
+
+(( "${#vids[@]}" )) && holdss=y
 
 $nice && do_unto_others
 
@@ -59,6 +81,6 @@ ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}x${y} -fs --ao=alsa \
     --term-status-msg='${time-pos} / ${duration} (${percent-pos}%) ${filename}' \
     --no-osc --script-opts=osc-visibility=always,osc-timems=no,osc-layout=topslim \
     --cursor-autohide=always \
-    --hr-seek=yes "${args[@]}" "${files[@]}"
+    --hr-seek=yes "${args[@]}" "${files[@]}" "${vids[@]}"
 
 echo
