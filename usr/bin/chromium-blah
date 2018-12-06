@@ -19,7 +19,7 @@ for arg; do
         tor)     :;;
         noproxy) proxy=''; resolv=''; tor=false;;
         mine)    configdir="${HOME}/.config/chromium";;
-        --devs)  fjargs+=--ignore=nou2f;;
+        --u2f)  fjargs+=--ignore=nou2f;;
         --keepin=*)   cleanup=''; uniqdir="$HOME/.config/chromium.${arg##*=}";;
         *)       urls+=("$arg");;
     esac; fi
@@ -46,7 +46,7 @@ if [[ "$cleanup" ]] && ! $tor; then
 fi
 
 ionice -c 2 -n 0 nice -n 10 \
-   firejail $profile "${fjargs[@]}" chromium --incognito \
+   firejail "${fjargs[@]}" $profile chromium --incognito \
       --load-extension=/usr/share/newsblurbackgroundtab-git,/usr/share/https-everywhere-chrome-git,/usr/share/stylus-git,/usr/share/chromium-ublock-origin-git,/usr/share/chromium-pdfjs-git/chromium \
       --ssl-version-min=tls1 \
       --user-data-dir="$uniqdir" "$proxy" "$resolv" "${urls[@]}"

@@ -149,7 +149,7 @@ DestroyMenu MenuFvwmRoot
 AddToMenu MenuFvwmRoot
 + "Terminal"   Exec exec urxvt -pe -tabbedex
 + "Ch Tor"     Exec exec chromium-blah
-+ "Ch devs"    Exec exec chromium-blah 55114 --devs
++ "Ch u2f"     Exec exec chromium-blah 55114 --u2f
 + "Ch 55114"   Exec exec chromium-blah 55114
 + "Ch 55115"   Exec exec chromium-blah 55115
 + "Ch 55116"   Exec exec chromium-blah 55116

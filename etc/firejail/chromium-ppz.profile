@@ -2,7 +2,7 @@ disable-mnt
 nou2f
 private-bin chromium,chromedriver
 private-cache
-private-etc chromium,fonts,group
+private-etc chromium,fonts,group,localtime
 private-opt index.html
 private-srv index.html
 
