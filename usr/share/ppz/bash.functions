@@ -885,3 +885,10 @@ isprime() {
     done
     return 0
 }
+gi() {
+    git remote show | column
+    git branch --all --list --column=dense --no-merged
+    git status
+    git ls-files -v | /usr/bin/grep '^[[:lower:]]'
+    glog -n 3
+}
