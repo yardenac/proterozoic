@@ -38,7 +38,7 @@ test_tor() {
 journal_wait() {
     # true if journal unit $1 prints $2 within $3 secs, otherwise false
     local fifo=/tmp/.$(uniq_token) pid unit=$1 string=$2 timeout=${3:-15}
-    local start=$(date +%s)
+    local start=$(date +%s) prefix=${jw_prefix:-}
     trap "rm -f $fifo" HUP QUIT INT TERM ABRT TSTP CONT
     mkfifo "$fifo" || return
     timeout -k 5 "$timeout" journalctl -xfn 0 -u "$unit" > "$fifo" & pid=$!
@@ -62,7 +62,7 @@ shopt -s expand_aliases
 alias revpn='{
    root_do systemctl restart openvpn-client@\*.service
    am_root || break
-   journal_wait "system-openvpn\x2dclient.slice" "Initialization Sequence Completed" 40
+   journal_wait "system-openvpn\x2dclient.slice" "Initialization Sequence Completed" 120
    continue
 }'
 do_network_test() {
