@@ -13,7 +13,7 @@ process_file() {
     [ "$file" ] || return
     case "${file##*.}" in
         jpg|jpeg|png|nfo) return;;
-        srt|sub)     args+=("--sub-file=$file");;
+        srt|sub|vtt) args+=("--sub-file=$file");;
         avi|mkv|mp4) vids+=("$file");;
         *) if [ -d "$file" ]; then
                dirs+=("$file")
@@ -25,6 +25,9 @@ process_file() {
 for arg; do
     if [ -a "$arg" ]; then
         process_file "$arg"
+        continue
+    elif [[ "$arg" =~ googlevideo.com ]]; then
+        vids+=("$arg")
         continue
     fi
     case "$arg" in
