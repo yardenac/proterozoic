@@ -76,7 +76,7 @@ ck_pkg() {
         elif [ "$flagged" = yes ]; then
             name_vers "$name" "$vers_here"
             echo_cyan_n "$vers_there "
-            echo_yellow_n "FLAGGED "
+            echo_green_n "FLAGGED "
             echo "https://aur.archlinux.org/packages/${base}"
         elif [[ $verbose == y ]]; then
             if $incremental; then
