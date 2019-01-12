@@ -32,7 +32,19 @@ show_if_diff_hash() {
     [ "$hash" ] || return
     [[ $verbose != y ]] && [[ "$vhere" =~ "$hash" ]] && return
     name_vers "$name" "$vhere"
-    echo_cyan_n "$vthere $hash"
+    if [[ "$vthere" =~ ^@[0-9]+$ ]]; then
+        # @ means it's a date, not a regular version
+        if (( $(date +%s) - ${vthere##@} > 60*60*24*5 )); then
+            # it hasn't been updated in >5 days
+            echo_yellow_n $(date -d "$vthere" "+%Y%m%d-1")
+        else
+            # it's newly updated
+            echo_cyan_n $(date -d "$vthere" "+%Y%m%d-1")
+        fi
+        echo_cyan_n " $hash"
+    else
+        echo_cyan_n "$vthere $hash"
+    fi
     echo " $url"
 }
 show_github() {
@@ -45,8 +57,7 @@ show_github() {
     commit=$(curl -sL "$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')"/commits | jshon -e 0)
     date=$(echo "$commit" | jshon -e commit -e author -e date | tr -d \")
     hash=$(echo "$commit" | jshon -e sha | tr -d \" | colrm 8)
-    vers_github=$(date -d "$date" "+%Y%m%d-1")
-    show_if_diff_hash "$name" "$vers_here" "$vers_github" "$hash" "$url/commits/master"
+    show_if_diff_hash "$name" "$vers_here" "@$(date -d "$date" +%s)" "$hash" "$url/commits/master"
 }
 ck_pkg() {
     local base file giturl hash ig_pkgn incremental name perlvers pkgdeets url vers_here vers_there
