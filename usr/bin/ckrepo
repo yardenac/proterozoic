@@ -59,6 +59,17 @@ show_github() {
     hash=$(echo "$commit" | jshon -e sha | tr -d \" | colrm 8)
     show_if_diff_hash "$name" "$vers_here" "@$(date -d "$date" +%s)" "$hash" "$url/commits/master"
 }
+vers_there_function() {
+    local hash name=$1 vers_there
+    vers_there=$($cower --info --format="%v" "${name}") || return 1
+    if [[ "$vers_there" =~ ^[0-9\.]+r[0-9]+\.[0-f]+-[0-9]+$ ]]; then
+        hash=${vers_there##*.}
+        hash=${hash%%-*}
+        echo "${vers_there%.*}.${hash:0:8}-${vers_there#*-}"
+    else
+        echo "$vers_there"
+    fi
+}
 ck_pkg() {
     local base file giturl hash ig_pkgn incremental name perlvers pkgdeets url vers_here vers_there
     file=$(readlink -e "$1") || return 1
@@ -70,7 +81,7 @@ ck_pkg() {
         [ "x$name" = "x$ig_pkgn" ] && return
     done
     vers_here=${pkgdeets[1]}
-    vers_there=$($cower --info --format="%v" "${name}") || {
+    vers_there=$(vers_there_function "$name") || {
         echo_red "package not in AUR: $name"
         return 1
     }
