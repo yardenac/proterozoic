@@ -72,6 +72,7 @@ vers_there_function() {
 }
 ck_pkg() {
     local base file giturl hash ig_pkgn incremental name perlvers pkgdeets url vers_here vers_there
+    local fucked=no
     file=$(readlink -e "$1") || return 1
     is_pkg "$file" || return 1
     pkgdeets=($(tar -xOf "$file" .PKGINFO 2>/dev/null | awk '/^pkg(name|ver) *=/ {print $3}')) || return 1
@@ -87,6 +88,8 @@ ck_pkg() {
     }
     base=$($cower --info --format="%b" "${name}")
     flagged=$($cower --info --format="%t" "${name}")
+    maintainer=$($cower --info --format="%m" "${name}")
+    [ "$flagged" = yes ] || [ "$maintainer" = "(orphan)" ] && fucked=yes
     incremental=false
     [ "$vers_here" = "$vers_there.${vers_here##*.}" ] && incremental=true
     if [ "$vers_here" = "$vers_there" ] || $incremental; then
@@ -95,10 +98,11 @@ ck_pkg() {
             name_vers "$name" "$vers_here"
             echo_yellow_n "PERL $perlvers "
             echo "https://aur.archlinux.org/packages/${base}"
-        elif [ "$flagged" = yes ]; then
+        elif [ "$fucked" = yes ]; then
             name_vers "$name" "$vers_here"
             echo_cyan_n "$vers_there "
-            echo_green_n "FLAGGED "
+            [ "$flagged" = yes ] && echo_green_n "FLAGGED "
+            [ "$maintainer" = "(orphan)" ] && echo_green_n "ORPHAN "
             echo "https://aur.archlinux.org/packages/${base}"
         elif [[ $verbose == y ]]; then
             if $incremental; then
