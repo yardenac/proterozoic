@@ -50,7 +50,7 @@ journal_wait() {
         kill "$pid"
         rm -f "$fifo"
         return
-    done < "$fifo"
+    done < "$fifo" &
     wait
     secs=$(( "$(date +%s)" - start ))
     verbosely 1 $v "" "NOT FOUND IN JOURNAL AFTER ${secs}s: $string"
