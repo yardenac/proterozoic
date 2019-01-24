@@ -31,3 +31,8 @@
 (global-set-key (kbd "C-c C-r") 'revert-buffer)
 (global-set-key (kbd "C-c C-p") 'shell-script-mode)
 (global-set-key (kbd "C-c C-t") 'toggle-truncate-lines)
+
+(defun sort-lines-nocase ()
+  (interactive)
+  (let ((sort-fold-case t))
+    (call-interactively 'sort-lines)))
