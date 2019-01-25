@@ -82,8 +82,8 @@ Mouse 1            R      A         -
 Mouse 1            SFTW   M         DragNMove
 Mouse 3            SFTW   M         ResizeDynamicFromVars
 Mouse 3            R     A         Menu MenuFvwmRoot Nop
-Key   XF86AudioLowerVolume A N   Exec exec amixer set Master 1-
-Key   XF86AudioRaiseVolume A N   Exec exec amixer set Master 1+
+Key   XF86AudioLowerVolume A N   Exec exec amixer set Master 655-
+Key   XF86AudioRaiseVolume A N   Exec exec amixer set Master 655+
 Key   XF86AudioMute         A N   Exec exec amixer set Master toggle
 
 #NiceTerm WIDTHxHEIGHT -/"" COMMAND
