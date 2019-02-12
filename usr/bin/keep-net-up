@@ -72,7 +72,7 @@ do_network_test() {
     # figure out what the wifi device is called
     for dev in $(ip link show | awk '/^[0-9]/ {print $2}'); do
         case "${dev%:}" in
-            lo|enp*|eth*|lxcbr*|tun*) continue;;
+            lo|docker*|enp*|eth*|lxcbr*|tun*) continue;;
             wlan*|wlp*) wifidev=${dev%:}; break;;
             *)     echo "WEIRD DEVICE: $dev";;
         esac
@@ -83,6 +83,10 @@ do_network_test() {
         gateway=$(ip route | awk '/^default via/ { print $3}')
         [ "$gateway" ] && ping -i 0.4 -c 5 -w 4 -nq "$gateway" &>/dev/null
         verbosely $? $v "GATEWAY UP" "GATEWAY DOWN" && break || {
+                ip route flush table main
+                for module in "${WIFI_MODULES[@]}"; do
+                    modprobe -r "$module"
+                done
                 root_do systemctl restart ip{,6}tables systemd-networkd wpa_supplicant@$wifidev
                 am_root || break
                 journal_wait system-wpa_supplicant.slice CTRL-EVENT-CONNECTED 20
