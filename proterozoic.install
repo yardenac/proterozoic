@@ -8,6 +8,7 @@ preowned_files=(
     etc/issue
     etc/logrotate.conf
     etc/mkinitcpio.conf
+    etc/mkinitcpio.d/linux-hardened.preset
     etc/ntp.conf
     etc/php/php-fpm.conf
     etc/php/php.ini
