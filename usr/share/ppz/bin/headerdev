@@ -14,7 +14,7 @@ genct() {
         sed 's/^\([^#$]\)/#\1/ig; /'"${headerfor}"'/ !b; s/^#*//ig' /headerdev/headers/crypttab.initramfs >| /etc/crypttab
         /usr/lib/systemd/system-generators/systemd-cryptsetup-generator
         systemctl daemon-reload
-        systemctl restart cryptsetup.target
+        exec systemctl --no-block restart cryptsetup.target
     else
         echo "No header device"
         exit 1

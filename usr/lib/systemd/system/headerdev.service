@@ -1,13 +1,13 @@
 [Unit]
 Description=Decrypt disks
 ConditionPathExists=/etc/initrd-release
-Requires=headerdev.mount
-After=headerdev.mount
-Before=multi-user.target
+RequiresMountsFor=/headerdev
+DefaultDependencies=no
+Before=cryptsetup-pre.target
 
 [Service]
 Type=oneshot
 ExecStart=/usr/share/ppz/bin/headerdev
 
 [Install]
-RequiredBy=default.target
+RequireddBy=cryptsetup.target
