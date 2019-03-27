@@ -618,6 +618,13 @@ integrity_sensors() {
 integrity_laptop() {
     am_root || return 0
     [ $SYSTEM_TYPE = laptop ] || return 0
+    chown root:video /dev/dri/card0 /dev/fb0
+    chmod 760 /dev/dri/card0 /dev/fb0
+    awk '/^loop / {err = $3} END {exit err}' /proc/modules && {
+        # runs if loop module is "used by" zero others
+        . /etc/mkinitcpio.conf.ppz.laptop
+        for mod in $MODULES; do modprobe -r $mod; modprobe -v $mod; done
+    }
     wehave acpid cpupower laptop-mode-tools-git thermald || return 0
     local f=/etc/laptop-mode/conf.d/cpufreq.conf
     [ -f $f ] && sed -i \
@@ -625,7 +632,7 @@ integrity_laptop() {
         -e 's/^\(BATT_CPU_GOVERNOR=\).*/\1conservative/' \
         -e 's/^\(LM_AC_CPU_GOVERNOR=\).*/\1performance/' \
         -e 's/^\(NOLM_AC_CPU_GOVERNOR=\).*/\1performance/' $f
-    systemctl enable acpid integrity laptop-mode thermald # restorecond symlink-resolv systemd-networkd systemd-resolved
+    systemctl enable acpid cpupower integrity laptop-mode thermald # restorecond symlink-resolv systemd-networkd systemd-resolved
 }
 # this gets run in:
 #   post_install
