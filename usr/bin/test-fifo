@@ -1,0 +1,14 @@
+#!/usr/bin/bash
+
+. /usr/share/ppz/bash.functions
+
+fifo=/tmp/.$(uniq_token)
+trap "rm -f $fifo" HUP QUIT INT TERM ABRT TSTP CONT
+mkfifo "$fifo" || return
+timeout -k 5 5 tail -f /dev/null > "$fifo" & pid=$!
+while read; do
+    :
+done < "$fifo" &
+wait
+echo DONE
+rm -rf "$fifo"
