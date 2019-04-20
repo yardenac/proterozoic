@@ -27,13 +27,16 @@ done
 
 test_tor() {
    fwget 6 0 http://zqktlwi4fecvo6ri.onion/ http://127.0.0.1:8118 | grep -iq hidden\ wiki || \
-   fwget 6 0 http://duskgytldkxiuqc6.onion/ http://127.0.0.1:8118 | grep -iq rendezvous || \
-   fwget 6 0 http://3g2upl4pq6kufc4m.onion/ http://127.0.0.1:8118 | grep -iq "doesn't track you" || \
-   fwget 6 0 http://pubdrop4dw6rk3aq.onion/ http://127.0.0.1:8118 | grep -iq securedrop
+   fwget 10 0 http://duskgytldkxiuqc6.onion/ http://127.0.0.1:8118 | grep -iq rendezvous || \
+   fwget 14 1 http://3g2upl4pq6kufc4m.onion/ http://127.0.0.1:8118 | grep -iq "doesn't track you" || \
+   fwget 18 2 http://pubdrop4dw6rk3aq.onion/ http://127.0.0.1:8118 | grep -iq securedrop
 #   fwget 10 1 http://4thievzv3hh26qeh.onion/ http://127.0.0.1:8118 | grep -iq "Four Thieves Vinegar" || \
 #   fwget 10 1 https://www.facebookcorewwwi.onion/ http://127.0.0.1:8118 | grep -iq "facebook" || \
 #   fwget 10 1 https://www.nytimes3xbfgragh.onion/ http://127.0.0.1:8118 | grep -iq "The New York Times: Find breaking news, multimedia, reviews" || \
 #   fwget 10 1 http://fncuwbiisyh6ak3i.onion/ http://127.0.0.1:8118 | grep -iq keybase
+}
+ping_test() {
+    ping -i 0.4 -c 5 -w 12 -nq "$@"
 }
 journal_wait() {
     # true if journal unit $1 prints $2 within $3 secs, otherwise false
@@ -81,7 +84,7 @@ do_network_test() {
     # check for local gateway
     while :; do
         gateway=$(ip route | awk '/^default via/ { print $3}')
-        [ "$gateway" ] && ping -i 0.4 -c 5 -w 4 -nq "$gateway" &>/dev/null
+        [ "$gateway" ] && ping_test "$gateway" &>/dev/null
         verbosely $? $v "GATEWAY UP" "GATEWAY DOWN" && break || {
                 ip route flush table main
                 for module in "${WIFI_MODULES[@]}"; do
@@ -98,18 +101,18 @@ do_network_test() {
     verbosely $? $v "" "" && while :; do
         vpn_local=$(ip address show dev tun0 scope global | awk '($1 == "inet") {print $2}') \
             && [[ "$vpn_local" =~ ^[0-9\.]+/[0-9]+$ ]] \
-            && ping -i 0.4 -c 5 -w 4 -nq "${vpn_local%%/*}" &>/dev/null
+            && ping_test "${vpn_local%%/*}" &>/dev/null
         verbosely $? $v "" "VPN DOWN LOCALLY" || revpn
 
         vpn_gateway=$(ip route show dev tun0 via "$vpn_local" | awk '{print $3; exit}') \
             && [[ "$vpn_gateway" =~ ^[0-9\.]+$ ]] \
-            && ping -i 0.4 -c 5 -w 4 -nq "${vpn_gateway%%/*}" &>/dev/null
+            && ping_test "${vpn_gateway%%/*}" &>/dev/null
         verbosely $? $v "" "VPN GATEWAY DOWN" || revpn
 
-        ping -i 0.4 -c 5 -w 4 -nq 8.8.8.8 &>/dev/null
+        ping_test 8.8.8.8 &>/dev/null
         verbosely $? $v "" "VPN IPV4 DOWN" || revpn
 
-        ping -i 0.4 -c 5 -w 4 -nq6 2001:4860:4860::8888 &>/dev/null
+        ping_test -6 2001:4860:4860::8888 &>/dev/null
         verbosely $? $v "VPN UP" "VPN DOWN" && break || revpn
     done
 
