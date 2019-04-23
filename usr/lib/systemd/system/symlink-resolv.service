@@ -1,5 +1,4 @@
 [Unit]
-Conflicts=keep-net-up.service
 After=keep-net-up.service
 Before=systemd-networkd.service
 
