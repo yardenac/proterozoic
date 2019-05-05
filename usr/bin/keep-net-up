@@ -99,8 +99,9 @@ do_network_test() {
     done
 
     # check openvpn
+    tries=10
     systemctl --quiet is-active openvpn-client@\*.service
-    verbosely $? $v "" "" && while :; do
+    verbosely $? $v "" "" && while :; do if let tries--; then
         vpn_local=$(ip address show dev tun0 scope global | awk '($1 == "inet") {print $2}') \
             && [[ "$vpn_local" =~ ^[0-9\.]+/[0-9]+$ ]] \
             && ping_test "${vpn_local%%/*}" &>/dev/null
@@ -116,25 +117,31 @@ do_network_test() {
 
         ping_test -6 2001:4860:4860::8888 &>/dev/null
         verbosely $? $v "defer:VPN UP" "VPN DOWN" && break || revpn
-    done
+    else
+        return 1
+    fi; done
 
     # check tor
+    tries=10
     systemctl --quiet is-active tor
     verbosely $? $v "" "" && { # "DOING TOR TEST" "NO TOR TEST"
-        while :; do
+        while :; do if let tries--; then
             test_tor
             verbosely $? $v "defer:TOR UP" "TOR DOWN" && break || {
                     root_do systemctl restart tor
                     am_root || break
                     journal_wait tor 'Bootstrapped 100%: Done' 30
                 }
-        done
+        else
+           return 1
+        fi; done
     }
 
     # check dns
+    tries=10
     systemctl --quiet is-active systemd-resolved.service
     verbosely $? $v "" "" && { # "DOING DNS TEST" "NO DNS TEST"
-        while :; do
+        while :; do if tries--; then
             [ "$(readlink -e /etc/resolv.conf)" = "/run/systemd/resolve/resolv.conf" ] || \
                 root_do ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
             [ -f /run/systemd/resolve/resolv.conf ] && \
@@ -144,7 +151,9 @@ do_network_test() {
                     am_root || break
                     sleep 5
                 }
-        done
+        else
+           return 1
+        fi; done
     }
 
     [ $v = min ] && {
