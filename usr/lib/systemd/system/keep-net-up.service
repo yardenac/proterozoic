@@ -3,7 +3,7 @@ Description=Keep-Net-Up
 
 [Service]
 Restart=always
-ExecStart=/usr/bin/keep-net-up --loop --nostamp
+ExecStart=/usr/bin/keep-net-up --loop --quiet
 
 [Install]
 WantedBy=network-online.target

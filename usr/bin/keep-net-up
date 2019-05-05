@@ -14,11 +14,12 @@ root_do() {
     fi; :
 }
 
-v=stamp loop=false
+v=stamp loop=false c=p=20 t=15
 for arg; do
     case "$arg" in
         --loop)    loop=true;;
-        --quiet)   v=none;;
+        --quiet)   v=min;; # outputs p up loops per line
+        --silent)  v=none;;
         --errors)  v=errors;;
         --nostamp) v=all;;
         *)         echo_red "WEIRD ARG: $arg";;
@@ -58,6 +59,7 @@ journal_wait() {
     secs=$(( "$(date +%s)" - start ))
     verbosely 1 $v "" "NOT FOUND IN JOURNAL AFTER ${secs}s: $string"
     rm -f "$fifo"
+    c=$p
     return 1
 }
 
@@ -85,7 +87,7 @@ do_network_test() {
     while :; do
         gateway=$(ip route | awk '/^default via/ { print $3}')
         [ "$gateway" ] && ping_test "$gateway" &>/dev/null
-        verbosely $? $v "GATEWAY UP" "GATEWAY DOWN" && break || {
+        verbosely $? $v "defer:GATEWAY UP" "GATEWAY DOWN" && break || {
                 ip route flush table main
                 for module in "${WIFI_MODULES[@]}"; do
                     modprobe -r "$module"
@@ -113,7 +115,7 @@ do_network_test() {
         verbosely $? $v "" "VPN IPV4 DOWN" || revpn
 
         ping_test -6 2001:4860:4860::8888 &>/dev/null
-        verbosely $? $v "VPN UP" "VPN DOWN" && break || revpn
+        verbosely $? $v "defer:VPN UP" "VPN DOWN" && break || revpn
     done
 
     # check tor
@@ -121,7 +123,7 @@ do_network_test() {
     verbosely $? $v "" "" && { # "DOING TOR TEST" "NO TOR TEST"
         while :; do
             test_tor
-            verbosely $? $v "TOR UP" "TOR DOWN" && break || {
+            verbosely $? $v "defer:TOR UP" "TOR DOWN" && break || {
                     root_do systemctl restart tor
                     am_root || break
                     journal_wait tor 'Bootstrapped 100%: Done' 30
@@ -137,12 +139,20 @@ do_network_test() {
                 root_do ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
             [ -f /run/systemd/resolve/resolv.conf ] && \
                 [ "$(dig +short ns1.linode.com A)" = 162.159.27.72 ]
-            verbosely $? $v "DNS UP" "DNS DOWN" && break || {
+            verbosely $? $v "defer:DNS UP" "DNS DOWN" && break || {
                     root_do systemctl restart systemd-resolved
                     am_root || break
                     sleep 5
                 }
         done
+    }
+
+    [ $v = min ] && {
+        echo_green_n "UP "
+        if ! let --c; then
+            echo
+            c=$p
+        fi
     }
 
     if [ -O "$userscript" ] && [ -x "$userscript" ]; then
@@ -153,7 +163,7 @@ do_network_test() {
 do_loop() {
     while :; do
         do_network_test
-        sleep 60
+        sleep $t
     done
 }
 $loop && do_loop || do_network_test

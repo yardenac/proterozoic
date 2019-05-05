@@ -557,12 +557,28 @@ fwget() { # fwget [TIMEOUT [TRIES [URL [PROXY]]]]
    fi
    /usr/bin/curl --proxy "$4" --retry ${RETRIES} --max-time ${TIMEOUT} ${URL} -so- 2>/dev/null
 }
+verbosely_say() {
+    local func=$1 yesmsg=$2
+    case "$yesmsg" in
+        defer) :;;
+        *) "$func" "$yesmsg";;
+    esac
+}
+verbosely_deferred=false
 verbosely() {
     local returncode=$1 verbosity=$2 yesmsg=$3 errmsg=$4
+    [[ "$yesmsg" =~ ^defer: ]] && {
+        if [ "$verbosity" = min ]; then
+            (( $returncode )) && echo_red "$errmsg"
+            return "$returncode"
+        else
+            yesmsg=${yesmsg#*:}
+        fi
+    }
     case "$verbosity" in
-        stamp)  (( $returncode )) && stamp red "$errmsg" || stamp green "$yesmsg";;
-        all)    (( $returncode )) && echo_red "$errmsg" || echo_green "$yesmsg";;
-        errors) (( $returncode )) && echo_red "$errmsg";;
+        stamp)   (( $returncode )) && stamp red "$errmsg" || stamp green "$yesmsg";;
+        min|all) (( $returncode )) && echo_red "$errmsg" || echo_green "$yesmsg";;
+        errors)  (( $returncode )) && echo_red "$errmsg";;
     esac
     return $returncode
 }
