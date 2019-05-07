@@ -141,7 +141,7 @@ do_network_test() {
     tries=10
     systemctl --quiet is-active systemd-resolved.service
     verbosely $? $v "" "" && { # "DOING DNS TEST" "NO DNS TEST"
-        while :; do if tries--; then
+        while :; do if let tries--; then
             [ "$(readlink -e /etc/resolv.conf)" = "/run/systemd/resolve/resolv.conf" ] || \
                 root_do ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
             [ -f /run/systemd/resolve/resolv.conf ] && \
