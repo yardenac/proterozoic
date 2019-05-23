@@ -2,7 +2,7 @@
 
 # Check an arch repository for AUR updates
 
-export cower='cower --timeout=60'
+export auracle='auracle'
 
 vergt () {
     [ "$1" = "$2" ] && return 1
@@ -61,7 +61,7 @@ show_github() {
 }
 vers_there_function() {
     local hash name=$1 vers_there
-    vers_there=$($cower --info --format="%v" "${name}") || return 1
+    vers_there=$($auracle info -F '{version}' "${name}") || return 1
     if [[ "$vers_there" =~ ^[0-9\.]+r[0-9]+\.[0-f]+-[0-9]+$ ]]; then
         hash=${vers_there##*.}
         hash=${hash%%-*}
@@ -86,10 +86,10 @@ ck_pkg() {
         echo_red "package not in AUR: $name"
         return 1
     }
-    base=$($cower --info --format="%b" "${name}")
-    flagged=$($cower --info --format="%t" "${name}")
-    maintainer=$($cower --info --format="%m" "${name}")
-    [ "$flagged" = yes ] || [ "$maintainer" = "(orphan)" ] && fucked=yes
+    base=$($auracle info -F '{pkgbase}' "${name}")
+    flagged=$($auracle info -F '{outofdate:%s}' "${name}")
+    maintainer=$($auracle info -F '{maintainer}' "${name}")
+    (( "$flagged" )) || [ -z "$maintainer" ] && fucked=yes
     incremental=false
     [ "$vers_here" = "$vers_there.${vers_here##*.}" ] && incremental=true
     if [ "$vers_here" = "$vers_there" ] || $incremental; then
@@ -101,8 +101,8 @@ ck_pkg() {
         elif [ "$fucked" = yes ]; then
             name_vers "$name" "$vers_here"
             echo_cyan_n "$vers_there "
-            [ "$flagged" = yes ] && echo_green_n "FLAGGED "
-            [ "$maintainer" = "(orphan)" ] && echo_green_n "ORPHAN "
+            (( "$flagged" )) && echo_green_n "FLAGGED "
+            [ -z "$maintainer" ] && echo_green_n "ORPHAN "
             echo "https://aur.archlinux.org/packages/${base}"
         elif [[ $verbose == y ]]; then
             if $incremental; then
@@ -113,12 +113,12 @@ ck_pkg() {
             fi
         fi
     elif vergt "$vers_here" "$vers_there"; then
-        url=$($cower --info --format="%u" "${name}")
+        url=$($auracle info -F '{url}' "${name}")
         if [[ "$url" =~ github.com ]]; then
             show_github "$vers_here" "$url"
         else
             hash=''
-            if cower --quiet --force --timeout=60 --ignorerepo -d "${name}" >/dev/null; then
+            if $auracle --quiet download "${name}" >/dev/null; then
                 giturl=$(awk '($1 ~ /source/ && $3 ~ /^([a-zA-Z0-9-]+::)?git/) {print $3; exit}' "${base}"/.SRCINFO)
                 if [[ "$giturl" =~ github.com ]]; then
                     show_github "$vers_here" "$giturl"

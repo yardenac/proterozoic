@@ -53,7 +53,7 @@ pkgs_wireless=(wireless_tools wpa_supplicant b43-firmware iw) #wpa_actiond ifplu
 pkgs_laptop=(dhcpcd libu2f-host)
 pkgs_printer=(cups hplip a2ps)
 pkgs_hw=(memtest86+ mprime parted dmidecode amd-ucode intel-ucode biosdisk-git)
-pkgs_dev=(base-devel s3fs s3cmd cower pkgbuild-introspection python-magic python2-magic asp aws-cli)
+pkgs_dev=(base-devel s3fs s3cmd auracle-git pkgbuild-introspection python-magic python2-magic asp aws-cli)
 pkgs_more=(pkgfile openbsd-netcat tig)
 pkgs_selinux=(audit checkpolicy libse{linux,manage,pol} mcstrans policycoreutils restorecond secilc setools
    selinux-{alpm-hook,dbus-config,gui,python{,2},refpolicy-{arch,git,src},sandbox,utils}
