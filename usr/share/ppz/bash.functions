@@ -694,7 +694,7 @@ is() {
         pkg)
             str='^application/x-(xz|tar);';; # repo-drop
         gz|gzip|db)
-               str='^application/x-gzip;';; # ckrepo repo-drop
+               str='^application/gzip;';; # ckrepo repo-drop
         c)      str='^text/x-c;';; # ct
         plain)   str='^text/plain;';; # fit
         dvd)   srt='^application/x-iso9660-image;';; # mountdvd
