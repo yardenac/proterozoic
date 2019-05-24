@@ -54,6 +54,7 @@ show_github() {
     url="${url##*::}"
     url="${url##git+}"
     url="${url%%.git}"
+    url="${url%/}"
     commit=$(curl -sL "$(echo "$url" | sed 's_^https\?://github.com/_https://api.github.com/repos/_; t; d')"/commits | jshon -e 0)
     date=$(echo "$commit" | jshon -e commit -e author -e date | tr -d \")
     hash=$(echo "$commit" | jshon -e sha | tr -d \" | colrm 8)
