@@ -7,17 +7,34 @@ self=$(dirname "${self}") || exit 1
 . "$self/../share/ppz/bash.functions"
 
 root_do() {
+    local cmd=() sudo=$useroot
+    for arg; do
+        case "$arg" in
+            --quietfail) sudo=false;;
+            *) cmd+=("$arg");;
+        esac
+    done
     if am_root; then
-        "$@"
+        "${cmd[@]}"
+    elif ! $sudo; then
+        return
+    elif sudo -n true &>/dev/null; then
+         sudo "${cmd[@]}"
+    elif askyn "Do you want to use sudo?"; then
+         sudo "${cmd[@]}"
     else
-        verbosely 1 $v "" "root would do $*"
+        verbosely 1 $v "" "root would do ${cmd[*]}"
     fi; :
 }
 
-v=stamp loop=false c=p=20 t=15
+v=stamp loop=false c=p=20 t=15 useroot=true
 for arg; do
     case "$arg" in
         --loop)    loop=true;;
+        --noroot)  am_root && {
+                        echo_red "Cannot run --noroot as root."
+                        exit 1
+                    } || useroot=false;;
         --quiet)   v=min;; # outputs p up loops per line
         --silent)  v=none;;
         --errors)  v=errors;;
