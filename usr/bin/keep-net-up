@@ -53,7 +53,7 @@ done
 
 if [ -f "$lockfile" ]; then
     echo "Another keep-net-up process is already running: "$(cat $lockfile)
-    if [ "$lock" ]; then
+    if "$lock"; then
         echo "Exiting."
         trap "" EXIT
         exit
