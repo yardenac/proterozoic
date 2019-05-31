@@ -17,24 +17,32 @@ root_do() {
     if am_root; then
         "${cmd[@]}"
     elif ! $sudo; then
-        return
+        return 1
     elif sudo -n true &>/dev/null; then
          sudo "${cmd[@]}"
     elif askyn "Do you want to use sudo?"; then
          sudo "${cmd[@]}"
     else
+        useroot=false
         verbosely 1 $v "" "root would do ${cmd[*]}"
     fi; :
 }
 
-v=stamp loop=false c=p=20 t=15 useroot=true
+v=stamp loop=false c=p=20 t=15 useroot=true lock=true
+fifo=/tmp/.$(uniq_token)
+lockfile=/run/keep-net-up/lock
+trap "root_do --quietfail rm -f $fifo $lockfile" HUP QUIT INT TERM ABRT TSTP CONT EXIT
 for arg; do
     case "$arg" in
         --loop)    loop=true;;
+        --nolock)  lock=false;;
         --noroot)  am_root && {
                         echo_red "Cannot run --noroot as root."
                         exit 1
-                    } || useroot=false;;
+                    } || {
+                        useroot=false
+                        lock=false
+                    };;
         --quiet)   v=min;; # outputs p up loops per line
         --silent)  v=none;;
         --errors)  v=errors;;
@@ -42,6 +50,23 @@ for arg; do
         *)         echo_red "WEIRD ARG: $arg";;
     esac
 done
+
+if [ -f "$lockfile" ]; then
+    echo "Another keep-net-up process is already running: "$(cat $lockfile)
+    if [ "$lock" ]; then
+        echo "Exiting."
+        trap "" EXIT
+        exit
+    else
+        if root_do true; then
+            echo "Continuing because of --nolock"
+        else
+            echo "Cannot lock without root. Continuing."
+        fi
+    fi
+else
+    root_do --quietfail bash -c "echo $$ > $lockfile" || echo "Cannot write lock without root. We may get company."
+fi
 
 test_tor() {
    fwget 6 0 http://zqktlwi4fecvo6ri.onion/ http://127.0.0.1:8118 | grep -iq hidden\ wiki || \
@@ -58,9 +83,8 @@ ping_test() {
 }
 journal_wait() {
     # true if journal unit $1 prints $2 within $3 secs, otherwise false
-    local fifo=/tmp/.$(uniq_token) pid unit=$1 string=$2 timeout=${3:-15}
+    local pid unit=$1 string=$2 timeout=${3:-15}
     local start=$(date +%s) prefix=${jw_prefix:-}
-    trap "rm -f $fifo" HUP QUIT INT TERM ABRT TSTP CONT
     mkfifo "$fifo" || return
     timeout -k 5 "$timeout" journalctl -xfn 0 -u "$unit" > "$fifo" & pid=$!
     while read; do
