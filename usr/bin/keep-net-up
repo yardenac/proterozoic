@@ -81,6 +81,17 @@ test_tor() {
 ping_test() {
     ping -i 0.4 -c 5 -w 12 -nq "$@"
 }
+restart_if_old() {
+    # restart services unless that just happened really recently
+    for arg; do
+        local last=$(systemctl show "$arg" --property=ActiveEnterTimestamp)
+        [ "$(( $(date +%s) - $(date -d "${last##*=}" +%s) ))" -lt 60 ] && {
+            echo_red "Not restarting $arg - too soon"
+            continue
+        }
+        root_do systemctl restart "$arg"
+    done
+}
 journal_wait() {
     # true if journal unit $1 prints $2 within $3 secs, otherwise false
     local pid unit=$1 string=$2 timeout=${3:-15}
@@ -106,7 +117,7 @@ journal_wait() {
 
 shopt -s expand_aliases
 alias revpn='{
-   root_do systemctl restart openvpn-client@\*.service
+   restart_if_old openvpn-client@\*.service
    am_root || break
    journal_wait "system-openvpn\x2dclient.slice" "Initialization Sequence Completed" 120
    continue
@@ -133,7 +144,7 @@ do_network_test() {
                 for module in "${WIFI_MODULES[@]}"; do
                     modprobe -r "$module"
                 done
-                root_do systemctl restart ip{,6}tables systemd-networkd wpa_supplicant@$wifidev
+                restart_if_old ip{,6}tables systemd-networkd wpa_supplicant@$wifidev
                 am_root || break
                 journal_wait system-wpa_supplicant.slice CTRL-EVENT-CONNECTED 20
             }
@@ -169,7 +180,7 @@ do_network_test() {
         while :; do if let tries--; then
             test_tor
             verbosely $? $v "defer:TOR UP" "TOR DOWN" && break || {
-                    root_do systemctl restart tor
+                    restart_if_old tor
                     am_root || break
                     journal_wait tor 'Bootstrapped 100%: Done' 30
                 }
@@ -188,7 +199,7 @@ do_network_test() {
             [ -f /run/systemd/resolve/resolv.conf ] && \
                 [ "$(dig +short ns1.linode.com A)" = 162.159.27.72 ]
             verbosely $? $v "defer:DNS UP" "DNS DOWN" && break || {
-                    root_do systemctl restart systemd-resolved
+                    restart_if_old systemd-resolved
                     am_root || break
                     sleep 5
                 }
