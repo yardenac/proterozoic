@@ -28,14 +28,13 @@ root_do() {
     fi; :
 }
 
-v=stamp loop=false c=p=20 t=15 useroot=true lock=true
+v=stamp loop=false c=p=20 t=15 useroot=true lock=false
 fifo=/tmp/.$(uniq_token)
 lockfile=/run/keep-net-up/lock
 trap "root_do --quietfail rm -f $fifo $lockfile; exit;" HUP QUIT INT TERM ABRT TSTP CONT EXIT
 for arg; do
     case "$arg" in
-        --loop)    loop=true;;
-        --nolock)  lock=false;;
+        --loop)    loop=true; lock=true;;
         --noroot)  am_root && {
                         echo_red "Cannot run --noroot as root."
                         exit 1
