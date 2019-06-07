@@ -139,9 +139,9 @@ do_network_test() {
         gateway=$(ip route | awk '/^default via/ { print $3}')
         [ "$gateway" ] && ping_test "$gateway" &>/dev/null
         verbosely $? $v "defer:GATEWAY UP" "GATEWAY DOWN" && break || {
-                ip route flush table main
+                root_do ip route flush table main
                 for module in "${WIFI_MODULES[@]}"; do
-                    modprobe -r "$module"
+                    root_do modprobe -r "$module"
                 done
                 restart_if_old ip{,6}tables systemd-networkd wpa_supplicant@$wifidev
                 am_root || break
