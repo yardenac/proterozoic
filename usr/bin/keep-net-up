@@ -150,7 +150,7 @@ do_network_test() {
     done
 
     # check openvpn
-    tries=10
+    tries=2
     systemctl --quiet is-active openvpn-client@\*.service
     verbosely $? $v "" "" && while :; do if let tries--; then
         vpn_local=$(ip address show dev tun0 scope global | awk '($1 == "inet") {print $2}') \
@@ -173,7 +173,7 @@ do_network_test() {
     fi; done
 
     # check tor
-    tries=10
+    tries=2
     systemctl --quiet is-active tor
     verbosely $? $v "" "" && { # "DOING TOR TEST" "NO TOR TEST"
         while :; do if let tries--; then
@@ -189,7 +189,7 @@ do_network_test() {
     }
 
     # check dns
-    tries=10
+    tries=2
     systemctl --quiet is-active systemd-resolved.service
     verbosely $? $v "" "" && { # "DOING DNS TEST" "NO DNS TEST"
         while :; do if let tries--; then
