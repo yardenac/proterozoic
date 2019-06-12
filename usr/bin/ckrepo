@@ -72,7 +72,8 @@ vers_there_function() {
     fi
 }
 ck_pkg() {
-    local base file giturl hash ig_pkgn incremental name perlvers pkgdeets url vers_here vers_there
+    local base file giturl hash ig_pkgn incremental name pkgdeets url vers_here vers_there
+    local perlv_sys perlv_pkg
     local fucked=no
     file=$(readlink -e "$1") || return 1
     is_pkg "$file" || return 1
@@ -92,10 +93,11 @@ ck_pkg() {
     maintainer=$($auracle info -F '{maintainer}' "${name}")
     (( "$flagged" )) || [ -z "$maintainer" ] && fucked=yes
     incremental=false
+    perlv_sys=$(perl -e 'print substr($^V,1,4)')
     [ "$vers_here" = "$vers_there.${vers_here##*.}" ] && incremental=true
     if [ "$vers_here" = "$vers_there" ] || $incremental; then
-        perlvers=$(pacman -Qlqp "$file" | awk '($0 ~ /^\/usr\/lib\/perl5\/[0-9\.]+\/$/) {split($0,a,"/"); print a[5]}')
-        if [ "$perlvers" ] && [ "$perlvers" != 5.28 ]; then
+        perlv_pkg=$(pacman -Qlqp "$file" | awk '($0 ~ /^\/usr\/lib\/perl5\/[0-9\.]+\/$/) {split($0,a,"/"); print a[5]}')
+        if [ "$perl_pkg" ] && [ "$perlv_pkg" != "$perlv_sys" ]; then
             name_vers "$name" "$vers_here"
             echo_yellow_n "PERL $perlvers "
             echo "https://aur.archlinux.org/packages/${base}"
