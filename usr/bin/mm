@@ -14,7 +14,7 @@ process_file() {
     case "${file##*.}" in
         jpg|jpeg|png|nfo) return;;
         srt|sub|vtt) args+=("--sub-file=$file");;
-        avi|mkv|mp4|webm) vids+=("$file");;
+        avi|mkv|mp4|ts|webm) vids+=("$file");;
         *) if [ -d "$file" ]; then
                dirs+=("$file")
            else
