@@ -18,7 +18,7 @@ package() {
     mkdir -p ${pkgdir}/etc/skel.ppz/.{macromedia,local/share/applications}
 
     fbdir=${pkgdir}/etc/skel.ppz/.config/fbpanel
-    for width in 1024 1280; do
+    for width in 1024 1280 1366; do
         sed -e 's/\(widthtype = \).*$/\1pixel/ig' \
             -e 's/\(width = \)100$/\1'$width'/ig' ${fbdir}/default >| ${fbdir}/$width
     done
