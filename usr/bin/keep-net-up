@@ -181,7 +181,7 @@ do_network_test() {
             verbosely $? $v "defer:TOR UP" "TOR DOWN" && break || {
                     restart_if_old tor
                     am_root || break
-                    journal_wait tor 'Bootstrapped 100%: Done' 30
+                    journal_wait tor 'Bootstrapped 100% (done): Done' 30
                 }
         else
            return 1
