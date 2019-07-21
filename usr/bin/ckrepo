@@ -2,8 +2,15 @@
 
 # Check an arch repository for AUR updates
 
-export auracle='auracle'
+export auracle='auracle_loop'
 
+auracle_loop() {
+    local c=3
+    while let c--; do
+        auracle "$@" && return
+    done
+    return 1
+}
 vergt () {
     [ "$1" = "$2" ] && return 1
     [ "$(vercmp "$1" "$2")" -gt 0 ]
