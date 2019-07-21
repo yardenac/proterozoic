@@ -10,7 +10,7 @@ ServerAliveCountMax 10
 Compression no
 ControlMaster auto
 ControlPersist no
-ControlPath ~/.ssh/master-%u-%r-%h-%p
+ControlPath ~/.ssh/ctl-%n
 RekeyLimit 200M 6H
 UpdateHostkeys ask
 UseRoaming no
