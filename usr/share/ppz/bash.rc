@@ -9,15 +9,16 @@ am_root && {
 }
 GOODPATH=$(readlink -e ~/bin):/usr/bin
 for NEWDIR in $(in_2_but_not_in_1 "$GOODPATH" "$PATH"); do case $NEWDIR in
+   /opt/cuda/bin|\
    /opt/java/jre/bin|\
-   /opt/qt/bin|\
-   /usr/lib/qt4/bin|\
-   /usr/share/java/apache-ant/bin|\
-   /usr/lib/jvm/java-8-openjdk/jre/bin|\
    /opt/opencascade/bin|\
+   /opt/qt/bin|\
    /usr/bin/core_perl|\
    /usr/bin/site_perl|\
-   /usr/bin/vendor_perl)            GOODPATH=$GOODPATH:$NEWDIR;;
+   /usr/bin/vendor_perl|\
+   /usr/lib/jvm/java-8-openjdk/jre/bin|\
+   /usr/lib/qt4/bin|\
+   /usr/share/java/apache-ant/bin)  GOODPATH=$GOODPATH:$NEWDIR;;
    /usr/local/bin|\
    /usr/local/sbin)                 : ;; # we don't want these
    *)                               echo weird path: $NEWDIR;;

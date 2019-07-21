@@ -1,11 +1,12 @@
-HOOKS="base systemd modconf autodetect block keyboard sd-vconsole headerdev sd-encrypt sd-lvm2 fsck filesystems"
+HOOKS="base systemd modconf block autodetect keyboard sd-vconsole headerdev sd-encrypt sd-lvm2 fsck filesystems"
 MODULES="
-   ac acpi-cpufreq battery coretemp sbs
+   ac acpi_cpufreq battery coretemp sbs
    ata_generic ata_piix ahci mmc_block loop
-   hid_generic ohci_pci uhci-hcd usb-storage usbhid
+   libata ahci libahci uas sd_mod scsi_mod
+   hid_generic ohci_pci uhci_hcd usb_storage usbhid
    atkbd mousedev psmouse
    intel_agp i915 drm video
-   cbc fuse snd-hda-intel
+   cbc fuse
    ath10k_pci ath10k_sdio ath10k_core ath10k_usb
    brcmfmac brcmsmac e1000e cfg80211 mac80211 iwldvm iwlwifi nf_conntrack tun
 "

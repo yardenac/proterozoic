@@ -83,7 +83,7 @@ ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}x${y} -fs --ao=alsa \
     --input-conf=/usr/share/ppz/mplayer.input.conf \
     --term-status-msg='${time-pos} / ${duration} (${percent-pos}%) ${filename}' \
     --no-osc --script-opts=osc-visibility=always,osc-timems=no,osc-layout=topslim \
-    --cursor-autohide=always \
+    --cursor-autohide=always --hwdec=auto \
     --hr-seek=yes "${args[@]}" "${files[@]}" "${vids[@]}"
 
 echo
