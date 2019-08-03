@@ -114,7 +114,8 @@ journal_wait() {
     return 1
 }
 
-shopt -s expand_aliases
+set +bm
+shopt -s expand_aliases nullglob
 alias revpn='{
    restart_if_old openvpn-client@\*.service
    am_root || break
@@ -206,6 +207,26 @@ do_network_test() {
            return 1
         fi; done
     }
+
+    # check all ssh sessions in $HOME/.ssh
+    if [ -d $HOME/.ssh ]; then
+        cd $HOME/.ssh
+        for cmf in ctl-*; do
+            cm=${cm#ctl-}
+            tries=3
+            while :; do if let tries--; then
+                [ -S "$cmf" ] && timeout 8 ssh -tO check "$cm" 2>&1 | grep -qi 'master running' &>/dev/null \
+                              && timeout 8 ssh -t "$cm" true
+                verbosely $? $v "defer:SSH UP $cm" "SSH DOWN $cm" && break || {
+                        timeout 8 ssh -tO exit "$cm" &>/dev/null
+                        pkill -u "$EUID" -f "ssh.*$cm " &>/dev/null
+                        mount | awk "/^$cm:/ "'{print $3}' | while read; do timeout 5 fusermount -uqz "$REPLY"; done
+                    }
+            else
+                return 1
+            fi; done
+        done
+    fi
 
     [ $v = min ] && {
         echo_green_n "UP "
