@@ -51,16 +51,21 @@ for arg; do
 done
 
 if [ -f "$lockfile" ]; then
-    echo "Another keep-net-up process is already running: "$(cat $lockfile)
-    if "$lock"; then
-        echo "Exiting."
-        trap "" EXIT
-        exit
+    if ! ps --pid $(cat "$lockfile") &>/dev/null; then
+        echo "Stale lock file..."
+        root_do rm -fv "$lockfile"
     else
-        if root_do true; then
-            echo "Continuing because of --nolock"
+        echo "Another keep-net-up process is already running: "$(cat $lockfile)
+        if "$lock"; then
+            echo "Exiting."
+            trap "" EXIT
+            exit
         else
-            echo "Cannot lock without root. Continuing."
+            if root_do true; then
+                echo "Continuing because of --nolock"
+            else
+                echo "Cannot lock without root. Continuing."
+            fi
         fi
     fi
 else
