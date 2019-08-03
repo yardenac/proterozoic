@@ -108,6 +108,7 @@ for pack in "${packs[@]}"; do
         (( ${#dbs[@]} )) || echo_red "NO VALID DBs for $arch in $dir"
 
         for db in "${dbs[@]}"; do
+            echo db: $db
             is db "$db" || continue
             repo=$(dirname "$db")
             if [ -a "$repo/$pack_base" ]; then
