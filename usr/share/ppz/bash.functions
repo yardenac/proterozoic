@@ -268,8 +268,15 @@ comm_front() {
     [ $(cursor_position) -eq 0 ] || echo -en '\e[1;41m<->\e[m';
     [ "$1" -eq 0 ] || echo "[${1}] "
 }
+tputt() {
+    if [ "$TERM" ]; then
+        tput "$@"
+    else
+        tput -Tlinux "$@"
+    fi
+}
 echo_spaces_return() { # spaces until the end of the line
-    local char=0 cols=$(tput cols) string=$*
+    local char=0 cols=$(tputt cols) string=$*
     while let cols--; do
         if [ $char -lt ${#string} ]; then
             echo -ne "${string:$char:1}"
@@ -282,7 +289,7 @@ echo_spaces_return() { # spaces until the end of the line
 }
 clear_line() {
     echo -ne "\r"
-    let NUMCHARS=$( tput cols )
+    let NUMCHARS=$( tputt cols )
     while let NUMCHARS--; do
         echo -n ' '
     done
@@ -300,7 +307,7 @@ has_hardstatus() {
     # breaks when used first in subshell or with redirected output
     # so call it with NO redirections first - it replaces itself :D
     eval "has_hardstatus() { return 0; }"
-    tput hs && return
+    tputt hs && return
     # how to read title?
     echo -en "\e]2;TESTING_TITLE\a"
     (( $(cursor_position) )) || { #means it got set
@@ -680,7 +687,7 @@ git_home_clone() {
         gith config --local core.bare false
         gith checkout -f
         chmod -R go-rx ~/.ssh
-        gith glog -n $(($(tput lines)/5)) | colrm $(tput cols)
+        gith glog -n $(($(tputt lines)/5)) | colrm $(tputt cols)
         popd >/dev/null
     }
 }
@@ -794,7 +801,7 @@ stamp() {
     echo : "$*"
 }
 glog() {
-    git glog -n $(($(tput lines)/5)) "$@" | colrm $(tput cols)
+    git glog -n $(($(tputt lines)/5)) "$@" | colrm $(tputt cols)
 }
 nma() {
     local host=${1:-""}
@@ -855,7 +862,7 @@ vidlength() {
         else
             printf '% 2d:%02d:%02d ' $(($secs/3600)) $(($secs%3600/60)) $(($secs%60))
         fi
-        echo $(filename_fitted "$f" $(( $(tput cols) - 9 )))
+        echo $(filename_fitted "$f" $(( $(tputt cols) - 9 )))
     done
 }
 grexify() {
