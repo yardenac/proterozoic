@@ -15,6 +15,7 @@ preowned_files=(
     etc/privoxy/config
     etc/screenrc
     etc/ssh/ssh_config
+    etc/systemd/timesyncd.conf
     etc/tor/torrc.ppz
 )
 ######### FUNCTIONS
