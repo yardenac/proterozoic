@@ -217,7 +217,7 @@ do_network_test() {
     if [ -d $HOME/.ssh ]; then
         cd $HOME/.ssh
         for cmf in ctl-*; do
-            cm=${cm#ctl-}
+            cm=${cmf#ctl-}
             tries=3
             while :; do if let tries--; then
                 [ -S "$cmf" ] && timeout 8 ssh -tO check "$cm" 2>&1 | grep -qi 'master running' &>/dev/null \
