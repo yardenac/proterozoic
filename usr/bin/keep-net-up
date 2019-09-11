@@ -217,19 +217,13 @@ do_network_test() {
     if [ -d $HOME/.ssh ]; then
         cd $HOME/.ssh
         for cmf in ctl-*; do
-            cm=${cmf#ctl-}
-            tries=3
-            while :; do if let tries--; then
-                [ -S "$cmf" ] && timeout 8 ssh -tO check "$cm" 2>&1 | grep -qi 'master running' &>/dev/null \
-                              && timeout 8 ssh -t "$cm" true
-                verbosely $? $v "defer:SSH UP $cm" "SSH DOWN $cm" && break || {
-                        timeout 8 ssh -tO exit "$cm" &>/dev/null
-                        pkill -u "$EUID" -f "ssh.*$cm " &>/dev/null
-                        mount | awk "/^$cm:/ "'{print $3}' | while read; do timeout 5 fusermount -uqz "$REPLY"; done
-                    }
-            else
-                return 1
-            fi; done
+            host=${cmf#ctl-}
+            ssh_up "$host" &>/dev/null
+            verbosely $? $v "SSH UP $host" "SSH DOWN $host" || {
+                    timeout 20 ssh -tO exit "$host" &>/dev/null
+                    pkill -u "$EUID" -f "ssh.*$host " &>/dev/null
+                    mount | awk "/^$host:/ "'{print $3}' | while read; do timeout 5 fusermount -uqz "$REPLY"; done
+                }
         done
     fi
 

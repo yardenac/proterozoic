@@ -787,6 +787,16 @@ ssh_key_from_host() {
       }
    '
 }
+ssh_up() {
+    local host=$1
+    [ -S "$HOME/.ssh/ctl-$host" ] || return 1
+    echo "$host socket good"
+    timeout 20 ssh -O check "$host" 2>&1 | grep -qi 'master running' || return 1
+    echo "$host check good"
+    timeout 20 ssh "$host" true || return 1
+    echo "$host existing good"
+    return 0
+}
 stamp() {
     local c color=green
     for c in "${ansi_colors[@]}"; do
