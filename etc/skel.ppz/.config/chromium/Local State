@@ -6,10 +6,12 @@
       "enabled_labs_experiments": [
          "enable-account-consistency@2",
          "enable-asm-webassembly",
-         "enable-site-per-process",
          "enable-devtools-experiments",
+         "enable-reader-mode",
+         "enable-site-per-process",
          "enable-webassembly",
-         "enable-webassembly-streaming"
+         "enable-webassembly-streaming",
+         "focus-mode"
       ]
    }
 }
