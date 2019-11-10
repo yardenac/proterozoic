@@ -19,7 +19,7 @@ is_pkg() {
     local type
     type=$(file -ib "$1") || return 1
     case "${type%%;*}" in
-        application/x-xz|application/x-gzip) return 0;;
+        application/x-xz|application/x-gzip|application/x-zstd) return 0;;
         *) return 1
     esac
     return 0

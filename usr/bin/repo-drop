@@ -40,7 +40,7 @@ for arg in "$@" "${rd_args[@]}"; do
 done
 
 (( ${#dirs[@]} )) && (( ${#packs[@]} )) || \
-    croak "USAGE: repo-drop /path/to/repo/ to-add.pkg.tar.xz"
+    croak "USAGE: repo-drop /path/to/repo/ to-add.pkg.tar.zstd"
 
 _gpg_verify() {
     if gpg --verify "${1}.sig" </dev/null &>/dev/null; then
