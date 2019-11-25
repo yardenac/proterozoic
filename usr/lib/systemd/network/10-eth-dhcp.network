@@ -1,0 +1,10 @@
+[Match]
+Name=eno* enp*
+
+[Network]
+DHCP=ipv4
+IPv6AcceptRA=yes
+IPv6PrivacyExtensions=kernel
+
+[DHCP]
+ClientIdentifier=mac

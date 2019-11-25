@@ -130,30 +130,32 @@ alias revpn='{
    continue
 }'
 do_network_test() {
-    local dev wifidev gateway vpn_local vpn_gateway
+    local dev gateway gwdev vpn_local vpn_gateway
     local userscript=$HOME/.config/bin/test_network.sh
-
-    # figure out what the wifi device is called
-    for dev in $(ip link show | awk '/^[0-9]/ {print $2}'); do
-        case "${dev%:}" in
-            lo|docker*|eno*|enp*|eth*|lxcbr*|tun*) continue;;
-            wlan*|wlp*) wifidev=${dev%:}; break;;
-            *)     echo "WEIRD DEVICE: $dev";;
-        esac
-    done
 
     # check for local gateway
     while :; do
         gateway=$(ip route | awk '/^default via/ { print $3}')
+        gwdev=$(ip route | awk '/^default via/ { print $5}')
         [ "$gateway" ] && ping_test "$gateway" &>/dev/null
-        verbosely $? $v "defer:GATEWAY UP" "GATEWAY DOWN" && break || {
+        verbosely $? $v "defer:GATEWAY $gwdev UP" "GATEWAY $gwdev DOWN" && break || {
                 root_do ip route flush table main
                 for module in "${WIFI_MODULES[@]}"; do
                     root_do modprobe -r "$module"
                 done
-                restart_if_old ip{,6}tables systemd-networkd wpa_supplicant@$wifidev
-                am_root || break
-                journal_wait system-wpa_supplicant.slice CTRL-EVENT-CONNECTED 20
+                restart_if_old ip{,6}tables systemd-networkd
+                case "${gwdev%:}" in
+                    lo|docker*|lxcbr*|tun*) echo "WHY DEVICE? $gwdev";;
+                    eno*|enp*|eth*)
+                        sleep 5
+                        ;;
+                    wlan*|wlp*)
+                        restart_if_old "wpa_supplicant@$gwdev"
+                        am_root || continue
+                        journal_wait system-wpa_supplicant.slice CTRL-EVENT-CONNECTED 20
+                        ;;
+                    *) echo "WEIRD DEVICE: $gwdev";;
+                esac
             }
     done
 
