@@ -144,6 +144,13 @@ do_network_test() {
                     root_do modprobe -r "$module"
                 done
                 restart_if_old ip{,6}tables systemd-networkd
+                [ "$gwdev" ] || for dev in $(ip link show | awk '/^[0-9]/ {print $2}'); do
+                    case "${dev%:}" in
+                        lo|docker*|eno*|enp*|eth*|lxcbr*|tun*) continue;;
+                        wlan*|wlp*) gwdev=${dev%:}; break;;
+                        *)     echo "WEIRD LINK DEVICE: $dev";;
+                    esac
+                done
                 case "${gwdev%:}" in
                     lo|docker*|lxcbr*|tun*) echo "WHY DEVICE? $gwdev";;
                     eno*|enp*|eth*)
@@ -154,7 +161,7 @@ do_network_test() {
                         am_root || continue
                         journal_wait system-wpa_supplicant.slice CTRL-EVENT-CONNECTED 20
                         ;;
-                    *) echo "WEIRD DEVICE: $gwdev";;
+                    *) echo "WEIRD GW DEVICE: $gwdev";;
                 esac
             }
     done
