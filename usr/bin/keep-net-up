@@ -34,7 +34,8 @@ lockfile=/run/keep-net-up/lock
 trap "root_do --quietfail rm -f $fifo $lockfile; exit;" HUP QUIT INT TERM ABRT TSTP CONT EXIT
 for arg; do
     case "$arg" in
-        --loop)    loop=true; lock=true;;
+        --loop)    loop=true;;
+        --lock)    lock=true;;
         --noroot)  am_root && {
                         echo_red "Cannot run --noroot as root."
                         exit 1
