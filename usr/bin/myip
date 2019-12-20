@@ -11,6 +11,6 @@ for env in ['http_proxy', 'HTTP_PROXY', 'https_proxy', 'HTTPS_PROXY', 'all_proxy
     os.environ[env] = ''
 
 context = ssl.create_default_context(capath="/etc/ssl/certs")
-response = urllib.request.urlopen("https://www.privateinternetaccess.com/pages/whats-my-ip/",context=context)
+response = urllib.request.urlopen("https://wtfismyip.com/text",context=context)
 
-print (re.search('>Your IP Address: ([0-9a-fA-F\.:]+)+<',response.read().decode()).groups()[0])
+print (response.read().decode())
