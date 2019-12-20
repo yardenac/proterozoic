@@ -6,10 +6,11 @@ import re
 import urllib.request
 import ssl
 
+os.environ['no_proxy'] = '*'
 for env in ['http_proxy', 'HTTP_PROXY', 'https_proxy', 'HTTPS_PROXY', 'all_proxy', 'ALL_PROXY']:
     os.environ[env] = ''
 
 context = ssl.create_default_context(capath="/etc/ssl/certs")
-response = urllib.request.urlopen("https://api.duckduckgo.com/?format=json&q=whats+my+ip",context=context)
+response = urllib.request.urlopen("https://www.privateinternetaccess.com/pages/whats-my-ip/",context=context)
 
-print (re.sub('<[^>]*>','',json.loads(response.read().decode())['Answer']))
+print (re.search('>Your IP Address: ([0-9a-fA-F\.:]+)+<',response.read().decode()).groups()[0])
