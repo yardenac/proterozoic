@@ -559,10 +559,17 @@ fwget() { # fwget [TIMEOUT [TRIES [URL [PROXY]]]]
    local URL=${3:-https://duckduckgo.com/}
    if systemctl --quiet is-active tor &>/dev/null; then
        local p=${4:-http://127.0.0.1:8118}
+       local {ALL,FTP,HTTP,HTTPS}_PROXY=$p
+       local {all,ftp,http,https}_proxy=$p
+       local no_proxy=
    else
+       local {ALL,FTP,HTTP,HTTPS}_PROXY=
+       local {all,ftp,http,https}_proxy=
+       local no_proxy='*'
        local p=${4:-}
    fi
-   /usr/bin/curl --proxy "$4" --retry ${RETRIES} --max-time ${TIMEOUT} ${URL} -so- 2>/dev/null
+   eval {ALL,FTP,HTTP,HTTPS}_PROXY=$p {all,ftp,http,https}_proxy=$p no_proxy=$no_proxy \
+        /usr/bin/curl --proxy "$p" --retry ${RETRIES} --max-time ${TIMEOUT} ${URL} -so- 2>/dev/null
 }
 verbosely_say() {
     local func=$1 yesmsg=$2

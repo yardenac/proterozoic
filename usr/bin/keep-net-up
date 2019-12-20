@@ -85,9 +85,9 @@ reload_mods() {
     echo
 }
 test_tor() {
-   fwget 12 0 http://zqktlwi4fecvo6ri.onion/ http://127.0.0.1:8118 | grep -iq hidden\ wiki || \
-   fwget 9 0 http://duskgytldkxiuqc6.onion/ http://127.0.0.1:8118 | grep -iq rendezvous || \
-   fwget 6 1 http://3g2upl4pq6kufc4m.onion/ http://127.0.0.1:8118 | grep -iq "doesn't track you"
+   fwget 12 0 http://zqktlwi4fecvo6ri.onion/ | grep -iq hidden\ wiki || \
+   fwget 9 0 http://duskgytldkxiuqc6.onion/  | grep -iq rendezvous || \
+   fwget 6 1 http://3g2upl4pq6kufc4m.onion/  | grep -iq "doesn't track you"
 #  https://www.bbcnewsv2vjtpsuy.onion/
 #   fwget 18 2 http://pubdrop4dw6rk3aq.onion/ http://127.0.0.1:8118 | grep -iq securedrop
 #   fwget 10 1 http://4thievzv3hh26qeh.onion/ http://127.0.0.1:8118 | grep -iq "Four Thieves Vinegar" || \
