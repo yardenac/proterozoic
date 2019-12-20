@@ -74,6 +74,16 @@ else
     root_do --quietfail bash -c "echo $$ > $lockfile" || echo "Cannot write lock without root. We may get company."
 fi
 
+reload_mods() {
+    for m in "${WIFI_MODULES[@]}"; do
+        root_do modprobe -r $m
+    done
+    echo_green_n "RELOADING MODS: "
+    for m in "${WIFI_MODULES[@]}"; do
+        root_do modprobe -v $m | awk '/^insmod/ { printf "%s ", "'$m'" }'
+    done
+    echo
+}
 test_tor() {
    fwget 12 0 http://zqktlwi4fecvo6ri.onion/ http://127.0.0.1:8118 | grep -iq hidden\ wiki || \
    fwget 9 0 http://duskgytldkxiuqc6.onion/ http://127.0.0.1:8118 | grep -iq rendezvous || \
@@ -141,9 +151,7 @@ do_network_test() {
         [ "$gateway" ] && ping_test "$gateway" &>/dev/null
         verbosely $? $v "defer:GATEWAY $gwdev UP" "GATEWAY $gwdev DOWN" && break || {
                 root_do ip route flush table main
-                for module in "${WIFI_MODULES[@]}"; do
-                    root_do modprobe -r "$module"
-                done
+                reload_mods
                 restart_if_old ip{,6}tables systemd-networkd
                 [ "$gwdev" ] || for dev in $(ip link show | awk '/^[0-9]/ {print $2}'); do
                     case "${dev%:}" in
