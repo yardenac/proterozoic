@@ -705,7 +705,7 @@ is() {
         '')      return 1;; # existential crisis...
         xz|xzip)
                str='^application/x-xz;';;
-        zstd)
+        zst|zstd)
                str='^application/x-zstd;';;
         pkg)
             str='^application/x-(xz|tar);';; # repo-drop
