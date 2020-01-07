@@ -136,7 +136,6 @@ set +bm
 shopt -s expand_aliases nullglob
 alias revpn='{
    restart_if_old openvpn-client@\*.service
-   am_root || break
    journal_wait "system-openvpn\x2dclient.slice" "Initialization Sequence Completed" 120
    continue
 }'
@@ -152,7 +151,7 @@ do_network_test() {
         verbosely $? $v "defer:GATEWAY $gwdev UP" "GATEWAY $gwdev DOWN" && break || {
                 root_do ip route flush table main
                 reload_mods
-                restart_if_old ip{,6}tables systemd-networkd
+                root_do systemctl restart ip{,6}tables systemd-networkd
                 [ "$gwdev" ] || for dev in $(ip link show | awk '/^[0-9]/ {print $2}'); do
                     case "${dev%:}" in
                         lo|docker*|eno*|enp*|eth*|lxcbr*|tun*) continue;;
@@ -160,15 +159,16 @@ do_network_test() {
                         *)     echo "WEIRD LINK DEVICE: $dev";;
                     esac
                 done
+                echo "DOING $gwdev"
                 case "${gwdev%:}" in
                     lo|docker*|lxcbr*|tun*) echo "WHY DEVICE? $gwdev";;
                     eno*|enp*|eth*)
                         sleep 5
                         ;;
                     wlan*|wlp*)
-                        restart_if_old "wpa_supplicant@$gwdev"
-                        am_root || continue
+                        root_do systemctl restart "wpa_supplicant@$gwdev"
                         journal_wait system-wpa_supplicant.slice CTRL-EVENT-CONNECTED 20
+                        sleep 5
                         ;;
                     *) echo "WEIRD GW DEVICE: $gwdev";;
                 esac
@@ -206,7 +206,6 @@ do_network_test() {
             test_tor
             verbosely $? $v "defer:TOR UP" "TOR DOWN" && break || {
                     restart_if_old tor
-                    am_root || break
                     journal_wait tor 'Bootstrapped 100% (done): Done' 30
                 }
         else
