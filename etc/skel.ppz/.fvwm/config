@@ -74,6 +74,8 @@ Key   l            A      4         Exec exec xscreensaver-command -lock
 Key   r            A      4         Refresh
 Key   q            A      4         Exec exec transset-df -a --dec 0.04
 Key   w            A      4         Exec exec transset-df -a --inc 0.04
+Key   a            A      4         Exec exec xbacklight -dec 8
+Key   s            A      4         Exec exec xbacklight -inc 8
 Key   x            A      4         Exec exec xdotool click 2
 Key   v            A      4         Exec exec bash -c 'xclip -selection p -o | xclip -selection c -i; sleep .05; xdotool key shift+Insert'
 Key   Insert       A      4         Exec exec bash -c 'xclip -selection p -o | xclip -selection c -i; sleep .05; xdotool key shift+Insert'
