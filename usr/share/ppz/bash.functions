@@ -858,32 +858,6 @@ sums() {
 filename_fitted() {
     [ ${#1} -lt "$2" ] && echo "$1" || echo $(basename "$1") | colrm "$2"
 }
-vidlength() {
-    files=()
-    for arg; do
-        if [ -f "$arg" ]; then
-            files+=("$arg")
-        elif [ -d "$arg" ]; then
-            local IFS2=$IFS IFS='
-';          for file in $(find "$arg" -type f); do
-                files+=("$file")
-            done
-            IFS=$IFS2
-        else
-            echo "weird option: $arg"
-        fi
-    done
-    for f in "${files[@]}"; do
-        secs=$(ffprobe -i "$f" -show_entries format=duration -v quiet -of csv="p=0")
-        secs=${secs%%.*}
-        if [ "$secs" = 0 -o "$secs" = "" ] || ! [[ "$secs" =~ ^[0-9]+$ ]]; then
-            echo -n "         "
-        else
-            printf '% 2d:%02d:%02d ' $(($secs/3600)) $(($secs%3600/60)) $(($secs%60))
-        fi
-        echo $(filename_fitted "$f" $(( $(tputt cols) - 9 )))
-    done
-}
 grexify() {
     local tmpfile=/tmp/.$(uniq_token)
     files=() equals_too=''
