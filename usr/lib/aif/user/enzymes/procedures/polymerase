@@ -45,13 +45,14 @@ pkgs_x=(xorg-{server,xinit,xkill,xprop,xrdb,xsetroot,xhost,xwininfo,xrandr,xinpu
         xf86-video-ati xf86-video-intel nvidia-dkms mtpfs xcalib redshift \
         urxvt-tabbedex-git urxvt-font-size-git yart)
 pkgs_wayland=(weston sway-wlroots-git)
-pkgs_web=(chromium{,-widevine,{pdfjs,ublock-origin}-git} flashplugin libu2f-host pepper-flash wget)
+pkgs_web=(chromium{,-widevine,{pdfjs,ublock-origin}-git} flashplugin libu2f-host pepper-flash wget firejail)
 pkgs_audio=(alsa-utils pulseaudio{,-alsa,-equalizer} pulsemixer)
 pkgs_cd=(cdrkit dvd+rw-tools handbrake-cli libisoburn squashfs-tools archiso-git)
 pkgs_net=(openvpn privoxy tor torsocks)
 pkgs_wireless=(wireless_tools wpa_supplicant b43-firmware iw) #wpa_actiond ifplugd
 pkgs_laptop=(dhcpcd libu2f-host)
 pkgs_printer=(cups hplip a2ps)
+pkgs_hd=(ddrescue pv smartmontools)
 pkgs_hw=(memtest86+ mprime parted dmidecode amd-ucode hwinfo intel-ucode biosdisk-git)
 pkgs_dev=(base-devel s3fs s3cmd auracle-git pkgbuild-introspection python-magic python2-magic asp aws-cli
    perl-mime-tools perl-net-smtp-ssl perl-authen-sasl)

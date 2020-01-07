@@ -6,7 +6,9 @@ proxy=--proxy-server=localhost:8118
 resolv='--host-resolver-rules=MAP * 0.0.0.0'
 configdir=/etc/skel.ppz/.config/chromium
 fjargs=() urls=() cleanup=y uniqtok=$(uniq_token)
-uniqdir="$HOME/.config/chromium.$uniqtok"
+cdir="$HOME/.config/chromium.tmp"
+mkdir -p "$cdir"
+uniqdir="$cdir/$uniqtok"
 profile=--profile=/etc/firejail/chromium-ppz.profile
 for arg; do
     if [[ "$arg" =~ ^[0-9]+$ ]]; then
@@ -20,7 +22,7 @@ for arg; do
         noproxy) proxy=''; resolv=''; tor=false;;
         mine)    configdir="${HOME}/.config/chromium";;
         --u2f)  fjargs+=--ignore=nou2f;;
-        --keepin=*)   cleanup=''; uniqdir="$HOME/.config/chromium.${arg##*=}";;
+        --keepin=*)   cleanup=''; uniqdir="$cdir/${arg##*=}";;
         *)       urls+=("$arg");;
     esac; fi
 done
@@ -52,5 +54,5 @@ ionice -c 2 -n 0 nice -n 10 \
       --user-data-dir="$uniqdir" "$proxy" "$resolv" "${urls[@]}"
 
 if [[ "$cleanup" ]]; then
-    rm -rf "$uniqdir" "$HOME/.cache/chromium.$uniqtok"
+    rm -rf "$uniqdir"
 fi
