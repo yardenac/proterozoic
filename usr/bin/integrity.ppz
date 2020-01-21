@@ -126,6 +126,9 @@ integrity_simpleconf() {
         local pem=/etc/httpd/ssl/dhparam.pem
         [ -a $pem ] || openssl dhparam -out $pem 2048
     fi
+
+    local uscript="$HOME/.config/bin/integrity.sh"
+    ! am_root && [ -x "$uscript" ] && "$uscript"
 }
 integrity_users() {
     am_root || return 0
