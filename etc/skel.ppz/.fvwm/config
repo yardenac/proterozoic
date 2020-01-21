@@ -76,6 +76,9 @@ Key   q            A      4         Exec exec transset-df -a --dec 0.04
 Key   w            A      4         Exec exec transset-df -a --inc 0.04
 Key   a            A      4         Exec exec xbacklight -dec 8
 Key   s            A      4         Exec exec xbacklight -inc 8
+Key   8            A      4         Exec exec amixer set Master toggle
+Key   9            A      4         Exec exec amixer set Master 655-
+Key   0            A      4         Exec exec amixer set Master 655+
 Key   x            A      4         Exec exec xdotool click 2
 Key   v            A      4         Exec exec bash -c 'xclip -selection p -o | xclip -selection c -i; sleep .05; xdotool key shift+Insert'
 Key   Insert       A      4         Exec exec bash -c 'xclip -selection p -o | xclip -selection c -i; sleep .05; xdotool key shift+Insert'
