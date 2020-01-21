@@ -10,6 +10,7 @@ am_root && {
 GOODPATH=$(readlink -e ~/bin):/usr/bin
 for NEWDIR in $(in_2_but_not_in_1 "$GOODPATH" "$PATH"); do case $NEWDIR in
    /opt/cuda/bin|\
+   /opt/intel/mediasdk/bin|\
    /opt/java/jre/bin|\
    /opt/opencascade/bin|\
    /opt/qt/bin|\
