@@ -129,7 +129,7 @@ integrity_simpleconf() {
 
     local uscript="$HOME/.config/bin/integrity.sh"
     ! am_root && [ -x "$uscript" ] && "$uscript"
-}
+:; }
 integrity_users() {
     am_root || return 0
 
