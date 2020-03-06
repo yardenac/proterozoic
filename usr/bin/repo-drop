@@ -127,7 +127,7 @@ for pack in "${packs[@]}"; do
                 oldfiles+=("$repo/$pack_base.sig")
             fi
             for upfile in "${uplist[@]}"; do
-                rsync --out-format='%t %o %f' --inplace -LPhz -e 'ssh -C' "$pack_dir/$upfile" "$repo/$upfile"
+                rsync --out-format='%t %o %f' --inplace -LPhzz -e 'ssh -C' "$pack_dir/$upfile" "$repo/$upfile"
             done
 
             repo-add "$db" "$repo/$pack_base"
