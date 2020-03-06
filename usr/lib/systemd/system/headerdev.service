@@ -10,4 +10,4 @@ Type=oneshot
 ExecStart=/usr/share/ppz/bin/headerdev
 
 [Install]
-RequireddBy=cryptsetup.target
+RequiredBy=cryptsetup.target
