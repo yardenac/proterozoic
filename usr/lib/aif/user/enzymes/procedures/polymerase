@@ -55,7 +55,7 @@ pkgs_printer=(cups hplip a2ps)
 pkgs_hd=(ddrescue pv smartmontools)
 pkgs_hw=(memtest86+ mprime parted dmidecode amd-ucode hwinfo intel-ucode biosdisk-git)
 pkgs_dev=(base-devel s3fs s3cmd auracle-git pkgbuild-introspection python-magic python2-magic asp aws-cli
-   perl-mime-tools perl-net-smtp-ssl perl-authen-sasl)
+   perl-mime-tools perl-net-smtp-ssl perl-authen-sasl the_silver_searcher)
 pkgs_more=(pkgfile openbsd-netcat tig)
 pkgs_selinux=(audit checkpolicy libse{linux,manage,pol} mcstrans policycoreutils restorecond secilc setools
    selinux-{alpm-hook,dbus-config,gui,python{,2},refpolicy-{arch,git,src},sandbox,utils}
