@@ -301,8 +301,8 @@ __git_ps1_cleaner() {
         return
     }
     [ -a .git ] || return
-    [ "$(git config --local user.autostatus 2>/dev/null)" == "false" ] && return
-    local s=$(__git_ps1 %s | sed 's/^[a-z0-9-]*//i')
+    [ "$(GIT_TRACE=0 git config --local user.autostatus 2>/dev/null)" == "false" ] && return
+    local s=$(GIT_TRACE=0 __git_ps1 %s | sed 's/^[a-z0-9-]*//i')
     echo "${s##* }"
 }
 has_hardstatus() {
