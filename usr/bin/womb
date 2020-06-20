@@ -59,29 +59,56 @@ setup_git() {
     git add --all .
     git commit -m setup
 }
-if [ "$USER" = ex ]; then
-    setup_home
-    [ "$(/usr/bin/tty)" = /dev/tty3 ] \
-        && [ -x /usr/bin/xinit ] \
-        && ! /usr/bin/pgrep -x X &>/dev/null && {
+err() {
+    echo "#################################"
+    echo "#######"
+    echo "#######      $*"
+    echo "#######"
+    echo "#################################"
+    read
+    exit
+}
+checktty() {
+    case "$USER" in
+        ex) local type=x;;
+        ew) local type=wayland;;
+        *) return 1;;
+    esac
+
+    local mytty="$(/usr/bin/tty 2>/dev/null)"
+    mytty=${mytty#/dev/}
+
+    local itspid="$(systemctl show "auto-$type@$mytty.service" --no-page 2>/dev/null | grep ^MainPID= 2>/dev/null)"
+    itspid=${itspid##*=}
+
+    # true if we are the main process of our own tty's service
+    [ "$itspid" = "$PPID" ] || return 1
+
+    # extra check
+    [ "$mytty" = "tty$(mydisplay)" ] || return 1
+
+    echo "${mytty#tty}"
+}
+user_setups() {
+    if [ "$USER" = ex ]; then
+        setup_home
+        t=$(checktty) || return
         setup_git
         . /etc/ppz.conf
-        if [ "$WALLPAPER" ]; then
-            sed -i "s%/usr/share/ppz/wallpaper%$WALLPAPER%" ~/.fvwm/config
-        fi
-        exec /usr/bin/xinit -- /usr/bin/X vt3 -f 0 -nolisten tcp -retro
+        [ "$WALLPAPER" ] && sed -i "s%/usr/share/ppz/wallpaper%$WALLPAPER%" ~/.fvwm/config
+        [ -x /usr/bin/xinit ] || err "NO XINIT"
+        exec /usr/bin/xinit -- /usr/bin/X :$t vt$t -f 0 -nolisten tcp -retro -logverbose 9
         exit $? #this makes respawn work
-    }
-elif [ "$USER" = ew ]; then
-    setup_home
-    [ "$(/usr/bin/tty)" = /dev/tty5 ] && {
+    elif [ "$USER" = ew ]; then
+        setup_home
+        t=$(checktty) || return
         setup_git
         . /etc/ppz.conf
         unset DISPLAY
         exec /usr/bin/weston
-        #exit $? #this makes respawn work
-    }
-fi
+    fi
+}
+user_setups
 
 case "${2%% *}" in
     rsync|git)   :;;

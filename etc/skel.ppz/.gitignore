@@ -6,7 +6,7 @@
 /.config/tmpdir
 /.dbus/session-bus/
 /.fvwm/errorlog
-/.local/share/xorg/Xorg.0.log
-/.local/share/xorg/Xorg.0.log.old
+/.local/share/xorg/Xorg.*.log
+/.local/share/xorg/Xorg.*.log.old
 /.parallel/tmp/
 /.tig_history

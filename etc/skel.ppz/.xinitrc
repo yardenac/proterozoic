@@ -2,6 +2,8 @@
 
 . /etc/ppz.conf
 
+export DISPLAY=${DISPLAY:-:$(mydisplay)}
+
 [ "$SYSTEM_TYPE" = desktop ] && numlockx on
 
 export XAUTHORITY=/tmp/.Xauthority.xuser

@@ -4,7 +4,7 @@
 
 eval $(awk '/^export RXVT_SOCKET/' /usr/share/ppz/bash.rc)
 
-export DISPLAY=${DISPLAY:-:0}
+export DISPLAY=${DISPLAY:-:$(mydisplay)}
 
 urxvtc "$@"
 

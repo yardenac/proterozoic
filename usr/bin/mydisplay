@@ -1,0 +1,36 @@
+#!/usr/bin/bash
+
+mainf() {
+    local p s pairs=() services=( $(systemctl list-units | awk '/@tty/ {print $1}') ) name pid
+    for s in "${services[@]}"; do
+        p=$(systemctl show "${s}" --property=MainPID)
+        pairs+=( "${p##*=}:$s" )
+    done
+    pstree -Asp $$ | awk -F -+ '{
+       for(i = 1; i <= NF; i++) {
+          if (paren = index($i,"(")) {
+             name = substr($i,1,paren-1)
+             pid  = substr($i,paren+1,(length($i)-paren-1))
+             print name " " pid
+          }
+       }
+    }' | while read name pid; do
+        case "$name" in
+            systemd) continue;;
+            screen) exit;;
+            *)
+                for p in "${pairs[@]}"; do
+                    [ "$pid" = "${p%%:*}" ] || continue
+                    s=${p##*:}
+                    s=${s%%.*}
+                    case "${s%%@*}" in
+                        auto-x|auto-wayland) echo "${s##*@tty}";;
+                        *) exit;;
+                    esac
+                done
+                continue;;
+        esac
+    done
+}
+
+mainf 2>/dev/null
