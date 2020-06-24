@@ -82,7 +82,7 @@ export TSOCKS_CONFFILE="$HOME"/.config/tsocks.conf
 export XAUTHORITY=/tmp/.Xauthority.$USER
 export XDG_CONFIG_HOME=~/.config
 export RXVT_SOCKET=/tmp/.rxvt-unicode.socket.$USER.$EUID
-mesg n
+mesg n 2>/dev/null
 set completion-ignore-case On
 set completion-query-items 150
 set page-completions Off
