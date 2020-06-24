@@ -47,9 +47,23 @@ if [[ "$cleanup" ]] && ! $tor; then
         | sqlite3 "${uniqdir}/Default/Web Data"
 fi
 
+extensions() {
+    local IFS=, extensions=(
+        /usr/share/chromium-bypass-paywalls-git
+        /usr/share/chromium-darkreader-git
+        /usr/share/chromium-pdfjs-git/chromium
+        /usr/share/chromium-ublock-origin-git
+        /usr/share/chromium-unpaywall-git
+        /usr/share/https-everywhere-chrome-git
+        /usr/share/newsblurbackgroundtab-git
+        /usr/share/stylus-git
+    )
+    echo "${extensions[*]}"
+}
+
 ionice -c 2 -n 0 nice -n 10 \
    firejail "${fjargs[@]}" $profile chromium --incognito \
-      --load-extension=/usr/share/newsblurbackgroundtab-git,/usr/share/https-everywhere-chrome-git,/usr/share/stylus-git,/usr/share/chromium-ublock-origin-git,/usr/share/chromium-pdfjs-git/chromium \
+      --load-extension=$(extensions) \
       --ssl-version-min=tls1  --force-dark-mode \
       --user-data-dir="$uniqdir" "$proxy" "$resolv" "${urls[@]}"
 

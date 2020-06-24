@@ -880,6 +880,14 @@ grexify() {
         rm -rf $tmpfile
     done
 }
+jshonify() {
+    local f="$1" tmpfile=/tmp/.$(uniq_token)
+    [ -O "$f" ] || return 1
+    cat "$f" | jshon &>/dev/null || return 1
+    mv -i "$f" $tmpfile
+    cat $tmpfile | jshon >| "$f"
+    rm -rf $tmpfile
+}
 wehave() {
     local arg= missing=()
     for arg; do

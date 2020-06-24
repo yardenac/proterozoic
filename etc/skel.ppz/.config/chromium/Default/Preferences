@@ -60,23 +60,39 @@
    "extensions": {
       "settings": {
          "cjelmkehlpcdogpnfjeicgklplbpgjih": {
+            "path": "\/usr\/share\/newsblurbackgroundtab-git",
             "incognito": true
          },
-         "ehfhghddhachdadpdnpcpigiipkagfoe": {
+         "clngdbkpkpeebahjckkjfobafhncgmne": {
+            "path": "\/usr\/share\/stylus-git",
+            "incognito": true
+         },
+         "dcpihecpambacapedldabdbpakmachpb": {
+            "path": "\/usr\/share\/chromium-bypass-paywalls-git",
             "incognito": true,
-            "newAllowFileAccess": false
+            "state": 0
+         },
+         "fppnenjkaccbhhnfclbfhkecpchdidmg": {
+            "path": "\/usr\/share\/chromium-unpaywall-git",
+            "incognito": true,
+            "state": 0
          },
          "ekjnponglcbkpjobdnoijpnkphfallfn": {
+            "path": "\/usr\/share\/chromium-ublock-origin-git",
             "incognito": true
          },
-         "gmbclidgiobnognmnejllpfcmkdppicp": {
+         "japndfmnmlkelcaiamhbepgpbmioldpl": {
+            "path": "\/usr\/share\/chromium-darkreader-git",
             "incognito": true,
-            "newAllowFileAccess": false
+            "state": 0
          },
-         "ngpgelmapbhdaloljhnooakekchnnmjk": {
+         "gmbclidgiobnognmnejllpfcmkdppicp": {
+            "path": "\/usr\/share\/https-everywhere-chrome-git",
+            "newAllowFileAccess": false,
             "incognito": true
          },
          "pamahahcaaddkbaccgihgdfbkiianjck": {
+            "path": "\/usr\/share\/chromium-pdfjs-git\/chromium",
             "incognito": true
          }
       }
