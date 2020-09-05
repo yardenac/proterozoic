@@ -6,7 +6,7 @@
 
 userscript=$HOME/.config/bin/pre-mm.sh
 
-nice=false debug=no
+nice=false debug=no subliminal=false maketmpdir=false
 args=() dirs=() files=() vids=() x=700 y=400 holdss=''
 process_file() {
     local file=$*
@@ -14,9 +14,10 @@ process_file() {
     case "${file##*.}" in
         jpg|jpeg|png|nfo) return;;
         srt|sub|vtt) args+=("--sub-file=$file");;
-        avi|mkv|mp4|ts|webm|divx) vids+=("$file");;
+        avi|mkv|mp4|ts|webm|divx|ogm|swf) vids+=("$file");;
         *) if [ -d "$file" ]; then
                dirs+=("$file")
+               maketmpdir=true
            else
                files+=("$file")
            fi;;
@@ -33,6 +34,7 @@ for arg; do
     case "$arg" in
         --nice) nice=true;;
         --debug) debug=warn;;
+        --subdl) subliminal=true;;
         *)
             is_ssh_host "$arg" && {
                 as=mm
@@ -46,9 +48,16 @@ for arg; do
     esac
 done
 
+$subliminal || (( "${#vids[@]}" )) && maketmpdir=true
+
+if $maketmpdir; then
+    tmpdir=/tmp/.$(uniq_token)
+    trap "rm -f $tmpdir" EXIT HUP QUIT INT TERM ABRT
+    mkdir $tmpdir
+fi
+
 if (( "${#dirs[@]}" )); then
-    fifo=/tmp/.$(uniq_token)
-    trap "rm -f $fifo" EXIT HUP QUIT INT TERM ABRT
+    fifo=$tmpdir/fifo
     mkfifo $fifo
     for dir in "${dirs[@]}"; do
         find "$dir" -type f >> $fifo &
@@ -60,7 +69,17 @@ if (( "${#dirs[@]}" )); then
     rm -f $fifo
 fi
 
-(( "${#vids[@]}" )) && holdss=y
+for vid in "${vids[@]}"; do
+    holdss=y
+    if $subliminal; then
+        mkdir -p $tmpdir/subs
+        subliminal download -f -v -l en -d $tmpdir/subs "$vid"
+    fi
+done
+shopt -s nullglob
+for f in $tmpdir/subs/*; do
+    process_file "$f"
+done
 
 $nice && do_unto_others
 
