@@ -2,7 +2,7 @@
 
 _repo-drop() {
     _get_comp_words_by_ref cur
-    COMPREPLY=($(compgen -f -X '!*.pkg.tar.?z' -- $cur))
+    COMPREPLY=($(compgen -f -X '!*.pkg.tar*' -- $cur))
 }
 
 complete -F _repo-drop repo-drop
