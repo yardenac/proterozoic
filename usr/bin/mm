@@ -4,6 +4,8 @@
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.xorg
 
+am_root && exit 1
+
 userscript=$HOME/.config/bin/pre-mm.sh
 
 nice=false debug=no subliminal=false maketmpdir=false
