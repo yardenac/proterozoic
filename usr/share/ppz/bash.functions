@@ -367,38 +367,58 @@ askyn() {
         *) echo && return 0
     esac
 }
+_ALLTRAPS=(EXIT HUP QUIT INT TERM ABRT TSTP CONT)
+unset _TRAPEXITCODE
 pushtrap() {
-    local C=0
-    while let ++C; do
-        local varname=TRAPSTACK_$C
+    local C=0 varname=
+    while true; do
+        let ++C
+        varname=_TRAPSTACK_$C
         [ "${!varname}" ] || break
-        [ "$C" -gt 1024 ] && return 1
+        [ "$C" -gt 1024 ] && {
+            er "TRAP OVERFLOW"
+            return 1
+        }
     done
-    eval ${varname}='$(trap)'
-    [ "$*" ] && trap "$@"
+    eval ${varname}'=("$@")'
 }
 poptrap() {
-    [ "${TRAPSTACK_1}" ] || return
-    local IFS=$' \t\n'
+    [ "${_TRAPSTACK_1}" ] || return
+    local IFS=$' \t\n' C=0 varname=
+    while true; do
+        let ++C
+        varname=_TRAPSTACK_$C
+        [ "${!varname}" ] && continue
+        unset _TRAPSTACK_$((C-1))
+        break
+     done
+}
+listalltraps() {
     local C=0
-    while let ++C; do
-        local varname=TRAPSTACK_$((C+1))
-        [ "${!varname}" ] || varname=TRAPSTACK_$C && break
-        [ "$C" -gt 1024 ] && return 1
-    done
-    trap - $(trap | while read; do echo ${REPLY##*\'}; done)
-    #iterating through multiline var - "while read"
-    #does not preserve all quoting!!!
-    local traptmp="${!varname}"
-    unset $varname
-    while [ -n "${traptmp}" ]; do
-        local shorter="${traptmp%%$'\n'*}"
-        eval trap ${shorter:7}
-        [ "${traptmp}" = "${traptmp//$'\n'/}" ] \
-            && traptmp= \
-            || traptmp="${traptmp#*$'\n'}"
+    while true; do
+        let ++C
+        varname=_TRAPSTACK_$C
+        if [ "${!varname}" ]; then
+            eval echo '${'"${varname}"'[@]}'
+        else
+            return
+        fi
     done
 }
+runalltraps() {
+    local rv=$? C=0
+    while true; do
+        let ++C
+        varname=_TRAPSTACK_$C
+        if [ "${!varname}" ]; then
+            eval eval '${'"${varname}"'[@]}'
+        else
+            break
+        fi
+    done
+    exit ${_TRAPEXITCODE:-$rv}
+}
+trap "runalltraps;" "${_ALLTRAPS[@]}"
 usetvar() { local ctxt temp; local confirm=0
 #    lets user set var with default and interactive readline
 #    USAGE: usetvar VARNAME 'prompt: ' "default val" 'val if cancelled'
@@ -417,7 +437,6 @@ usetvar() { local ctxt temp; local confirm=0
 #        eval $1=NONINTERACTIVE
         return 1
     }
-    pushtrap 'poptrap; echo; return;' INT QUIT
     clear_input_buffer
     while :; do
         read -ei "${DVAL}" -p $'\e[1;34m'"${2//   }"$'\e[m' $5 $6 $7 "${1}"
@@ -429,7 +448,6 @@ usetvar() { local ctxt temp; local confirm=0
         [ "$DVAL" = "$ctxt" ] && break
         echo_red "They did not match! Trying again!"
     done
-    poptrap
     return $RV
 }
 commalist() {
