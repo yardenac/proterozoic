@@ -130,7 +130,8 @@ first_to_exist() {
     #this is fucked up
     PREFIX=$1
     c=0
-    while let ++c; do
+    while true; do
+        let ++c
                 LOCKDIR=/tmp/lock.file.first-to-exist
                 mkdir ${LOCKDIR} 2>/dev/null || return
         [ -a "$PREFIX$c" ] || break
@@ -657,7 +658,8 @@ vars_in_series() { local prefix n var width
     prefix="$1"
     n=1
     width=0
-    while let ++width; do
+    while true; do
+        let ++width
         var=${prefix}_$(strpad $n $width 0)
         [ "${!var}" ] && break
         [ $width -gt 5 ] && return 1
