@@ -4,8 +4,7 @@
 
 am_root || croak "You must be root to run $0!"
 
-trap 'exit 46;' HUP QUIT INT TERM ABRT TSTP CONT
-
+_TRAPEXITCODE=46
 mountpoint=/media/dvd
 
 [ -a $mountpoint ]         || mkdir $mountpoint

@@ -18,7 +18,7 @@ for arg; do
 done
 
 tmpfile=/tmp/sort-diff.$(uniq_token)
-trap "rm -rf $tmpfile; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+pushtrap "rm -rf $tmpfile;"
 cat "$file" >| "$tmpfile"
 
 diff -C 1 \

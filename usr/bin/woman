@@ -2,8 +2,7 @@
 
 . /usr/share/ppz/bash.functions
 . /usr/share/ppz/bash.functions.xorg
-pushd "$HOME"
-trap "popd; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+cd "$HOME"
 
 window= target=''
 for arg; do

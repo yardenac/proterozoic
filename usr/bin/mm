@@ -52,7 +52,7 @@ $subliminal || (( "${#vids[@]}" )) && maketmpdir=true
 
 if $maketmpdir; then
     tmpdir=/tmp/.$(uniq_token)
-    trap "rm -f $tmpdir" EXIT HUP QUIT INT TERM ABRT
+    pushtrap "rm -rf $tmpdir"
     mkdir $tmpdir
 fi
 
@@ -91,7 +91,7 @@ fi
 
 [ "$holdss" ] && {
     holdss &
-    trap "kill -SIGHUP $!" EXIT HUP QUIT INT TERM ABRT
+    pushtrap "kill -SIGHUP $!"
     args+=(--stop-screensaver)
 }
 

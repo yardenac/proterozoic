@@ -213,8 +213,7 @@ print_repos=''
 [ ${#repos[@]} -gt 1 ] || [ "$verbose" ] && print_repos=y
 
 tmpdir=/tmp/ckrepo.$(uniq_token)
-ckr_cleanup() { popd &>/dev/null; rm -rf "$tmpdir"; }
-trap "ckr_cleanup; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+pushtrap "rm -rf $tmpdir;"
 mkdir "$tmpdir"
 pushd "$tmpdir" >/dev/null
 

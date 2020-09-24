@@ -65,11 +65,7 @@ done
 }
 
 # mounting might happen now -- prepare cleanup
-trap "
-   rm -rf ${tmp_files[*]}
-   sudo /usr/bin/mountdvd --unmount
-   exit
-" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+pushtrap "rm -rf ${tmp_files[*]}; sudo /usr/bin/mountdvd --unmount"
 
 md5diff() {
     comm --output-delimiter=\  --nocheck-order -3 "$2" "$3" \

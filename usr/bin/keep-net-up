@@ -31,7 +31,7 @@ root_do() {
 v=stamp loop=false c=p=20 t=15 useroot=true lock=false do_test_tor=true
 fifo=/tmp/.$(uniq_token)
 lockfile=/run/keep-net-up/lock
-trap "root_do --quietfail rm -f $fifo $lockfile; exit;" HUP QUIT INT TERM ABRT TSTP CONT EXIT
+pushtrap "root_do --quietfail rm -f $fifo $lockfile"
 for arg; do
     case "$arg" in
         --loop)    loop=true;;
@@ -60,7 +60,7 @@ if [ -f "$lockfile" ]; then
         echo "Another keep-net-up process is already running: "$(cat $lockfile)
         if "$lock"; then
             echo "Exiting."
-            trap "" EXIT
+            poptrap
             exit
         else
             if root_do true; then

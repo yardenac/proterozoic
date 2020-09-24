@@ -23,7 +23,7 @@ grep -qiE '^#include <pthread.h>$'               ${CFILE} && CFLAGS=$CFLAGS' -lp
 DIR=~/.ct.$(uniq_token)
 
 if mkdir -p ${DIR}; then
-    trap "popd &>/dev/null || cd ~; rm -rf ${DIR}; exit;" EXIT HUP QUIT INT TERM ABRT TSTP CONT
+    pushtrap "rm -rf $DIR;"
     pushd ${DIR}
     if cc ${CFILE} -Wall -o ${DIR}/outfile.o $CFLAGS; then
         echo_red "compiled ok."
