@@ -1,5 +1,8 @@
 ############# ABSTRACTIONS
-uniq_token()   { echo $(date +%s).$$.$(printf "%05d" $RANDOM); }
+uniq_token()   {
+    local p=${1:-.}
+    echo $(date +%s)${p}"$$"${p}$(printf "%05d" $RANDOM)
+}
 am_root()      { [ "x$EUID" = "x0" ]; }
 say_and_do()   { echo DOING: "$@"; "$@"; }
 return_arg1()   { return "$1"; }
