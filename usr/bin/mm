@@ -11,12 +11,13 @@ userscript=$HOME/.config/bin/pre-mm.sh
 nice=false debug=no subliminal=false maketmpdir=false
 args=() dirs=() files=() vids=() x=700 y=400 holdss=''
 process_file() {
-    local file=$*
+    local ext file=$*
     [ "$file" ] || return
-    case "${file##*.}" in
+    ext=${file##*.}
+    case "${ext,,}" in
         jpg|jpeg|png|nfo) return;;
         srt|sub|vtt) args+=("--sub-file=$file");;
-        avi|mkv|mp4|ts|webm|divx|ogm|swf|flv) vids+=("$file");;
+        avi|mkv|mp4|ts|webm|divx|ogm|swf|flv|vob) vids+=("$file");;
         *) if [ -d "$file" ]; then
                dirs+=("$file")
                maketmpdir=true
