@@ -31,6 +31,8 @@ COMMIT
 -A OUTPUT -o lo -j ACCEPT
 -A OUTPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
 -A OUTPUT -j open-out
+-A FORWARD -m conntrack --ctstate ESTABLISHED -j ACCEPT
+-A FORWARD -j evil
 -A evil -m state --state INVALID -j DROP
 -A evil -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m conntrack --ctstate NEW -j DROP
 -A evil -f -j DROP
