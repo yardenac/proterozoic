@@ -76,7 +76,9 @@ for vid in "${vids[@]}"; do
     holdss=y
     if $subliminal; then
         mkdir -p $tmpdir/subs
-        subliminal download -f -v -l en -d $tmpdir/subs "$vid"
+        subliminal download -f -v -l en -m 0 \
+                   --refiner metadata --refiner omdb --refiner tvdb \
+                   -d $tmpdir/subs "$vid"
     fi
 done
 shopt -s nullglob
