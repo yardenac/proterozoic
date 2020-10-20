@@ -1,6 +1,7 @@
 disable-mnt
 nou2f
-nodbus
+dbus-user none
+dbus-system none
 private-bin chromium,chromedriver
 private-cache
 private-etc chromium,fonts,group,localtime,asound.conf

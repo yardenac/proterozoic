@@ -5,7 +5,8 @@ tor=true
 proxy=--proxy-server=localhost:8118
 resolv='--host-resolver-rules=MAP * 0.0.0.0'
 configdir=/etc/skel.ppz/.config/chromium
-fjargs=() urls=() cleanup=y uniqtok=$(uniq_token)
+fjargs=(--ignore=nogroups)
+urls=() cleanup=y uniqtok=$(uniq_token)
 cdir="$HOME/.config/chromium.tmp"
 mkdir -p "$cdir"
 uniqdir="$cdir/$uniqtok"
