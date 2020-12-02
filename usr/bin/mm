@@ -102,7 +102,7 @@ fi
 
 ionice -c 2 -n 0 nice -n 0 mpv --geometry=${x}x${y} -fs --ao=alsa \
     --alang=en --slang=en \
-    --msg-level=all=${debug}:statusline=status:cache=info:network=info \
+    --msg-level=all=${debug},statusline=status,cache=info,network=info \
     --no-input-default-bindings \
     --input-conf=/usr/share/ppz/mplayer.input.conf \
     --term-status-msg='${time-pos} / ${duration} (${percent-pos}%) ${filename}' \
