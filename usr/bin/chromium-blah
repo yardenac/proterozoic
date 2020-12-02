@@ -22,7 +22,7 @@ for arg; do
         tor)     :;;
         noproxy) proxy=''; resolv=''; tor=false;;
         mine)    configdir="${HOME}/.config/chromium";;
-        --u2f)  fjargs+=--ignore=nou2f;;
+        --u2f)  fjargs+=(--ignore=nou2f --ignore=private-dev);;
         --keepin=*)   cleanup=''; uniqdir="$cdir/${arg##*=}";;
         *)       urls+=("$arg");;
     esac; fi
@@ -62,11 +62,13 @@ extensions() {
     echo "${extensions[*]}"
 }
 
-ionice -c 2 -n 0 nice -n 10 \
+cmd=(ionice -c 2 -n 0 nice -n 10 \
    firejail "${fjargs[@]}" $profile chromium --incognito \
       --load-extension=$(extensions) \
       --ssl-version-min=tls1  --force-dark-mode \
-      --user-data-dir="$uniqdir" "$proxy" "$resolv" "${urls[@]}"
+      --user-data-dir="$uniqdir" "$proxy" "$resolv" "${urls[@]}")
+#echo "COMMAND IS: ${cmd[@]}"
+"${cmd[@]}"
 
 if [[ "$cleanup" ]]; then
     rm -rf "$uniqdir"
